@@ -1,0 +1,4 @@
+
+> ivos-fleet-management@1.0.0 build
+> tsc && vite build --mode production
+

@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <title>Workflow Mission IVOS</title>
+  <style>
+    body { font-family: 'Inter', Arial, sans-serif; background: #f8fafc; color: #222; margin: 0; padding: 0; }
+    .container { max-width: 800px; margin: 40px auto; background: #fff; border-radius: 12px; box-shadow: 0 2px 16px #0001; padding: 40px 32px; }
+    h1 { color: #1e40af; font-size: 2.2em; margin-bottom: 0.2em; }
+    h2 { color: #2563eb; font-size: 1.3em; margin-top: 2.2em; margin-bottom: 0.5em; border-bottom: 1px solid #e0e7ef; padding-bottom: 4px; }
+    h3 { color: #0e7490; margin-top: 1.5em; }
+    ul, ol { margin-left: 1.2em; margin-bottom: 1em; }
+    .step { margin: 18px 0; padding: 18px 22px; background: #eff6ff; border-left: 5px solid #2563eb; border-radius: 8px; }
+    .doc { background: #fef9c3; border-left: 5px solid #eab308; padding: 14px 18px; border-radius: 8px; margin: 18px 0; }
+    .diagram { background: #f1f5f9; border: 1px solid #cbd5e1; border-radius: 8px; padding: 18px; font-family: 'JetBrains Mono', 'Courier New', monospace; font-size: 13px; margin: 18px 0; overflow-x: auto; }
+    .badge { display: inline-block; background: #2563eb; color: #fff; border-radius: 12px; padding: 2px 12px; font-size: 0.9em; margin-right: 6px; }
+    .sig { color: #059669; font-weight: 600; }
+    .note { color: #b91c1c; font-size: 0.98em; }
+    .footer { margin-top: 40px; text-align: center; color: #64748b; font-size: 0.95em; }
+    @media print { .container { box-shadow: none; } }
+  </style>
+</head>
+<body>
+<div class="container">
+  <h1>Workflow Mission IVOS<br><span style="font-size:0.6em;font-weight:400;">De la Préparation au Delivery Note/BSD</span></h1>
+
+  <h2>1. Création & Planification</h2>
+  <div class="step">
+    <strong>Initiateur :</strong> Dispatcher ou Responsable Exploitation<br>
+    <strong>Données :</strong> Client, type de mission, véhicule, chauffeur, matériel, dates.<br>
+    <strong>Statut initial :</strong> <span class="badge">À planifier</span>
+  </div>
+
+  <h2>2. Validation Hiérarchique (Workflow Signature)</h2>
+  <ol>
+    <li><span class="sig">Autorisation DG</span> : Validation stratégique</li>
+    <li><span class="sig">Planification Opérations</span> : Validation ressources</li>
+    <li><span class="sig">Affectation Logistique</span> : Véhicule, chauffeur, matériel</li>
+    <li><span class="sig">Déploiement Exploitation</span> : Préparation terrain, équipement</li>
+    <li><span class="sig">Contrôle Technique</span> : Contrôle véhicule</li>
+    <li><span class="sig">Collecte/Exécution</span> : Réalisation terrain</li>
+  </ol>
+  <div class="note">Chaque étape = signature électronique horodatée. Refus = retour à l’étape précédente.</div>
+
+  <h2>3. Pré-départ</h2>
+  <ul>
+    <li>Checklist équipement obligatoire (EPI, documents, matériel)</li>
+    <li>Contrôle véhicule (carburant, pneus, documents à jour)</li>
+    <li>Validation chauffeur + chef exploitation</li>
+    <li>Statut : <span class="badge">Prêt à partir</span></li>
+  </ul>
+
+  <h2>4. Déroulement de la Mission</h2>
+  <ul>
+    <li>Départ effectif, heure enregistrée</li>
+    <li>Suivi en temps réel (GPS si activé), pointage à chaque étape clé</li>
+    <li>Checkpoints : arrivée site, opération, signature client</li>
+  </ul>
+
+  <h2>5. Génération & Gestion des Documents</h2>
+  <div class="doc">
+    <strong>A. Delivery Note (Bon de Livraison)</strong><br>
+    - Pour missions de livraison/transport<br>
+    - Détail marchandise, véhicule, chauffeur, client, date/heure, signature client<br>
+    - Généré automatiquement à la fin, signé sur place, export PDF
+  </div>
+  <div class="doc">
+    <strong>B. BSD (Bordereau de Suivi des Déchets)</strong><br>
+    - Pour missions de transport de déchets réglementés<br>
+    - Sections : Producteur, Caractéristiques, Transporteur, Destination, Signatures<br>
+    - Workflow : Brouillon → Validé → En transit → Réceptionné → Signé<br>
+    - PDF généré automatiquement avec toutes les signatures
+  </div>
+
+  <h2>6. Clôture de la Mission</h2>
+  <ul>
+    <li>Contrôle retour véhicule, pointage chauffeur, état matériel</li>
+    <li>Statut : <span class="badge">Terminée</span> ou <span class="badge">Clôturée</span></li>
+    <li>Documents liés (Delivery Note/BSD) archivés et accessibles</li>
+  </ul>
+
+  <h2>7. Notifications & Suivi</h2>
+  <ul>
+    <li>Badges dynamiques pour chaque responsable</li>
+    <li>Alertes immédiates en cas de blocage/refus</li>
+    <li>Historique complet (audit trail) de toutes les actions/signatures</li>
+  </ul>
+
+  <h2>Résumé Visuel</h2>
+  <div class="diagram">
+1. Création mission
+2. Validation DG
+3. Planification
+4. Affectation
+5. Pré-départ (checklist, contrôle)
+6. Départ
+7. Checkpoints terrain
+8. Génération Delivery Note/BSD (signature client)
+9. Clôture mission
+  </div>
+
+  <div class="footer">
+    IVOS — Workflow de mission | Généré le 15 avril 2026<br>
+    <span style="color:#1e40af">Cliquez sur Fichier &gt; Imprimer &gt; Enregistrer en PDF</span>
+  </div>
+</div>
+</body>
+</html>

@@ -1,0 +1,10 @@
+node_modules/
+dist/
+build/
+coverage/
+public/
+*.min.js
+*.map
+.vite/
+.supabase/
+/.github/

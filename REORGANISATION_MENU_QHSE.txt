@@ -1,0 +1,289 @@
+
+═══════════════════════════════════════════════════════════════════════════════
+                  📊 RÉORGANISATION MENU QHSE - TERMINÉE ✅
+═══════════════════════════════════════════════════════════════════════════════
+
+                          🎯 OBJECTIF ACCOMPLI 🎯
+
+Regroupement des fonctions d'analyse et de stockage QHSE dans une interface
+unifiée avec 3 onglets pour une expérience utilisateur optimale.
+
+
+═══════════════════════════════════════════════════════════════════════════════
+                         🗂️ NOUVELLE ARCHITECTURE
+═══════════════════════════════════════════════════════════════════════════════
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                        MENU → REPORTING & IMPACT                             │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                                                                             │
+│  📊 Reporting QHSE                                                          │
+│  └─ /qhse/reporting                                                         │
+│     │                                                                        │
+│     ├─ Onglet 1 : TABLEAU DE BORD 📈                                       │
+│     │   • Graphiques interactifs (Recharts)                                │
+│     │   • KPIs et métriques de tonnage                                     │
+│     │   • Évolution mensuelle/trimestrielle/annuelle                       │
+│     │   • Filtres par période, client, site                                │
+│     │   • Export Web professionnel                                         │
+│     │                                                                        │
+│     ├─ Onglet 2 : ARCHIVES QHSE 📁                                         │
+│     │   • Full-width / Full-height layout                                  │
+│     │   • Tous les documents : VGP, BSD, Certificats                       │
+│     │   • Filtres avancés :                                                │
+│     │     - Recherche textuelle                                            │
+│     │     - Type de document (VGP/BSD/Certificat)                          │
+│     │     - Client (dropdown unique)                                       │
+│     │     - Plage de dates (début/fin)                                     │
+│     │   • Statistiques en temps réel (4 KPIs)                              │
+│     │   • Téléchargement direct                                            │
+│     │   • Scroll optimisé                                                  │
+│     │                                                                        │
+│     └─ Onglet 3 : CERTIFICATS 📜                                           │
+│         • Certificats de Destruction officiels                             │
+│         • QR Code anti-falsification                                       │
+│         • PDF professionnel                                                │
+│         • Envoi email client                                               │
+│         • Vérification publique                                            │
+│                                                                             │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+
+═══════════════════════════════════════════════════════════════════════════════
+                        📂 FICHIERS CRÉÉS/MODIFIÉS
+═══════════════════════════════════════════════════════════════════════════════
+
+✅ NOUVEAUX FICHIERS (2)
+────────────────────────
+
+1. src/features/qhse/pages/QHSEReportingPage.tsx
+   └─ Page unifiée avec système d'onglets
+   └─ Header professionnel avec gradient vert
+   └─ Description contextuelle par onglet
+   └─ Navigation fluide entre sections
+
+2. src/features/qhse/pages/ArchivesQHSEPage.tsx
+   └─ Version optimisée avec filtres avancés
+   └─ Support multi-types (VGP, BSD, Certificats)
+   └─ Layout full-width avec scroll
+   └─ 4 KPIs statistiques
+   └─ Système de recherche intelligent
+
+
+✅ FICHIERS MODIFIÉS (2)
+────────────────────────
+
+1. src/app/App.tsx
+   ├─ Ajout import : QHSEReportingPage
+   ├─ Suppression import : AnalyticsDashboardPage, CertificatesPage, ArchivesQHSEPage
+   ├─ Route unifiée : /qhse/reporting → QHSEReportingPage
+   └─ Suppression routes : /reporting/analytics, /qhse/certificates, /settings/archives-qhse
+
+2. src/layouts/DashboardLayout.tsx
+   ├─ Section REPORTING & IMPACT :
+   │  └─ 1 seul lien : "Reporting QHSE" → /qhse/reporting
+   └─ Section Paramètres :
+      └─ Retrait : "Archives QHSE"
+
+
+═══════════════════════════════════════════════════════════════════════════════
+                          ✨ FONCTIONNALITÉS CLÉS
+═══════════════════════════════════════════════════════════════════════════════
+
+🎨 INTERFACE UTILISATEUR
+────────────────────────
+
+✅ Onglets visuels avec icônes (BarChart2, FolderOpen, FileText)
+✅ Bordure verte active sur l'onglet sélectionné
+✅ Description contextuelle sous chaque onglet
+✅ Header avec gradient vert professionnel
+✅ Utilisation de fragments React <>...</> pour éviter erreurs de rendu
+✅ Transitions fluides au hover
+✅ Charte graphique cohérente (couleurs IVOS)
+
+
+📊 TABLEAU DE BORD (Onglet 1)
+─────────────────────────────
+
+✅ Métriques d'impact QHSE complètes
+✅ Graphiques Recharts (Line, Bar, Pie, Area)
+✅ Filtres par période (Mois, Trimestre, Année, Personnalisé)
+✅ Filtres par client et site
+✅ Export Web professionnel
+✅ Données en temps réel depuis BSD finalisés
+
+
+📁 ARCHIVES QHSE (Onglet 2) - OPTIMISÉ
+───────────────────────────────────────
+
+✅ Full-width layout (utilisation maximale de l'écran)
+✅ Full-height avec scroll optimisé (max-h-[calc(100vh-500px)])
+
+✅ FILTRES AVANCÉS :
+   🔍 Recherche textuelle (titre, client, fichier)
+   📋 Type de document : Tous / VGP / BSD / Certificats
+   👥 Client : Dropdown dynamique des clients uniques
+   📅 Date début : Input date
+   📅 Date fin : Input date
+   🧹 Bouton "Réinitialiser" si filtres actifs
+   📊 Compteur de filtres actifs
+
+✅ STATISTIQUES (4 KPIs) :
+   • Total Documents (gris)
+   • Rapports VGP (bleu)
+   • BSD Finalisés (violet)
+   • Certificats (vert)
+
+✅ LISTE INTELLIGENTE :
+   • Tri par date décroissante
+   • Icônes différenciées par type
+   • Couleurs thématiques (bleu/violet/vert)
+   • Badges de statut
+   • Date formatée en français
+   • Client affiché si disponible
+   • Bouton téléchargement avec hover
+   • Message si aucun document
+
+✅ SOURCES DE DONNÉES :
+   • VGP : getAllVGPReports()
+   • BSD : getOperations() filtrés (status='cloturee' + validatedAt)
+   • Certificats : getCertificates()
+
+
+📜 CERTIFICATS (Onglet 3)
+─────────────────────────
+
+✅ Page existante CertificatesPage intégrée
+✅ Génération PDF professionnelle
+✅ QR Code anti-falsification
+✅ Envoi email aux clients
+✅ Page de vérification publique
+
+
+═══════════════════════════════════════════════════════════════════════════════
+                           🎯 NAVIGATION UTILISATEUR
+═══════════════════════════════════════════════════════════════════════════════
+
+AVANT :
+───────
+Menu → REPORTING & IMPACT
+  ├─ Analyse Avancée (/reporting/analytics)
+  └─ Certificats (/qhse/certificates)
+
+Menu → Paramètres
+  └─ Archives QHSE (/settings/archives-qhse)
+
+
+APRÈS :
+──────
+Menu → REPORTING & IMPACT
+  └─ Reporting QHSE (/qhse/reporting)
+     ├─ [Onglet] Tableau de Bord
+     ├─ [Onglet] Archives QHSE
+     └─ [Onglet] Certificats
+
+Menu → Paramètres
+  └─ (Archives QHSE retirées) ✅
+
+
+═══════════════════════════════════════════════════════════════════════════════
+                            ✅ VALIDATION FINALE
+═══════════════════════════════════════════════════════════════════════════════
+
+✅ 0 erreurs TypeScript
+✅ Toutes les routes fonctionnelles
+✅ Menu mis à jour (1 lien au lieu de 3)
+✅ Archives retirées des Paramètres
+✅ Layout full-width/full-height pour Archives
+✅ Filtres avancés implémentés (Date, Client, Type)
+✅ Cohérence visuelle (charte IVOS)
+✅ Fragments React utilisés
+✅ Transitions fluides
+✅ Données en temps réel
+
+
+═══════════════════════════════════════════════════════════════════════════════
+                          🚀 UTILISATION IMMÉDIATE
+═══════════════════════════════════════════════════════════════════════════════
+
+1. Lancer le serveur :
+   npm run dev
+
+2. Accéder à la nouvelle section :
+   Menu → REPORTING & IMPACT → Reporting QHSE
+
+3. Tester les 3 onglets :
+   ┌─────────────────────────────────────────────────────┐
+   │  [Tableau de Bord] [Archives QHSE] [Certificats]   │
+   └─────────────────────────────────────────────────────┘
+
+4. Tester les filtres dans Archives :
+   • Rechercher un document
+   • Filtrer par type (VGP/BSD/Certificat)
+   • Sélectionner un client
+   • Définir une plage de dates
+   • Réinitialiser les filtres
+
+
+═══════════════════════════════════════════════════════════════════════════════
+                           📊 STATISTIQUES PROJET
+═══════════════════════════════════════════════════════════════════════════════
+
+Fichiers créés        : 2
+Fichiers modifiés     : 2
+Lignes de code ajoutées : ~650
+Erreurs TypeScript    : 0
+Routes ajoutées       : 1 (/qhse/reporting)
+Routes supprimées     : 3 (analytics, certificates, archives-qhse)
+Menu simplifié        : 3 liens → 1 lien
+Onglets disponibles   : 3 (Dashboard, Archives, Certificats)
+Filtres dans Archives : 5 (Recherche, Type, Client, Date début, Date fin)
+
+
+═══════════════════════════════════════════════════════════════════════════════
+                        🎨 COHÉRENCE VISUELLE ASSURÉE
+═══════════════════════════════════════════════════════════════════════════════
+
+Couleurs IVOS :
+  • Vert primaire : #1a5c3a
+  • Vert foncé : #14472e
+  • Gradient header : from-[#1a5c3a] to-[#14472e]
+
+Éléments visuels :
+  • Border-radius : 2xl (1rem)
+  • Shadow : sm (soft)
+  • Transitions : all / colors
+  • Police : font-bold pour titres, font-semibold pour labels
+  • Icônes : Lucide-react (cohérence totale)
+
+Layout :
+  • Container : space-y-6 / space-y-4
+  • Grid : responsive (grid-cols-1 md:grid-cols-4)
+  • Padding : p-4 / p-6 (homogène)
+  • Borders : border-2 pour KPIs, border pour conteneurs
+
+
+═══════════════════════════════════════════════════════════════════════════════
+                          🎯 RÉUSSITE DE LA MISSION
+═══════════════════════════════════════════════════════════════════════════════
+
+✅ Déplacement des Archives → Section REPORTING & IMPACT
+✅ Structure 3 onglets → Dashboard / Archives / Certificats
+✅ Archives optimisées → Full-width, Full-height, Filtres
+✅ Cohérence visuelle → Charte IVOS respectée
+✅ Fragments React → Pas d'erreurs de rendu
+✅ Menu simplifié → 1 lien unique
+✅ 0 erreurs TypeScript → Production ready
+
+
+═══════════════════════════════════════════════════════════════════════════════
+
+              🎉 ARCHITECTURE QHSE UNIFIÉE PRÊTE À L'EMPLOI ! 🎉
+
+                   Navigation : Menu → REPORTING & IMPACT
+                              → Reporting QHSE
+
+═══════════════════════════════════════════════════════════════════════════════
+                         Développé avec ❤️ par IVOS Tech
+                                 21 avril 2026
+═══════════════════════════════════════════════════════════════════════════════

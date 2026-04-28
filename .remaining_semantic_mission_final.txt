@@ -1,0 +1,10 @@
+src/__mocks__/fixtures.ts:334:  missions: mockOperations,
+src/app/App.tsx:135:                    <Route path="missions" element={<Navigate to="/operations" replace />} />
+src/features/settings/pages/AdministrationSysteme.tsx:185:    const criticalKeywords = ['budget', 'mission', 'suppression', 'delete']
+src/features/settings/pages/AdministrationSysteme.tsx:500:                <p className="text-xs text-gray-500 mb-3">Inclut les événements sensibles (modification budget, suppression mission, actions critiques).</p>
+src/features/waste-tracking/services/wasteFormService.ts:76:      mission:missions(mission_number, status),
+src/features/waste-tracking/services/wasteFormService.ts:114:      mission:missions(*),
+src/features/auth/pages/LoginPage.tsx:283:                Centralisez la flotte, les missions, les équipes terrain et les flux documentaires dans une interface pensée pour la vitesse, la lisibilité et la maîtrise opérationnelle.
+src/shared/services/webExportService.ts:158:Cette performance s'inscrit dans notre mission de protéger l'environnement tout en accompagnant les acteurs économiques dans leur transition écologique.
+src/shared/services/permissionStore.ts:57:  '/missions': 'exploitation',
+src/shared/services/backupService.ts:178:    missions: localStorage.getItem('ivos_operations_v1') || '[]',

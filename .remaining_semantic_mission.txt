@@ -1,0 +1,217 @@
+src/__mocks__/fixtures.ts:334:  missions: mockOperations,
+src/app/App.tsx:135:                    <Route path="missions" element={<Navigate to="/operations" replace />} />
+src/features/settings/pages/AdministrationSysteme.tsx:185:    const criticalKeywords = ['budget', 'mission', 'suppression', 'delete']
+src/features/settings/pages/AdministrationSysteme.tsx:500:                <p className="text-xs text-gray-500 mb-3">Inclut les événements sensibles (modification budget, suppression mission, actions critiques).</p>
+src/features/reporting/pages/DashboardPage.tsx:117:    const missions = loadOperations();
+src/features/reporting/pages/DashboardPage.tsx:119:    const activeVehicles = vehicles.filter((v: any) => v.status === 'Actif' || v.status === 'Disponible' || v.status === 'En mission').length;
+src/features/reporting/pages/DashboardPage.tsx:180:    const monthOperations = missions.filter(m => m.createdAt?.slice(0, 7) === currentKey);
+src/features/waste-tracking/services/wasteFormService.ts:76:      mission:missions(mission_number, status),
+src/features/waste-tracking/services/wasteFormService.ts:114:      mission:missions(*),
+src/features/chat/pages/Chat.tsx:20:  status: "online" | "away" | "offline" | "en-mission";
+src/features/chat/pages/Chat.tsx:191:      case "en-mission": return "bg-blue-500";
+src/features/chat/pages/Chat.tsx:200:      case "en-mission": return "En mission";
+src/features/chat/pages/Chat.tsx:237:        { id: "user-4", name: "David Martin", email: "david@ivos.dz", role: "logisticien", department: "logistique", status: "en-mission" },
+src/features/chat/pages/Chat.tsx:1041:                      {user.status === "en-mission" && (
+src/features/chat/pages/Chat.tsx:1043:                          <Truck className="w-2.5 h-2.5" /> En mission
+src/features/missions/services/operationService.ts:2: * Service de gestion des missions (CRUD local, workflow, affectations)
+src/features/missions/services/operationService.ts:14:const missions: Operation[] = [];
+src/features/missions/services/operationService.ts:17:  createOperation(mission: Omit<Operation, 'id'>): Operation {
+src/features/missions/services/operationService.ts:18:    const newOperation = { ...mission, id: Date.now().toString() } as Operation;
+src/features/missions/services/operationService.ts:19:    missions.push(newOperation);
+src/features/missions/services/operationService.ts:24:    return missions.find(m => m.id === id) || null;
+src/features/missions/services/operationService.ts:28:    return missions;
+src/features/missions/services/operationService.ts:31:  updateOperation(id: string, mission: Partial<Operation>): Operation | null {
+src/features/missions/services/operationService.ts:32:    const idx = missions.findIndex(m => m.id === id);
+src/features/missions/services/operationService.ts:34:    missions[idx] = { ...missions[idx], ...mission };
+src/features/missions/services/operationService.ts:35:    return missions[idx];
+src/features/missions/services/operationService.ts:39:    const idx = missions.findIndex(m => m.id === id);
+src/features/missions/services/operationService.ts:40:    if (idx !== -1) missions.splice(idx, 1);
+src/features/missions/services/operationService.test.ts:4:  it('should fetch missions for a subsidiary', async () => {
+src/features/missions/services/operationService.test.ts:9:  it('should create a new mission', async () => {
+src/features/missions/services/operationService.test.ts:14:  it('should update a mission', async () => {
+src/features/missions/services/operationService.test.ts:19:  it('should delete a mission', async () => {
+src/features/auth/pages/LoginPage.tsx:283:                Centralisez la flotte, les missions, les équipes terrain et les flux documentaires dans une interface pensée pour la vitesse, la lisibilité et la maîtrise opérationnelle.
+src/features/operations/operation.types.ts:40:  chefDeMission: string;
+src/features/operations/exportOperationsPDF.ts:5:export function exportOperationsToPDF(missions: Operation[]) {
+src/features/operations/exportOperationsPDF.ts:8:  const filtered = missions;
+src/features/operations/exportOperationsExcel.ts:4:export function exportOperationsToExcel(missions: Operation[]) {
+src/features/operations/exportOperationsExcel.ts:7:  const filtered = missions;
+src/features/operations/pages/NewOperationModal.tsx:3:// Remplacement du formulaire missions par création d'opérations BSD
+src/features/operations/pages/NewOperationModal.tsx:17:  onCreate: (mission: any) => void;
+src/features/operations/pages/OperationsDashboard.tsx:33:    vehicle: "SN-0001-AB", driver: "A. Diop", chefDeMission: "A. Diop",
+src/features/operations/pages/OperationsDashboard.tsx:51:    vehicle: "SN-0002-AB", driver: "B. Sarr", chefDeMission: "B. Sarr",
+src/features/operations/pages/OperationsDashboard.tsx:69:    vehicle: "SN-0003-AB", driver: "C. Fall", chefDeMission: "C. Fall",
+src/features/operations/pages/OperationsDashboard.tsx:78:  const [missions, setMissions] = useState<Operation[]>(MOCK_MISSIONS);
+src/features/operations/pages/OperationsDashboard.tsx:84:  const filteredOperations = missions.filter(m =>
+src/features/operations/pages/OperationsDashboard.tsx:162:          existingCount={missions.length}
+src/features/operations/pages/OperationsDashboard.tsx:163:          onCreate={mission => {
+src/features/operations/pages/OperationsDashboard.tsx:165:              { ...mission, status: 'A_PLANIFIER', progression: 0, checkpoints: { equipement: false, arrivee: false, operation: false, bon: false }, documents: [], avatarUrl: '', materiel: [], id: mission.ref },
+src/features/operations/pages/OperationsDashboard.tsx:194:                    {filteredOperations.filter((m) => m.status === col.key).map((mission) => (
+src/features/operations/pages/OperationsDashboard.tsx:196:                        key={mission.id}
+src/features/operations/pages/OperationsDashboard.tsx:204:                            <div className="font-bold text-blue-900 text-sm">{mission.id}</div>
+src/features/operations/pages/OperationsDashboard.tsx:205:                            <div className="text-xs text-slate-500">{mission.client}</div>
+src/features/operations/pages/OperationsDashboard.tsx:206:                            <div className="text-xs text-slate-500">Resp. {mission.responsable}</div>
+src/features/operations/pages/OperationsDashboard.tsx:211:                              onClick={() => toast.info('Ouverture du salon de discussion pour ' + mission.id)}
+src/features/operations/pages/OperationsDashboard.tsx:219:                              onClick={() => toast.success('PDF généré pour ' + mission.id)}
+src/features/operations/pages/OperationsDashboard.tsx:231:                            className={`h-2 rounded-full transition-all ${(mission.progression ?? 0) === 100 ? "bg-green-500" : (mission.progression ?? 0) > 0 ? "bg-amber-400" : "bg-blue-400"}`}
+src/features/operations/pages/OperationsDashboard.tsx:232:                            style={{ width: `${mission.progression ?? 0}%` }}
+src/features/operations/pages/OperationsDashboard.tsx:270:                      filteredOperations.map((mission) => (
+src/features/operations/pages/OperationsDashboard.tsx:271:                        <tr key={mission.id} className="hover:bg-slate-50 transition-colors">
+src/features/operations/pages/OperationsDashboard.tsx:273:                            <div className="font-bold text-blue-900 text-sm">{mission.id}</div>
+src/features/operations/pages/OperationsDashboard.tsx:276:                            <div className="text-sm font-medium text-slate-900">{mission.client}</div>
+src/features/operations/pages/OperationsDashboard.tsx:279:                            <div className="text-sm text-slate-600">{mission.type}</div>
+src/features/operations/pages/OperationsDashboard.tsx:282:                            <div className="text-sm text-slate-600">{mission.vehicle || 'N/A'}</div>
+src/features/operations/pages/OperationsDashboard.tsx:285:                            <div className="text-sm text-slate-600">{mission.driver || mission.responsable}</div>
+src/features/operations/pages/OperationsDashboard.tsx:288:                            {getStatusBadge(mission.status)}
+src/features/operations/pages/OperationsDashboard.tsx:295:                                onClick={() => toast.info('Affichage des détails pour ' + mission.id)}
+src/features/operations/pages/OperationsDashboard.tsx:302:                                onClick={() => window.open(`/templates/bordereau_dechets.html?id=${mission.id}`, '_blank')}
+src/features/operations/pages/OperationsDashboard.tsx:311:                                    onClick={() => toast.info('Édition de ' + mission.id)}
+src/features/operations/pages/OperationsDashboard.tsx:319:                                      if (confirm(`Supprimer l'opération ${mission.id} ?`)) {
+src/features/operations/pages/OperationsDashboard.tsx:320:                                        setMissions(prev => prev.filter(m => m.id !== mission.id));
+src/features/operations/pages/OperationsPage.tsx:21:    chefDeMission: 'Diallo Mamadou',
+src/features/operations/pages/OperationsPage.tsx:40:    chefDeMission: 'Soro Fatou',
+src/features/operations/pages/OperationsPage.tsx:58:  const [missions, setMissions] = useState<Operation[]>(INITIAL_MISSIONS);
+src/features/operations/pages/OperationsPage.tsx:61:  const getNextOperationNumber = () => `OM-${new Date().getFullYear()}${String(new Date().getMonth() + 1).padStart(2, '0')}-${String(missions.length + 1).padStart(4, '0')}`;
+src/features/operations/pages/OperationsPage.tsx:62:  const getNextBSDNumber = () => `BSD-${new Date().getFullYear()}${String(new Date().getMonth() + 1).padStart(2, '0')}-${String(missions.filter(m => m.notes?.startsWith('BSD')).length + 1).padStart(4, '0')}`;
+src/features/operations/pages/OperationsPage.tsx:63:  const getNextBLNumber = () => `BL-${new Date().getFullYear()}${String(new Date().getMonth() + 1).padStart(2, '0')}-${String(missions.filter(m => m.notes?.startsWith('Delivery Note')).length + 1).padStart(4, '0')}`;
+src/features/operations/pages/OperationsPage.tsx:75:    chefDeMission: '',
+src/features/operations/pages/OperationsPage.tsx:93:      const mission = e.detail;
+src/features/operations/pages/OperationsPage.tsx:94:      if (mission && (mission.operationStatus === 'authorized' || mission.notes?.toLowerCase().includes('conforme'))) {
+src/features/operations/pages/OperationsPage.tsx:96:        const missionWithOM = { ...mission, id: omNumber };
+src/features/operations/pages/OperationsPage.tsx:131:  const filteredOperations = missions.filter(mission => {
+src/features/operations/pages/OperationsPage.tsx:133:      mission.id.toLowerCase().includes(searchTerm.toLowerCase()) ||
+src/features/operations/pages/OperationsPage.tsx:134:      mission.vehicle.toLowerCase().includes(searchTerm.toLowerCase()) ||
+src/features/operations/pages/OperationsPage.tsx:135:      mission.driver.toLowerCase().includes(searchTerm.toLowerCase()) ||
+src/features/operations/pages/OperationsPage.tsx:136:      (mission.origin ?? '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+src/features/operations/pages/OperationsPage.tsx:137:      (mission.destination ?? '').toLowerCase().includes(searchTerm.toLowerCase())
+src/features/operations/pages/OperationsPage.tsx:139:    const matchesStatus = filterStatus === 'all' || mission.status === filterStatus
+src/features/operations/pages/OperationsPage.tsx:167:      chefDeMission: '',
+src/features/operations/pages/OperationsPage.tsx:271:    setMissions([newOperation, ...missions]);
+src/features/operations/pages/OperationsPage.tsx:285:          entityType: 'mission',
+src/features/operations/pages/OperationsPage.tsx:305:    setMissions(missions.map((m) =>
+src/features/operations/pages/OperationsPage.tsx:316:      setMissions(missions.filter(m => m.id !== id))
+src/features/operations/pages/OperationsPage.tsx:323:  const openEditModal = (mission: Operation) => {
+src/features/operations/pages/OperationsPage.tsx:324:    setSelectedMission(mission)
+src/features/operations/pages/OperationsPage.tsx:326:      vehicle: mission.vehicle,
+src/features/operations/pages/OperationsPage.tsx:327:      driver: mission.driver,
+src/features/operations/pages/OperationsPage.tsx:328:      chefDeMission: mission.chefDeMission,
+src/features/operations/pages/OperationsPage.tsx:329:      coDrivers: [...mission.coDrivers],
+src/features/operations/pages/OperationsPage.tsx:330:      origin: mission.origin ?? '',
+src/features/operations/pages/OperationsPage.tsx:331:      destination: mission.destination ?? '',
+src/features/operations/pages/OperationsPage.tsx:332:      status: mission.status,
+src/features/operations/pages/OperationsPage.tsx:333:      startDate: mission.startDate,
+src/features/operations/pages/OperationsPage.tsx:334:      startTime: mission.startTime,
+src/features/operations/pages/OperationsPage.tsx:335:      endDate: mission.endDate,
+src/features/operations/pages/OperationsPage.tsx:336:      endTime: mission.endTime,
+src/features/operations/pages/OperationsPage.tsx:337:      distance: mission.distance,
+src/features/operations/pages/OperationsPage.tsx:338:      wasteForm: mission.wasteForm,
+src/features/operations/pages/OperationsPage.tsx:339:      documents: [...mission.documents],
+src/features/operations/pages/OperationsPage.tsx:340:      notes: mission.notes || ''
+src/features/operations/pages/OperationsPage.tsx:346:  const openViewModal = (mission: Operation) => {
+src/features/operations/pages/OperationsPage.tsx:347:    setSelectedMission(mission)
+src/features/operations/pages/OperationsPage.tsx:440:            <div className="mt-4 text-xs text-gray-400">(opérations = {missions.length})</div>
+src/features/operations/pages/OperationsPage.tsx:457:              {filteredOperations.map((mission) => (
+src/features/operations/pages/OperationsPage.tsx:458:                <tr key={mission.id} className="hover:bg-gray-50">
+src/features/operations/pages/OperationsPage.tsx:461:                      <div className="text-sm font-medium text-gray-900">{mission.id}</div>
+src/features/operations/pages/OperationsPage.tsx:462:                      {mission.wasteForm && (
+src/features/operations/pages/OperationsPage.tsx:470:                      {mission.vehicle}
+src/features/operations/pages/OperationsPage.tsx:477:                        {mission.driver}
+src/features/operations/pages/OperationsPage.tsx:479:                      <div className="text-xs text-gray-500 mt-0.5">Chef: {mission.chefDeMission}</div>
+src/features/operations/pages/OperationsPage.tsx:480:                      {mission.coDrivers.length > 0 && (
+src/features/operations/pages/OperationsPage.tsx:483:                          {mission.coDrivers.join(', ')}
+src/features/operations/pages/OperationsPage.tsx:493:                          <div className="font-medium">{mission.origin}</div>
+src/features/operations/pages/OperationsPage.tsx:494:                          <div className="text-gray-500">→ {mission.destination}</div>
+src/features/operations/pages/OperationsPage.tsx:495:                          <div className="text-xs text-gray-400 mt-1">{mission.distance}</div>
+src/features/operations/pages/OperationsPage.tsx:503:                      <span>{new Date(mission.startDate).toLocaleDateString('fr-FR')} {mission.startTime}</span>
+src/features/operations/pages/OperationsPage.tsx:506:                      → {new Date(mission.endDate).toLocaleDateString('fr-FR')} {mission.endTime}
+src/features/operations/pages/OperationsPage.tsx:508:                    {mission.documents.length > 0 && (
+src/features/operations/pages/OperationsPage.tsx:511:                        {mission.documents.length} doc(s)
+src/features/operations/pages/OperationsPage.tsx:516:                    <span className={`px-2 py-1 text-xs font-semibold rounded-full ${getStatusColor(mission.status)}`}>
+src/features/operations/pages/OperationsPage.tsx:517:                      {mission.status}
+src/features/operations/pages/OperationsPage.tsx:523:                        onClick={() => openViewModal(mission)}
+src/features/operations/pages/OperationsPage.tsx:529:                        onClick={() => openEditModal(mission)}
+src/features/operations/pages/OperationsPage.tsx:559:          <Input label="Chef d'opération" name="chefDeMission" value={formData.chefDeMission} onChange={handleInputChange} placeholder="Nom du chef d'opération" required />
+src/features/operations/pages/OperationsPage.tsx:707:          <Input label="Chef d'opération" name="chefDeMission" value={formData.chefDeMission} onChange={handleInputChange} required />
+src/features/operations/pages/OperationsPage.tsx:836:                <p className="font-medium text-gray-900">{selectedOperation.chefDeMission}</p>
+src/features/operations/pages/OperationsPage.test.tsx:22:  it('affiche les missions mockées', () => {
+src/features/team/components/TeamCalendar.tsx:48:  { key: "missions", label: "Opérations", bg: "bg-blue-700", border: "border-blue-900", text: "text-white", light: "bg-blue-100 text-blue-800 border-blue-300" },
+src/features/team/components/TeamCalendar.tsx:86:  { id: 1, date: "2026-04-12", title: "Réunion équipe", type: "missions", time: "10:00", duration: 90, location: "Salle 1", client: "SOCOCIM", camion: "TK-204", instructions: "Préparer dossier projet" },
+src/features/team/components/TeamCalendar.tsx:90:  { id: 5, date: "2026-04-14", title: "Livraison site Nord", type: "missions", time: "07:30", duration: 150, location: "Site Nord", client: "DANGOTE", camion: "TK-305", instructions: "Chargement quai 3 à 07h00" },
+src/features/team/components/TeamCalendar.tsx:93:  { id: 8, date: "2026-04-12", title: "Briefing mission", type: "missions", time: "08:00", duration: 60, location: "Bureau ops", client: "EIFFAGE", camion: "TK-210", instructions: "Confirmer itinéraire avec le client" },
+src/features/team/components/TeamCalendar.tsx:94:  { id: 9, date: "2026-04-20", title: "Transport ciment", type: "missions", time: "06:30", duration: 300, location: "Usine Rufisque", client: "SOCOCIM", camion: "TK-401", instructions: "35 tonnes, bâcher obligatoire" },
+src/features/team/components/TeamCalendar.tsx:97:  { id: 12, date: "2026-04-12", title: "Livraison Thiès", type: "missions", time: "16:00", duration: 120, location: "Thiès centre", client: "AUCHAN", camion: "TK-112", instructions: "Palette fragile, attention déchargement" },
+src/features/team/components/TeamCalendar.tsx:474:      doc.text("Aucune mission pr\u00e9vue ce jour.", pageWidth / 2, 35, { align: "center" });
+src/features/team/components/TeamCalendar.tsx:489:        missions: [29, 78, 216],
+src/features/team/components/TeamCalendar.tsx:1079:    missions: ["#1d4ed8", "#1e3a8a"],
+src/features/direction/pages/DirectionDashboard.tsx:143:    const missions = loadOperations();
+src/features/direction/pages/DirectionDashboard.tsx:209:    const monthOperations = missions.filter(m => {
+src/features/finances/pages/BillingPage.tsx:120:    // Lien mission
+src/features/finances/pages/BillingPage.tsx:259:                    <p className="text-xs mt-1">Les factures seront créées automatiquement à la clôture des missions</p>
+src/features/finances/services/workflowInvoiceService.ts:3:// Crée un brouillon de facture à la clôture d'une mission (Étape 6)
+src/features/finances/services/workflowInvoiceService.ts:7:// Minimal local type representing a closed mission passed to createInvoiceFromWorkflow
+src/features/finances/services/workflowInvoiceService.ts:116:function resolvePricing(mission: ExploitationOperation): { prixUnitaire: number; unite: string; quantite: number; categorieDechet: string } {
+src/features/finances/services/workflowInvoiceService.ts:117:  const realWeight = mission.weighingData?.poidsReel ?? 0;
+src/features/finances/services/workflowInvoiceService.ts:119:  if (mission.documentType === 'BSD' && mission.bsdData) {
+src/features/finances/services/workflowInvoiceService.ts:120:    const cat = mission.bsdData.categorieDechet || mission.bsdData.descriptionDechet || 'Déchet';
+src/features/finances/services/workflowInvoiceService.ts:127:        : uf.unit === 'm³' ? (mission.bsdData.volumeEstime || realWeight / 1000)
+src/features/finances/services/workflowInvoiceService.ts:136:  if (mission.documentType === 'DELIVERY_NOTE' && mission.deliveryNoteData) {
+src/features/finances/services/workflowInvoiceService.ts:137:    const desc = mission.deliveryNoteData.description || 'Livraison';
+src/features/finances/services/workflowInvoiceService.ts:138:    const qty = mission.deliveryNoteData.quantite || realWeight;
+src/features/finances/services/workflowInvoiceService.ts:139:    const unite = mission.deliveryNoteData.unite || 'kg';
+src/features/finances/services/workflowInvoiceService.ts:151: * Crée un brouillon de facture depuis une mission clôturée (appelé par submitCollecteTerrain)
+src/features/finances/services/workflowInvoiceService.ts:153:export function createInvoiceFromWorkflow(mission: ExploitationOperation): WorkflowInvoice {
+src/features/finances/services/workflowInvoiceService.ts:156:  // Éviter les doublons pour la même mission
+src/features/finances/services/workflowInvoiceService.ts:157:  const existing = invoices.find(i => i.operationId === mission.id);
+src/features/finances/services/workflowInvoiceService.ts:160:  const { prixUnitaire, unite, quantite, categorieDechet } = resolvePricing(mission);
+src/features/finances/services/workflowInvoiceService.ts:164:  let clientNom = mission.clientOrigin;
+src/features/finances/services/workflowInvoiceService.ts:167:  if (mission.documentType === 'BSD' && mission.bsdData) {
+src/features/finances/services/workflowInvoiceService.ts:168:    clientNom = mission.bsdData.producteurNom || mission.clientOrigin;
+src/features/finances/services/workflowInvoiceService.ts:169:    clientAdresse = mission.bsdData.producteurAdresse || '';
+src/features/finances/services/workflowInvoiceService.ts:170:    clientContact = mission.bsdData.producteurContact || '';
+src/features/finances/services/workflowInvoiceService.ts:171:  } else if (mission.documentType === 'DELIVERY_NOTE' && mission.deliveryNoteData) {
+src/features/finances/services/workflowInvoiceService.ts:172:    clientNom = mission.deliveryNoteData.clientNom || mission.clientOrigin;
+src/features/finances/services/workflowInvoiceService.ts:173:    clientAdresse = mission.deliveryNoteData.clientAdresse || '';
+src/features/finances/services/workflowInvoiceService.ts:174:    clientContact = mission.deliveryNoteData.clientContact || '';
+src/features/finances/services/workflowInvoiceService.ts:177:  const docLabel = mission.documentType === 'BSD' ? 'BSD' : 'DN';
+src/features/finances/services/workflowInvoiceService.ts:182:    operationId: mission.id,
+src/features/finances/services/workflowInvoiceService.ts:183:    operationNumero: mission.numero,
+src/features/finances/services/workflowInvoiceService.ts:184:    numeroOfficiel: mission.numeroOfficiel || mission.numero,
+src/features/finances/services/workflowInvoiceService.ts:185:    documentType: mission.documentType,
+src/features/finances/services/workflowInvoiceService.ts:189:    prestationLabel: `Prestation effectuée selon ${docLabel} N°${mission.numeroOfficiel || mission.numero}`,
+src/features/finances/services/workflowInvoiceService.ts:196:    siteCode: mission.siteCode,
+src/features/finances/services/workflowInvoiceService.ts:197:    annee: mission.annee,
+src/features/fleet/components/AlertCards.tsx:10:  status: 'Disponible' | 'En mission' | 'Maintenance' | 'Hors service';
+src/features/fleet/pages/VehiclesPage.tsx:83:  status: 'Disponible' | 'En mission' | 'Maintenance' | 'Hors service'
+src/features/fleet/pages/VehiclesPage.tsx:439:      status: 'En mission', 
+src/features/fleet/pages/VehiclesPage.tsx:1194:      case 'En mission':
+src/features/fleet/pages/VehiclesPage.tsx:1316:            <option value="En mission">En mission</option>
+src/features/fleet/pages/VehiclesPage.tsx:1379:                              {vehicle.status === 'En mission' && (
+src/features/fleet/pages/VehiclesPage.tsx:1383:                                    toast.success(`${vehicle.registration} — mission terminée, véhicule disponible`)
+src/features/fleet/pages/VehiclesPage.tsx:1388:                                  Fin de mission
+src/features/fleet/pages/VehiclesPage.tsx:1634:                      { value: 'En mission', label: 'En mission' },
+src/features/fleet/pages/VehiclesPage.tsx:2200:              { value: 'En mission', label: 'En mission' },
+src/features/fleet/pages/VehiclesPage.tsx:2341:                {selectedVehicle.status === 'En mission' && (
+src/features/fleet/pages/VehiclesPage.tsx:2346:                      toast.success(`${selectedVehicle.registration} — mission terminée, véhicule disponible`)
+src/features/fleet/pages/VehiclesPage.tsx:2351:                    Fin de mission
+src/features/fleet/pages/DriversPage.tsx:51:  status: 'Disponible' | 'En mission' | 'Repos' | 'Congé'
+src/features/fleet/pages/DriversPage.tsx:143:        status: 'En mission',
+src/features/fleet/pages/DriversPage.tsx:506:      case 'En mission':
+src/features/fleet/pages/DriversPage.tsx:573:            <option value="En mission">En mission</option>
+src/features/fleet/pages/DriversPage.tsx:640:                    {driver.totalOperations} missions
+src/features/fleet/pages/DriversPage.tsx:949:                { value: 'En mission', label: 'En mission' },
+src/features/fleet/pages/DriversPage.tsx:1103:                { value: 'En mission', label: 'En mission' },
+src/features/fleet/pages/DriversPage.tsx:1174:              <div><p className="text-sm text-gray-500">Total missions</p><p className="font-medium text-gray-900">{selectedDriver.totalOperations}</p></div>
+src/features/fleet/pages/PreTripCheckPage.tsx:539:              <p className="text-gray-300 text-sm mt-0.5">Inspection des véhicules avant mission</p>
+src/features/fleet/pages/PreTripCheckPage.tsx:912:                              doc.save(`Ordre_Mission_${form.vehicleRegistration}_${form.driverName}.pdf`)
+src/features/fleet/pages/PreTripCheckPage.tsx:914:                              // Création automatique de mission liée (exemple)
+src/features/fleet/pages/PreTripCheckPage.tsx:919:                                chefDeMission: form.responsibleName,
+src/features/personnel/pages/DocumentsEntreprisePage.tsx:45:    description: 'Modèles de contrats, fiches de mission, attestations',
+src/shared/types/enums.ts:55:// Statuts de mission
+src/shared/types/enums.ts:65:// Types de mission
+src/shared/services/webExportService.ts:158:Cette performance s'inscrit dans notre mission de protéger l'environnement tout en accompagnant les acteurs économiques dans leur transition écologique.
+src/shared/services/permissionStore.ts:57:  '/missions': 'exploitation',
+src/shared/services/aiService.ts:7:export function optimizeRoutes(missions: any[]) {
+src/shared/services/aiService.ts:9:  console.log('[IA] Optimisation tournées', missions)
+src/shared/services/aiService.ts:12:export function recommendDriver(mission: any, drivers: any[]) {
+src/shared/services/aiService.ts:14:  console.log('[IA] Recommandation chauffeur', mission, drivers)
+src/shared/services/backupService.ts:178:    missions: localStorage.getItem('ivos_operations_v1') || '[]',

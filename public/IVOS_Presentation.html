@@ -1,0 +1,1178 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>IVOS — Présentation Complète du Système</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+
+    :root {
+      --primary: #1e40af;
+      --primary-light: #3b82f6;
+      --primary-bg: #eff6ff;
+      --accent: #059669;
+      --accent-bg: #ecfdf5;
+      --warn: #d97706;
+      --warn-bg: #fffbeb;
+      --danger: #dc2626;
+      --danger-bg: #fef2f2;
+      --gray-50: #f9fafb;
+      --gray-100: #f3f4f6;
+      --gray-200: #e5e7eb;
+      --gray-600: #4b5563;
+      --gray-700: #374151;
+      --gray-800: #1f2937;
+      --gray-900: #111827;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      color: var(--gray-800);
+      line-height: 1.6;
+      background: #fff;
+    }
+
+    /* ---- COVER ---- */
+    .cover {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      background: linear-gradient(135deg, #1e3a8a 0%, #1e40af 30%, #2563eb 60%, #3b82f6 100%);
+      color: white;
+      text-align: center;
+      padding: 60px 40px;
+      page-break-after: always;
+    }
+    .cover-logo {
+      font-size: 72px;
+      font-weight: 800;
+      letter-spacing: -2px;
+      margin-bottom: 8px;
+    }
+    .cover-logo span { color: #93c5fd; }
+    .cover-subtitle {
+      font-size: 22px;
+      font-weight: 300;
+      opacity: 0.9;
+      max-width: 600px;
+      margin-bottom: 48px;
+    }
+    .cover-meta {
+      display: flex;
+      gap: 40px;
+      font-size: 14px;
+      opacity: 0.7;
+    }
+    .cover-badge {
+      display: inline-block;
+      background: rgba(255,255,255,0.15);
+      border: 1px solid rgba(255,255,255,0.3);
+      border-radius: 24px;
+      padding: 8px 24px;
+      font-size: 14px;
+      margin-top: 32px;
+    }
+    .cover-flags { font-size: 32px; margin-top: 24px; letter-spacing: 8px; }
+
+    /* ---- CONTENT ---- */
+    .content { max-width: 900px; margin: 0 auto; padding: 40px 32px; }
+
+    /* ---- TOC ---- */
+    .toc { page-break-after: always; padding-top: 60px; }
+    .toc h2 { font-size: 28px; color: var(--primary); margin-bottom: 32px; }
+    .toc-list { list-style: none; }
+    .toc-list li {
+      padding: 12px 0;
+      border-bottom: 1px solid var(--gray-200);
+      display: flex;
+      justify-content: space-between;
+      font-size: 15px;
+    }
+    .toc-list li .num { color: var(--primary-light); font-weight: 600; margin-right: 12px; }
+
+    /* ---- SECTIONS ---- */
+    .section {
+      page-break-before: always;
+      padding-top: 48px;
+    }
+    .section:first-of-type { page-break-before: avoid; }
+
+    h1 { font-size: 32px; font-weight: 800; color: var(--primary); margin-bottom: 24px; }
+    h2 {
+      font-size: 24px;
+      font-weight: 700;
+      color: var(--primary);
+      margin-top: 40px;
+      margin-bottom: 16px;
+      padding-bottom: 8px;
+      border-bottom: 2px solid var(--primary-bg);
+    }
+    h3 {
+      font-size: 18px;
+      font-weight: 600;
+      color: var(--gray-900);
+      margin-top: 28px;
+      margin-bottom: 12px;
+    }
+    h4 {
+      font-size: 15px;
+      font-weight: 600;
+      color: var(--gray-700);
+      margin-top: 20px;
+      margin-bottom: 8px;
+    }
+
+    p { margin-bottom: 12px; font-size: 14px; color: var(--gray-700); }
+
+    /* Tables */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 16px 0 24px;
+      font-size: 13px;
+    }
+    thead th {
+      background: var(--primary);
+      color: white;
+      padding: 10px 14px;
+      text-align: left;
+      font-weight: 600;
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    tbody td {
+      padding: 10px 14px;
+      border-bottom: 1px solid var(--gray-200);
+      vertical-align: top;
+    }
+    tbody tr:nth-child(even) { background: var(--gray-50); }
+    tbody tr:hover { background: var(--primary-bg); }
+
+    /* Lists */
+    ul, ol { margin: 8px 0 16px 20px; font-size: 14px; color: var(--gray-700); }
+    li { margin-bottom: 6px; }
+    li strong { color: var(--gray-900); }
+
+    /* Info boxes */
+    .box {
+      border-radius: 8px;
+      padding: 16px 20px;
+      margin: 16px 0;
+      font-size: 13px;
+    }
+    .box-blue { background: var(--primary-bg); border-left: 4px solid var(--primary-light); }
+    .box-green { background: var(--accent-bg); border-left: 4px solid var(--accent); }
+    .box-yellow { background: var(--warn-bg); border-left: 4px solid var(--warn); }
+    .box-red { background: var(--danger-bg); border-left: 4px solid var(--danger); }
+    .box-title { font-weight: 600; margin-bottom: 6px; font-size: 14px; }
+
+    /* Diagram */
+    .diagram {
+      background: var(--gray-50);
+      border: 1px solid var(--gray-200);
+      border-radius: 8px;
+      padding: 24px;
+      margin: 20px 0;
+      font-family: 'Courier New', monospace;
+      font-size: 12px;
+      line-height: 1.7;
+      overflow-x: auto;
+      white-space: pre;
+    }
+
+    /* Workflow */
+    .workflow {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin: 16px 0;
+    }
+    .workflow-step {
+      flex: 1;
+      min-width: 120px;
+      background: var(--primary-bg);
+      border: 1px solid #bfdbfe;
+      border-radius: 8px;
+      padding: 12px;
+      text-align: center;
+      font-size: 12px;
+      position: relative;
+    }
+    .workflow-step .step-num {
+      display: inline-block;
+      background: var(--primary);
+      color: white;
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      line-height: 24px;
+      font-size: 11px;
+      font-weight: 700;
+      margin-bottom: 6px;
+    }
+    .workflow-step .step-title { font-weight: 600; font-size: 11px; display: block; }
+    .workflow-step .step-role { font-size: 10px; color: var(--gray-600); }
+
+    /* Chips / badges */
+    .chip {
+      display: inline-block;
+      padding: 3px 10px;
+      border-radius: 12px;
+      font-size: 11px;
+      font-weight: 600;
+      margin: 2px;
+    }
+    .chip-green { background: #dcfce7; color: #166534; }
+    .chip-yellow { background: #fef9c3; color: #854d0e; }
+    .chip-red { background: #fee2e2; color: #991b1b; }
+    .chip-blue { background: #dbeafe; color: #1e40af; }
+    .chip-gray { background: var(--gray-100); color: var(--gray-700); }
+
+    /* Stats grid */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+      margin: 16px 0;
+    }
+    .stat-card {
+      background: var(--gray-50);
+      border: 1px solid var(--gray-200);
+      border-radius: 8px;
+      padding: 16px;
+      text-align: center;
+    }
+    .stat-card .stat-icon { font-size: 24px; margin-bottom: 4px; }
+    .stat-card .stat-label { font-size: 11px; color: var(--gray-600); text-transform: uppercase; letter-spacing: 0.5px; }
+    .stat-card .stat-value { font-size: 18px; font-weight: 700; color: var(--primary); }
+
+    /* Footer */
+    .page-footer {
+      margin-top: 60px;
+      padding-top: 20px;
+      border-top: 1px solid var(--gray-200);
+      font-size: 11px;
+      color: var(--gray-600);
+      text-align: center;
+    }
+
+    /* Print styles */
+    @media print {
+      body { font-size: 12px; }
+      .cover { min-height: 100vh; }
+      .section { page-break-before: always; }
+      .no-print { display: none !important; }
+      table { font-size: 11px; }
+      h1 { font-size: 26px; }
+      h2 { font-size: 20px; }
+    }
+
+    /* Download bar */
+    .download-bar {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      background: var(--primary);
+      color: white;
+      padding: 12px 24px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 16px;
+      z-index: 1000;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.2);
+    }
+    .download-bar button {
+      background: white;
+      color: var(--primary);
+      border: none;
+      padding: 10px 28px;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: transform 0.1s;
+    }
+    .download-bar button:hover { transform: scale(1.03); }
+    .download-bar button:active { transform: scale(0.97); }
+    .download-bar .info { font-size: 13px; opacity: 0.9; }
+    body { padding-top: 56px; }
+  </style>
+</head>
+<body>
+
+<!-- Download bar -->
+<div class="download-bar no-print" id="downloadBar">
+  <span class="info">Cliquez pour télécharger la présentation complète en PDF</span>
+  <button onclick="window.print()">📄 Télécharger en PDF</button>
+</div>
+
+<!-- ============================================ -->
+<!-- COVER PAGE -->
+<!-- ============================================ -->
+<div class="cover">
+  <div class="cover-logo">IVOS</div>
+  <div class="cover-subtitle">
+    Plateforme SaaS de Gestion de Flotte, Transport de Déchets & Opérations
+  </div>
+  <div class="cover-flags">🇸🇳 🇨🇮</div>
+  <div class="cover-badge">Présentation Complète du Système</div>
+  <div class="cover-meta">
+    <span>Version 1.0</span>
+    <span>Avril 2026</span>
+    <span>Document Confidentiel</span>
+  </div>
+</div>
+
+<!-- ============================================ -->
+<!-- TABLE OF CONTENTS -->
+<!-- ============================================ -->
+<div class="content toc">
+  <h2>📑 Table des Matières</h2>
+  <ol class="toc-list">
+    <li><span class="num">01</span> Qu'est-ce qu'IVOS ? <span>Vue d'ensemble</span></li>
+    <li><span class="num">02</span> Stack Technique <span>Technologies utilisées</span></li>
+    <li><span class="num">03</span> Rôles Utilisateurs <span>Qui utilise le système</span></li>
+    <li><span class="num">04</span> Dashboard <span>Tableau de bord & KPIs</span></li>
+    <li><span class="num">05</span> Gestion de Flotte <span>Véhicules, Carburant, Pneus, Pannes, Sinistres</span></li>
+    <li><span class="num">06</span> Exploitation & Missions <span>Workflow, Kanban, BSD</span></li>
+    <li><span class="num">07</span> Finances <span>Facturation, Paie, Prêts</span></li>
+    <li><span class="num">08</span> Ressources Humaines <span>Annuaire, GRH, Pointage, Congés</span></li>
+    <li><span class="num">09</span> Communication <span>Chat temps réel, Appels, Fichiers</span></li>
+    <li><span class="num">10</span> Sécurité & Paramètres <span>Auth, RLS, Config</span></li>
+    <li><span class="num">11</span> Architecture Technique <span>Flux de données, BDD</span></li>
+    <li><span class="num">12</span> Feuille de Route <span>État actuel & évolutions</span></li>
+  </ol>
+</div>
+
+<!-- ============================================ -->
+<!-- 01 — QU'EST-CE QU'IVOS ? -->
+<!-- ============================================ -->
+<div class="content">
+  <div class="section">
+    <h1>01 — Qu'est-ce qu'IVOS ?</h1>
+
+    <p><strong>IVOS</strong> est une <strong>plateforme web professionnelle (SaaS B2B)</strong> conçue pour les entreprises de <strong>transport et de gestion de déchets</strong> en Afrique de l'Ouest. Elle centralise l'ensemble des opérations quotidiennes en un seul outil.</p>
+
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-icon">🚛</div>
+        <div class="stat-label">Gestion de Flotte</div>
+        <div class="stat-value">Complète</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon">📋</div>
+        <div class="stat-label">Traçabilité BSD</div>
+        <div class="stat-value">Réglementaire</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon">💰</div>
+        <div class="stat-label">Finances</div>
+        <div class="stat-value">Intégrées</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon">👥</div>
+        <div class="stat-label">RH & Personnel</div>
+        <div class="stat-value">Complet</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon">💬</div>
+        <div class="stat-label">Chat Temps Réel</div>
+        <div class="stat-value">Intégré</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon">📊</div>
+        <div class="stat-label">Reporting</div>
+        <div class="stat-value">KPIs & PDF</div>
+      </div>
+    </div>
+
+    <h3>Problèmes résolus</h3>
+    <ul>
+      <li><strong>Fin des fichiers Excel dispersés</strong> — Tout est centralisé dans une seule application</li>
+      <li><strong>Traçabilité réglementaire</strong> — Bordereaux BSD numériques avec signatures horodatées</li>
+      <li><strong>Visibilité temps réel</strong> — État de la flotte, missions, finances en un coup d'œil</li>
+      <li><strong>Communication centralisée</strong> — Chat interne par département, alertes automatiques</li>
+      <li><strong>Multi-sites</strong> — Gérer plusieurs pays/filiales depuis une seule interface</li>
+      <li><strong>Conformité</strong> — Audit trail complet, isolation des données par filiale (RLS)</li>
+    </ul>
+
+    <div class="box box-blue">
+      <div class="box-title">💡 Progressive Web App (PWA)</div>
+      IVOS fonctionne dans le navigateur mais peut s'installer sur téléphone comme une application native. Pas besoin de télécharger depuis un app store.
+    </div>
+  </div>
+
+  <!-- ============================================ -->
+  <!-- 02 — STACK TECHNIQUE -->
+  <!-- ============================================ -->
+  <div class="section">
+    <h1>02 — Stack Technique</h1>
+
+    <p>IVOS utilise des technologies modernes, performantes et largement adoptées dans l'industrie.</p>
+
+    <table>
+      <thead>
+        <tr>
+          <th>Couche</th>
+          <th>Technologie</th>
+          <th>Rôle</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>Interface utilisateur</strong></td>
+          <td>React 18 + TypeScript</td>
+          <td>Ce que l'utilisateur voit et avec quoi il interagit. TypeScript garantit la fiabilité du code.</td>
+        </tr>
+        <tr>
+          <td><strong>Build & Dev</strong></td>
+          <td>Vite</td>
+          <td>Outil de développement ultra-rapide, compilation instantanée.</td>
+        </tr>
+        <tr>
+          <td><strong>Design visuel</strong></td>
+          <td>Tailwind CSS + Shadcn/UI</td>
+          <td>Style moderne et cohérent. Composants UI professionnels (boutons, modales, menus, etc.).</td>
+        </tr>
+        <tr>
+          <td><strong>Icônes</strong></td>
+          <td>Lucide React</td>
+          <td>Bibliothèque d'icônes légères et esthétiques.</td>
+        </tr>
+        <tr>
+          <td><strong>Graphiques</strong></td>
+          <td>Recharts</td>
+          <td>Courbes, barres, camemberts interactifs pour le dashboard.</td>
+        </tr>
+        <tr>
+          <td><strong>Navigation</strong></td>
+          <td>React Router v6</td>
+          <td>Navigation entre les pages sans rechargement (SPA).</td>
+        </tr>
+        <tr>
+          <td><strong>Gestion de données</strong></td>
+          <td>TanStack React Query</td>
+          <td>Cache intelligent, rafraîchissement automatique des données.</td>
+        </tr>
+        <tr>
+          <td><strong>Backend / BDD</strong></td>
+          <td>Supabase (PostgreSQL)</td>
+          <td>Base de données, authentification, stockage fichiers, fonctions serveur, temps réel.</td>
+        </tr>
+        <tr>
+          <td><strong>Chat temps réel</strong></td>
+          <td>Supabase Realtime</td>
+          <td>Messages instantanés via abonnements PostgreSQL.</td>
+        </tr>
+        <tr>
+          <td><strong>Appels vidéo</strong></td>
+          <td>Jitsi Meet + WebRTC</td>
+          <td>Visioconférence et appels audio intégrés.</td>
+        </tr>
+        <tr>
+          <td><strong>PDF</strong></td>
+          <td>jsPDF + html2canvas</td>
+          <td>Génération automatique de rapports, bordereaux, fiches de paie.</td>
+        </tr>
+        <tr>
+          <td><strong>Formulaires</strong></td>
+          <td>React Hook Form + Zod</td>
+          <td>Formulaires performants avec validation côté client.</td>
+        </tr>
+        <tr>
+          <td><strong>Orchestration</strong></td>
+          <td>n8n (webhooks)</td>
+          <td>Automatisation : envoi de PDF, notifications, intégrations externes.</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- ============================================ -->
+  <!-- 03 — RÔLES UTILISATEURS -->
+  <!-- ============================================ -->
+  <div class="section">
+    <h1>03 — Rôles Utilisateurs</h1>
+
+    <p>Chaque utilisateur a un <strong>rôle</strong> qui détermine ce qu'il peut voir et faire dans le système. Les données sont isolées par <strong>filiale/pays</strong> (multi-tenant).</p>
+
+    <table>
+      <thead>
+        <tr>
+          <th>Rôle</th>
+          <th>Périmètre</th>
+          <th>Accès Principal</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>Super Admin</strong></td>
+          <td>Global (toutes filiales)</td>
+          <td>Configuration système, gestion utilisateurs, toutes données, paramètres de sécurité</td>
+        </tr>
+        <tr>
+          <td><strong>Directeur Pays</strong></td>
+          <td>Sa filiale</td>
+          <td>Dashboard complet, données financières sensibles, validation stratégique, exports</td>
+        </tr>
+        <tr>
+          <td><strong>Dispatcher</strong></td>
+          <td>Son site</td>
+          <td>Création et affectation des missions, coordination flotte, suivi en temps réel</td>
+        </tr>
+        <tr>
+          <td><strong>Superviseur</strong></td>
+          <td>Son site</td>
+          <td>Validation terrain, contrôle qualité, signatures BSD, suivi opérations</td>
+        </tr>
+        <tr>
+          <td><strong>Chauffeur</strong></td>
+          <td>Ses missions</td>
+          <td>Réception missions, pré-départ, signatures BSD, chat, signalement pannes</td>
+        </tr>
+        <tr>
+          <td><strong>Client</strong></td>
+          <td>Ses documents</td>
+          <td>Consultation de ses bordereaux et missions uniquement</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="box box-green">
+      <div class="box-title">🔐 Isolation Multi-Tenant</div>
+      Un utilisateur au Sénégal ne peut <strong>jamais</strong> voir les données de la Côte d'Ivoire, et vice-versa. 
+      C'est garanti au niveau de la base de données par des politiques <strong>Row Level Security (RLS)</strong>.
+    </div>
+
+    <h3>Workflow d'inscription</h3>
+    <ol>
+      <li>L'utilisateur crée un compte → statut <span class="chip chip-yellow">En attente</span></li>
+      <li>Un administrateur examine la demande</li>
+      <li>Il approuve → <span class="chip chip-green">Approuvé</span> (avec fonction et rôle assignés)</li>
+      <li>Ou il refuse → <span class="chip chip-red">Rejeté</span></li>
+    </ol>
+  </div>
+
+  <!-- ============================================ -->
+  <!-- 04 — DASHBOARD -->
+  <!-- ============================================ -->
+  <div class="section">
+    <h1>04 — Dashboard (Tableau de Bord)</h1>
+
+    <p>Le point d'entrée principal de l'application. Un écran qui affiche en un coup d'œil l'état complet de l'entreprise.</p>
+
+    <h3>Indicateurs Financiers Mensuels</h3>
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-icon">💵</div>
+        <div class="stat-label">Masse Salariale</div>
+        <div class="stat-value">Total XOF</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon">📈</div>
+        <div class="stat-label">CA Facturé</div>
+        <div class="stat-value">Revenus</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon">📊</div>
+        <div class="stat-label">Marge Opérationnelle</div>
+        <div class="stat-value">%</div>
+      </div>
+    </div>
+
+    <h3>Tableaux & Graphiques</h3>
+    <table>
+      <thead>
+        <tr>
+          <th>Graphique</th>
+          <th>Type</th>
+          <th>Données affichées</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Consommation Carburant</td>
+          <td>Barres comparatives</td>
+          <td>Litres vs Coût mensuel, véhicules de fonction vs parc</td>
+        </tr>
+        <tr>
+          <td>Top 3 Véhicules Gourmands</td>
+          <td>Classement</td>
+          <td>Véhicules avec la plus forte consommation</td>
+        </tr>
+        <tr>
+          <td>Missions</td>
+          <td>Compteur + %</td>
+          <td>Terminées / En cours / Total</td>
+        </tr>
+        <tr>
+          <td>État des Modules</td>
+          <td>Tableau récapitulatif</td>
+          <td>Flotte, Chauffeurs, Clients, Carburant, Pneus, Sinistres, Matériels</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h3>Alertes Automatiques</h3>
+    <ul>
+      <li>🔴 <strong>Contrôle technique</strong> expirant sous 15 jours</li>
+      <li>🔴 <strong>Assurance</strong> expirant sous 15 jours</li>
+      <li>🟡 <strong>Maintenance préventive</strong> en retard</li>
+      <li>🟡 <strong>Pneus usés</strong> (profondeur &lt; 3mm)</li>
+    </ul>
+
+    <div class="box box-blue">
+      <div class="box-title">📄 Export PDF Mensuel</div>
+      Génération automatique d'un rapport PDF complet avec toutes les données financières, carburant et missions du mois.
+    </div>
+  </div>
+
+  <!-- ============================================ -->
+  <!-- 05 — GESTION DE FLOTTE -->
+  <!-- ============================================ -->
+  <div class="section">
+    <h1>05 — Gestion de Flotte</h1>
+
+    <p>Le module le plus riche en fonctionnalités — il couvre tout le cycle de vie des véhicules.</p>
+
+    <!-- Véhicules -->
+    <h2>🚗 Parc Véhicules</h2>
+    <p>Gestion complète de chaque véhicule, de l'immatriculation à la mise hors service.</p>
+
+    <h4>Fiche Véhicule</h4>
+    <table>
+      <thead>
+        <tr><th>Information</th><th>Détail</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>Identification</td><td>Immatriculation, marque, modèle, année</td></tr>
+        <tr><td>Type</td><td>Camion, Fourgon, Citerne, Remorque, Compacteur, Autre</td></tr>
+        <tr><td>Capacité</td><td>Tonnage, volume utile</td></tr>
+        <tr><td>Statut</td><td><span class="chip chip-green">Disponible</span> <span class="chip chip-blue">En mission</span> <span class="chip chip-yellow">Maintenance</span> <span class="chip chip-red">Hors service</span></td></tr>
+      </tbody>
+    </table>
+
+    <h4>Documents de Conformité (avec dates d'expiration)</h4>
+    <ul>
+      <li>📋 Contrôle Technique (Visite Technique)</li>
+      <li>🛡️ Assurance véhicule</li>
+      <li>📄 Carte Grise</li>
+      <li>🏷️ Vignette</li>
+    </ul>
+
+    <h4>Historique Maintenance</h4>
+    <ul>
+      <li>🔧 Vidanges (intervalle : 6 mois ou 10 000 km)</li>
+      <li>🔩 Plaquettes de frein (épaisseur surveillée)</li>
+      <li>📏 Pression des pneus</li>
+      <li>🔄 Pièces remplacées avec coûts</li>
+      <li>📸 Photos de maintenance</li>
+    </ul>
+
+    <h4>Suivi des Dépenses par Véhicule</h4>
+    <p>Pièces détachées, réparations, péages, lavage, amendes, assurance, vignette — tout est catégorisé et chiffré.</p>
+
+
+    <!-- Pneumatiques -->
+    <h2>🛞 Gestion des Pneumatiques</h2>
+    <table>
+      <thead>
+        <tr><th>Fonctionnalité</th><th>Description</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>Inventaire</td><td>N° série, marque, modèle, statut (Stock / Monté / À réformer / En réparation)</td></tr>
+        <tr><td>Profondeur sculptures</td><td>Surveillance continue — <span class="chip chip-red">alerte &lt; 3mm</span></td></tr>
+        <tr><td>Suivi kilométrique</td><td>Km parcourus par pneu + coût par kilomètre (CPK)</td></tr>
+        <tr><td>Permutation</td><td><span class="chip chip-yellow">Alerte &gt; 10 000 km</span> — rotation recommandée</td></tr>
+        <tr><td>Position</td><td>AV gauche, AV droit, AR gauche, AR droit, Roue de secours</td></tr>
+        <tr><td>Valorisation stock</td><td>Coût total de l'inventaire de pneus</td></tr>
+      </tbody>
+    </table>
+
+    <!-- Maintenance -->
+    <h2>🔧 Maintenance & Pannes</h2>
+    <table>
+      <thead>
+        <tr><th>Champ</th><th>Options</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>Type de panne</td><td>Moteur, Pneus, Hydraulique, Électrique, Freins, Autre</td></tr>
+        <tr><td>Urgence</td><td><span class="chip chip-green">Faible</span> <span class="chip chip-yellow">Critique</span> <span class="chip chip-red">Immobilisation totale</span></td></tr>
+        <tr><td>Responsables</td><td>Chauffeur déclarant + Mécanicien assigné</td></tr>
+        <tr><td>Coûts</td><td>Estimation + Pièces remplacées détaillées</td></tr>
+        <tr><td>Documentation</td><td>Photos de la panne, rapport d'intervention</td></tr>
+      </tbody>
+    </table>
+    <p>Un <strong>badge temps réel</strong> dans le menu latéral affiche le nombre de pannes actives.</p>
+
+    <!-- Sinistres -->
+    <h2>💥 Gestion des Sinistres</h2>
+    <table>
+      <thead>
+        <tr><th>Information</th><th>Détail</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>Nature</td><td>Collision, Vol, Incendie, Bris de glace, Vandalisme, Autre</td></tr>
+        <tr><td>Gravité</td><td><span class="chip chip-green">Mineur</span> <span class="chip chip-yellow">Majeur</span> <span class="chip chip-red">Critique</span></td></tr>
+        <tr><td>Assurance</td><td>N° rapport, N° dossier, Assureur tiers (nom, téléphone, email)</td></tr>
+        <tr><td>Financier</td><td>Estimation des coûts, couverture assurance</td></tr>
+        <tr><td>Workflow</td><td><span class="chip chip-blue">Ouvert</span> → <span class="chip chip-yellow">En cours</span> → <span class="chip chip-green">Clôturé</span></td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- ============================================ -->
+  <!-- 06 — EXPLOITATION & MISSIONS -->
+  <!-- ============================================ -->
+  <div class="section">
+    <h1>06 — Exploitation & Missions</h1>
+
+    <p>Le cœur opérationnel d'IVOS — gère tout le cycle d'une mission de transport, de la demande à la clôture.</p>
+
+    <h2>📋 Workflow des Missions — Chaîne de Validation</h2>
+    <p>Chaque mission passe par <strong>6 étapes de signature hiérarchique</strong>. Si un responsable rejette à n'importe quelle étape, la mission est renvoyée pour correction avec notification.</p>
+
+    <div class="workflow">
+      <div class="workflow-step">
+        <div class="step-num">1</div>
+        <span class="step-title">Autorisation</span>
+        <span class="step-role">Directeur Général</span>
+      </div>
+      <div class="workflow-step">
+        <div class="step-num">2</div>
+        <span class="step-title">Planification</span>
+        <span class="step-role">Dir. Opérations</span>
+      </div>
+      <div class="workflow-step">
+        <div class="step-num">3</div>
+        <span class="step-title">Affectation</span>
+        <span class="step-role">Resp. Logistique</span>
+      </div>
+      <div class="workflow-step">
+        <div class="step-num">4</div>
+        <span class="step-title">Déploiement</span>
+        <span class="step-role">Chef Exploitation</span>
+      </div>
+      <div class="workflow-step">
+        <div class="step-num">5</div>
+        <span class="step-title">Contrôle Tech.</span>
+        <span class="step-role">Chef Mécanique</span>
+      </div>
+      <div class="workflow-step">
+        <div class="step-num">6</div>
+        <span class="step-title">Collecte</span>
+        <span class="step-role">Équipe Terrain</span>
+      </div>
+    </div>
+
+    <h3>Étape 4 — Détail du Déploiement</h3>
+    <ol>
+      <li>✅ Vérification équipement (check-list pré-départ)</li>
+      <li>✅ Confirmation d'arrivée sur site</li>
+      <li>✅ Réalisation de l'opération</li>
+      <li>✅ Bon de livraison signé</li>
+    </ol>
+
+    <h2>📊 Tableau Kanban des Missions</h2>
+    <p>Vue projet avec 3 colonnes :</p>
+    <table>
+      <thead>
+        <tr><th>À Planifier</th><th>En Cours</th><th>Terminées</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Nouvelles missions<br>en attente d'affectation</td>
+          <td>Missions actives<br>avec % d'avancement</td>
+          <td>Missions clôturées<br>avec récapitulatif</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h4>Informations sur chaque carte mission</h4>
+    <ul>
+      <li>N° mission, client, type, responsable avec avatar</li>
+      <li>Fenêtre horaire (début/fin) + indicateur de retard</li>
+      <li>Pourcentage d'avancement</li>
+      <li>Points de contrôle : équipement ✓, arrivée ✓, opération ✓, BL ✓</li>
+      <li>Personnel et matériel affectés</li>
+      <li>Mode archive pour l'historique</li>
+    </ul>
+
+    <h2>📜 Registre BSD (Bordereaux de Suivi des Déchets)</h2>
+
+    <div class="box box-yellow">
+      <div class="box-title">⚠️ Document Réglementaire Obligatoire</div>
+      Le BSD est le document légal qui accompagne tout transport de déchets. IVOS le digitalise entièrement avec signatures électroniques horodatées.
+    </div>
+
+    <table>
+      <thead>
+        <tr><th>Section</th><th>Contenu</th></tr>
+      </thead>
+      <tbody>
+        <tr><td><strong>A — Producteur</strong></td><td>Nom, adresse, contact, NINEA (n° identification nationale)</td></tr>
+        <tr><td><strong>B — Caractéristiques</strong></td><td>Description du déchet, état physique (solide/liquide/boue), code catégorie, conditionnement (benne, citerne, fût…), poids/volume estimés. Si dangereux : n° ONU, classe de danger</td></tr>
+        <tr><td><strong>C — Transporteur</strong></td><td>Entreprise, n° licence, immatriculation véhicule, nom et permis chauffeur, date collecte + signature de confirmation</td></tr>
+        <tr><td><strong>D — Destination</strong></td><td>Nom installation, n° licence, date réception, poids/volume réels, statut d'acceptation</td></tr>
+        <tr><td><strong>Signatures</strong></td><td>Producteur, Transporteur, Destinataire, Superviseur — horodatées</td></tr>
+      </tbody>
+    </table>
+
+    <h4>Workflow du BSD</h4>
+    <p>
+      <span class="chip chip-gray">Brouillon</span> →
+      <span class="chip chip-blue">Validé</span> →
+      <span class="chip chip-yellow">En transit</span> →
+      <span class="chip chip-green">Réceptionné</span> →
+      <span class="chip chip-green">Signé</span>
+    </p>
+    <p>Statuts exceptionnels : <span class="chip chip-red">Rejeté</span> <span class="chip chip-red">Annulé</span> (acceptation partielle possible)</p>
+
+    <p><strong>Génération PDF automatique</strong> du bordereau complet avec toutes les signatures et données.</p>
+  </div>
+
+  <!-- ============================================ -->
+  <!-- 07 — FINANCES -->
+  <!-- ============================================ -->
+  <div class="section">
+    <h1>07 — Finances</h1>
+
+    <h2>📊 Tableau de Bord Financier</h2>
+    <ul>
+      <li><strong>Budget annuel</strong> : allocation avec barre de progression des dépenses</li>
+      <li><strong>Revenus vs Dépenses</strong> : suivi du chiffre d'affaires et de la marge opérationnelle</li>
+      <li><strong>Catégories de coûts</strong> : Masse salariale, Carburant, Maintenance, Administratif</li>
+      <li><strong>Graphiques mensuels</strong> : tendances revenus (barres), répartition dépenses (camembert)</li>
+    </ul>
+
+    <div class="box box-red">
+      <div class="box-title">🔒 Accès Restreint</div>
+      Seul le <strong>Directeur Général</strong> peut voir les données financières sensibles (salaires, marges, budget détaillé).
+    </div>
+
+    <h2>🧾 Facturation</h2>
+    <table>
+      <thead><tr><th>Champ</th><th>Description</th></tr></thead>
+      <tbody>
+        <tr><td>Montants</td><td>HT (hors taxes) et TTC (toutes taxes comprises)</td></tr>
+        <tr><td>Client</td><td>Lié au référentiel clients</td></tr>
+        <tr><td>Mission</td><td>Référence à la mission source</td></tr>
+        <tr><td>Workflow</td><td><span class="chip chip-gray">Brouillon</span> → <span class="chip chip-blue">Envoyée</span> → <span class="chip chip-green">Payée</span> / <span class="chip chip-red">Annulée</span></td></tr>
+        <tr><td>Badge</td><td>Nombre de factures non lues affiché dans le menu</td></tr>
+      </tbody>
+    </table>
+
+    <h2>🏦 Gestion des Prêts</h2>
+    <ul>
+      <li>Création de prêt employé : montant, durée en mois, mensualité calculée</li>
+      <li>Suivi en temps réel : mois payés vs mois restants</li>
+      <li>Statut : <span class="chip chip-blue">En cours</span> ou <span class="chip chip-green">Remboursé</span></li>
+      <li>Déduction automatique intégrée à la fiche de paie</li>
+    </ul>
+
+    <h2>💰 Paie avec Retenues</h2>
+    <ul>
+      <li>Salaire de base + Primes + Cotisations sociales</li>
+      <li>Déductions automatiques des prêts en cours</li>
+      <li>Calcul du <strong>salaire net</strong></li>
+      <li>Génération de bulletins de paie</li>
+      <li>Historique et archivage</li>
+    </ul>
+
+    <h2>📋 Dépenses Globales</h2>
+    <p>Vue consolidée de toutes les dépenses de l'entreprise, catégorisées et filtrables par période.</p>
+  </div>
+
+  <!-- ============================================ -->
+  <!-- 08 — RESSOURCES HUMAINES -->
+  <!-- ============================================ -->
+  <div class="section">
+    <h1>08 — Ressources Humaines</h1>
+
+    <h2>📖 Annuaire du Personnel</h2>
+    <p>Répertoire complet et filtrable de tous les employés, organisé par rôle :</p>
+    <ul>
+      <li>👔 Administratif</li>
+      <li>⚙️ Opérateurs</li>
+      <li>🔧 Mécaniciens</li>
+      <li>🚗 Chauffeurs</li>
+      <li>🛡️ Agents de sécurité</li>
+      <li>🤝 Aides</li>
+    </ul>
+
+    <h2>📅 Module GRH — 5 Onglets</h2>
+    <table>
+      <thead>
+        <tr><th>Onglet</th><th>Fonctionnalité</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>Planning</strong></td>
+          <td>Calendrier hebdomadaire avec affectation du personnel jour par jour (Lun-Dim)</td>
+        </tr>
+        <tr>
+          <td><strong>Congés & Absences</strong></td>
+          <td>
+            Demande de congé avec types : Congé annuel, Permission, Maladie, Compensatoire, Absence injustifiée<br>
+            Workflow : <span class="chip chip-yellow">En attente</span> → <span class="chip chip-green">Validé par directeur</span> / <span class="chip chip-red">Refusé</span>
+          </td>
+        </tr>
+        <tr>
+          <td><strong>Pointage</strong></td>
+          <td>
+            État journalier par employé :<br>
+            <span class="chip chip-green">En service</span>
+            <span class="chip chip-blue">Repos</span>
+            <span class="chip chip-yellow">Congé</span>
+            <span class="chip chip-red">Absence injustifiée</span>
+            <span class="chip chip-gray">Maladie</span>
+            <span class="chip chip-gray">Férié</span>
+            <span class="chip chip-blue">Nuit</span>
+          </td>
+        </tr>
+        <tr>
+          <td><strong>Paramètres Calendrier</strong></td>
+          <td>Configuration des week-ends (ex: Sam-Dim), définition des jours fériés, ajustements équipes</td>
+        </tr>
+        <tr>
+          <td><strong>Équipe de Nuit</strong></td>
+          <td>Suivi spécifique du personnel travaillant de nuit, statistiques dédiées</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h3>Interfaces Spécialisées</h3>
+    <ul>
+      <li><strong>Borne de Pointage</strong> — Interface dédiée pour l'enregistrement des présences (écran tactile)</li>
+      <li><strong>Demande de Congés Mobile</strong> — Formulaire simplifié pour que les employés demandent leurs congés depuis leur téléphone</li>
+    </ul>
+  </div>
+
+  <!-- ============================================ -->
+  <!-- 09 — COMMUNICATION -->
+  <!-- ============================================ -->
+  <div class="section">
+    <h1>09 — Communication (Chat)</h1>
+
+    <div class="box box-green">
+      <div class="box-title">⚡ Module le plus avancé techniquement</div>
+      C'est le seul module entièrement connecté à <strong>Supabase</strong> en temps réel. Les messages arrivent instantanément, les statuts de présence sont synchronisés, et les fichiers sont stockés dans le cloud.
+    </div>
+
+    <h2>💬 Canaux de Discussion</h2>
+    <table>
+      <thead><tr><th>Type</th><th>Description</th><th>Exemples</th></tr></thead>
+      <tbody>
+        <tr><td><strong>Départements</strong></td><td>Canaux système par service</td><td>🚛 Logistique, 🔧 Mécanique, 🏢 Administration, 🚗 Chauffeurs</td></tr>
+        <tr><td><strong>Alertes</strong></td><td>Canal système automatique</td><td>🚨 Notifications système, pannes, expirations</td></tr>
+        <tr><td><strong>Personnalisés</strong></td><td>Créés par les utilisateurs</td><td>Projet X, Réunion hebdo, etc.</td></tr>
+        <tr><td><strong>Messages Directs</strong></td><td>Conversation privée 1-à-1</td><td>Entre 2 utilisateurs</td></tr>
+      </tbody>
+    </table>
+
+    <h2>✉️ Fonctionnalités des Messages</h2>
+    <ul>
+      <li>📝 Texte riche</li>
+      <li>📎 Envoi de fichiers (images avec lightbox, documents) — max 50 Mo</li>
+      <li>📍 Partage de localisation</li>
+      <li>@mentions avec auto-complétion du nom</li>
+      <li>😀 Réactions emoji sur les messages (6 catégories : Smileys, Gestes, Transport, Objets, Alertes, Nature)</li>
+      <li>📌 Messages épinglés (importants)</li>
+      <li>🔍 Recherche dans les conversations</li>
+      <li>✏️ Édition et 🗑️ suppression de messages</li>
+      <li>⚡ Marquage message urgent</li>
+      <li>⌨️ Indicateur de saisie ("X est en train d'écrire…")</li>
+      <li>✅ Accusés de lecture</li>
+    </ul>
+
+    <h2>👤 Présence Utilisateur</h2>
+    <p>4 statuts en temps réel :</p>
+    <p>
+      <span class="chip chip-green">🟢 En ligne</span>
+      <span class="chip chip-yellow">🟡 Absent</span>
+      <span class="chip chip-gray">⚫ Hors ligne</span>
+      <span class="chip chip-blue">🔵 En mission</span>
+    </p>
+
+    <h2>📞 Appels Audio & Vidéo</h2>
+    <table>
+      <thead><tr><th>Fonctionnalité</th><th>Technologie</th></tr></thead>
+      <tbody>
+        <tr><td>Appel audio 1-à-1</td><td>WebRTC natif</td></tr>
+        <tr><td>Appel vidéo 1-à-1</td><td>WebRTC natif</td></tr>
+        <tr><td>Appel vidéo groupe</td><td>WebRTC mesh / Jitsi Meet</td></tr>
+        <tr><td>Partage d'écran</td><td>Screen Capture API</td></tr>
+        <tr><td>Sourdine / Caméra off</td><td>Contrôles intégrés</td></tr>
+      </tbody>
+    </table>
+
+    <h3>Options Visuelles</h3>
+    <ul>
+      <li>🌙 Mode sombre disponible</li>
+      <li>📱 Interface adaptée mobile (sidebar rétractable)</li>
+    </ul>
+  </div>
+
+  <!-- ============================================ -->
+  <!-- 10 — SÉCURITÉ -->
+  <!-- ============================================ -->
+  <div class="section">
+    <h1>10 — Sécurité & Paramètres</h1>
+
+    <h2>🔐 Sécurité</h2>
+    <table>
+      <thead><tr><th>Fonctionnalité</th><th>Détail</th></tr></thead>
+      <tbody>
+        <tr><td>Mot de passe</td><td>Min 8 caractères, 1 majuscule, 1 chiffre, 1 caractère spécial. Indicateur de force (Faible → Excellent)</td></tr>
+        <tr><td>2FA</td><td>Authentification à deux facteurs (activable)</td></tr>
+        <tr><td>Sessions</td><td>Gestion des sessions actives, déconnexion à distance</td></tr>
+        <tr><td>RLS</td><td>Row Level Security — isolation des données par filiale au niveau PostgreSQL</td></tr>
+        <tr><td>Audit Trail</td><td>Journal de toutes les actions (qui, quand, quoi, sur quelle ressource)</td></tr>
+      </tbody>
+    </table>
+
+    <h2>⚙️ Paramètres Système</h2>
+    <table>
+      <thead><tr><th>Page</th><th>Rôle</th></tr></thead>
+      <tbody>
+        <tr><td>Gestion Utilisateurs</td><td>Créer, approuver, rejeter, supprimer des comptes, attribuer rôles</td></tr>
+        <tr><td>Configuration de Base</td><td>Paramètres généraux (devise, timezone, etc.)</td></tr>
+        <tr><td>Référentiel Clients</td><td>Base de données des clients/partenaires</td></tr>
+        <tr><td>Seuils d'Alertes</td><td>Configurer quand les alertes se déclenchent (km, jours, seuils)</td></tr>
+        <tr><td>Sauvegardes</td><td>Gestion et planification des backups</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- ============================================ -->
+  <!-- 11 — ARCHITECTURE TECHNIQUE -->
+  <!-- ============================================ -->
+  <div class="section">
+    <h1>11 — Architecture Technique</h1>
+
+    <h2>🔄 Flux de Données</h2>
+    <div class="diagram">┌──────────────────────────────────────────────────────────┐
+│                      NAVIGATEUR                           │
+│                                                           │
+│  ┌──────────────┐     ┌───────────────┐                  │
+│  │ AuthProvider  │────▶│ContextProvider│                  │
+│  │ (login/rôle)  │     │(pays/site/an) │                  │
+│  └──────┬───────┘     └──────┬────────┘                  │
+│         │                    │                            │
+│         ▼                    ▼                            │
+│  ┌──────────────────────────────────────┐                │
+│  │        DashboardLayout               │                │
+│  │   (menu latéral + badges dynamiques) │                │
+│  └──────────────┬───────────────────────┘                │
+│                 │                                         │
+│    ┌────────────┼─────────────┐                          │
+│    ▼            ▼             ▼                           │
+│  Flotte     Missions     Finances  ...                   │
+│  (localStorage)  (localStorage)  (localStorage)          │
+│                                                           │
+│  Chat ─────────────────────────────────▶  SUPABASE       │
+│  (temps réel, fichiers, présence)        (PostgreSQL)    │
+│                                           (Storage)      │
+│                                           (Realtime)     │
+└──────────────────────────────────────────────────────────┘</div>
+
+    <h2>🗄️ Schéma Base de Données</h2>
+    <p>14 tables principales, toutes avec UUIDs et horodatage automatique :</p>
+
+    <div class="diagram">subsidiaries (filiales/pays) ─── RACINE MULTI-TENANT
+  │
+  ├── user_profiles (utilisateurs + rôles)
+  │
+  ├── vehicles (parc véhicules)
+  │     └── drivers (chauffeurs, permis, certifications)
+  │
+  ├── clients (producteurs / destinataires déchets)
+  │
+  ├── missions (ordres de mission avec workflow)
+  │     └── waste_tracking_forms (bordereaux BSD)
+  │           └── signature_logs (historique signatures)
+  │
+  ├── documents (fichiers uploadés)
+  ├── notifications (alertes utilisateurs)
+  ├── audit_logs (trace de toutes les actions)
+  ├── webhook_logs (logs intégrations n8n)
+  │
+  └── Chat System
+        ├── chat_channels
+        ├── chat_messages
+        ├── chat_channel_members
+        ├── user_presence
+        └── chat_message_reactions</div>
+
+    <h2>🔗 Exemples de Flux</h2>
+    <table>
+      <thead><tr><th>Scénario</th><th>Flux Technique</th></tr></thead>
+      <tbody>
+        <tr><td>Connexion utilisateur</td><td>LoginPage → authStore.login() → localStorage → AuthContext → DashboardLayout</td></tr>
+        <tr><td>Envoi message chat</td><td>ChatPage → useChat().sendMessage() → Supabase INSERT → Real-time notif → tous les abonnés</td></tr>
+        <tr><td>Voir les véhicules</td><td>VehiclesPage → useContextSelector(site) → vehiclesStore → localStorage → render tableau</td></tr>
+        <tr><td>Créer une mission</td><td>MissionsDashboard → Modal → missionsStore.add() → localStorage → Kanban refresh</td></tr>
+        <tr><td>Générer un BSD PDF</td><td>BSDRegistryPage → jsPDF + autoTable → téléchargement automatique</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- ============================================ -->
+  <!-- 12 — FEUILLE DE ROUTE -->
+  <!-- ============================================ -->
+  <div class="section">
+    <h1>12 — Feuille de Route</h1>
+
+    <h2>État Actuel (Avril 2026)</h2>
+    <table>
+      <thead><tr><th>Aspect</th><th>Statut</th><th>Détail</th></tr></thead>
+      <tbody>
+        <tr><td>Interface utilisateur</td><td><span class="chip chip-green">✅ Complète</span></td><td>Tous les modules fonctionnels avec UI moderne</td></tr>
+        <tr><td>Chat temps réel</td><td><span class="chip chip-green">✅ Production</span></td><td>Connecté à Supabase (DB + Realtime + Storage)</td></tr>
+        <tr><td>Données métier</td><td><span class="chip chip-yellow">⚠️ Prototype</span></td><td>Stockées dans localStorage (mock)</td></tr>
+        <tr><td>Authentification</td><td><span class="chip chip-yellow">⚠️ Prototype</span></td><td>Custom authStore (localStorage), pas encore Supabase Auth</td></tr>
+        <tr><td>Génération PDF</td><td><span class="chip chip-green">✅ Fonctionnel</span></td><td>BSD, rapports mensuels, fiches de paie</td></tr>
+        <tr><td>Appels vidéo</td><td><span class="chip chip-yellow">⚠️ Basique</span></td><td>WebRTC + Jitsi en place, signaling à finaliser</td></tr>
+      </tbody>
+    </table>
+
+    <h2>Prochaines Étapes</h2>
+    <table>
+      <thead><tr><th>Priorité</th><th>Chantier</th><th>Description</th></tr></thead>
+      <tbody>
+        <tr><td><span class="chip chip-red">P0</span></td><td>Migration Supabase Auth</td><td>Remplacer localStorage auth par Supabase Auth (JWT, sessions sécurisées)</td></tr>
+        <tr><td><span class="chip chip-red">P0</span></td><td>Migration données → Supabase</td><td>Migrer flotte, missions, finances vers PostgreSQL (suivre le pattern chat)</td></tr>
+        <tr><td><span class="chip chip-red">P0</span></td><td>Tests automatisés</td><td>Jest + React Testing Library — couverture des modules critiques</td></tr>
+        <tr><td><span class="chip chip-yellow">P1</span></td><td>CI/CD</td><td>Pipeline GitHub Actions (build, test, deploy automatique)</td></tr>
+        <tr><td><span class="chip chip-yellow">P1</span></td><td>GPS & Cartographie</td><td>Intégration Mapbox/Google Maps pour suivi des véhicules en temps réel</td></tr>
+        <tr><td><span class="chip chip-yellow">P1</span></td><td>Notifications Push</td><td>Web Push API + SMS (Twilio) pour alertes critiques</td></tr>
+        <tr><td><span class="chip chip-blue">P2</span></td><td>Application Mobile</td><td>React Native pour chauffeurs et terrain</td></tr>
+        <tr><td><span class="chip chip-blue">P2</span></td><td>IoT / Télématique</td><td>Intégration capteurs OBD-II, suivi pression pneus en temps réel</td></tr>
+        <tr><td><span class="chip chip-blue">P2</span></td><td>IA Prédictive</td><td>Prédiction pannes, optimisation tournées, recommandations maintenance</td></tr>
+        <tr><td><span class="chip chip-gray">P3</span></td><td>Multi-tenant SaaS complet</td><td>Facturation par abonnement, onboarding automatisé, personnalisation</td></tr>
+      </tbody>
+    </table>
+
+    <div class="box box-blue">
+      <div class="box-title">🎯 Stratégie d'Évolution</div>
+      L'architecture modulaire permet de migrer chaque module indépendamment de localStorage vers Supabase, 
+      en suivant le pattern déjà validé sur le module Chat. Aucune réécriture majeure n'est nécessaire.
+    </div>
+  </div>
+
+  <!-- FOOTER -->
+  <div class="page-footer">
+    <p><strong>IVOS</strong> — Plateforme de Gestion de Flotte & Transport de Déchets</p>
+    <p>Document généré le 15 avril 2026 — Confidentiel</p>
+  </div>
+
+</div>
+
+</body>
+</html>

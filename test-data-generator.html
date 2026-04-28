@@ -1,0 +1,666 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>🧪 Générateur Données IVOS — Complet</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: linear-gradient(135deg, #0f172a 0%, #1e3a5f 100%); min-height: 100vh; padding: 24px; }
+    .page-header { text-align: center; margin-bottom: 28px; }
+    .page-header h1 { color: white; font-size: 28px; font-weight: 800; }
+    .page-header p { color: #94a3b8; margin-top: 6px; font-size: 14px; }
+    .master-btn { display: block; width: 100%; max-width: 860px; margin: 0 auto 28px; padding: 20px 32px; background: linear-gradient(135deg, #10b981, #059669); color: white; border: none; border-radius: 16px; font-size: 18px; font-weight: 700; cursor: pointer; box-shadow: 0 8px 24px rgba(16,185,129,.4); transition: all .2s; text-align: center; }
+    .master-btn:hover { transform: translateY(-2px); box-shadow: 0 12px 32px rgba(16,185,129,.5); }
+    .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(400px, 1fr)); gap: 20px; max-width: 1300px; margin: 0 auto; }
+    .card { background: white; border-radius: 16px; padding: 20px; box-shadow: 0 4px 16px rgba(0,0,0,.2); }
+    .card-title { display: flex; align-items: center; gap: 10px; font-size: 15px; font-weight: 700; color: #1e293b; margin-bottom: 14px; }
+    .card-icon { font-size: 22px; }
+    .card-count { margin-left: auto; background: #f1f5f9; color: #475569; font-size: 12px; font-weight: 600; padding: 2px 10px; border-radius: 20px; }
+    .btn-row { display: flex; gap: 8px; flex-wrap: wrap; }
+    .btn { padding: 8px 16px; border: none; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; transition: all .15s; flex: 1; min-width: 80px; }
+    .btn:hover { opacity: .88; transform: translateY(-1px); }
+    .btn-green  { background: #dcfce7; color: #15803d; }
+    .btn-blue   { background: #dbeafe; color: #1d4ed8; }
+    .btn-red    { background: #fee2e2; color: #b91c1c; }
+    .btn-amber  { background: #fef3c7; color: #b45309; }
+    .stats-bar { display: grid; grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); gap: 10px; max-width: 1300px; margin: 0 auto 24px; }
+    .stat-pill { background: rgba(255,255,255,.1); border-radius: 12px; padding: 10px 12px; text-align: center; color: white; }
+    .stat-pill .val { font-size: 22px; font-weight: 800; }
+    .stat-pill .lbl { font-size: 10px; opacity: .7; text-transform: uppercase; letter-spacing: .5px; margin-top: 2px; }
+    .log-wrap { max-width: 1300px; margin: 24px auto 0; }
+    #log { background: #0f172a; color: #10b981; padding: 16px 20px; border-radius: 12px; font-family: 'Courier New', monospace; font-size: 12px; max-height: 280px; overflow-y: auto; line-height: 1.8; white-space: pre-wrap; word-break: break-all; border: 1px solid rgba(16,185,129,.2); }
+    .bottom-row { max-width: 1300px; margin: 16px auto 0; display: flex; gap: 12px; }
+    .btn-lg { padding: 12px 24px; border: none; border-radius: 10px; font-size: 14px; font-weight: 700; cursor: pointer; transition: all .2s; }
+    .btn-lg:hover { transform: translateY(-1px); }
+    .btn-clear { background: #ef4444; color: white; }
+    .btn-info  { background: #3b82f6; color: white; }
+  </style>
+</head>
+<body>
+  <div class="page-header">
+    <h1>🧪 Générateur de Données IVOS</h1>
+    <p>Génère des données fictives réalistes pour tous les modules du système</p>
+  </div>
+
+  <button class="master-btn" onclick="generateAll()">⚡ TOUT GÉNÉRER — Remplir tous les modules en une fois</button>
+
+  <div class="stats-bar">
+    <div class="stat-pill"><div class="val" id="s_ops">0</div><div class="lbl">Opérations</div></div>
+    <div class="stat-pill"><div class="val" id="s_missions">0</div><div class="lbl">Missions</div></div>
+    <div class="stat-pill"><div class="val" id="s_vehicles">0</div><div class="lbl">Véhicules</div></div>
+    <div class="stat-pill"><div class="val" id="s_personnel">0</div><div class="lbl">Personnel</div></div>
+    <div class="stat-pill"><div class="val" id="s_clients">0</div><div class="lbl">Clients</div></div>
+    <div class="stat-pill"><div class="val" id="s_invoices">0</div><div class="lbl">Factures</div></div>
+    <div class="stat-pill"><div class="val" id="s_payments">0</div><div class="lbl">Paiements</div></div>
+    <div class="stat-pill"><div class="val" id="s_expenses">0</div><div class="lbl">Dépenses</div></div>
+    <div class="stat-pill"><div class="val" id="s_payslips">0</div><div class="lbl">Fiches paie</div></div>
+    <div class="stat-pill"><div class="val" id="s_investments">0</div><div class="lbl">Projets Inv.</div></div>
+    <div class="stat-pill"><div class="val" id="s_materiels">0</div><div class="lbl">Matériels</div></div>
+    <div class="stat-pill"><div class="val" id="s_fuel">0</div><div class="lbl">Carburant</div></div>
+  </div>
+
+  <div class="grid">
+    <div class="card">
+      <div class="card-title"><span class="card-icon">♻️</span> Opérations BSD <span class="card-count" id="c_ops">0</span></div>
+      <div class="btn-row">
+        <button class="btn btn-green" onclick="genOpsComplete(3)">+ 3 Complètes</button>
+        <button class="btn btn-blue" onclick="genOpsInProgress(2)">+ 2 En cours</button>
+        <button class="btn btn-amber" onclick="genOpsPending(2)">+ 2 Fact. att.</button>
+        <button class="btn btn-red" onclick="clearKey('ivos_operations_v1')">Vider</button>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title"><span class="card-icon">🗺️</span> Missions <span class="card-count" id="c_missions">0</span></div>
+      <div class="btn-row">
+        <button class="btn btn-green" onclick="genMissions(5)">+ 5 Opérations</button>
+        <button class="btn btn-blue" onclick="genExploitMissions(5)">+ 5 Exploitation</button>
+        <button class="btn btn-red" onclick="clearKey('ivos_missions_v1','ivos_exploitation_missions_v3')">Vider</button>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title"><span class="card-icon">🚛</span> Flotte Véhicules <span class="card-count" id="c_vehicles">0</span></div>
+      <div class="btn-row">
+        <button class="btn btn-green" onclick="genVehicles()">Générer flotte (6)</button>
+        <button class="btn btn-blue" onclick="genMaintenancePlans(4)">+ 4 Plans maint.</button>
+        <button class="btn btn-red" onclick="clearKey('ivos_fleet_vehicles_v1','ivos_maintenance_plans_v1')">Vider</button>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title"><span class="card-icon">👷</span> Personnel <span class="card-count" id="c_personnel">0</span></div>
+      <div class="btn-row">
+        <button class="btn btn-green" onclick="genPersonnel()">Équipe (8 agents)</button>
+        <button class="btn btn-blue" onclick="genMechanics()">+ Mécaniciens (3)</button>
+        <button class="btn btn-red" onclick="clearKey('ivos_personnel_v1','ivos_mechanics_v1')">Vider</button>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title"><span class="card-icon">🏭</span> Clients <span class="card-count" id="c_clients">0</span></div>
+      <div class="btn-row">
+        <button class="btn btn-green" onclick="genClients()">Générer clients (7)</button>
+        <button class="btn btn-red" onclick="clearKey('ivos_clients_v1')">Vider</button>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title"><span class="card-icon">💰</span> Factures &amp; Paiements <span class="card-count" id="c_invoices">0</span></div>
+      <div class="btn-row">
+        <button class="btn btn-green" onclick="genWorkflowInvoices(5)">+ 5 Fact. BSD</button>
+        <button class="btn btn-blue" onclick="genInvoices(4)">+ 4 Fact. finance</button>
+        <button class="btn btn-amber" onclick="genPayments(4)">+ 4 Paiements</button>
+        <button class="btn btn-red" onclick="clearKey('ivos_workflow_invoices_v1','ivos_invoices_v1','ivos_payments_v1')">Vider</button>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title"><span class="card-icon">📋</span> Dépenses Globales <span class="card-count" id="c_expenses">0</span></div>
+      <div class="btn-row">
+        <button class="btn btn-green" onclick="genExpenses(8)">+ 8 Dépenses</button>
+        <button class="btn btn-red" onclick="clearKey('ivos_global_expenses_v1')">Vider</button>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title"><span class="card-icon">💵</span> Fiches de Paie <span class="card-count" id="c_payslips">0</span></div>
+      <div class="btn-row">
+        <button class="btn btn-green" onclick="genPayslips()">Mois courant</button>
+        <button class="btn btn-blue" onclick="genPayslipsHistory()">+ 3 mois historique</button>
+        <button class="btn btn-red" onclick="clearKey('ivos_payslips_v1')">Vider</button>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title"><span class="card-icon">🏗️</span> Investissements <span class="card-count" id="c_investments">0</span></div>
+      <div class="btn-row">
+        <button class="btn btn-green" onclick="genInvestments()">+ 3 Projets complets</button>
+        <button class="btn btn-red" onclick="clearKey('ivos_investment_projects_v1','ivos_investment_expenses_v1','ivos_investment_documents_v1')">Vider</button>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title"><span class="card-icon">⛽</span> Carburant <span class="card-count" id="c_fuel">0</span></div>
+      <div class="btn-row">
+        <button class="btn btn-green" onclick="genFuelAllocations(6)">+ 6 Dotations</button>
+        <button class="btn btn-blue" onclick="genFuelCards()">+ Cartes (4)</button>
+        <button class="btn btn-red" onclick="clearKey('ivos_fuel_allocations_v1','ivos_fuel_cards_v1')">Vider</button>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title"><span class="card-icon">🔧</span> Matériels Technique <span class="card-count" id="c_materiels">0</span></div>
+      <div class="btn-row">
+        <button class="btn btn-green" onclick="genMateriels()">Générer matériels (6)</button>
+        <button class="btn btn-red" onclick="clearKey('ivos_materiels_v1')">Vider</button>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title"><span class="card-icon">🎯</span> Budget &amp; Divers</div>
+      <div class="btn-row">
+        <button class="btn btn-green" onclick="genBudget()">Budget 120M FCFA</button>
+        <button class="btn btn-blue" onclick="genPreTripChecks(4)">+ 4 Pré-départ</button>
+        <button class="btn btn-amber" onclick="genPointage()">+ Pointage du jour</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="bottom-row">
+    <button class="btn-lg btn-info" onclick="refreshStats()">🔄 Actualiser les stats</button>
+    <button class="btn-lg btn-clear" style="margin-left:auto" onclick="clearAll()">🗑️ Tout effacer (irréversible)</button>
+  </div>
+
+  <div class="log-wrap"><div id="log"></div></div>
+
+  <script>
+  const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2,7);
+  const rnd = (a,b) => Math.floor(Math.random()*(b-a+1))+a;
+  const pick = a => a[rnd(0,a.length-1)];
+  const iso = (d=0) => new Date(Date.now()+d*86400000).toISOString();
+  const ds  = (d=0) => iso(d).slice(0,10);
+  const ym  = (mo=0) => { const d=new Date(); d.setMonth(d.getMonth()+mo); return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0'); };
+  const YEAR = new Date().getFullYear();
+
+  const log = (msg,t='info') => {
+    const el=document.getElementById('log');
+    const c={success:'#10b981',info:'#60a5fa',warning:'#fbbf24',error:'#f87171'}[t]||'#60a5fa';
+    el.innerHTML+=`<span style="color:${c}">${msg}</span>\n`;
+    el.scrollTop=el.scrollHeight;
+  };
+
+  const load  = k => { try{return JSON.parse(localStorage.getItem(k)||'[]')}catch{return[]} };
+  const save  = (k,d) => localStorage.setItem(k,JSON.stringify(d));
+  const prepend=(k,items) => { const d=load(k); d.unshift(...items); save(k,d); };
+
+  function clearKey(...keys) {
+    keys.forEach(k=>localStorage.removeItem(k));
+    log('🗑️ Vidé : '+keys.join(', '),'warning');
+    refreshStats();
+  }
+
+  const CLIENTS  = ['Total Sénégal','SAR Sénégal','Shell Sénégal','Petrosen','Oryx Energies','Dangote Cement','SOCOCIM','Unilever Sénégal'];
+  const WASTES   = ['Huiles usagées hydrocarbures','Boues de forage','Déchets chimiques','Solvants usagés','Filtres usagés','Piles et accumulateurs','Emballages souillés'];
+  const DRIVERS  = ['Mamadou Ndiaye','Ousmane Fall','Ibrahima Diallo','Cheikh Sow','Moussa Ba','Abdou Kane','Lamine Diop'];
+  const REGS     = ['DK-1234-AB','DK-5678-CD','DK-9012-EF','DK-3456-GH','DK-7890-IJ','SN-2222-KL'];
+  const STATIONS = ['Total Liberté','Shell Corniche','Total Cambérène','Oryx Sacré-Cœur'];
+  const BANKS    = ['CBAO Sénégal','Banque Atlantique','BOA Sénégal','Ecobank'];
+
+  function nextBSD() {
+    const c=JSON.parse(localStorage.getItem('ivos_operations_counter_v1')||'{}');
+    const n=(c[YEAR]||0)+1; c[YEAR]=n;
+    localStorage.setItem('ivos_operations_counter_v1',JSON.stringify(c));
+    return `BSD-${YEAR}-${String(n).padStart(4,'0')}`;
+  }
+
+  function makeOp(status='cloturee') {
+    const numero=nextBSD(), qty=rnd(800,5000), client=pick(CLIENTS);
+    return {
+      id:`op-${uid()}`, numero, client, clientNom:pick(DRIVERS),
+      clientTelephone:`+221 7${rnd(6,8)} ${rnd(100,999)} ${rnd(10,99)} ${rnd(10,99)}`,
+      clientAdresse:'Zone Industrielle, Dakar, Sénégal',
+      clientEmail:`contact@${client.replace(/\s/g,'-').toLowerCase()}.sn`,
+      typeDechet:pick(WASTES), etatDechet:pick(['liquide','solide','pâteux']),
+      typeConditionnement:pick(['citerne','fût','big-bag','caisse']),
+      nombreColis:String(rnd(1,5)), quantiteKg:String(qty),
+      uniteComplementaire:`${(qty/1000).toFixed(2)} tonnes`,
+      vehicule:pick(['Camion Citerne 20m³','Camion Benne 15m³','Camion Plateau']),
+      immatriculation:pick(REGS), chauffeur:pick(DRIVERS),
+      dateDepart:iso(-rnd(0,90)), observations:'Collecte programmée',
+      status, createdBy:'sample_10', createdAt:iso(-rnd(0,90)), updatedAt:iso(-rnd(0,10)),
+      bsdGeneratedAt:iso(-rnd(0,90)),
+      ...(status==='cloturee'?{bsdData:{
+        validatedAt:iso(-rnd(0,30)), poidsReel:String(qty+rnd(10,100)),
+        dateReception:iso(-rnd(0,20)), modeTraitement:pick(['Valorisation énergétique','Enfouissement contrôlé','Incinération']),
+        certification:`CER-${YEAR}-${String(rnd(1,9999)).padStart(4,'0')}`,
+      }}:{}),
+    };
+  }
+
+  function makeWorkflowInv(opId,opNum,client,qty,ht,status='validee') {
+    const n=`FAC-${YEAR}-${String(load('ivos_workflow_invoices_v1').length+rnd(1,50)).padStart(4,'0')}`;
+    return {
+      id:`INV-${uid()}`, missionId:opId, missionNumero:opNum, numeroOfficiel:n,
+      documentType:'BSD', clientNom:client,
+      clientAdresse:'Zone Industrielle, Dakar',
+      clientContact:`+221 77 ${rnd(100,999)} ${rnd(10,99)} ${rnd(10,99)}`,
+      prestationLabel:`Collecte et traitement déchets selon BSD N°${opNum}`,
+      categorieDechet:pick(['Déchets Dangereux','Déchets Industriels Banals']),
+      quantite:qty, unite:'kg', prixUnitaire:500, montantHT:ht,
+      status, siteCode:'DKR', annee:YEAR,
+      createdAt:iso(-rnd(5,60)), updatedAt:iso(-rnd(0,5)),
+      validatedAt:status!=='brouillon'?iso(-rnd(0,30)):undefined,
+      validatedBy:status!=='brouillon'?'Samba (DG)':undefined,
+    };
+  }
+
+  function makePayment(invId,invNum,client,montant) {
+    const method=pick(['virement','cheque','especes','autre']);
+    return {
+      id:`PAY-${uid()}`, invoiceId:invId, invoiceNumero:invNum,
+      clientNom:client, montant, method,
+      details: method==='virement'?{referenceBancaire:`VIR-${YEAR}-${rnd(10000,99999)}`,banqueEmettrice:pick(BANKS)}
+             : method==='cheque'  ?{numeroCheque:`CHQ-${rnd(100000,999999)}`,banqueCheque:'CBAO'}
+             : method==='especes' ?{nomRemettant:pick(DRIVERS)}
+             : {autreDetails:'Règlement hors cycle standard'},
+      status:pick(['en_attente','valide','encaisse']),
+      dateCreation:iso(-rnd(5,60)), dateValidation:iso(-rnd(0,30)), dateEncaissement:iso(-rnd(0,10)),
+      saisiePar:'Agent Finance', validePar:'Samba (DG)', notes:'Données test',
+    };
+  }
+
+  function genOpsComplete(n=3) {
+    const ops=Array.from({length:n},()=>makeOp('cloturee'));
+    prepend('ivos_operations_v1',ops);
+    ops.forEach(op=>{
+      const qty=parseInt(op.quantiteKg), ht=500*qty;
+      const inv=makeWorkflowInv(op.id,op.numero,op.client,qty,ht,'payee');
+      prepend('ivos_workflow_invoices_v1',[inv]);
+      prepend('ivos_payments_v1',[makePayment(inv.id,inv.numeroOfficiel,op.client,ht)]);
+    });
+    log(`✅ ${n} opérations complètes (+ factures + paiements)`,'success'); refreshStats();
+  }
+
+  function genOpsInProgress(n=2) {
+    prepend('ivos_operations_v1',Array.from({length:n},()=>makeOp('en_cours')));
+    log(`⏳ ${n} opérations en cours`,'info'); refreshStats();
+  }
+
+  function genOpsPending(n=2) {
+    const ops=Array.from({length:n},()=>makeOp('cloturee'));
+    prepend('ivos_operations_v1',ops);
+    ops.forEach(op=>{
+      const qty=parseInt(op.quantiteKg),ht=500*qty;
+      prepend('ivos_workflow_invoices_v1',[makeWorkflowInv(op.id,op.numero,op.client,qty,ht,'validee')]);
+    });
+    log(`📄 ${n} opérations avec factures en attente`,'info'); refreshStats();
+  }
+
+  function genWorkflowInvoices(n=5) {
+    const invs=Array.from({length:n},()=>{
+      const op=makeOp('cloturee'),qty=parseInt(op.quantiteKg);
+      return makeWorkflowInv(op.id,op.numero,op.client,qty,500*qty,pick(['brouillon','validee','payee']));
+    });
+    prepend('ivos_workflow_invoices_v1',invs);
+    log(`💰 ${n} factures BSD`,'success'); refreshStats();
+  }
+
+  function genInvoices(n=4) {
+    const ex=load('ivos_invoices_v1');
+    prepend('ivos_invoices_v1',Array.from({length:n},(_, i)=>({
+      id:`fin-inv-${uid()}`,
+      numero:`FINV-${YEAR}-${String(ex.length+i+1).padStart(4,'0')}`,
+      clientId:rnd(1,6), clientNom:pick(CLIENTS),
+      montantHT:rnd(100000,3000000), montantTVA:0, montantTTC:rnd(100000,3000000),
+      description:`Prestation collecte ${pick(WASTES)}`,
+      dateEmission:ds(-rnd(0,90)), dateEcheance:ds(rnd(10,60)),
+      status:pick(['brouillon','emise','payee','annulee']),
+      createdAt:iso(-rnd(0,90)), updatedAt:iso(-rnd(0,10)),
+    })));
+    log(`🧾 ${n} factures finances`,'success'); refreshStats();
+  }
+
+  function genPayments(n=4) {
+    const invs=load('ivos_workflow_invoices_v1');
+    if(!invs.length){log('⚠️ Génère des factures BSD d\'abord','warning');return;}
+    prepend('ivos_payments_v1',Array.from({length:n},()=>{
+      const inv=pick(invs);
+      return makePayment(inv.id,inv.numeroOfficiel||inv.id,inv.clientNom,inv.montantHT||rnd(200000,2000000));
+    }));
+    log(`💳 ${n} paiements`,'success'); refreshStats();
+  }
+
+  function genMissions(n=5) {
+    prepend('ivos_missions_v1',Array.from({length:n},()=>({
+      id:`miss-${uid()}`, client:pick(CLIENTS),
+      type:pick(['Collecte','Transport','Traitement','Livraison']),
+      responsable:pick(DRIVERS),
+      status:pick(['A_PLANIFIER','EN_COURS','CLOTURE','VALIDE','TERMINE']),
+      vehicle:pick(REGS), driver:pick(DRIVERS),
+      chefDeMission:pick(DRIVERS), coDrivers:[],
+      startDate:ds(-rnd(0,30)), startTime:`0${rnd(6,9)}:00`,
+      endDate:ds(rnd(0,5)), endTime:`1${rnd(4,9)}:00`,
+      distance:String(rnd(20,500)), wasteForm:Math.random()>.4,
+      documents:[], origin:'Dakar',
+      destination:pick(['Mbao','Rufisque','Thiès','Kaolack']),
+      notes:'Mission fictive', siteCode:'DKR', year:YEAR,
+      progression:rnd(0,100),
+      checkpoints:{equipement:true,arrivee:Math.random()>.3,operation:Math.random()>.5,bon:Math.random()>.7},
+      createdAt:iso(-rnd(0,30)),
+    })));
+    log(`🗺️ ${n} opérations`,'success'); refreshStats();
+  }
+
+  function genExploitMissions(n=5) {
+    prepend('ivos_exploitation_missions_v3',Array.from({length:n},(_, i)=>{
+      const ex=load('ivos_exploitation_missions_v3');
+      return {
+        id:`exp-${uid()}`,
+        numero:`EXP-${YEAR}-${String(ex.length+i+1).padStart(4,'0')}`,
+        status:pick(['en_cours','cloturee','en_attente','validee']),
+        currentStep:rnd(1,9),
+        documentType:pick(['BSD','BL','OM','DeliveryNote']),
+        siteCode:'DKR', client:pick(CLIENTS),
+        chauffeur:pick(DRIVERS), vehicule:pick(REGS),
+        typeDechet:pick(WASTES), quantiteKg:String(rnd(500,5000)),
+        createdAt:iso(-rnd(0,60)), updatedAt:iso(-rnd(0,10)),
+      };
+    }));
+    log(`⚙️ ${n} opérations exploitation`,'success'); refreshStats();
+  }
+
+  function genVehicles() {
+    const fleet=[
+      {id:'v1',registration:'DK-1234-AB',brand:'Mercedes',model:'Actros 2545',type:'Camion Citerne',capacity:'20000 L',fuelType:'Diesel',year:2020,status:'Disponible'},
+      {id:'v2',registration:'DK-5678-CD',brand:'Renault',model:'Trucks T460',type:'Camion Benne',capacity:'15 T',fuelType:'Diesel',year:2019,status:'En mission'},
+      {id:'v3',registration:'DK-9012-EF',brand:'MAN',model:'TGS 26.440',type:'Camion Plateau',capacity:'18 T',fuelType:'Diesel',year:2021,status:'Disponible'},
+      {id:'v4',registration:'DK-3456-GH',brand:'Toyota',model:'Land Cruiser 200',type:'Véhicule léger',capacity:'5 pers.',fuelType:'Diesel',year:2022,status:'Disponible'},
+      {id:'v5',registration:'DK-7890-IJ',brand:'Iveco',model:'Daily 35S15',type:'Fourgonnette',capacity:'3.5 T',fuelType:'Diesel',year:2021,status:'Maintenance'},
+      {id:'v6',registration:'SN-2222-KL',brand:'Ford',model:'Ranger 3.2',type:'Pick-up',capacity:'1 T',fuelType:'Diesel',year:2023,status:'Disponible'},
+    ];
+    save('ivos_fleet_vehicles_v1',fleet.map(v=>({
+      ...v,
+      purchaseDate:`${YEAR-rnd(1,5)}-0${rnd(1,9)}-15`,
+      commissionDate:`${YEAR-rnd(1,4)}-0${rnd(1,9)}-20`,
+      mileage:rnd(15000,180000),
+      insuranceExpiry:ds(rnd(-30,365)),
+      technicalControlExpiry:ds(rnd(-15,300)),
+      carteGriseExpiry:ds(rnd(30,730)),
+      vignetteExpiry:ds(rnd(30,365)),
+      lastOilChange:ds(-rnd(30,180)),
+      nextOilChange:ds(rnd(30,120)),
+      maintenanceHistory:[],documents:[],complianceDocs:[],expenses:[],
+      fuelRecords:Array.from({length:rnd(2,5)},()=>({
+        id:`fr-${uid()}`,date:ds(-rnd(5,60)),
+        liters:rnd(40,200),costPerLiter:rnd(700,900),
+        totalCost:rnd(30000,180000),mileageAtFill:rnd(10000,175000),
+        station:pick(STATIONS),
+      })),
+      assignedDriver:pick(DRIVERS),siteCode:'DKR',notes:'',
+    })));
+    log(`🚛 Flotte : 6 véhicules`,'success'); refreshStats();
+  }
+
+  function genMaintenancePlans(n=4) {
+    const types=['Vidange moteur','Changement pneus','Révision générale','Contrôle freins','Remplacement filtres'];
+    prepend('ivos_maintenance_plans_v1',Array.from({length:n},()=>({
+      id:`maint-${uid()}`,
+      vehicleRegistration:pick(REGS),
+      vehicleBrand:pick(['Mercedes','MAN','Renault Trucks','Iveco']),
+      vehicleModel:pick(['Actros','TGS','T460','Daily']),
+      vehicleSource:'parc',
+      alertType:pick(['vidange','pneus','revision','freins']),
+      description:pick(types),
+      scheduledDate:ds(rnd(-10,60)),
+      mechanic:pick(['Amina Diop','Ibrahima Sarr','Boubacar Thiaw']),
+      estimatedCost:rnd(50000,500000),
+      status:pick(['Planifié','En cours','Terminé','Annulé']),
+      notes:'Maintenance planifiée', createdAt:iso(-rnd(0,30)),
+    })));
+    log(`🔧 ${n} plans de maintenance`,'success'); refreshStats();
+  }
+
+  function genPersonnel() {
+    const base=[
+      {id:'ag1',firstName:'Mamadou',lastName:'Diallo',genre:'Homme',role:'Chauffeurs',matricule:'IVOS-CH-001',salaireBase:350000,poste:'Chauffeur Poids Lourd',departement:'Logistique',statut:'Actif'},
+      {id:'ag2',firstName:'Fatou',lastName:'Sow',genre:'Femme',role:'Administratif',matricule:'IVOS-AD-003',salaireBase:550000,poste:'Responsable RH',departement:'RH',statut:'Actif'},
+      {id:'ag3',firstName:'Ousmane',lastName:'Ndiaye',genre:'Homme',role:'Opérateurs',matricule:'IVOS-OP-007',salaireBase:300000,poste:'Opérateur Citerne',departement:'Logistique',statut:'Actif'},
+      {id:'ag4',firstName:'Aïssatou',lastName:'Ba',genre:'Femme',role:'Chauffeurs',matricule:'IVOS-CH-009',salaireBase:280000,poste:'Chauffeur Léger',departement:'Logistique',statut:'En congé'},
+      {id:'ag5',firstName:'Ibrahima',lastName:'Fall',genre:'Homme',role:'Mécaniciens',matricule:'IVOS-MC-002',salaireBase:400000,poste:'Chef Mécanicien',departement:'Technique',statut:'Actif'},
+      {id:'ag6',firstName:'Marième',lastName:'Diop',genre:'Femme',role:'Administratif',matricule:'IVOS-AD-011',salaireBase:480000,poste:'Comptable',departement:'Finance',statut:'Actif'},
+      {id:'ag7',firstName:'Cheikh',lastName:'Gueye',genre:'Homme',role:'Opérateurs',matricule:'IVOS-OP-015',salaireBase:290000,poste:'Opérateur BSD',departement:'Exploitation',statut:'Actif'},
+      {id:'ag8',firstName:'Rokhaya',lastName:'Faye',genre:'Femme',role:'Agent de sécurité',matricule:'IVOS-SEC-004',salaireBase:250000,poste:'Agente de sécurité',departement:'Sécurité',statut:'Actif'},
+    ];
+    const qtrs=['Parcelles Assainies','Mermoz','Sacré-Cœur','Almadies','Yoff','Grand Yoff'];
+    save('ivos_personnel_v1',base.map(a=>({
+      ...a, photo:'',
+      phone:`+221 7${rnd(6,8)} ${rnd(100,999)} ${rnd(10,99)} ${rnd(10,99)}`,
+      whatsapp:'', email:`${a.firstName.toLowerCase()}.${a.lastName.toLowerCase()}@ivos.sn`,
+      quartier:pick(qtrs), adresseDakar:`${pick(['Apt.','Villa'])} ${rnd(1,50)}, Dakar`,
+      hireDate:`${YEAR-rnd(1,6)}-0${rnd(1,9)}-${rnd(10,28)}`,
+      typeContrat:pick(['CDI','CDD','Stage']), statutContractuel:pick(['CDI','CDD','Stagiaire']),
+      banque:pick(BANKS), rib:`SN08 000${rnd(1,5)} 000${rnd(1,9)} 0000 ${rnd(1000,9999)} ${rnd(1000,9999)} ${rnd(10,99)}`,
+      permisValidity:ds(rnd(30,1000)), permisNumber:`SN-P-${YEAR-rnd(0,3)}-${String(rnd(1000,9999))}`,
+      idType:'CNI', idNumber:`SN-${rnd(1000000000,9999999999)}`,
+      idValidity:ds(rnd(200,2000)), medicalValidity:ds(rnd(30,400)),
+      bloodGroup:pick(['O+','A+','B+','AB+','O-','A-']),
+      shiftNuit:false, shiftNuitDebut:'', shiftNuitFin:'',
+      emergency1:{name:'Contact Urgence 1',relation:'Famille',phone:`+221 77 ${rnd(100,999)} ${rnd(10,99)} ${rnd(10,99)}`},
+      emergency2:{name:'Contact Urgence 2',relation:'Ami(e)',phone:`+221 76 ${rnd(100,999)} ${rnd(10,99)} ${rnd(10,99)}`},
+    })));
+    log(`👷 8 agents`,'success'); refreshStats();
+  }
+
+  function genMechanics() {
+    save('ivos_mechanics_v1',[
+      {id:'mec1',name:'Amina Diop',specialization:'Moteur & Transmission',assignedVehicle:'DK-1234-AB'},
+      {id:'mec2',name:'Ibrahima Sarr',specialization:'Hydraulique & Pneumatique',assignedVehicle:'DK-5678-CD'},
+      {id:'mec3',name:'Boubacar Thiaw',specialization:'Électricité automobile',assignedVehicle:'DK-9012-EF'},
+    ].map(m=>({
+      ...m,
+      phone:`+221 7${rnd(6,8)} ${rnd(100,999)} ${rnd(10,99)} ${rnd(10,99)}`,
+      email:`${m.name.split(' ')[0].toLowerCase()}@ivos.sn`,
+      position:'Mécanicien', nationality:'Sénégalaise',
+      certifications:`Certificat maintenance lourde ${YEAR-rnd(1,5)}`,
+      idDocumentType:'CNI', idDocumentNumber:`SN-CNI-${rnd(10000000,99999999)}`,
+      hireDate:`${YEAR-rnd(2,7)}-0${rnd(1,9)}-${rnd(10,28)}`,
+      experience:rnd(3,15), status:pick(['Disponible','En intervention','Repos']),
+      licenseNumber:`SN-${YEAR-rnd(1,5)}-${String(rnd(10000,99999))}`,
+      licenseType:pick(['B, C','B, C, E','C, E']),
+      licenseIssueDate:ds(-rnd(365,2000)), licenseExpiryDate:ds(rnd(200,3000)),
+      lastTraining:ds(-rnd(30,365)), nextTraining:ds(rnd(100,400)),
+      notes:'Mécanicien qualifié',
+    })));
+    log(`🔩 3 mécaniciens`,'success'); refreshStats();
+  }
+
+  function genClients() {
+    save('ivos_clients_v1',[
+      {id:1,name:'SAR (Société Africaine de Raffinage)',type:'Producteur',ninea:'002345678A1',address:'Zone industrielle, Mbao, Dakar',contact:'Amadou Diallo',phone:'+221 33 879 10 00',email:'contact@sar.sn',certifications:['ISO 14001','OHSAS 18001'],notes:'Client historique depuis 2018',annee:String(YEAR),archived:false},
+      {id:2,name:'Dangote Cement Senegal',type:'Producteur',ninea:'005678912B3',address:'Pout, Thiès',contact:'Ibrahima Ndiaye',phone:'+221 33 951 20 00',email:'info@dangote.sn',certifications:['ISO 9001'],notes:'Contrat annuel',annee:String(YEAR),archived:false},
+      {id:3,name:'SOCOCIM Industries',type:'Les deux',ninea:'001234567C2',address:'Rufisque, Dakar',contact:'Moussa Fall',phone:'+221 33 839 90 00',email:'commercial@sococim.sn',certifications:['ISO 14001','ISO 9001'],notes:'Double rôle',annee:String(YEAR),archived:false},
+      {id:4,name:'Unilever Sénégal',type:'Producteur',ninea:'003456789D4',address:'Zone franche, Dakar',contact:'Fatou Sow',phone:'+221 33 869 50 00',email:'waste@unilever.sn',certifications:['ISO 14001'],notes:'',annee:String(YEAR-1),archived:false},
+      {id:5,name:'Centre PROMOGED',type:'Réceptionnaire',ninea:'007890123E5',address:'Sindia, Thiès',contact:'Omar Sy',phone:'+221 77 654 32 10',email:'reception@promoged.sn',certifications:['Agrément DEEC'],notes:'Centre agréé',annee:String(YEAR),archived:false},
+      {id:6,name:'Total Sénégal SA',type:'Producteur',ninea:'009012345F6',address:'Plateau, Dakar',contact:'Seydou Diagne',phone:'+221 33 849 30 00',email:'hse@totalsenegal.com',certifications:['ISO 14001','ISO 45001'],notes:'Client premium',annee:String(YEAR),archived:false},
+      {id:7,name:'Petrosen',type:'Les deux',ninea:'006789012G7',address:'Route des Almadies, Dakar',contact:'Lamine Ciss',phone:'+221 33 859 40 00',email:'environment@petrosen.sn',certifications:['ISO 14001'],notes:'Compagnie nationale',annee:String(YEAR),archived:false},
+    ]);
+    log(`🏭 7 clients`,'success'); refreshStats();
+  }
+
+  function genExpenses(n=8) {
+    const cats=['Carburant','Entretien Véhicule','EPI','Logistique','Administratif','Autre'];
+    const lbls={
+      'Carburant':['Gasoil Camion Benne','Gasoil Citerne','Essence Véhicule léger'],
+      'Entretien Véhicule':['Vidange complète','Pneus avant','Filtres air/huile'],
+      'EPI':['Gants et casques','Combinaisons protection','Lunettes et masques'],
+      'Logistique':['Transport matériel','Location engin','Péages autoroute'],
+      'Administratif':['Ramettes papier A4','Toner imprimante','Fournitures bureau'],
+      'Autre':['Prime terrain','Frais déplacement','Repas mission'],
+    };
+    const maxId=load('ivos_global_expenses_v1').reduce((m,e)=>Math.max(m,e.id||0),0);
+    prepend('ivos_global_expenses_v1',Array.from({length:n},(_, i)=>{
+      const cat=pick(cats), at=pick(['none','employee','vehicle']);
+      return {
+        id:maxId+i+1, label:pick(lbls[cat]), category:cat,
+        amount:rnd(30000,600000), date:ds(-rnd(0,90)),
+        affectationType:at,
+        affectationId:at==='vehicle'?pick(['v1','v2','v3']):at==='employee'?pick(['ag1','ag2','ag3']):'',
+        affectationName:at==='vehicle'?pick(REGS):at==='employee'?pick(DRIVERS):'',
+        createdAt:iso(-rnd(0,90)),
+      };
+    }));
+    log(`📋 ${n} dépenses`,'success'); refreshStats();
+  }
+
+  const AGENTS_PAY=[
+    {id:'ag1',name:'Mamadou Diallo',matricule:'IVOS-CH-001',base:350000},
+    {id:'ag2',name:'Fatou Sow',matricule:'IVOS-AD-003',base:550000},
+    {id:'ag3',name:'Ousmane Ndiaye',matricule:'IVOS-OP-007',base:300000},
+    {id:'ag4',name:'Aïssatou Ba',matricule:'IVOS-CH-009',base:280000},
+    {id:'ag5',name:'Ibrahima Fall',matricule:'IVOS-MC-002',base:400000},
+    {id:'ag6',name:'Marième Diop',matricule:'IVOS-AD-011',base:480000},
+  ];
+
+  function makePayslips(month,startId=1) {
+    return AGENTS_PAY.map((a,i)=>{
+      const bonus=rnd(30000,100000),ret=Math.round(a.base*.1),loan=rnd(0,80000);
+      return {id:startId+i,employeeId:a.id,employeeName:a.name,employeeMatricule:a.matricule,baseSalary:a.base,bonus,retenues:ret,loanDeduction:loan,net:a.base+bonus-ret-loan,month,status:pick(['Brouillon','Validé','Payé']),createdAt:iso(-rnd(0,30)),validatedBy:'Admin DG'};
+    });
+  }
+
+  function genPayslips() {
+    const month=ym(0), ex=load('ivos_payslips_v1');
+    const maxId=ex.reduce((m,p)=>Math.max(m,p.id||0),0);
+    prepend('ivos_payslips_v1',makePayslips(month,maxId+1));
+    log(`💵 6 fiches de paie pour ${month}`,'success'); refreshStats();
+  }
+
+  function genPayslipsHistory() {
+    const ex=load('ivos_payslips_v1'); let maxId=ex.reduce((m,p)=>Math.max(m,p.id||0),0), all=[];
+    for(let mo=-1;mo>=-3;mo--){const sl=makePayslips(ym(mo),maxId+1);maxId+=sl.length;all=all.concat(sl);}
+    prepend('ivos_payslips_v1',all);
+    log(`💵 ${all.length} fiches historiques (3 mois)`,'success'); refreshStats();
+  }
+
+  function genInvestments() {
+    const projects=[
+      {nom:'Construction hangar logistique',prestataire:'Eiffage Sénégal',budget:45000000,acc:[{pct:30,label:'Mobilisation'},{pct:40,label:'Gros œuvre'},{pct:30,label:'Réception'}]},
+      {nom:'Acquisition camion citerne 25m³',prestataire:'Tractafric Motors',budget:28000000,acc:[{pct:50,label:'Acompte commande'},{pct:50,label:'Solde livraison'}]},
+      {nom:'Installation station carburant',prestataire:'SIPS Sénégal',budget:12000000,acc:[{pct:40,label:'Études & fournitures'},{pct:35,label:'Travaux'},{pct:25,label:'Mise en service'}]},
+    ];
+    const ex=load('ivos_investment_projects_v1');
+    const newProjs=projects.map((p,i)=>{
+      const id=`inv-proj-${uid()}`;
+      const acomptesPrevus=p.acc.map((a,j)=>({id:`inv-acc-${uid()}`,libelle:a.label,pourcentage:a.pct,montantPrevu:Math.round(p.budget*a.pct/100),datePrevisionnelle:ds(rnd(30,300)+j*60)}));
+      return {id,codeProjet:`INV-${YEAR}-${String(ex.length+i+1).padStart(4,'0')}`,nomProjet:p.nom,prestataire:p.prestataire,budgetTotal:p.budget,dateDebut:ds(-rnd(30,180)),dateLivraison:ds(rnd(60,400)),acomptesPrevus,description:`Projet d'investissement — ${p.nom}`,archived:false,createdAt:iso(-rnd(30,180)),updatedAt:iso(-rnd(0,10)),createdBy:'sample_10'};
+    });
+    prepend('ivos_investment_projects_v1',newProjs);
+    const newExp=[], newDoc=[];
+    newProjs.forEach(proj=>{
+      for(let e=0;e<rnd(1,3);e++){
+        const acc=pick(proj.acomptesPrevus);
+        newExp.push({id:`inv-exp-${uid()}`,projectId:proj.id,projectName:proj.nomProjet,acompteId:acc.id,factureFournisseur:`FACT-${YEAR}-${String(rnd(1000,9999))}`,montant:Math.round(acc.montantPrevu*(0.9+Math.random()*.2)),dateFacture:ds(-rnd(5,60)),description:`Facture ${acc.libelle}`,categorieFinance:'Investissements (CAPEX)',statutPaiement:pick(['Brouillon','Bon a payer','Paye']),qhseConforme:Math.random()>.3,superAdminValide:Math.random()>.5,superAdminBy:'Admin DG',superAdminAt:iso(-rnd(0,20)),createdAt:iso(-rnd(5,30)),updatedAt:iso(-rnd(0,5)),createdBy:'sample_10'});
+        newDoc.push({id:`inv-doc-${uid()}`,projectId:proj.id,projectName:proj.nomProjet,type:pick(['Contrat','Plan','Facture']),fileName:`document_${proj.codeProjet}_${e+1}.pdf`,archivePath:`Archives / Investissements / ${proj.nomProjet.replace(/\s/g,'_')}`,uploadedAt:iso(-rnd(0,30)),uploadedBy:'sample_10',size:rnd(50000,2000000)});
+      }
+    });
+    prepend('ivos_investment_expenses_v1',newExp);
+    prepend('ivos_investment_documents_v1',newDoc);
+    log(`🏗️ ${newProjs.length} projets d'investissement`,'success'); refreshStats();
+  }
+
+  function genFuelAllocations(n=6) {
+    prepend('ivos_fuel_allocations_v1',Array.from({length:n},()=>{
+      const qty=rnd(40,200),price=rnd(700,900);
+      return {id:`fuel-${uid()}`,vehicleRegistration:pick(REGS),vehicleBrand:pick(['Mercedes','MAN','Renault','Toyota']),vehicleModel:pick(['Actros','TGS','T460','Hilux']),vehicleSource:'parc',vehicleType:pick(['Camion','Voiture','Moto']),driverName:pick(DRIVERS),agentId:pick(['ag1','ag2','ag3','ag4']),date:ds(-rnd(0,60)),fuelType:pick(['Gasoil','Essence','Super']),quantity:qty,unitPrice:price,totalCost:qty*price,station:pick(STATIONS),fournisseur:pick(['Total','Shell','Oryx','Petro-SN']),mileageAtFill:rnd(10000,200000),bonNumber:`BON-${YEAR}-${String(rnd(1000,9999))}`,fuelCardId:pick(['card-001','card-002','card-003']),usagePeriod:ym(0),monthlyQuota:rnd(200,600),notes:'',createdAt:iso(-rnd(0,60))};
+    }));
+    log(`⛽ ${n} dotations carburant`,'success'); refreshStats();
+  }
+
+  function genFuelCards() {
+    save('ivos_fuel_cards_v1',[
+      {id:'card-001',cardNumber:'CARD-PARC-0001',cardType:'parc',paymentType:'postpayee',provider:'Total',assignedVehicle:'DK-1234-AB',assignedDriver:'Mamadou Ndiaye',status:'active',monthlyLimit:500000},
+      {id:'card-002',cardNumber:'CARD-PARC-0002',cardType:'parc',paymentType:'africapass',provider:'Shell',assignedVehicle:'DK-5678-CD',assignedDriver:'Ousmane Fall',status:'active',monthlyLimit:400000},
+      {id:'card-003',cardNumber:'CARD-FONC-0001',cardType:'personnel',paymentType:'prepayee',provider:'Oryx',assignedVehicle:'DK-3456-GH',assignedDriver:'Ibrahima Diallo',status:'active',monthlyLimit:250000},
+      {id:'card-004',cardNumber:'CARD-FONC-0002',cardType:'personnel',paymentType:'postpayee',provider:'Total',assignedVehicle:'SN-2222-KL',assignedDriver:'Cheikh Sow',status:'blocked',monthlyLimit:200000},
+    ].map(c=>({...c,expiryDate:ds(rnd(100,1000)),allocatedAmount:rnd(100000,c.monthlyLimit),allocatedLitres:rnd(100,500),notes:'',createdAt:iso(-rnd(0,180))})));
+    log(`🪪 4 cartes carburant`,'success'); refreshStats();
+  }
+
+  function genMateriels() {
+    save('ivos_materiels_v1',[
+      {id:1,designation:'Cric hydraulique 20T',codeSerie:'MAT-MEC-001',categorie:'Levage',etat:'Opérationnel',localisation:"Camion d'intervention",localisationType:'vehicule',valeurNeuf:85000},
+      {id:2,designation:'Groupe électrogène 5kVA',codeSerie:'MAT-ELE-002',categorie:'Électrique',etat:'En maintenance',localisation:'Atelier 1',localisationType:'depot',valeurNeuf:450000},
+      {id:3,designation:'Pompe de transfert GNR',codeSerie:'MAT-MEC-003',categorie:'Mécanique',etat:'Opérationnel',localisation:'Zone carburant',localisationType:'depot',valeurNeuf:320000},
+      {id:4,designation:'Compresseur 200L',codeSerie:'MAT-MEC-004',categorie:'Mécanique',etat:'Hors service',localisation:'Atelier 1',localisationType:'depot',valeurNeuf:280000},
+      {id:5,designation:'Chariot élévateur 2T',codeSerie:'MAT-LOG-005',categorie:'Manutention',etat:'Opérationnel',localisation:'Entrepôt principal',localisationType:'depot',valeurNeuf:1200000},
+      {id:6,designation:'Outillage soudure TIG',codeSerie:'MAT-ELE-006',categorie:'Électrique',etat:'Opérationnel',localisation:'Atelier soudure',localisationType:'depot',valeurNeuf:180000},
+    ].map(it=>({...it,annee:String(YEAR),archived:false,historique:Array.from({length:rnd(0,2)},()=>({date:ds(-rnd(30,365)),description:pick(['Remplacement joint','Vidange','Réglage','Nettoyage']),reparateur:pick(['Atelier Central','ElecPro Dakar','Mécanique Générale']),tel:`+221 7${rnd(6,8)} ${rnd(100,999)} ${rnd(10,99)} ${rnd(10,99)}`,coutPieces:rnd(5000,80000),coutMo:rnd(5000,40000),total:rnd(10000,120000)}))})));
+    log(`🔧 6 matériels technique`,'success'); refreshStats();
+  }
+
+  function genBudget() {
+    localStorage.setItem('ivos_budget_annual_v1',JSON.stringify({annualBudget:120000000,updatedAt:iso(),updatedBy:'Admin DG'}));
+    log('🎯 Budget annuel : 120 000 000 FCFA','success');
+  }
+
+  function genPreTripChecks(n=4) {
+    prepend('ivos_pre_trip_checks_v1',Array.from({length:n},()=>({
+      id:`ptc-${uid()}`,vehicleRegistration:pick(REGS),vehicleBrand:pick(['Mercedes','MAN','Renault','Toyota']),vehicleModel:pick(['Actros','TGS','T460','Land Cruiser']),driverName:pick(DRIVERS),date:ds(-rnd(0,30)),missionStatus:pick(['authorized','blocked']),items:{niveauHuile:true,niveauEau:true,pression:true,phares:true,freins:Math.random()>.2,extinguisher:Math.random()>.3,documents:true},createdAt:iso(-rnd(0,30)),inspectedBy:pick(DRIVERS)
+    })));
+    log(`🚦 ${n} contrôles pré-départ`,'success'); refreshStats();
+  }
+
+  function genPointage() {
+    const personnel = load('ivos_personnel_v1');
+    if (personnel.length === 0) {
+      log('⚠️ Génère le personnel d\'abord pour le pointage.', 'warning');
+      return;
+    }
+    const agentIds = personnel.map(p => p.id);
+    const existingPortals = new Set();
+
+    prepend('ivos_pointage_v1', agentIds.map(id => {
+      const agent = personnel.find(p => p.id === id);
+      const isSecurity = agent?.role === 'Agent de sécurité';
+      const isPresent = Math.random() > 0.2;
+      let portal;
+      if (isPresent && isSecurity) {
+        const availablePortal = ['Portail 1', 'Portail 2'].find(p => !existingPortals.has(p));
+        if (availablePortal) {
+          portal = availablePortal;
+          existingPortals.add(portal);
+        }
+      }
+      return { id: `ptg-${uid()}`, agentId: id, agentName: `${agent.firstName} ${agent.lastName}`, date: ds(0), heureArrivee: isPresent ? `0${rnd(7, 9)}:${rnd(0, 5)}${rnd(0, 9)}` : null, heureDepart: null, statut: isPresent ? 'present' : 'absent', portal, notes: 'Donnée de test', createdAt: iso() };
+    }));
+    log(`🕐 ${agentIds.length} pointages du jour générés (avec affectation portail pour sécurité)`, 'success');
+    refreshStats();
+  }
+
+  function generateAll() {
+    log('','info');
+    log('╔══════════════════════════════════════════════════════╗','info');
+    log('║    ⚡ GÉNÉRATION COMPLÈTE DE TOUTES LES DONNÉES     ║','info');
+    log('╚══════════════════════════════════════════════════════╝','info');
+    genClients(); genVehicles(); genPersonnel(); genMechanics();
+    genOpsComplete(4); genOpsInProgress(2); genOpsPending(2);
+    genMissions(5); genExploitMissions(5);
+    genWorkflowInvoices(3); genInvoices(4); genPayments(4);
+    genExpenses(8); genPayslips(); genPayslipsHistory();
+    genInvestments(); genFuelAllocations(6); genFuelCards();
+    genMaintenancePlans(4); genMateriels(); genBudget();
+    genPreTripChecks(4); genPointage();
+    log('','success');
+    log('╔══════════════════════════════════════════════════════╗','success');
+    log('║  ✅ TOUTES LES DONNÉES GÉNÉRÉES !                   ║','success');
+    log('║  Actualisez l\'application IVOS pour les voir.       ║','success');
+    log('╚══════════════════════════════════════════════════════╝','success');
+    refreshStats();
+  }
+
+  function clearAll() {
+    if(!confirm('⚠️ ATTENTION\n\nSupprimer TOUTES les données IVOS du localStorage ?\nCette action est irréversible.')) return;
+    ['ivos_operations_v1','ivos_operations_counter_v1','ivos_workflow_invoices_v1','ivos_payments_v1','ivos_invoices_v1','ivos_missions_v1','ivos_exploitation_missions_v3','ivos_fleet_vehicles_v1','ivos_maintenance_plans_v1','ivos_personnel_v1','ivos_mechanics_v1','ivos_clients_v1','ivos_clients_reference_v1','ivos_global_expenses_v1','ivos_payslips_v1','ivos_investment_projects_v1','ivos_investment_expenses_v1','ivos_investment_documents_v1','ivos_fuel_allocations_v1','ivos_fuel_cards_v1','ivos_materiels_v1','ivos_budget_annual_v1','ivos_pre_trip_checks_v1','ivos_pointage_v1','ivos_certificates_v1','ivos_bsd_v1','ivos_special_operations_v1','ivos_delivery_notes_v1','ivos_invoice_notifications_v1'].forEach(k=>localStorage.removeItem(k));
+    log('🗑️ TOUTES LES DONNÉES SUPPRIMÉES','warning'); refreshStats();
+  }
+
+  function refreshStats() {
+    [['s_ops','ivos_operations_v1'],['s_missions','ivos_missions_v1'],['s_vehicles','ivos_fleet_vehicles_v1'],['s_personnel','ivos_personnel_v1'],['s_clients','ivos_clients_v1'],['s_invoices','ivos_workflow_invoices_v1'],['s_payments','ivos_payments_v1'],['s_expenses','ivos_global_expenses_v1'],['s_payslips','ivos_payslips_v1'],['s_investments','ivos_investment_projects_v1'],['s_materiels','ivos_materiels_v1'],['s_fuel','ivos_fuel_allocations_v1'],['c_ops','ivos_operations_v1'],['c_missions','ivos_missions_v1'],['c_vehicles','ivos_fleet_vehicles_v1'],['c_personnel','ivos_personnel_v1'],['c_clients','ivos_clients_v1'],['c_invoices','ivos_workflow_invoices_v1'],['c_expenses','ivos_global_expenses_v1'],['c_payslips','ivos_payslips_v1'],['c_investments','ivos_investment_projects_v1'],['c_fuel','ivos_fuel_allocations_v1'],['c_materiels','ivos_materiels_v1']].forEach(([id,key])=>{const el=document.getElementById(id);if(el)el.textContent=load(key).length;});
+  }
+
+  refreshStats();
+  log('🚀 Générateur prêt. Cliquez sur "TOUT GÉNÉRER" ou utilisez les boutons par module.','info');
+  </script>
+</body>
+</html>

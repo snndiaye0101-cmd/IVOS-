@@ -1,0 +1,273 @@
+IVOS/
+│
+├── 📁 database/                          # Base de données Supabase
+│   ├── schema.sql                        # ✅ Schéma complet (multi-tenant, fleet, BSD)
+│   ├── migrations/
+│   │   ├── 001_initial_schema.sql
+│   │   ├── 002_add_indexes.sql
+│   │   └── 003_rls_policies.sql
+│   ├── seed/
+│   │   ├── subsidiaries.sql
+│   │   ├── test_users.sql
+│   │   └── sample_data.sql
+│   └── functions/
+│       ├── generate_mission_number.sql
+│       └── generate_form_number.sql
+│
+├── 📁 src/                               # Code source React
+│   │
+│   ├── 📁 app/                           # Configuration globale
+│   │   ├── App.tsx                       # Composant racine
+│   │   ├── router.tsx                    # Routes (React Router 6)
+│   │   ├── main.tsx                      # Point d'entrée
+│   │   └── providers/
+│   │       ├── AuthProvider.tsx          # Context authentification
+│   │       ├── SupabaseProvider.tsx      # Client Supabase
+│   │       ├── ThemeProvider.tsx         # Mode sombre/clair
+│   │       └── QueryProvider.tsx         # React Query
+│   │
+│   ├── 📁 features/                      # Fonctionnalités par domaine métier
+│   │   │
+│   │   ├── 📁 auth/                      # Authentification
+│   │   │   ├── components/
+│   │   │   │   ├── LoginForm.tsx
+│   │   │   │   ├── RegisterForm.tsx
+│   │   │   │   └── ForgotPasswordForm.tsx
+│   │   │   ├── hooks/
+│   │   │   │   ├── useAuth.ts
+│   │   │   │   └── useSession.ts
+│   │   │   ├── pages/
+│   │   │   │   ├── LoginPage.tsx
+│   │   │   │   └── RegisterPage.tsx
+│   │   │   └── services/
+│   │   │       └── authService.ts
+│   │   │
+│   │   ├── 📁 fleet/                     # Gestion de flotte
+│   │   │   ├── components/
+│   │   │   │   ├── VehicleCard.tsx
+│   │   │   │   ├── VehicleList.tsx
+│   │   │   │   ├── VehicleForm.tsx
+│   │   │   │   ├── VehicleStatusBadge.tsx
+│   │   │   │   ├── DriverCard.tsx
+│   │   │   │   ├── DriverList.tsx
+│   │   │   │   └── DriverForm.tsx
+│   │   │   ├── hooks/
+│   │   │   │   ├── useVehicles.ts
+│   │   │   │   ├── useDrivers.ts
+│   │   │   │   └── useFleetStats.ts
+│   │   │   ├── pages/
+│   │   │   │   ├── VehiclesPage.tsx
+│   │   │   │   ├── VehicleDetailPage.tsx
+│   │   │   │   ├── DriversPage.tsx
+│   │   │   │   └── DriverDetailPage.tsx
+│   │   │   ├── services/
+│   │   │   │   ├── vehicleService.ts
+│   │   │   │   └── driverService.ts
+│   │   │   └── types/
+│   │   │       ├── vehicle.types.ts
+│   │   │       └── driver.types.ts
+│   │   │
+│   │   ├── 📁 missions/                  # Ordres de mission
+│   │   │   ├── components/
+│   │   │   │   ├── MissionCard.tsx
+│   │   │   │   ├── MissionList.tsx
+│   │   │   │   ├── MissionForm.tsx
+│   │   │   │   ├── MissionWorkflow.tsx   # Workflow d'approbation
+│   │   │   │   ├── MissionTimeline.tsx
+│   │   │   │   └── RouteMap.tsx          # Carte interactive
+│   │   │   ├── hooks/
+│   │   │   │   ├── useMissions.ts
+│   │   │   │   ├── useMissionWorkflow.ts
+│   │   │   │   └── useMissionStats.ts
+│   │   │   ├── pages/
+│   │   │   │   ├── MissionsPage.tsx
+│   │   │   │   ├── MissionDetailPage.tsx
+│   │   │   │   └── CreateMissionPage.tsx
+│   │   │   ├── services/
+│   │   │   │   └── missionService.ts
+│   │   │   └── types/
+│   │   │       └── mission.types.ts
+│   │   │
+│   │   ├── 📁 waste-tracking/            # 🎯 Bordereau BSD (Priorité haute)
+│   │   │   ├── components/
+│   │   │   │   ├── WasteFormWizard.tsx   # Wizard multi-étapes
+│   │   │   │   ├── SectionA_Producer.tsx
+│   │   │   │   ├── SectionB_WasteCharacterization.tsx
+│   │   │   │   ├── SectionC_Transporter.tsx
+│   │   │   │   ├── SectionD_Destination.tsx
+│   │   │   │   ├── SignatureCapture.tsx  # Signature tactile
+│   │   │   │   ├── WasteFormPreview.tsx
+│   │   │   │   ├── PDFViewer.tsx
+│   │   │   │   └── FormStatusBadge.tsx
+│   │   │   ├── hooks/
+│   │   │   │   ├── useWasteForms.ts
+│   │   │   │   ├── useSignature.ts
+│   │   │   │   └── usePDFGeneration.ts
+│   │   │   ├── pages/
+│   │   │   │   ├── WasteFormsPage.tsx
+│   │   │   │   ├── CreateWasteFormPage.tsx
+│   │   │   │   ├── WasteFormDetailPage.tsx
+│   │   │   │   └── SignFormPage.tsx
+│   │   │   ├── services/
+│   │   │   │   ├── wasteFormService.ts
+│   │   │   │   ├── signatureService.ts
+│   │   │   │   └── pdfWebhookService.ts
+│   │   │   └── types/
+│   │   │       └── wasteForm.types.ts
+│   │   │
+│   │   ├── 📁 clients/                   # Gestion clients
+│   │   │   ├── components/
+│   │   │   │   ├── ClientCard.tsx
+│   │   │   │   ├── ClientList.tsx
+│   │   │   │   └── ClientForm.tsx
+│   │   │   ├── hooks/
+│   │   │   │   └── useClients.ts
+│   │   │   ├── pages/
+│   │   │   │   ├── ClientsPage.tsx
+│   │   │   │   └── ClientDetailPage.tsx
+│   │   │   ├── services/
+│   │   │   │   └── clientService.ts
+│   │   │   └── types/
+│   │   │       └── client.types.ts
+│   │   │
+│   │   ├── 📁 reporting/                 # Reporting & Analytics
+│   │   │   ├── components/
+│   │   │   │   ├── DashboardStats.tsx
+│   │   │   │   ├── KPICard.tsx
+│   │   │   │   ├── MissionsChart.tsx
+│   │   │   │   ├── WasteVolumeChart.tsx
+│   │   │   │   └── ExportButton.tsx
+│   │   │   ├── hooks/
+│   │   │   │   ├── useDashboardData.ts
+│   │   │   │   └── useExport.ts
+│   │   │   ├── pages/
+│   │   │   │   ├── DashboardPage.tsx
+│   │   │   │   └── ReportsPage.tsx
+│   │   │   └── services/
+│   │   │       └── reportingService.ts
+│   │   │
+│   │   └── 📁 settings/                  # Paramètres
+│   │       ├── components/
+│   │       │   ├── ProfileSettings.tsx
+│   │       │   ├── SubsidiarySettings.tsx
+│   │       │   └── UserManagement.tsx
+│   │       ├── hooks/
+│   │       │   └── useSettings.ts
+│   │       ├── pages/
+│   │       │   └── SettingsPage.tsx
+│   │       └── services/
+│   │           └── settingsService.ts
+│   │
+│   ├── 📁 shared/                        # Code partagé transverse
+│   │   │
+│   │   ├── 📁 components/                # Composants UI réutilisables
+│   │   │   ├── ui/                       # Shadcn/UI components
+│   │   │   │   ├── button.tsx
+│   │   │   │   ├── card.tsx
+│   │   │   │   ├── dialog.tsx
+│   │   │   │   ├── form.tsx
+│   │   │   │   ├── input.tsx
+│   │   │   │   ├── select.tsx
+│   │   │   │   ├── table.tsx
+│   │   │   │   ├── badge.tsx
+│   │   │   │   ├── tabs.tsx
+│   │   │   │   └── ...
+│   │   │   ├── DataTable.tsx
+│   │   │   ├── LoadingSpinner.tsx
+│   │   │   ├── ErrorBoundary.tsx
+│   │   │   ├── SearchBar.tsx
+│   │   │   ├── FilterPanel.tsx
+│   │   │   ├── StatusBadge.tsx
+│   │   │   ├── FileUpload.tsx
+│   │   │   ├── DatePicker.tsx
+│   │   │   └── ConfirmDialog.tsx
+│   │   │
+│   │   ├── 📁 hooks/                     # Custom hooks
+│   │   │   ├── useSupabase.ts            # Hook Supabase
+│   │   │   ├── useDebounce.ts
+│   │   │   ├── useLocalStorage.ts
+│   │   │   ├── useMediaQuery.ts
+│   │   │   ├── usePagination.ts
+│   │   │   ├── useToast.ts
+│   │   │   └── usePermissions.ts
+│   │   │
+│   │   ├── 📁 utils/                     # Utilitaires
+│   │   │   ├── formatters.ts             # Format dates, nombres
+│   │   │   ├── validators.ts             # Validation formulaires
+│   │   │   ├── constants.ts              # Constantes globales
+│   │   │   ├── helpers.ts
+│   │   │   └── cn.ts                     # className merge (shadcn)
+│   │   │
+│   │   ├── 📁 types/                     # Types TypeScript globaux
+│   │   │   ├── database.types.ts         # Types générés par Supabase
+│   │   │   ├── api.types.ts
+│   │   │   ├── common.types.ts
+│   │   │   └── enums.ts
+│   │   │
+│   │   ├── 📁 constants/                 # Constantes
+│   │   │   ├── roles.ts
+│   │   │   ├── statuses.ts
+│   │   │   ├── routes.ts
+│   │   │   └── config.ts
+│   │   │
+│   │   └── 📁 services/                  # Services partagés
+│   │       ├── supabaseClient.ts         # Client Supabase configuré
+│   │       ├── storageService.ts         # Upload fichiers
+│   │       ├── webhookService.ts         # Appels webhooks n8n
+│   │       ├── notificationService.ts
+│   │       └── geoLocationService.ts
+│   │
+│   ├── 📁 layouts/                       # Layouts de page
+│   │   ├── DashboardLayout.tsx           # Layout principal avec sidebar
+│   │   ├── AuthLayout.tsx                # Layout pages auth
+│   │   ├── MobileLayout.tsx              # Layout mobile/PWA
+│   │   └── components/
+│   │       ├── Sidebar.tsx
+│   │       ├── Header.tsx
+│   │       ├── Navbar.tsx
+│   │       └── Footer.tsx
+│   │
+│   ├── 📁 assets/                        # Ressources statiques
+│   │   ├── images/
+│   │   ├── icons/
+│   │   └── fonts/
+│   │
+│   └── 📁 styles/                        # Styles globaux
+│       ├── index.css                     # Tailwind imports
+│       └── globals.css
+│
+├── 📁 public/                            # Fichiers publics
+│   ├── favicon.ico
+│   ├── manifest.json                     # PWA manifest
+│   ├── robots.txt
+│   └── icons/
+│       ├── icon-192x192.png
+│       └── icon-512x512.png
+│
+├── 📁 supabase/                          # Configuration Supabase
+│   ├── functions/                        # Edge Functions
+│   │   ├── generate-pdf/
+│   │   │   └── index.ts
+│   │   ├── send-notification/
+│   │   │   └── index.ts
+│   │   └── webhook-handler/
+│   │       └── index.ts
+│   ├── migrations/
+│   └── config.toml
+│
+├── 📁 docs/                              # Documentation
+│   ├── API.md
+│   ├── ARCHITECTURE.md
+│   ├── DEPLOYMENT.md
+│   └── USER_GUIDE.md
+│
+├── 📄 .env.example                       # Variables d'environnement exemple
+├── 📄 .env.local                         # Variables locales (gitignored)
+├── 📄 .gitignore
+├── 📄 package.json
+├── 📄 tsconfig.json                      # Configuration TypeScript
+├── 📄 vite.config.ts                     # Configuration Vite
+├── 📄 tailwind.config.js                 # Configuration Tailwind
+├── 📄 postcss.config.js
+├── 📄 components.json                    # Config Shadcn/UI
+└── 📄 README.md                          # ✅ Documentation principale

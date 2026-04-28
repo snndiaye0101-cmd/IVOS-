@@ -1,0 +1,354 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    /* ═══ IVOS Design System v2 — Neumorphism + Material 3 ═══ */
+    --background: 222 20% 97%;         /* #F4F7FC — fond gris-bleu très clair */
+    --foreground: 222.2 84% 4.9%;
+    --card: 0 0% 100%;                 /* #FFFFFF — cartes blanches pures */
+    --card-foreground: 222.2 84% 4.9%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 222.2 84% 4.9%;
+    --primary: 221.2 83.2% 53.3%;      /* Bleu IVOS */
+    --primary-foreground: 210 40% 98%;
+    --secondary: 220 16% 93%;
+    --secondary-foreground: 222.2 47.4% 11.2%;
+    --muted: 220 16% 93%;
+    --muted-foreground: 215.4 16.3% 46.9%;
+    --accent: 220 16% 93%;
+    --accent-foreground: 222.2 47.4% 11.2%;
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 210 40% 98%;
+    --border: 220 16% 90%;
+    --input: 220 16% 90%;
+    --ring: 221.2 83.2% 53.3%;
+    --radius: 0.75rem;                  /* 12px default radius */
+
+    /* Ombres Neumorphism */
+    --shadow-card: 0 2px 12px rgba(0,0,0,0.04), 0 1px 4px rgba(0,0,0,0.02);
+    --shadow-card-hover: 0 8px 30px rgba(0,0,0,0.08), 0 2px 8px rgba(0,0,0,0.04);
+    --shadow-elevated: 0 12px 40px rgba(0,0,0,0.1), 0 4px 12px rgba(0,0,0,0.05);
+    --shadow-soft: 0 1px 6px rgba(0,0,0,0.03);
+  }
+
+  .dark {
+    --background: 222.2 84% 4.9%;
+    --foreground: 210 40% 98%;
+    --card: 222.2 84% 4.9%;
+    --card-foreground: 210 40% 98%;
+    --popover: 222.2 84% 4.9%;
+    --popover-foreground: 210 40% 98%;
+    --primary: 217.2 91.2% 59.8%;
+    --primary-foreground: 222.2 47.4% 11.2%;
+    --secondary: 217.2 32.6% 17.5%;
+    --secondary-foreground: 210 40% 98%;
+    --muted: 217.2 32.6% 17.5%;
+    --muted-foreground: 215 20.2% 65.1%;
+    --accent: 217.2 32.6% 17.5%;
+    --accent-foreground: 210 40% 98%;
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 210 40% 98%;
+    --border: 217.2 32.6% 17.5%;
+    --input: 217.2 32.6% 17.5%;
+    --ring: 224.3 76.3% 48%;
+  }
+
+  /* Smooth scrollbar */
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: #cbd5e1 transparent;
+  }
+  *::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  *::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  *::-webkit-scrollbar-thumb {
+    background-color: #cbd5e1;
+    border-radius: 3px;
+  }
+  *::-webkit-scrollbar-thumb:hover {
+    background-color: #94a3b8;
+  }
+
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    background: #F4F7FC;
+  }
+}
+
+/* ═══ Design System v2 — Utility Classes ═══ */
+@layer components {
+  /* Card Neumorphism */
+  .ivos-card {
+    @apply bg-white rounded-2xl;
+    box-shadow: var(--shadow-card);
+    transition: box-shadow 0.3s ease, transform 0.3s ease;
+  }
+  .ivos-card:hover {
+    box-shadow: var(--shadow-card-hover);
+  }
+
+  /* Elevated card (modals, floating panels) */
+  .ivos-card-elevated {
+    @apply bg-white rounded-2xl;
+    box-shadow: var(--shadow-elevated);
+  }
+
+  /* Soft input style — Material 3 feel */
+  .ivos-input {
+    @apply w-full px-4 py-3 bg-gray-50/80 border-0 rounded-xl text-sm text-gray-900
+           placeholder:text-gray-400
+           focus:bg-white focus:ring-2 focus:ring-blue-500/20 focus:shadow-sm
+           outline-none transition-all duration-200;
+  }
+
+  /* Primary button — IVOS blue, rounded, smooth hover */
+  .ivos-btn-primary {
+    @apply inline-flex items-center justify-center gap-2 px-6 py-3 
+           bg-blue-600 hover:bg-blue-700 active:bg-blue-800
+           text-white font-semibold text-sm rounded-xl
+           shadow-md shadow-blue-600/20 hover:shadow-lg hover:shadow-blue-600/30
+           transition-all duration-200 ease-out;
+  }
+
+  /* Secondary button */
+  .ivos-btn-secondary {
+    @apply inline-flex items-center justify-center gap-2 px-5 py-2.5
+           bg-gray-100 hover:bg-gray-200 active:bg-gray-300
+           text-gray-700 font-medium text-sm rounded-xl
+           transition-all duration-200;
+  }
+
+  /* Badge translucent */
+  .ivos-badge {
+    @apply inline-flex items-center gap-1.5 px-3 py-1 text-xs font-semibold rounded-full;
+  }
+  .ivos-badge-green {
+    @apply ivos-badge bg-emerald-50 text-emerald-700 border border-emerald-100;
+  }
+  .ivos-badge-orange {
+    @apply ivos-badge bg-amber-50 text-amber-700 border border-amber-100;
+  }
+  .ivos-badge-red {
+    @apply ivos-badge bg-red-50 text-red-700 border border-red-100;
+  }
+  .ivos-badge-blue {
+    @apply ivos-badge bg-blue-50 text-blue-700 border border-blue-100;
+  }
+
+  /* Table modern */
+  .ivos-table {
+    @apply w-full text-sm;
+  }
+  .ivos-table thead th {
+    @apply bg-gray-50/80 text-gray-500 text-[11px] font-semibold uppercase tracking-wider px-5 py-3.5 text-left;
+  }
+  .ivos-table tbody tr {
+    @apply border-b border-gray-100/80 transition-colors duration-150;
+  }
+  .ivos-table tbody tr:nth-child(even) {
+    @apply bg-gray-50/40;
+  }
+  .ivos-table tbody tr:hover {
+    @apply bg-blue-50/40;
+  }
+  .ivos-table tbody td {
+    @apply px-5 py-4;
+  }
+
+  /* Section header gradient */
+  .ivos-page-header {
+    @apply bg-gradient-to-br from-[#0f172a] via-[#1e293b] to-[#334155] rounded-2xl p-6 text-white;
+    box-shadow: 0 8px 32px rgba(15, 23, 42, 0.25);
+  }
+
+  /* KPI Card — floating card with subtle depth */
+  .ivos-kpi {
+    @apply bg-white rounded-2xl p-5;
+    box-shadow: var(--shadow-card);
+    transition: box-shadow 0.3s ease, transform 0.25s ease;
+  }
+  .ivos-kpi:hover {
+    box-shadow: var(--shadow-card-hover);
+    transform: translateY(-2px);
+  }
+
+  /* Progress bar modern */
+  .ivos-progress-track {
+    @apply h-2 bg-gray-100/80 rounded-full overflow-hidden;
+  }
+  .ivos-progress-bar {
+    @apply h-full rounded-full transition-all duration-700 ease-out;
+  }
+}
+
+@layer utilities {
+  /* Modal animations */
+  .animate-fade-in {
+    animation: fadeIn 0.2s ease-out;
+  }
+  .animate-slide-up {
+    animation: slideUp 0.25s ease-out;
+  }
+  .animate-slide-in-right {
+    animation: slideInRight 0.3s ease-out;
+  }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(16px) scale(0.98); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+@keyframes slideInRight {
+  from { opacity: 0; transform: translateX(100%); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+    font-feature-settings: "rlig" 1, "calt" 1;
+  }
+}
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+}
+
+/* Styles personnalisés pour l'application IVOS */
+@layer components {
+  /* Container principal */
+  .app-container {
+    @apply mx-auto max-w-7xl px-4 sm:px-6 lg:px-8;
+  }
+
+  /* Sidebar */
+  .sidebar {
+    @apply fixed inset-y-0 left-0 z-50 w-64 bg-card border-r border-border transform transition-transform duration-300 ease-in-out;
+  }
+
+  /* Main content avec sidebar */
+  .main-content {
+    @apply lg:pl-64 min-h-screen;
+  }
+
+  /* Cards avec effet hover */
+  .card-hover {
+    @apply transition-all duration-200 hover:shadow-lg hover:-translate-y-0.5;
+  }
+
+  /* Badges de statut */
+  .status-badge {
+    @apply inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium;
+  }
+
+  /* Formulaires */
+  .form-section {
+    @apply space-y-6 rounded-lg border border-border bg-card p-6;
+  }
+
+  /* Boutons d'action */
+  .action-button {
+    @apply inline-flex items-center justify-center gap-2 rounded-md px-4 py-2 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50;
+  }
+}
+
+/* Animations personnalisées */
+@keyframes slide-in {
+  from {
+    transform: translateX(-100%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.animate-slide-in {
+  animation: slide-in 0.3s ease-out;
+}
+
+@keyframes form-field-in {
+  from { opacity: 0; transform: translateY(-8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.animate-form-field-in {
+  animation: form-field-in 0.2s ease-out both;
+}
+
+.animate-fade-in {
+  animation: fade-in 0.3s ease-out;
+}
+
+/* Scrollbar personnalisée */
+.custom-scrollbar::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  @apply bg-muted rounded-lg;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  @apply bg-muted-foreground/30 rounded-lg hover:bg-muted-foreground/50;
+}
+
+/* Print styles pour les bordereaux */
+@media print {
+  .no-print {
+    display: none !important;
+  }
+
+  .print-only {
+    display: block !important;
+  }
+
+  body {
+    @apply bg-white text-black;
+  }
+
+  .waste-form-print {
+    @apply border border-black;
+  }
+}
+
+/* Agenda: subtle pulse for in-progress events */
+@keyframes pulse-subtle {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(255,255,255,0.3); }
+  50% { box-shadow: 0 0 0 4px rgba(255,255,255,0.1); }
+}
+.animate-pulse-subtle {
+  animation: pulse-subtle 2s ease-in-out infinite;
+}

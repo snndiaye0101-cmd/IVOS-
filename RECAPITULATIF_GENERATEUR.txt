@@ -1,0 +1,180 @@
+```
+╔═══════════════════════════════════════════════════════════════════════════╗
+║                                                                           ║
+║           🧪 GÉNÉRATEUR DE DONNÉES FICTIVES — SYSTÈME COMPLET            ║
+║                                                                           ║
+╚═══════════════════════════════════════════════════════════════════════════╝
+
+
+📦 FICHIERS CRÉÉS (9 au total)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+SERVICES (2 fichiers)
+├─ src/shared/utils/fictiveDataGenerator.ts       Service principal
+└─ src/shared/utils/quickTestConsole.ts           Commandes console
+
+COMPOSANTS REACT (2 fichiers)
+├─ src/shared/components/QuickTestButton.tsx      Bouton flottant ⚡
+└─ src/features/settings/pages/FictiveDataPanel.tsx   Page admin complète
+
+FICHIER HTML STANDALONE (1 fichier)
+└─ test-data-generator.html                       Interface visuelle autonome
+
+DOCUMENTATION (4 fichiers)
+├─ GUIDE_GENERATEUR_DONNEES_FICTIVES.md          Guide complet (25 sections)
+├─ INTEGRATION_GENERATEUR_DONNEES.md             Intégration pas à pas
+├─ README_GENERATEUR_TEST.md                     Démarrage rapide
+└─ DEMARRAGE_IMMEDIAT.md                         Ultra-rapide (30s)
+
+
+⚡ DÉMARRAGE ULTRA-RAPIDE (30 SECONDES)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+MÉTHODE 1 : FICHIER HTML (Le plus simple)
+┌─────────────────────────────────────────────────────────────────────────┐
+│ 1. Double-cliquer sur : test-data-generator.html                       │
+│ 2. Cliquer sur : "Opération Complète"                                  │
+│ 3. Rafraîchir votre application IVOS (F5)                              │
+│                                                                         │
+│ ✅ Une opération complète a été créée !                                │
+└─────────────────────────────────────────────────────────────────────────┘
+
+
+MÉTHODE 2 : CONSOLE NAVIGATEUR (Le plus rapide)
+┌─────────────────────────────────────────────────────────────────────────┐
+│ 1. Ouvrir votre app IVOS dans le navigateur                            │
+│ 2. Appuyer sur F12 (Console)                                           │
+│ 3. Copier-coller ce code :                                             │
+│                                                                         │
+│    quickCreateComplete()                                                │
+│                                                                         │
+│ 4. Rafraîchir la page (F5)                                             │
+│                                                                         │
+│ ✅ Opération + Facture + Paiement créés !                              │
+└─────────────────────────────────────────────────────────────────────────┘
+
+
+📋 CE QUI EST GÉNÉRÉ
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+OPÉRATION COMPLÈTE
+┌─────────────────────────────────────────────────────────────────────────┐
+│ 📋 BSD-2026-0042                                                        │
+│ ├─ Client: Total Sénégal                                               │
+│ ├─ Déchet: Huiles usagées hydrocarbures                                │
+│ ├─ Quantité: 2500 kg → 2550 kg (pesée réelle)                          │
+│ ├─ Workflow: 9/9 étapes ✅ 100%                                         │
+│ │  ├─ 1-4: Bureau (Producteur, Collecteur, etc.)                       │
+│ │  ├─ 5-7: Chauffeur (Signatures + Pesée)                              │
+│ │  └─ 8-9: Réception (Réception + Traitement)                          │
+│ └─ Status: cloturee                                                     │
+│                                                                         │
+│ 💰 FAC-2026-0031                                                        │
+│ ├─ Montant HT: 1 275 000 FCFA                                          │
+│ ├─ Quantité: 2550 kg × 500 FCFA/kg                                     │
+│ ├─ Status: payee                                                        │
+│ └─ Validée par: Samba (DG)                                             │
+│                                                                         │
+│ 💳 PAY-ABC123XYZ                                                        │
+│ ├─ Mode: Virement                                                       │
+│ ├─ Référence: VIR-2026-12345                                           │
+│ ├─ Banque: CBAO Sénégal                                                │
+│ └─ Status: encaisse                                                     │
+└─────────────────────────────────────────────────────────────────────────┘
+
+
+🎯 OPTIONS DISPONIBLES
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+✅ Opération Complète        → Workflow + Facture + Paiement
+📄 Facture Non Payée         → Workflow + Facture (pour tester paiement)
+⏳ Opération En Cours        → Workflow incomplet (test saisie progressive)
+⚡ 5 Opérations Variées      → Clients et déchets différents
+🗑️  Supprimer Tout           → Nettoyer toutes les données de test
+
+
+📊 COMMANDES CONSOLE DISPONIBLES
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+quickCreateComplete()              → Créer 1 opération complète
+quickCreate5()                     → Créer 5 opérations variées
+quickStats()                       → Voir statistiques
+quickDeleteAll()                   → Supprimer tout
+
+
+🔧 INTÉGRATION DANS VOTRE APP
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+OPTION A : Bouton Flottant (Dev)
+┌─────────────────────────────────────────────────────────────────────────┐
+│ // Dans DashboardLayout.tsx                                             │
+│ import QuickTestButton from '../shared/components/QuickTestButton';    │
+│                                                                         │
+│ {process.env.NODE_ENV === 'development' && <QuickTestButton />}        │
+└─────────────────────────────────────────────────────────────────────────┘
+
+
+OPTION B : Page Admin (Production)
+┌─────────────────────────────────────────────────────────────────────────┐
+│ // Dans votre router                                                    │
+│ import FictiveDataPanel from './features/settings/pages/FictiveDataPanel'; │
+│                                                                         │
+│ {                                                                       │
+│   path: '/admin/test-data',                                            │
+│   element: <FictiveDataPanel />,                                       │
+│   roles: ['Directeur Général'],                                        │
+│ }                                                                       │
+└─────────────────────────────────────────────────────────────────────────┘
+
+
+OPTION C : Import Direct
+┌─────────────────────────────────────────────────────────────────────────┐
+│ import { createFictiveOperationComplete } from '@/shared/utils/...';   │
+│                                                                         │
+│ const handleTest = () => {                                             │
+│   createFictiveOperationComplete({ ... });                             │
+│   setTimeout(() => location.reload(), 1000);                           │
+│ };                                                                      │
+└─────────────────────────────────────────────────────────────────────────┘
+
+
+✅ VALIDATION
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Après avoir créé des données, vérifiez :
+
+[✓] Page Opérations      → Nouvelle opération BSD-2026-XXXX
+[✓] Page Factures        → Nouvelle facture FAC-2026-XXXX (status: payee)
+[✓] Page Finances        → Nouveau paiement (status: encaisse)
+[✓] Dashboard Finance    → Total encaissé mis à jour
+[✓] Workflow Stepper     → 100% de progression
+[✓] Auto-save            → Indicateur de sauvegarde
+[✓] Events               → ivos_operations_change déclenché
+
+
+📚 DOCUMENTATION COMPLÈTE
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+1. DEMARRAGE_IMMEDIAT.md               ← Commencez ici (30 secondes)
+2. README_GENERATEUR_TEST.md           ← Vue d'ensemble
+3. GUIDE_GENERATEUR_DONNEES_FICTIVES.md   Guide complet
+4. INTEGRATION_GENERATEUR_DONNEES.md   ← Intégration dans votre app
+
+
+🎉 PRÊT À TESTER !
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Choisissez votre méthode préférée et créez votre première opération
+fictive en 30 secondes !
+
+┌─────────────────────────────────────────────────────────────────────────┐
+│                                                                         │
+│  Option la plus simple : Double-cliquer sur test-data-generator.html   │
+│                                                                         │
+└─────────────────────────────────────────────────────────────────────────┘
+
+
+═══════════════════════════════════════════════════════════════════════════
+                            Bon test ! 🚀
+═══════════════════════════════════════════════════════════════════════════
+```

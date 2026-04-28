@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IVOS Fleet Management - Documentation</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 900px;
+            width: 100%;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+
+        header {
+            background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);
+            color: white;
+            padding: 50px 40px;
+            text-align: center;
+        }
+
+        header h1 {
+            font-size: 3rem;
+            margin-bottom: 10px;
+        }
+
+        header p {
+            font-size: 1.2rem;
+            opacity: 0.95;
+        }
+
+        .content {
+            padding: 40px;
+        }
+
+        .doc-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin: 30px 0;
+        }
+
+        .doc-card {
+            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+            border: 2px solid #e2e8f0;
+            border-radius: 12px;
+            padding: 25px;
+            text-decoration: none;
+            color: inherit;
+            transition: all 0.3s ease;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+        }
+
+        .doc-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+            border-color: #3b82f6;
+        }
+
+        .doc-card .icon {
+            font-size: 3rem;
+            margin-bottom: 15px;
+        }
+
+        .doc-card h3 {
+            color: #1e3a8a;
+            font-size: 1.3rem;
+            margin-bottom: 10px;
+        }
+
+        .doc-card p {
+            color: #64748b;
+            font-size: 0.95rem;
+            line-height: 1.5;
+        }
+
+        .section {
+            margin-bottom: 40px;
+        }
+
+        .section h2 {
+            color: #1e3a8a;
+            font-size: 1.8rem;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 3px solid #3b82f6;
+        }
+
+        .command-box {
+            background: #1e293b;
+            color: #22d3ee;
+            padding: 20px;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            margin: 20px 0;
+            overflow-x: auto;
+        }
+
+        .command-box .command {
+            margin: 8px 0;
+        }
+
+        .command-box .comment {
+            color: #94a3b8;
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            margin-top: 10px;
+        }
+
+        .badge-success {
+            background: #dcfce7;
+            color: #166534;
+        }
+
+        .badge-warning {
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+        .badge-info {
+            background: #dbeafe;
+            color: #1e40af;
+        }
+
+        footer {
+            background: #1e293b;
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        @media (max-width: 768px) {
+            header h1 {
+                font-size: 2rem;
+            }
+
+            .doc-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🚛 IVOS</h1>
+            <p>Fleet Management & Waste Tracking System</p>
+            <div style="margin-top: 20px;">
+                <span class="status-badge badge-success">Architecture Complète ✓</span>
+                <span class="status-badge badge-info">React + Supabase + n8n</span>
+            </div>
+        </header>
+
+        <div class="content">
+            <div class="section">
+                <h2>📚 Documentation</h2>
+                <div class="doc-grid">
+                    <a href="README.md" class="doc-card">
+                        <div class="icon">📖</div>
+                        <h3>README</h3>
+                        <p>Vue d'ensemble du projet et introduction générale</p>
+                    </a>
+
+                    <a href="NEXT_STEPS.md" class="doc-card">
+                        <div class="icon">🚀</div>
+                        <h3>Guide de Démarrage</h3>
+                        <p>Étapes détaillées pour démarrer le développement</p>
+                    </a>
+
+                    <a href="PROJECT_STRUCTURE.txt" class="doc-card">
+                        <div class="icon">📁</div>
+                        <h3>Structure Projet</h3>
+                        <p>Organisation complète des dossiers et fichiers</p>
+                    </a>
+
+                    <a href="docs/ARCHITECTURE.html" class="doc-card">
+                        <div class="icon">🏗️</div>
+                        <h3>Architecture Visuelle</h3>
+                        <p>Documentation interactive avec diagrammes</p>
+                    </a>
+
+                    <a href="docs/DATABASE_RELATIONS.md" class="doc-card">
+                        <div class="icon">🗄️</div>
+                        <h3>Relations Base de Données</h3>
+                        <p>Schéma complet et diagrammes de relations</p>
+                    </a>
+
+                    <a href="docs/QUICK_REFERENCE.md" class="doc-card">
+                        <div class="icon">⚡</div>
+                        <h3>Référence Rapide</h3>
+                        <p>Commandes et snippets essentiels</p>
+                    </a>
+                </div>
+            </div>
+
+            <div class="section">
+                <h2>🗄️ Base de Données</h2>
+                <div class="doc-grid">
+                    <a href="database/schema.sql" class="doc-card">
+                        <div class="icon">📄</div>
+                        <h3>Schéma SQL</h3>
+                        <p>14 tables avec RLS et triggers</p>
+                        <span class="status-badge badge-success">Complet</span>
+                    </a>
+
+                    <a href="database/seed/sample_data.sql" class="doc-card">
+                        <div class="icon">🌱</div>
+                        <h3>Données de Test</h3>
+                        <p>Données d'exemple pour développement</p>
+                        <span class="status-badge badge-success">Prêt</span>
+                    </a>
+                </div>
+            </div>
+
+            <div class="section">
+                <h2>🚀 Démarrage Rapide</h2>
+                <div class="command-box">
+<div class="command"><span class="comment"># 1. Installation</span></div>
+<div class="command">npm install</div>
+<div class="command">npm install -g supabase</div>
+
+<div class="command" style="margin-top: 15px;"><span class="comment"># 2. Configuration Supabase</span></div>
+<div class="command">supabase start</div>
+<div class="command">supabase db push --local</div>
+<div class="command">npm run supabase:types</div>
+
+<div class="command" style="margin-top: 15px;"><span class="comment"># 3. Configuration environnement</span></div>
+<div class="command">cp .env.example .env.local</div>
+<div class="command"><span class="comment"># Éditer .env.local avec vos credentials</span></div>
+
+<div class="command" style="margin-top: 15px;"><span class="comment"># 4. Lancer l'application</span></div>
+<div class="command">npm run dev</div>
+<div class="command"><span class="comment"># Ouvre http://localhost:3000</span></div>
+                </div>
+            </div>
+
+            <div class="section">
+                <h2>🎯 Fonctionnalités Principales</h2>
+                <div style="background: #f8fafc; border-radius: 12px; padding: 25px; border-left: 4px solid #3b82f6;">
+                    <h3 style="color: #1e3a8a; margin-bottom: 15px;">✅ Multi-Tenant & RBAC</h3>
+                    <ul style="color: #475569; line-height: 2; padding-left: 20px;">
+                        <li>Architecture multi-pays/filiales</li>
+                        <li>6 rôles utilisateur (Super Admin → Driver)</li>
+                        <li>Row Level Security (RLS) activé</li>
+                    </ul>
+
+                    <h3 style="color: #1e3a8a; margin: 25px 0 15px;">✅ Gestion de Flotte</h3>
+                    <ul style="color: #475569; line-height: 2; padding-left: 20px;">
+                        <li>CRUD Véhicules (maintenance, documents)</li>
+                        <li>CRUD Chauffeurs (permis, certifications)</li>
+                        <li>Suivi statuts temps réel</li>
+                    </ul>
+
+                    <h3 style="color: #1e3a8a; margin: 25px 0 15px;">✅ Ordres de Mission</h3>
+                    <ul style="color: #475569; line-height: 2; padding-left: 20px;">
+                        <li>Workflow : Brouillon → Validé → En cours → Terminé → Clôturé</li>
+                        <li>Association Véhicule + Chauffeur + Route</li>
+                        <li>Suivi kilométrique</li>
+                    </ul>
+
+                    <h3 style="color: #1e3a8a; margin: 25px 0 15px;">🌟 Bordereau de Suivi des Déchets (BSD) - PRIORITÉ</h3>
+                    <ul style="color: #475569; line-height: 2; padding-left: 20px;">
+                        <li><strong>Section A:</strong> Producteur/Client</li>
+                        <li><strong>Section B:</strong> Caractérisation du Déchet</li>
+                        <li><strong>Section C:</strong> Collecteur/Transporteur</li>
+                        <li><strong>Section D:</strong> Installation de Destination</li>
+                        <li>Signatures numériques multi-parties (4)</li>
+                        <li>Génération PDF via webhook n8n</li>
+                    </ul>
+
+                    <h3 style="color: #1e3a8a; margin: 25px 0 15px;">✅ Reporting & Analytics</h3>
+                    <ul style="color: #475569; line-height: 2; padding-left: 20px;">
+                        <li>Dashboard avec KPIs</li>
+                        <li>Graphiques interactifs (Recharts)</li>
+                        <li>Exports PDF/Excel</li>
+                        <li>Notifications temps réel</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="section">
+                <h2>🛠️ Stack Technique</h2>
+                <div class="doc-grid">
+                    <div class="doc-card" style="cursor: default;">
+                        <div class="icon">🎨</div>
+                        <h3>Frontend</h3>
+                        <p>React 18, TypeScript, Vite, Tailwind CSS, Shadcn/UI</p>
+                    </div>
+
+                    <div class="doc-card" style="cursor: default;">
+                        <div class="icon">🗄️</div>
+                        <h3>Backend</h3>
+                        <p>Supabase (PostgreSQL, Auth, Storage, Edge Functions)</p>
+                    </div>
+
+                    <div class="doc-card" style="cursor: default;">
+                        <div class="icon">🔄</div>
+                        <h3>Orchestration</h3>
+                        <p>n8n (Webhooks, PDF, Notifications)</p>
+                    </div>
+
+                    <div class="doc-card" style="cursor: default;">
+                        <div class="icon">📱</div>
+                        <h3>PWA</h3>
+                        <p>Mode offline, Notifications push, Installation mobile</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="section">
+                <h2>📊 Statistiques du Projet</h2>
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 15px; margin-top: 20px;">
+                    <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 20px; border-radius: 10px; text-align: center;">
+                        <div style="font-size: 2.5rem; font-weight: 700;">14</div>
+                        <div style="opacity: 0.9;">Tables DB</div>
+                    </div>
+                    <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 20px; border-radius: 10px; text-align: center;">
+                        <div style="font-size: 2.5rem; font-weight: 700;">7</div>
+                        <div style="opacity: 0.9;">Modules</div>
+                    </div>
+                    <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 20px; border-radius: 10px; text-align: center;">
+                        <div style="font-size: 2.5rem; font-weight: 700;">6</div>
+                        <div style="opacity: 0.9;">Rôles</div>
+                    </div>
+                    <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 20px; border-radius: 10px; text-align: center;">
+                        <div style="font-size: 2.5rem; font-weight: 700;">4</div>
+                        <div style="opacity: 0.9;">Sections BSD</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <footer>
+            <p style="font-size: 1.2rem; font-weight: 600;">IVOS Fleet Management System</p>
+            <p style="opacity: 0.8; margin-top: 10px;">
+                Architecture SaaS B2B Multi-Tenant © 2026
+            </p>
+            <p style="opacity: 0.7; margin-top: 15px; font-size: 0.9rem;">
+                React + Supabase + n8n | PWA Ready
+            </p>
+        </footer>
+    </div>
+</body>
+</html>

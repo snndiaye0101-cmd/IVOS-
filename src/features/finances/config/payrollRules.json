@@ -1,0 +1,78 @@
+{
+  "defaultCountry": "SN",
+  "countries": {
+    "SN": {
+      "label": "Sénégal",
+      "currency": "FCFA",
+      "workedUnitLabel": "Heures",
+      "defaultWorkedUnits": 173.33,
+      "employer": {
+        "companyName": "IVOS Sénégal Oilfield Services",
+        "address": "Kignabour, Dakar, Sénégal",
+        "ninea": "SN-NINEA-001",
+        "ipres": "IPRES-EMP-10293",
+        "css": "CSS-EMP-77291"
+      },
+      "socialRates": {
+        "ipresGeneral": 0.056,
+        "ipresCadre": 0.024,
+        "cssAccidentTravail": 0.01,
+        "cssPrestationsFamiliales": 0.07,
+        "ipm": 0.03
+      },
+      "taxRates": {
+        "ir": 0.1,
+        "cfce": 0.03
+      }
+    },
+    "CI": {
+      "label": "Côte d'Ivoire",
+      "currency": "FCFA",
+      "workedUnitLabel": "Jours",
+      "defaultWorkedUnits": 26,
+      "employer": {
+        "companyName": "IVOS Côte d'Ivoire Services",
+        "address": "Zone 4, Abidjan, Côte d'Ivoire",
+        "ninea": "CI-RCCM-001",
+        "ipres": "CNPS-EMP-33920",
+        "css": "CNPS-AT-33920"
+      },
+      "socialRates": {
+        "ipresGeneral": 0.063,
+        "ipresCadre": 0.03,
+        "cssAccidentTravail": 0.012,
+        "cssPrestationsFamiliales": 0.0575,
+        "ipm": 0.025
+      },
+      "taxRates": {
+        "ir": 0.08,
+        "cfce": 0.02
+      }
+    },
+    "GN": {
+      "label": "Guinée",
+      "currency": "GNF",
+      "workedUnitLabel": "Heures",
+      "defaultWorkedUnits": 173.33,
+      "employer": {
+        "companyName": "IVOS Guinée Services",
+        "address": "Conakry, République de Guinée",
+        "ninea": "GN-RCCM-001",
+        "ipres": "INPS-EMP-001",
+        "css": "INPS-AT-001"
+      },
+      "socialRates": {
+        "ipresGeneral": 0.05,
+        "ipresCadre": 0,
+        "cssAccidentTravail": 0,
+        "cssPrestationsFamiliales": 0,
+        "ipm": 0
+      },
+      "taxRates": {
+        "ir": 0,
+        "cfce": 0,
+        "tfp": 0.03
+      }
+    }
+  }
+}

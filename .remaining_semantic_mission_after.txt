@@ -1,0 +1,95 @@
+src/__mocks__/fixtures.ts:334:  missions: mockOperations,
+src/app/App.tsx:135:                    <Route path="missions" element={<Navigate to="/operations" replace />} />
+src/features/settings/pages/AdministrationSysteme.tsx:185:    const criticalKeywords = ['budget', 'mission', 'suppression', 'delete']
+src/features/settings/pages/AdministrationSysteme.tsx:500:                <p className="text-xs text-gray-500 mb-3">Inclut les événements sensibles (modification budget, suppression mission, actions critiques).</p>
+src/features/reporting/pages/DashboardPage.tsx:117:    const missions = loadOperations();
+src/features/reporting/pages/DashboardPage.tsx:119:    const activeVehicles = vehicles.filter((v: any) => v.status === 'Actif' || v.status === 'Disponible' || v.status === 'En mission').length;
+src/features/reporting/pages/DashboardPage.tsx:180:    const monthOperations = missions.filter(m => m.createdAt?.slice(0, 7) === currentKey);
+src/features/waste-tracking/services/wasteFormService.ts:76:      mission:missions(mission_number, status),
+src/features/waste-tracking/services/wasteFormService.ts:114:      mission:missions(*),
+src/features/chat/pages/Chat.tsx:20:  status: "online" | "away" | "offline" | "en-mission";
+src/features/chat/pages/Chat.tsx:191:      case "en-mission": return "bg-blue-500";
+src/features/chat/pages/Chat.tsx:200:      case "en-mission": return "En mission";
+src/features/chat/pages/Chat.tsx:237:        { id: "user-4", name: "David Martin", email: "david@ivos.dz", role: "logisticien", department: "logistique", status: "en-mission" },
+src/features/chat/pages/Chat.tsx:1041:                      {user.status === "en-mission" && (
+src/features/chat/pages/Chat.tsx:1043:                          <Truck className="w-2.5 h-2.5" /> En mission
+src/features/auth/pages/LoginPage.tsx:283:                Centralisez la flotte, les missions, les équipes terrain et les flux documentaires dans une interface pensée pour la vitesse, la lisibilité et la maîtrise opérationnelle.
+src/features/team/components/TeamCalendar.tsx:48:  { key: "missions", label: "Opérations", bg: "bg-blue-700", border: "border-blue-900", text: "text-white", light: "bg-blue-100 text-blue-800 border-blue-300" },
+src/features/team/components/TeamCalendar.tsx:86:  { id: 1, date: "2026-04-12", title: "Réunion équipe", type: "missions", time: "10:00", duration: 90, location: "Salle 1", client: "SOCOCIM", camion: "TK-204", instructions: "Préparer dossier projet" },
+src/features/team/components/TeamCalendar.tsx:90:  { id: 5, date: "2026-04-14", title: "Livraison site Nord", type: "missions", time: "07:30", duration: 150, location: "Site Nord", client: "DANGOTE", camion: "TK-305", instructions: "Chargement quai 3 à 07h00" },
+src/features/team/components/TeamCalendar.tsx:93:  { id: 8, date: "2026-04-12", title: "Briefing mission", type: "missions", time: "08:00", duration: 60, location: "Bureau ops", client: "EIFFAGE", camion: "TK-210", instructions: "Confirmer itinéraire avec le client" },
+src/features/team/components/TeamCalendar.tsx:94:  { id: 9, date: "2026-04-20", title: "Transport ciment", type: "missions", time: "06:30", duration: 300, location: "Usine Rufisque", client: "SOCOCIM", camion: "TK-401", instructions: "35 tonnes, bâcher obligatoire" },
+src/features/team/components/TeamCalendar.tsx:97:  { id: 12, date: "2026-04-12", title: "Livraison Thiès", type: "missions", time: "16:00", duration: 120, location: "Thiès centre", client: "AUCHAN", camion: "TK-112", instructions: "Palette fragile, attention déchargement" },
+src/features/team/components/TeamCalendar.tsx:474:      doc.text("Aucune mission pr\u00e9vue ce jour.", pageWidth / 2, 35, { align: "center" });
+src/features/team/components/TeamCalendar.tsx:489:        missions: [29, 78, 216],
+src/features/team/components/TeamCalendar.tsx:1079:    missions: ["#1d4ed8", "#1e3a8a"],
+src/features/direction/pages/DirectionDashboard.tsx:143:    const missions = loadOperations();
+src/features/direction/pages/DirectionDashboard.tsx:209:    const monthOperations = missions.filter(m => {
+src/features/finances/pages/BillingPage.tsx:120:    // Lien mission
+src/features/finances/pages/BillingPage.tsx:259:                    <p className="text-xs mt-1">Les factures seront créées automatiquement à la clôture des missions</p>
+src/features/finances/services/workflowInvoiceService.ts:3:// Crée un brouillon de facture à la clôture d'une mission (Étape 6)
+src/features/finances/services/workflowInvoiceService.ts:7:// Minimal local type representing a closed mission passed to createInvoiceFromWorkflow
+src/features/finances/services/workflowInvoiceService.ts:116:function resolvePricing(mission: ExploitationOperation): { prixUnitaire: number; unite: string; quantite: number; categorieDechet: string } {
+src/features/finances/services/workflowInvoiceService.ts:117:  const realWeight = mission.weighingData?.poidsReel ?? 0;
+src/features/finances/services/workflowInvoiceService.ts:119:  if (mission.documentType === 'BSD' && mission.bsdData) {
+src/features/finances/services/workflowInvoiceService.ts:120:    const cat = mission.bsdData.categorieDechet || mission.bsdData.descriptionDechet || 'Déchet';
+src/features/finances/services/workflowInvoiceService.ts:127:        : uf.unit === 'm³' ? (mission.bsdData.volumeEstime || realWeight / 1000)
+src/features/finances/services/workflowInvoiceService.ts:136:  if (mission.documentType === 'DELIVERY_NOTE' && mission.deliveryNoteData) {
+src/features/finances/services/workflowInvoiceService.ts:137:    const desc = mission.deliveryNoteData.description || 'Livraison';
+src/features/finances/services/workflowInvoiceService.ts:138:    const qty = mission.deliveryNoteData.quantite || realWeight;
+src/features/finances/services/workflowInvoiceService.ts:139:    const unite = mission.deliveryNoteData.unite || 'kg';
+src/features/finances/services/workflowInvoiceService.ts:151: * Crée un brouillon de facture depuis une mission clôturée (appelé par submitCollecteTerrain)
+src/features/finances/services/workflowInvoiceService.ts:153:export function createInvoiceFromWorkflow(mission: ExploitationOperation): WorkflowInvoice {
+src/features/finances/services/workflowInvoiceService.ts:156:  // Éviter les doublons pour la même mission
+src/features/finances/services/workflowInvoiceService.ts:157:  const existing = invoices.find(i => i.operationId === mission.id);
+src/features/finances/services/workflowInvoiceService.ts:160:  const { prixUnitaire, unite, quantite, categorieDechet } = resolvePricing(mission);
+src/features/finances/services/workflowInvoiceService.ts:164:  let clientNom = mission.clientOrigin;
+src/features/finances/services/workflowInvoiceService.ts:167:  if (mission.documentType === 'BSD' && mission.bsdData) {
+src/features/finances/services/workflowInvoiceService.ts:168:    clientNom = mission.bsdData.producteurNom || mission.clientOrigin;
+src/features/finances/services/workflowInvoiceService.ts:169:    clientAdresse = mission.bsdData.producteurAdresse || '';
+src/features/finances/services/workflowInvoiceService.ts:170:    clientContact = mission.bsdData.producteurContact || '';
+src/features/finances/services/workflowInvoiceService.ts:171:  } else if (mission.documentType === 'DELIVERY_NOTE' && mission.deliveryNoteData) {
+src/features/finances/services/workflowInvoiceService.ts:172:    clientNom = mission.deliveryNoteData.clientNom || mission.clientOrigin;
+src/features/finances/services/workflowInvoiceService.ts:173:    clientAdresse = mission.deliveryNoteData.clientAdresse || '';
+src/features/finances/services/workflowInvoiceService.ts:174:    clientContact = mission.deliveryNoteData.clientContact || '';
+src/features/finances/services/workflowInvoiceService.ts:177:  const docLabel = mission.documentType === 'BSD' ? 'BSD' : 'DN';
+src/features/finances/services/workflowInvoiceService.ts:182:    operationId: mission.id,
+src/features/finances/services/workflowInvoiceService.ts:183:    operationNumero: mission.numero,
+src/features/finances/services/workflowInvoiceService.ts:184:    numeroOfficiel: mission.numeroOfficiel || mission.numero,
+src/features/finances/services/workflowInvoiceService.ts:185:    documentType: mission.documentType,
+src/features/finances/services/workflowInvoiceService.ts:189:    prestationLabel: `Prestation effectuée selon ${docLabel} N°${mission.numeroOfficiel || mission.numero}`,
+src/features/finances/services/workflowInvoiceService.ts:196:    siteCode: mission.siteCode,
+src/features/finances/services/workflowInvoiceService.ts:197:    annee: mission.annee,
+src/features/fleet/components/AlertCards.tsx:10:  status: 'Disponible' | 'En mission' | 'Maintenance' | 'Hors service';
+src/features/fleet/pages/VehiclesPage.tsx:83:  status: 'Disponible' | 'En mission' | 'Maintenance' | 'Hors service'
+src/features/fleet/pages/VehiclesPage.tsx:439:      status: 'En mission', 
+src/features/fleet/pages/VehiclesPage.tsx:1194:      case 'En mission':
+src/features/fleet/pages/VehiclesPage.tsx:1316:            <option value="En mission">En mission</option>
+src/features/fleet/pages/VehiclesPage.tsx:1379:                              {vehicle.status === 'En mission' && (
+src/features/fleet/pages/VehiclesPage.tsx:1383:                                    toast.success(`${vehicle.registration} — mission terminée, véhicule disponible`)
+src/features/fleet/pages/VehiclesPage.tsx:1388:                                  Fin de mission
+src/features/fleet/pages/VehiclesPage.tsx:1634:                      { value: 'En mission', label: 'En mission' },
+src/features/fleet/pages/VehiclesPage.tsx:2200:              { value: 'En mission', label: 'En mission' },
+src/features/fleet/pages/VehiclesPage.tsx:2341:                {selectedVehicle.status === 'En mission' && (
+src/features/fleet/pages/VehiclesPage.tsx:2346:                      toast.success(`${selectedVehicle.registration} — mission terminée, véhicule disponible`)
+src/features/fleet/pages/VehiclesPage.tsx:2351:                    Fin de mission
+src/features/fleet/pages/DriversPage.tsx:51:  status: 'Disponible' | 'En mission' | 'Repos' | 'Congé'
+src/features/fleet/pages/DriversPage.tsx:143:        status: 'En mission',
+src/features/fleet/pages/DriversPage.tsx:506:      case 'En mission':
+src/features/fleet/pages/DriversPage.tsx:573:            <option value="En mission">En mission</option>
+src/features/fleet/pages/DriversPage.tsx:640:                    {driver.totalOperations} missions
+src/features/fleet/pages/DriversPage.tsx:949:                { value: 'En mission', label: 'En mission' },
+src/features/fleet/pages/DriversPage.tsx:1103:                { value: 'En mission', label: 'En mission' },
+src/features/fleet/pages/DriversPage.tsx:1174:              <div><p className="text-sm text-gray-500">Total missions</p><p className="font-medium text-gray-900">{selectedDriver.totalOperations}</p></div>
+src/features/personnel/pages/DocumentsEntreprisePage.tsx:45:    description: 'Modèles de contrats, fiches de mission, attestations',
+src/shared/types/enums.ts:55:// Statuts de mission
+src/shared/types/enums.ts:65:// Types de mission
+src/shared/types/enums.ts:114:  MISSION_ASSIGNED = 'mission_assigned',
+src/shared/services/notificationService.ts:10:  type: 'mission_assigned' | 'mission_completed' | 'document_expiring' | 'waste_form_signed' | 'maintenance_due' | 'other'
+src/shared/services/webExportService.ts:158:Cette performance s'inscrit dans notre mission de protéger l'environnement tout en accompagnant les acteurs économiques dans leur transition écologique.
+src/shared/services/permissionStore.ts:57:  '/missions': 'exploitation',
+src/shared/services/aiService.ts:7:export function optimizeRoutes(missions: any[]) {
+src/shared/services/aiService.ts:9:  console.log('[IA] Optimisation tournées', missions)
+src/shared/services/aiService.ts:12:export function recommendDriver(mission: any, drivers: any[]) {
+src/shared/services/aiService.ts:14:  console.log('[IA] Recommandation chauffeur', mission, drivers)
+src/shared/services/backupService.ts:178:    missions: localStorage.getItem('ivos_operations_v1') || '[]',

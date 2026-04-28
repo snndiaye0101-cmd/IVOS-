@@ -1,0 +1,33 @@
+src/__mocks__/fixtures.ts:334:  missions: mockOperations,
+src/app/App.tsx:135:                    <Route path="missions" element={<Navigate to="/operations" replace />} />
+src/features/settings/pages/AdministrationSysteme.tsx:185:    const criticalKeywords = ['budget', 'mission', 'suppression', 'delete']
+src/features/settings/pages/AdministrationSysteme.tsx:500:                <p className="text-xs text-gray-500 mb-3">Inclut les événements sensibles (modification budget, suppression mission, actions critiques).</p>
+src/features/reporting/pages/DashboardPage.tsx:117:    const missions = loadOperations();
+src/features/reporting/pages/DashboardPage.tsx:180:    const monthOperations = missions.filter(m => m.createdAt?.slice(0, 7) === currentKey);
+src/features/waste-tracking/services/wasteFormService.ts:76:      mission:missions(mission_number, status),
+src/features/waste-tracking/services/wasteFormService.ts:114:      mission:missions(*),
+src/features/auth/pages/LoginPage.tsx:283:                Centralisez la flotte, les missions, les équipes terrain et les flux documentaires dans une interface pensée pour la vitesse, la lisibilité et la maîtrise opérationnelle.
+src/features/team/components/TeamCalendar.tsx:48:  { key: "missions", label: "Opérations", bg: "bg-blue-700", border: "border-blue-900", text: "text-white", light: "bg-blue-100 text-blue-800 border-blue-300" },
+src/features/team/components/TeamCalendar.tsx:86:  { id: 1, date: "2026-04-12", title: "Réunion équipe", type: "missions", time: "10:00", duration: 90, location: "Salle 1", client: "SOCOCIM", camion: "TK-204", instructions: "Préparer dossier projet" },
+src/features/team/components/TeamCalendar.tsx:90:  { id: 5, date: "2026-04-14", title: "Livraison site Nord", type: "missions", time: "07:30", duration: 150, location: "Site Nord", client: "DANGOTE", camion: "TK-305", instructions: "Chargement quai 3 à 07h00" },
+src/features/team/components/TeamCalendar.tsx:93:  { id: 8, date: "2026-04-12", title: "Briefing mission", type: "missions", time: "08:00", duration: 60, location: "Bureau ops", client: "EIFFAGE", camion: "TK-210", instructions: "Confirmer itinéraire avec le client" },
+src/features/team/components/TeamCalendar.tsx:94:  { id: 9, date: "2026-04-20", title: "Transport ciment", type: "missions", time: "06:30", duration: 300, location: "Usine Rufisque", client: "SOCOCIM", camion: "TK-401", instructions: "35 tonnes, bâcher obligatoire" },
+src/features/team/components/TeamCalendar.tsx:97:  { id: 12, date: "2026-04-12", title: "Livraison Thiès", type: "missions", time: "16:00", duration: 120, location: "Thiès centre", client: "AUCHAN", camion: "TK-112", instructions: "Palette fragile, attention déchargement" },
+src/features/team/components/TeamCalendar.tsx:474:      doc.text("Aucune mission pr\u00e9vue ce jour.", pageWidth / 2, 35, { align: "center" });
+src/features/team/components/TeamCalendar.tsx:489:        missions: [29, 78, 216],
+src/features/team/components/TeamCalendar.tsx:1079:    missions: ["#1d4ed8", "#1e3a8a"],
+src/features/direction/pages/DirectionDashboard.tsx:143:    const missions = loadOperations();
+src/features/direction/pages/DirectionDashboard.tsx:209:    const monthOperations = missions.filter(m => {
+src/features/finances/pages/BillingPage.tsx:120:    // Lien mission
+src/features/finances/pages/BillingPage.tsx:259:                    <p className="text-xs mt-1">Les factures seront créées automatiquement à la clôture des missions</p>
+src/features/fleet/pages/DriversPage.tsx:640:                    {driver.totalOperations} missions
+src/features/personnel/pages/DocumentsEntreprisePage.tsx:45:    description: 'Modèles de contrats, fiches de mission, attestations',
+src/shared/types/enums.ts:55:// Statuts de mission
+src/shared/types/enums.ts:65:// Types de mission
+src/shared/services/webExportService.ts:158:Cette performance s'inscrit dans notre mission de protéger l'environnement tout en accompagnant les acteurs économiques dans leur transition écologique.
+src/shared/services/permissionStore.ts:57:  '/missions': 'exploitation',
+src/shared/services/aiService.ts:7:export function optimizeRoutes(missions: any[]) {
+src/shared/services/aiService.ts:9:  console.log('[IA] Optimisation tournées', missions)
+src/shared/services/aiService.ts:12:export function recommendDriver(mission: any, drivers: any[]) {
+src/shared/services/aiService.ts:14:  console.log('[IA] Recommandation chauffeur', mission, drivers)
+src/shared/services/backupService.ts:178:    missions: localStorage.getItem('ivos_operations_v1') || '[]',

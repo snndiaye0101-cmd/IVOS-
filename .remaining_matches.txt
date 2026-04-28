@@ -1,0 +1,144 @@
+src/__mocks__/fixtures.ts:10:export const mockMissions = [
+src/__mocks__/fixtures.ts:148:    totalMissionsCompletees: 245,
+src/__mocks__/fixtures.ts:166:    totalMissionsCompletees: 512,
+src/__mocks__/fixtures.ts:300:  ivos_operations_v1: JSON.stringify(mockMissions),
+src/__mocks__/fixtures.ts:334:  missions: mockMissions,
+src/features/reporting/pages/DashboardPage.tsx:45:interface ExploitationMission {
+src/features/reporting/pages/DashboardPage.tsx:70:function loadMissions(): ExploitationMission[] {
+src/features/reporting/pages/DashboardPage.tsx:117:    const missions = loadMissions();
+src/features/reporting/pages/DashboardPage.tsx:180:    const monthMissions = missions.filter(m => m.createdAt?.slice(0, 7) === currentKey);
+src/features/reporting/pages/DashboardPage.tsx:181:    const missionsRealisees = monthMissions.filter(m => m.currentStep >= 5 || m.status === 'completed').length;
+src/features/reporting/pages/DashboardPage.tsx:182:    const missionsEnCours = monthMissions.filter(m => m.currentStep < 5 && m.status !== 'completed').length;
+src/features/reporting/pages/DashboardPage.tsx:183:    const missionsTotal = monthMissions.length;
+src/features/waste-tracking/types/wasteForm.types.ts:9:  MissionStatus,
+src/features/waste-tracking/types/wasteForm.types.ts:81:  status: MissionStatus
+src/features/missions/services/operationService.ts:16:export class MissionService {
+src/features/missions/services/operationService.ts:17:  createMission(mission: Omit<Operation, 'id'>): Operation {
+src/features/missions/services/operationService.ts:18:    const newMission = { ...mission, id: Date.now().toString() } as Operation;
+src/features/missions/services/operationService.ts:19:    missions.push(newMission);
+src/features/missions/services/operationService.ts:20:    return newMission;
+src/features/missions/services/operationService.ts:23:  getMission(id: string): Operation | null {
+src/features/missions/services/operationService.ts:27:  getMissions(): Operation[] {
+src/features/missions/services/operationService.ts:31:  updateMission(id: string, mission: Partial<Operation>): Operation | null {
+src/features/missions/services/operationService.ts:38:  deleteMission(id: string): void {
+src/features/missions/services/operationService.test.ts:5:    // TODO: mock supabaseClient and test getMissions
+src/features/missions/services/operationService.test.ts:10:    // TODO: mock supabaseClient and test createMission
+src/features/missions/services/operationService.test.ts:15:    // TODO: mock supabaseClient and test updateMission
+src/features/missions/services/operationService.test.ts:20:    // TODO: mock supabaseClient and test deleteMission
+src/features/operations/operation.types.ts:40:  chefDeMission: string;
+src/features/operations/pages/NewOperationModal.tsx:14:interface NewMissionModalProps {
+src/features/operations/pages/NewOperationModal.tsx:48:export default function NewOperationModal({ isOpen, onClose, onCreate }: NewMissionModalProps) {
+src/features/operations/pages/OperationsDashboard.tsx:33:    vehicle: "SN-0001-AB", driver: "A. Diop", chefDeMission: "A. Diop",
+src/features/operations/pages/OperationsDashboard.tsx:51:    vehicle: "SN-0002-AB", driver: "B. Sarr", chefDeMission: "B. Sarr",
+src/features/operations/pages/OperationsDashboard.tsx:69:    vehicle: "SN-0003-AB", driver: "C. Fall", chefDeMission: "C. Fall",
+src/features/operations/pages/OperationsDashboard.tsx:78:  const [missions, setMissions] = useState<Operation[]>(MOCK_MISSIONS);
+src/features/operations/pages/OperationsDashboard.tsx:84:  const filteredMissions = missions.filter(m =>
+src/features/operations/pages/OperationsDashboard.tsx:164:            setMissions(prev => [
+src/features/operations/pages/OperationsDashboard.tsx:188:                    {filteredMissions.filter((m) => m.status === col.key).length === 0 && (
+src/features/operations/pages/OperationsDashboard.tsx:194:                    {filteredMissions.filter((m) => m.status === col.key).map((mission) => (
+src/features/operations/pages/OperationsDashboard.tsx:262:                    {filteredMissions.length === 0 ? (
+src/features/operations/pages/OperationsDashboard.tsx:270:                      filteredMissions.map((mission) => (
+src/features/operations/pages/OperationsDashboard.tsx:320:                                        setMissions(prev => prev.filter(m => m.id !== mission.id));
+src/features/operations/pages/OperationsPage.tsx:21:    chefDeMission: 'Diallo Mamadou',
+src/features/operations/pages/OperationsPage.tsx:40:    chefDeMission: 'Soro Fatou',
+src/features/operations/pages/OperationsPage.tsx:58:  const [missions, setMissions] = useState<Operation[]>(INITIAL_MISSIONS);
+src/features/operations/pages/OperationsPage.tsx:61:  const getNextMissionNumber = () => `OM-${new Date().getFullYear()}${String(new Date().getMonth() + 1).padStart(2, '0')}-${String(missions.length + 1).padStart(4, '0')}`;
+src/features/operations/pages/OperationsPage.tsx:64:  const nextMissionNumber = getNextMissionNumber();
+src/features/operations/pages/OperationsPage.tsx:75:    chefDeMission: '',
+src/features/operations/pages/OperationsPage.tsx:92:    function handleMissionCreated(e: CustomEvent) {
+src/features/operations/pages/OperationsPage.tsx:97:        setMissions(prev => [missionWithOM, ...prev] as Operation[]);
+src/features/operations/pages/OperationsPage.tsx:103:    window.addEventListener('operation:created', handleMissionCreated as EventListener);
+src/features/operations/pages/OperationsPage.tsx:104:    return () => window.removeEventListener('operation:created', handleMissionCreated as EventListener);
+src/features/operations/pages/OperationsPage.tsx:112:  const [selectedMission, setSelectedMission] = useState<Operation | null>(null);
+src/features/operations/pages/OperationsPage.tsx:131:  const filteredMissions = missions.filter(mission => {
+src/features/operations/pages/OperationsPage.tsx:167:      chefDeMission: '',
+src/features/operations/pages/OperationsPage.tsx:260:    const omNumber = nextMissionNumber;
+src/features/operations/pages/OperationsPage.tsx:263:    const newMission: Operation = {
+src/features/operations/pages/OperationsPage.tsx:271:    setMissions([newMission, ...missions]);
+src/features/operations/pages/OperationsPage.tsx:278:    if (user && newMission.driver) {
+src/features/operations/pages/OperationsPage.tsx:284:          message: `Vous avez été assigné à l'opération ${newMission.id} (${newMission.origin} → ${newMission.destination})`,
+src/features/operations/pages/OperationsPage.tsx:286:          entityId: newMission.id,
+src/features/operations/pages/OperationsPage.tsx:287:          metadata: { driver: newMission.driver },
+src/features/operations/pages/OperationsPage.tsx:298:    if (!selectedMission) return;
+src/features/operations/pages/OperationsPage.tsx:305:    setMissions(missions.map((m) =>
+src/features/operations/pages/OperationsPage.tsx:306:      m.id === selectedMission.id ? { ...m, ...formData } : m
+src/features/operations/pages/OperationsPage.tsx:309:    setSelectedMission(null);
+src/features/operations/pages/OperationsPage.tsx:316:      setMissions(missions.filter(m => m.id !== id))
+src/features/operations/pages/OperationsPage.tsx:318:      setSelectedMission(null)
+src/features/operations/pages/OperationsPage.tsx:324:    setSelectedMission(mission)
+src/features/operations/pages/OperationsPage.tsx:328:      chefDeMission: mission.chefDeMission,
+src/features/operations/pages/OperationsPage.tsx:347:    setSelectedMission(mission)
+src/features/operations/pages/OperationsPage.tsx:383:            onClick={() => exportOperationsToPDF(filteredMissions)}
+src/features/operations/pages/OperationsPage.tsx:389:            onClick={() => exportOperationsToExcel(filteredMissions)}
+src/features/operations/pages/OperationsPage.tsx:433:        {filteredMissions.length === 0 ? (
+src/features/operations/pages/OperationsPage.tsx:457:              {filteredMissions.map((mission) => (
+src/features/operations/pages/OperationsPage.tsx:479:                      <div className="text-xs text-gray-500 mt-0.5">Chef: {mission.chefDeMission}</div>
+src/features/operations/pages/OperationsPage.tsx:559:          <Input label="Chef d'opération" name="chefDeMission" value={formData.chefDeMission} onChange={handleInputChange} placeholder="Nom du chef d'opération" required />
+src/features/operations/pages/OperationsPage.tsx:565:              <input type="text" className="w-full rounded-md border border-gray-200 bg-gray-50 px-2 py-1 text-sm text-gray-700" value={nextMissionNumber} readOnly />
+src/features/operations/pages/OperationsPage.tsx:693:      <Modal isOpen={isEditModalOpen} onClose={() => { setIsEditModalOpen(false); setSelectedMission(null); resetForm() }} title="Modifier l'Opération" size="xl">
+src/features/operations/pages/OperationsPage.tsx:707:          <Input label="Chef d'opération" name="chefDeMission" value={formData.chefDeMission} onChange={handleInputChange} required />
+src/features/operations/pages/OperationsPage.tsx:791:            <Button variant="secondary" onClick={() => { setIsEditModalOpen(false); setSelectedMission(null); resetForm() }}>Annuler</Button>
+src/features/operations/pages/OperationsPage.tsx:793:                <Button variant="danger" onClick={() => { if (selectedMission) handleDelete(selectedMission.id) }}><Trash2 className="h-4 w-4 mr-2" />Supprimer</Button>
+src/features/operations/pages/OperationsPage.tsx:801:      <Modal isOpen={isViewModalOpen} onClose={() => { setIsViewModalOpen(false); setSelectedMission(null) }} title="Détails de l'Opération" size="lg">
+src/features/operations/pages/OperationsPage.tsx:802:        {selectedMission && (
+src/features/operations/pages/OperationsPage.tsx:806:                <h3 className="text-xl font-bold text-gray-900">{selectedMission.id}</h3>
+src/features/operations/pages/OperationsPage.tsx:807:                <span className={`px-3 py-1 text-sm font-semibold rounded-full ${getStatusColor(selectedMission.status)}`}>
+src/features/operations/pages/OperationsPage.tsx:808:                  {selectedMission.status}
+src/features/operations/pages/OperationsPage.tsx:811:              {selectedMission.wasteForm && (
+src/features/operations/pages/OperationsPage.tsx:824:                  {selectedMission.vehicle}
+src/features/operations/pages/OperationsPage.tsx:831:                  {selectedMission.driver}
+src/features/operations/pages/OperationsPage.tsx:836:                <p className="font-medium text-gray-900">{selectedMission.chefDeMission}</p>
+src/features/operations/pages/OperationsPage.tsx:840:                <p className="font-medium text-gray-900">{selectedMission.distance}</p>
+src/features/operations/pages/OperationsPage.tsx:844:            {selectedMission.coDrivers.length > 0 && (
+src/features/operations/pages/OperationsPage.tsx:848:                  {selectedMission.coDrivers.map(name => (
+src/features/operations/pages/OperationsPage.tsx:863:                  <p className="font-semibold text-gray-900">{new Date(selectedMission.startDate).toLocaleDateString('fr-FR')}</p>
+src/features/operations/pages/OperationsPage.tsx:864:                  <p className="text-sm text-gray-600">{selectedMission.startTime}</p>
+src/features/operations/pages/OperationsPage.tsx:868:                  <p className="font-semibold text-gray-900">{new Date(selectedMission.endDate).toLocaleDateString('fr-FR')}</p>
+src/features/operations/pages/OperationsPage.tsx:869:                  <p className="text-sm text-gray-600">{selectedMission.endTime}</p>
+src/features/operations/pages/OperationsPage.tsx:881:                    <p className="font-medium text-gray-900">{selectedMission.origin}</p>
+src/features/operations/pages/OperationsPage.tsx:886:                    <p className="font-medium text-gray-900">{selectedMission.destination}</p>
+src/features/operations/pages/OperationsPage.tsx:892:            {selectedMission.notes && (
+src/features/operations/pages/OperationsPage.tsx:895:                <p className="text-gray-900 bg-gray-50 p-3 rounded-lg">{selectedMission.notes}</p>
+src/features/operations/pages/OperationsPage.tsx:902:              <p className="text-sm text-gray-500 mb-2">Documents joints ({selectedMission.documents.length})</p>
+src/features/operations/pages/OperationsPage.tsx:903:              {selectedMission.documents.length > 0 ? (
+src/features/operations/pages/OperationsPage.tsx:905:                  {selectedMission.documents.map(doc => (
+src/features/operations/pages/OperationsPage.tsx:925:              <div className="mb-2 text-xs text-pink-600 font-mono">DEBUG deliveryNoteNumber: {String(selectedMission.deliveryNoteNumber)}</div>
+src/features/operations/pages/OperationsPage.tsx:926:              {selectedMission.deliveryNoteNumber && (
+src/features/operations/pages/OperationsPage.tsx:932:                    value={selectedMission.deliveryNoteNumber}
+src/features/operations/pages/OperationsPage.tsx:941:              <Button variant="secondary" onClick={() => { setIsViewModalOpen(false); setSelectedMission(null) }}>
+src/features/operations/pages/OperationsPage.tsx:944:              <Button variant="primary" onClick={() => { setIsViewModalOpen(false); openEditModal(selectedMission) }}>
+src/features/direction/pages/DirectionDashboard.tsx:41:interface ExploitationMission {
+src/features/direction/pages/DirectionDashboard.tsx:95:function loadMissions(): ExploitationMission[] {
+src/features/direction/pages/DirectionDashboard.tsx:143:    const missions = loadMissions();
+src/features/direction/pages/DirectionDashboard.tsx:209:    const monthMissions = missions.filter(m => {
+src/features/direction/pages/DirectionDashboard.tsx:213:    const missionsRealisees = monthMissions.filter(
+src/features/direction/pages/DirectionDashboard.tsx:216:    const missionsTotal = monthMissions.length;
+src/features/finances/services/workflowInvoiceService.ts:8:interface ExploitationMission {
+src/features/finances/services/workflowInvoiceService.ts:116:function resolvePricing(mission: ExploitationMission): { prixUnitaire: number; unite: string; quantite: number; categorieDechet: string } {
+src/features/finances/services/workflowInvoiceService.ts:153:export function createInvoiceFromWorkflow(mission: ExploitationMission): WorkflowInvoice {
+src/features/fleet/pages/DriversPage.tsx:64:  totalMissions: number
+src/features/fleet/pages/DriversPage.tsx:127:        totalMissions: 284,
+src/features/fleet/pages/DriversPage.tsx:161:        totalMissions: 187,
+src/features/fleet/pages/DriversPage.tsx:195:        totalMissions: 432,
+src/features/fleet/pages/DriversPage.tsx:272:    totalMissions: 0,
+src/features/fleet/pages/DriversPage.tsx:361:              ['experience', 'weeklyHours', 'monthlyHours', 'overtimeHours', 'performanceScore', 'totalMissions'].includes(name) 
+src/features/fleet/pages/DriversPage.tsx:391:      totalMissions: 0,
+src/features/fleet/pages/DriversPage.tsx:484:      totalMissions: driver.totalMissions,
+src/features/fleet/pages/DriversPage.tsx:640:                    {driver.totalMissions} missions
+src/features/fleet/pages/DriversPage.tsx:1174:              <div><p className="text-sm text-gray-500">Total missions</p><p className="font-medium text-gray-900">{selectedDriver.totalMissions}</p></div>
+src/features/fleet/pages/PreTripCheckPage.tsx:86:function validateMission(checklist: PreTripChecklist): 'authorized' | 'blocked' {
+src/features/fleet/pages/PreTripCheckPage.tsx:438:    const status = validateMission(form.checklist)
+src/features/fleet/pages/PreTripCheckPage.tsx:870:                const status = validateMission(form.checklist)
+src/features/fleet/pages/PreTripCheckPage.tsx:912:                              doc.save(`Ordre_Mission_${form.vehicleRegistration}_${form.driverName}.pdf`)
+src/features/fleet/pages/PreTripCheckPage.tsx:915:                              const newMission = {
+src/features/fleet/pages/PreTripCheckPage.tsx:919:                                chefDeMission: form.responsibleName,
+src/features/fleet/pages/PreTripCheckPage.tsx:933:                              window.dispatchEvent(new CustomEvent('operation:created', { detail: newMission }))
+src/shared/types/enums.ts:56:export enum MissionStatus {
+src/shared/types/enums.ts:66:export enum MissionType {
+src/shared/types/enums.ts:139:export const MissionStatusLabels: Record<MissionStatus, string> = {
+src/shared/types/enums.ts:140:  [MissionStatus.DRAFT]: 'Brouillon',
+src/shared/types/enums.ts:141:  [MissionStatus.VALIDATED]: 'Validé',
+src/shared/types/enums.ts:142:  [MissionStatus.IN_PROGRESS]: 'En Cours',
+src/shared/types/enums.ts:143:  [MissionStatus.COMPLETED]: 'Terminé',
+src/shared/types/enums.ts:144:  [MissionStatus.CLOSED]: 'Clôturé',
+src/shared/types/enums.ts:145:  [MissionStatus.CANCELLED]: 'Annulé',

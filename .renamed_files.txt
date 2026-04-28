@@ -1,0 +1,12 @@
+src/features/operations/mission.types.ts -> src/features/operations/operation.types.ts
+src/features/operations/exportMissionsPDF.ts -> src/features/operations/exportOperationsPDF.ts
+src/features/operations/exportMissionsExcel.ts -> src/features/operations/exportOperationsExcel.ts
+src/features/operations/pages/MissionsPage.tsx -> src/features/operations/pages/OperationsPage.tsx
+src/features/operations/pages/MissionsPage.test.tsx -> src/features/operations/pages/OperationsPage.test.tsx
+src/features/operations/pages/MissionsDashboard.tsx -> src/features/operations/pages/OperationsDashboard.tsx
+src/features/operations/pages/MissionsDashboard.test.tsx -> src/features/operations/pages/OperationsDashboard.test.tsx
+src/features/operations/pages/NewMissionModal.tsx -> src/features/operations/pages/NewOperationModal.tsx
+src/features/missions/services/missionService.ts -> src/features/missions/services/operationService.ts
+src/features/missions/services/missionService.test.ts -> src/features/missions/services/operationService.test.ts
+src/features/missions/pages/MissionsPage.tsx -> src/features/missions/pages/OperationsPage.tsx
+src/features/missions/pages/MissionsPage.lazy.tsx -> src/features/missions/pages/OperationsPage.lazy.tsx

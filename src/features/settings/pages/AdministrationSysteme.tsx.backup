@@ -1,0 +1,1731 @@
+// ═══════════════════════════════════════════════════════════════
+// ADMINISTRATION SYSTÈME — Page Unifiée
+// ═══════════════════════════════════════════════════════════════
+// Fusionne : Gestion des Utilisateurs + Contrôle Super Admin
+// Onglets : Dashboard Activité | Utilisateurs | Permissions | Audit & Sécurité
+
+import React, { useState, useMemo, useEffect, useCallback } from 'react'
+import {
+  Shield, Users, Eye, EyeOff, Edit3, CheckCircle2, XCircle, AlertTriangle,
+  Clock, Search, Filter, ChevronDown, ChevronRight, Activity, Lock,
+  Trash2, RefreshCw, Download, UserCheck, UserX, Info, ArrowRight,
+  ShieldAlert, ShieldCheck, FileText, CreditCard, Truck, Wrench,
+  BarChart3, MessageSquare, Settings, X, Bell, Wifi, WifiOff, Timer,
+  TrendingUp, Briefcase, PlusCircle, Camera, LogIn, LogOut, Calendar,
+  CheckCircle, Trash2 as TrashIcon, MoreHorizontal, Crown, AlertCircle, Server,
+  Zap, TrendingDown, Globe, Smartphone, Monitor, Gauge,
+} from 'lucide-react'
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, Legend, LineChart as RechartsLineChart, Line as RechartsLine } from 'recharts'
+import type { User } from '../../../shared/services/authStore'
+import { useAuth } from '../../../shared/contexts/AuthContext'
+import { useViewAs } from '../../../shared/contexts/ViewAsContext'
+import { permissionStore, APP_MODULES, MODULE_LABELS, type AppModule, type PermissionLevel, type UserRole } from '../../../shared/services/permissionStore'
+import { auditService, type AuditEntry } from '../../../shared/services/auditService'
+import { criticalActionService, CRITICAL_ACTION_TYPES, type CriticalActionRequest } from '../../../shared/services/criticalActionService'
+import { userAnalyticsService, type UserActivityLog } from '../../../shared/services/userAnalyticsService'
+import Modal from '../../../components/ui/Modal'
+import { sendNotification } from '../../../shared/services/notificationService'
+
+type AdminTab = 'dashboard' | 'users' | 'permissions' | 'audit' | 'super-admins' | 'analytics'
+
+const MODULE_ICONS: Record<AppModule, React.ComponentType<{ className?: string }>> = {
+  dashboard: BarChart3,
+  fleet: Truck,
+  exploitation: Activity,
+  finances: CreditCard,
+  technique: Wrench,
+  rh: Users,
+  parametres: Settings,
+  chat: MessageSquare,
+  hub_carburant: FileText,
+}
+
+const SEVERITY_STYLES: Record<AuditEntry['severity'], { bg: string; text: string; label: string }> = {
+  low: { bg: 'bg-gray-100', text: 'text-gray-600', label: 'Info' },
+  medium: { bg: 'bg-blue-100', text: 'text-blue-700', label: 'Moyen' },
+  high: { bg: 'bg-amber-100', text: 'text-amber-700', label: 'Élevé' },
+  critical: { bg: 'bg-red-100', text: 'text-red-700', label: 'Critique' },
+}
+
+const AVATAR_COLORS = [
+  'from-blue-500 to-blue-600', 'from-emerald-500 to-emerald-600', 'from-violet-500 to-violet-600',
+  'from-amber-500 to-amber-600', 'from-rose-500 to-rose-600', 'from-cyan-500 to-cyan-600',
+  'from-indigo-500 to-indigo-600', 'from-pink-500 to-pink-600',
+]
+
+const getAvatarColor = (name: string) => AVATAR_COLORS[name.charCodeAt(0) % AVATAR_COLORS.length]
+
+// ═══════════════════════════════════════════════════════════════
+export default function AdministrationSysteme() {
+  const {
+    allUsers, user: currentUser, onlineUserIds, sessionsLog, activityLogs,
+    pendingUsers, approveUser, rejectUser, deleteUser, toggleAdmin, toggleSiteAccess, toggleSystemAccess,
+  } = useAuth()
+  const { isSuperAdmin } = useViewAs()
+
+  // ──────────────────────────────────────────────────────────────
+  // ROLE GATING: Super Admin only
+  // ──────────────────────────────────────────────────────────────
+  const isSA = currentUser ? permissionStore.isSuperAdmin(currentUser.id) : false
+
+  if (!currentUser || !isSA) {
+    return (
+      <div className="flex items-center justify-center min-h-[60vh]">
+        <div className="text-center space-y-4">
+          <div className="w-16 h-16 mx-auto bg-red-100 rounded-full flex items-center justify-center">
+            <Lock className="w-8 h-8 text-red-600" />
+          </div>
+          <h2 className="text-xl font-bold text-gray-900">Accès Restreint</h2>
+          <p className="text-sm text-gray-500">Seul le Super Admin peut accéder à cette page.</p>
+        </div>
+      </div>
+    )
+  }
+
+  // ──────────────────────────────────────────────────────────────
+  // GLOBAL STATE
+  // ──────────────────────────────────────────────────────────────
+  const [activeTab, setActiveTab] = useState<AdminTab>('dashboard')
+  const [globalSearch, setGlobalSearch] = useState('')
+
+  // User management states
+  const [selectedUserForDetails, setSelectedUserForDetails] = useState<User | null>(null)
+  const [isViewAsActive, setIsViewAsActive] = useState(false)
+
+  // Super Admin tab states
+  const [superAdminFilter, setSuperAdminFilter] = useState<'all' | 'active' | 'inactive'>('all')
+
+  // Permission matrix states
+  const [selectedUserForPerms, setSelectedUserForPerms] = useState('')
+  const [perms, setPerms] = useState<Record<AppModule, PermissionLevel> | null>(null)
+  const [userRole, setUserRole] = useState<UserRole>('Utilisateur')
+  const [permsSaved, setPermsSaved] = useState(false)
+
+  // Audit states
+  const [auditEntries, setAuditEntries] = useState<AuditEntry[]>([])
+  const [severityFilter, setSeverityFilter] = useState<AuditEntry['severity'] | 'all'>('all')
+  const [actionFilter, setActionFilter] = useState<string>('all')
+  const [detailEntry, setDetailEntry] = useState<AuditEntry | null>(null)
+  const [criticalRequests, setCriticalRequests] = useState<CriticalActionRequest[]>([])
+  const [criticalFilter, setCriticalFilter] = useState<'all' | 'pending' | 'approved' | 'rejected'>('pending')
+  const [reviewNote, setReviewNote] = useState('')
+
+  // Analytics states
+  const [analyticsActivityLogs, setAnalyticsActivityLogs] = useState<UserActivityLog[]>([])
+  const [analyticsDateFilter, setAnalyticsDateFilter] = useState<'today' | 'yesterday' | 'week' | 'month' | 'all'>('week')
+  const [analyticsUserFilter, setAnalyticsUserFilter] = useState<string>('all')
+  const [analyticsSeverityFilter, setAnalyticsSeverityFilter] = useState<string>('all')
+  const [analyticsModuleFilter, setAnalyticsModuleFilter] = useState<string>('all')
+  const [analyticsSearchText, setAnalyticsSearchText] = useState('')
+  const [selectedUserForAnalytics, setSelectedUserForAnalytics] = useState<User | null>(null)
+
+  // ──────────────────────────────────────────────────────────────
+  // LOAD AUDIT & CRITICAL DATA
+  // ──────────────────────────────────────────────────────────────
+  const loadAuditData = useCallback(() => {
+    setAuditEntries(auditService.getAll())
+    setCriticalRequests(criticalActionService.getAll())
+    setAnalyticsActivityLogs(userAnalyticsService.getAllActivityLogs())
+  }, [])
+
+  useEffect(() => {
+    loadAuditData()
+    window.addEventListener('audit:updated', loadAuditData)
+    window.addEventListener('critical:updated', loadAuditData)
+    return () => {
+      window.removeEventListener('audit:updated', loadAuditData)
+      window.removeEventListener('critical:updated', loadAuditData)
+    }
+  }, [loadAuditData])
+
+  // ──────────────────────────────────────────────────────────────
+  // COMPUTED DATA
+  // ──────────────────────────────────────────────────────────────
+  const approvedUsers = useMemo(() => allUsers.filter(u => u.status === 'approved'), [allUsers])
+  const onlineUsers = useMemo(() => approvedUsers.filter(u => onlineUserIds.includes(u.id)), [approvedUsers, onlineUserIds])
+  const offlineUsers = useMemo(() => approvedUsers.filter(u => !onlineUserIds.includes(u.id)), [approvedUsers, onlineUserIds])
+
+  const weeklyStats = useMemo(() => {
+    const now = Date.now()
+    const weekAgo = now - 7 * 86400000
+    return approvedUsers
+      .map(u => {
+        const userSessions = sessionsLog.filter(s => s.userId === u.id && new Date(s.loginAt).getTime() >= weekAgo)
+        const totalMinutes = userSessions.reduce((acc, s) => acc + (s.durationMinutes || 0), 0)
+        const sessionCount = userSessions.length
+        const userLogs = activityLogs.filter(l => l.userId === u.id && new Date(l.timestamp).getTime() >= weekAgo)
+        const creates = userLogs.filter(l => l.action === 'create').length
+        const edits = userLogs.filter(l => l.action === 'edit').length
+        const deletes = userLogs.filter(l => l.action === 'delete').length
+        const views = userLogs.filter(l => l.action === 'view').length
+        const lastLogin =
+          userSessions.length > 0
+            ? userSessions.sort((a, b) => new Date(b.loginAt).getTime() - new Date(a.loginAt).getTime())[0].loginAt
+            : null
+        return {
+          user: u,
+          totalMinutes,
+          totalHours: Number((totalMinutes / 60).toFixed(1)),
+          sessionCount,
+          creates,
+          edits,
+          deletes,
+          views,
+          totalActions: creates + edits + deletes + views,
+          isOnline: onlineUserIds.includes(u.id),
+          lastLogin,
+        }
+      })
+      .sort((a, b) => b.totalMinutes - a.totalMinutes)
+  }, [approvedUsers, sessionsLog, activityLogs, onlineUserIds])
+
+  const dailyHoursChart = useMemo(() => {
+    const now = Date.now()
+    const days: { day: string; heures: number }[] = []
+    for (let d = 6; d >= 0; d--) {
+      const date = new Date(now - d * 86400000)
+      const dayStr = date.toLocaleDateString('fr-FR', { weekday: 'short', day: '2-digit' })
+      const dayStart = new Date(date)
+      dayStart.setHours(0, 0, 0, 0)
+      const dayEnd = new Date(date)
+      dayEnd.setHours(23, 59, 59, 999)
+      const minutes = sessionsLog
+        .filter(s => {
+          const t = new Date(s.loginAt).getTime()
+          return t >= dayStart.getTime() && t <= dayEnd.getTime()
+        })
+        .reduce((acc, s) => acc + (s.durationMinutes || 0), 0)
+      days.push({ day: dayStr, heures: Number((minutes / 60).toFixed(1)) })
+    }
+    return days
+  }, [sessionsLog])
+
+  const moduleChart = useMemo(() => {
+    const now = Date.now()
+    const weekAgo = now - 7 * 86400000
+    const weekLogs = activityLogs.filter(l => new Date(l.timestamp).getTime() >= weekAgo && l.module !== 'Auth')
+    const counts: Record<string, number> = {}
+    weekLogs.forEach(l => {
+      counts[l.module] = (counts[l.module] || 0) + 1
+    })
+    return Object.entries(counts)
+      .map(([name, value]) => ({ name, value }))
+      .sort((a, b) => b.value - a.value)
+      .slice(0, 8)
+  }, [activityLogs])
+
+  const actionTypeChart = useMemo(() => {
+    const now = Date.now()
+    const weekAgo = now - 7 * 86400000
+    const weekLogs = activityLogs.filter(l => new Date(l.timestamp).getTime() >= weekAgo && l.module !== 'Auth')
+    const labels: Record<string, string> = { create: 'Créations', edit: 'Modifications', delete: 'Suppressions', view: 'Consultations' }
+    const counts: Record<string, number> = {}
+    weekLogs.forEach(l => {
+      const label = labels[l.action] || l.action
+      counts[label] = (counts[label] || 0) + 1
+    })
+    return Object.entries(counts).map(([name, value]) => ({ name, value }))
+  }, [activityLogs])
+
+  // Audit filtering
+  const filteredAuditEntries = useMemo(() => {
+    let result = auditEntries
+    if (severityFilter !== 'all') result = result.filter(e => e.severity === severityFilter)
+    if (actionFilter !== 'all') result = result.filter(e => e.action === actionFilter)
+    if (globalSearch.trim()) {
+      const q = globalSearch.toLowerCase()
+      result = result.filter(
+        e =>
+          e.userName.toLowerCase().includes(q) ||
+          e.description.toLowerCase().includes(q) ||
+          e.module.toLowerCase().includes(q) ||
+          e.entity.toLowerCase().includes(q)
+      )
+    }
+    return result
+  }, [auditEntries, severityFilter, actionFilter, globalSearch])
+
+  // Super Admins list
+  const superAdmins = useMemo(() => {
+    return allUsers.filter(u => permissionStore.isSuperAdmin(u.id) && u.status === 'approved')
+  }, [allUsers])
+
+  // Super Admin audit entries (critical actions only)
+  const superAdminAuditEntries = useMemo(() => {
+    const criticalActions = ['permission_change', 'role_change', 'critical_action', 'delete', 'update']
+    return auditEntries.filter(
+      e => superAdmins.map(sa => sa.id).includes(e.userId) && (e.severity === 'critical' || e.severity === 'high' || criticalActions.includes(e.action))
+    ).sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime())
+  }, [auditEntries, superAdmins])
+
+  // Analytics - Filtered activity logs
+  const filteredActivityLogs = useMemo(() => {
+    return userAnalyticsService.getFilteredLogs({
+      userId: analyticsUserFilter === 'all' ? undefined : analyticsUserFilter,
+      dateRange: analyticsDateFilter,
+      severity: analyticsSeverityFilter === 'all' ? undefined : analyticsSeverityFilter,
+      module: analyticsModuleFilter === 'all' ? undefined : analyticsModuleFilter,
+      searchText: analyticsSearchText,
+    })
+  }, [analyticsDateFilter, analyticsUserFilter, analyticsSeverityFilter, analyticsModuleFilter, analyticsSearchText])
+
+  // Analytics - Global metrics
+  const globalMetrics = useMemo(() => {
+    return userAnalyticsService.getGlobalMetrics(approvedUsers, onlineUserIds)
+  }, [approvedUsers, onlineUserIds])
+
+  // Analytics - Top users stats
+  const topUsersStats = useMemo(() => {
+    return userAnalyticsService.getTopUsersStats(approvedUsers)
+  }, [approvedUsers])
+
+  // Analytics - Selected user details
+  const selectedUserAnalytics = useMemo(() => {
+    if (!selectedUserForAnalytics) return null
+    return userAnalyticsService.getUserAnalytics(selectedUserForAnalytics.id)
+  }, [selectedUserForAnalytics])
+
+  // Users filtering
+  const filteredUsers = useMemo(() => {
+    if (!globalSearch.trim()) return approvedUsers
+    const q = globalSearch.toLowerCase()
+    return approvedUsers.filter(u => u.fullName.toLowerCase().includes(q) || u.email.toLowerCase().includes(q))
+  }, [approvedUsers, globalSearch])
+
+  // KPIs
+  const totalWeeklyHours = weeklyStats.reduce((acc, s) => acc + s.totalHours, 0)
+  const totalCreates = weeklyStats.reduce((acc, s) => acc + s.creates, 0)
+  const totalEdits = weeklyStats.reduce((acc, s) => acc + s.edits, 0)
+  const totalActions = weeklyStats.reduce((acc, s) => acc + s.totalActions, 0)
+
+  // ──────────────────────────────────────────────────────────────
+  // HELPER FUNCTIONS
+  // ──────────────────────────────────────────────────────────────
+  const Avatar = ({ user: u, size = 'md', online }: { user: User; size?: 'sm' | 'md' | 'lg'; online?: boolean }) => {
+    const sizeClasses = { sm: 'w-9 h-9 text-xs', md: 'w-11 h-11 text-sm', lg: 'w-12 h-12 text-sm' }
+    const dotClasses = { sm: 'w-2.5 h-2.5', md: 'w-3 h-3', lg: 'w-3.5 h-3.5' }
+    const initials = u.fullName
+      .split(' ')
+      .map(n => n[0])
+      .join('')
+      .slice(0, 2)
+      .toUpperCase()
+    return (
+      <div className="relative flex-shrink-0">
+        {u.photo ? (
+          <img src={u.photo} alt={u.fullName} className={`${sizeClasses[size]} rounded-2xl object-cover shadow-sm`} />
+        ) : (
+          <div className={`${sizeClasses[size]} rounded-2xl bg-gradient-to-br ${getAvatarColor(u.fullName)} text-white flex items-center justify-center font-bold shadow-sm`}>
+            {initials}
+          </div>
+        )}
+        {online !== undefined && (
+          <div className={`absolute -bottom-0.5 -right-0.5 ${dotClasses[size]} rounded-full border-2 border-white ${online ? 'bg-green-500' : 'bg-gray-400'}`} />
+        )}
+      </div>
+    )
+  }
+
+  const getStatusBadge = (status: User['status']) => {
+    switch (status) {
+      case 'approved':
+        return <span className="ivos-badge-green"><UserCheck className="h-3.5 w-3.5" /> Actif</span>
+      case 'pending':
+        return <span className="ivos-badge-orange"><Clock className="h-3.5 w-3.5" /> En Attente</span>
+      case 'rejected':
+        return <span className="ivos-badge-red"><UserX className="h-3.5 w-3.5" /> Refusé</span>
+    }
+  }
+
+  const formatDateTime = (ts: string) => new Date(ts).toLocaleString('fr-FR', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' })
+
+  const timeAgo = (ts: string) => {
+    const diff = Date.now() - new Date(ts).getTime()
+    const mins = Math.floor(diff / 60000)
+    if (mins < 1) return "À l'instant"
+    if (mins < 60) return `Il y a ${mins} min`
+    const hours = Math.floor(mins / 60)
+    if (hours < 24) return `Il y a ${hours}h`
+    const days = Math.floor(hours / 24)
+    return `Il y a ${days}j`
+  }
+
+  // ──────────────────────────────────────────────────────────────
+  // PERMISSION MATRIX HANDLERS
+  // ──────────────────────────────────────────────────────────────
+  useEffect(() => {
+    if (selectedUserForPerms) {
+      setPerms({ ...permissionStore.getPermissions(selectedUserForPerms) })
+      setUserRole(permissionStore.getRole(selectedUserForPerms))
+      setPermsSaved(false)
+    } else {
+      setPerms(null)
+    }
+  }, [selectedUserForPerms])
+
+  function handlePermChange(mod: AppModule, level: PermissionLevel) {
+    if (!perms) return
+    setPerms({ ...perms, [mod]: level })
+    setPermsSaved(false)
+  }
+
+  function handleRoleChange(role: UserRole) {
+    if (!selectedUserForPerms) return
+    const oldRole = permissionStore.getRole(selectedUserForPerms)
+    const target = allUsers.find(u => u.id === selectedUserForPerms)
+    permissionStore.setRole(selectedUserForPerms, role)
+    setUserRole(role)
+    auditService.logRoleChange({ id: currentUser!.id, name: currentUser!.fullName, role: 'SuperAdmin' }, selectedUserForPerms, target?.fullName || selectedUserForPerms, oldRole, role)
+  }
+
+  function savePermissions() {
+    if (!selectedUserForPerms || !perms) return
+    const oldPerms = permissionStore.getPermissions(selectedUserForPerms)
+    permissionStore.setPermissions(selectedUserForPerms, perms)
+    auditService.logPermissionChange({ id: currentUser!.id, name: currentUser!.fullName, role: 'SuperAdmin' }, selectedUserForPerms, oldPerms as unknown as Record<string, unknown>, perms as unknown as Record<string, unknown>)
+    setPermsSaved(true)
+    setTimeout(() => setPermsSaved(false), 2000)
+  }
+
+  function resetDefaults() {
+    if (!selectedUserForPerms) return
+    permissionStore.resetToDefaults(selectedUserForPerms)
+    setPerms({ ...permissionStore.getPermissions(selectedUserForPerms) })
+    setPermsSaved(false)
+  }
+
+  // ──────────────────────────────────────────────────────────────
+  // CRITICAL ACTIONS HANDLERS
+  // ──────────────────────────────────────────────────────────────
+  function handleApproveAction(id: string) {
+    criticalActionService.approve(id, currentUser!.id, currentUser!.fullName, reviewNote)
+    auditService.log({
+      userId: currentUser!.id,
+      userName: currentUser!.fullName,
+      userRole: 'SuperAdmin',
+      action: 'approval',
+      module: 'Actions Critiques',
+      entity: 'CriticalAction',
+      entityId: id,
+      description: `Approbation de l'action critique ${id}`,
+      oldValue: { status: 'pending' },
+      newValue: { status: 'approved', note: reviewNote },
+      severity: 'critical',
+    })
+    setReviewNote('')
+    loadAuditData()
+  }
+
+  function handleRejectAction(id: string) {
+    criticalActionService.reject(id, currentUser!.id, currentUser!.fullName, reviewNote || 'Refusé par le Super Admin')
+    auditService.log({
+      userId: currentUser!.id,
+      userName: currentUser!.fullName,
+      userRole: 'SuperAdmin',
+      action: 'rejection',
+      module: 'Actions Critiques',
+      entity: 'CriticalAction',
+      entityId: id,
+      description: `Rejet de l'action critique ${id}`,
+      oldValue: { status: 'pending' },
+      newValue: { status: 'rejected', note: reviewNote },
+      severity: 'critical',
+    })
+    setReviewNote('')
+    loadAuditData()
+  }
+
+  // ──────────────────────────────────────────────────────────────
+  // IMPERSONATION (ViewAs) HANDLERS
+  // ──────────────────────────────────────────────────────────────
+  function activateViewAs(userId: string) {
+    const targetUser = approvedUsers.find(u => u.id === userId)
+    if (!targetUser) return
+    sessionStorage.setItem(
+      'ivos_view_as',
+      JSON.stringify({
+        originalUserId: currentUser!.id,
+        viewAsUserId: userId,
+        viewAsUserName: targetUser.fullName,
+        activatedAt: new Date().toISOString(),
+      })
+    )
+    auditService.log({
+      userId: currentUser!.id,
+      userName: currentUser!.fullName,
+      userRole: 'SuperAdmin',
+      action: 'critical_action',
+      module: 'Impersonation',
+      entity: 'ViewAs',
+      entityId: userId,
+      description: `Activation de "Visualiser en tant que" pour ${targetUser.fullName}`,
+      oldValue: null,
+      newValue: { targetUser: userId, targetName: targetUser.fullName },
+      severity: 'high',
+    })
+    window.location.reload()
+  }
+
+  // ──────────────────────────────────────────────────────────────
+  // EXPORT AUDIT TO CSV
+  // ──────────────────────────────────────────────────────────────
+  function exportAuditCSV() {
+    const header = ['Date', 'Utilisateur', 'Rôle', 'Action', 'Module', 'Entité', 'Description', 'Sévérité']
+    const rows = filteredAuditEntries.map(e => [
+      new Date(e.timestamp).toLocaleString('fr-FR'),
+      e.userName,
+      e.userRole,
+      e.action,
+      e.module,
+      e.entity,
+      e.description,
+      e.severity,
+    ])
+    const csv = [header, ...rows].map(r => r.map(c => `"${String(c).replace(/"/g, '""')}"`).join(';')).join('\n')
+    const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' })
+    const a = document.createElement('a')
+    a.href = URL.createObjectURL(blob)
+    a.download = `audit_log_${new Date().toISOString().slice(0, 10)}.csv`
+    a.click()
+    URL.revokeObjectURL(a.href)
+  }
+
+  // ─────────────────────────────────────────────────────────────
+  // RENDER
+  // ─────────────────────────────────────────────────────────────
+  const COLORS = ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899', '#06b6d4', '#84cc16']
+  const ACTION_COLORS: Record<string, string> = { Créations: '#10b981', Modifications: '#3b82f6', Suppressions: '#ef4444', Consultations: '#f59e0b' }
+
+  const filteredCriticalRequests = useMemo(() => {
+    if (criticalFilter === 'all') return criticalRequests
+    return criticalRequests.filter(r => r.status === criticalFilter)
+  }, [criticalRequests, criticalFilter])
+
+  const auditStats = useMemo(() => auditService.getStats(), [auditEntries])
+  const pendingCriticalCount = criticalRequests.filter(r => r.status === 'pending').length
+
+  return (
+    <div className="w-full min-h-screen space-y-6">
+      {/* ═══ HEADER ═══ */}
+      <div className="ivos-page-header mb-6">
+        <div className="flex items-center gap-4 mb-6">
+          <div className="w-13 h-13 bg-white/10 rounded-2xl flex items-center justify-center backdrop-blur-sm">
+            <ShieldAlert className="w-7 h-7" />
+          </div>
+          <div>
+            <h1 className="text-xl sm:text-2xl font-extrabold tracking-tight">Administration Système</h1>
+            <p className="text-xs sm:text-sm text-gray-400 font-medium mt-0.5">Gestion utilisateurs · Permissions · Audit · Actions critiques</p>
+          </div>
+        </div>
+
+        {/* Global Search Bar */}
+        <div className="relative max-w-md">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+          <input
+            type="text"
+            placeholder="Rechercher utilisateurs, actions, modules…"
+            value={globalSearch}
+            onChange={e => setGlobalSearch(e.target.value)}
+            className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-white/10 text-sm text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-red-400"
+          />
+        </div>
+      </div>
+
+      {/* ═══ TABS NAVIGATION ═══ */}
+      <div className="flex gap-1 bg-gray-100/80 p-1.5 rounded-2xl w-fit flex-wrap">
+        {[
+          { id: 'dashboard' as AdminTab, label: 'Tableau de Bord Activité', icon: <BarChart3 className="w-4 h-4" /> },
+          { id: 'users' as AdminTab, label: 'Liste des Utilisateurs', icon: <Users className="w-4 h-4" /> },
+          { id: 'permissions' as AdminTab, label: 'Matrice des Permissions', icon: <Shield className="w-4 h-4" /> },
+          { id: 'audit' as AdminTab, label: 'Journal d\'Audit & Sécurité', icon: <FileText className="w-4 h-4" /> },
+          { id: 'analytics' as AdminTab, label: 'User Analytics', icon: <TrendingUp className="w-4 h-4" /> },
+          { id: 'super-admins' as AdminTab, label: 'Contrôle des Super Admins', icon: <Crown className="w-4 h-4" /> },
+        ].map(t => {
+          // Super Admin tab only visible to SuperAdmins (restricted access)
+          if (t.id === 'super-admins' && !isSA) return null
+          return (
+            <button
+              key={t.id}
+              onClick={() => setActiveTab(t.id)}
+              className={`flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold transition-all duration-200 ${
+                activeTab === t.id ? 'bg-white text-gray-900 shadow-card' : 'text-gray-500 hover:text-gray-700 hover:bg-white/50'
+              }`}
+            >
+              {t.icon} {t.label}
+            </button>
+          )
+        })}
+      </div>
+
+      {/* ═══ TAB: DASHBOARD ACTIVITÉ ═══ */}
+      {activeTab === 'dashboard' && (
+        <div className="space-y-6">
+          {/* KPI Cards */}
+          <div className="grid grid-cols-2 lg:grid-cols-5 gap-4">
+            <div className="ivos-kpi">
+              <div className="flex items-center gap-2 text-xs text-gray-500 font-semibold uppercase tracking-wider mb-2">
+                <div className="w-8 h-8 rounded-xl bg-green-50 flex items-center justify-center">
+                  <Wifi className="h-4 w-4 text-green-500" />
+                </div>
+                En ligne
+              </div>
+              <p className="text-3xl font-extrabold text-gray-900">{onlineUsers.length}</p>
+              <p className="text-xs text-gray-400 mt-1.5 font-medium">sur {approvedUsers.length} utilisateurs</p>
+            </div>
+            <div className="ivos-kpi">
+              <div className="flex items-center gap-2 text-xs text-gray-500 font-semibold uppercase tracking-wider mb-2">
+                <div className="w-8 h-8 rounded-xl bg-gray-100 flex items-center justify-center">
+                  <WifiOff className="h-4 w-4 text-gray-400" />
+                </div>
+                Hors ligne
+              </div>
+              <p className="text-3xl font-extrabold text-gray-900">{offlineUsers.length}</p>
+              <p className="text-xs text-gray-400 mt-1.5 font-medium">inactifs actuellement</p>
+            </div>
+            <div className="ivos-kpi">
+              <div className="flex items-center gap-2 text-xs text-gray-500 font-semibold uppercase tracking-wider mb-2">
+                <div className="w-8 h-8 rounded-xl bg-blue-50 flex items-center justify-center">
+                  <Timer className="h-4 w-4 text-blue-500" />
+                </div>
+                Heures / sem.
+              </div>
+              <p className="text-3xl font-extrabold text-gray-900">
+                {totalWeeklyHours.toFixed(0)}
+                <span className="text-lg text-gray-400 ml-0.5">h</span>
+              </p>
+              <p className="text-xs text-gray-400 mt-1.5 font-medium">temps total connecté</p>
+            </div>
+            <div className="ivos-kpi">
+              <div className="flex items-center gap-2 text-xs text-gray-500 font-semibold uppercase tracking-wider mb-2">
+                <div className="w-8 h-8 rounded-xl bg-emerald-50 flex items-center justify-center">
+                  <PlusCircle className="h-4 w-4 text-emerald-500" />
+                </div>
+                Créations
+              </div>
+              <p className="text-3xl font-extrabold text-gray-900">{totalCreates}</p>
+              <p className="text-xs text-gray-400 mt-1.5 font-medium">cette semaine</p>
+            </div>
+            <div className="ivos-kpi">
+              <div className="flex items-center gap-2 text-xs text-gray-500 font-semibold uppercase tracking-wider mb-2">
+                <div className="w-8 h-8 rounded-xl bg-purple-50 flex items-center justify-center">
+                  <TrendingUp className="h-4 w-4 text-purple-500" />
+                </div>
+                Actions
+              </div>
+              <p className="text-3xl font-extrabold text-gray-900">{totalActions}</p>
+              <p className="text-xs text-gray-400 mt-1.5 font-medium">{totalEdits} modifications</p>
+            </div>
+          </div>
+
+          {/* Charts Row */}
+          <div className="grid lg:grid-cols-2 gap-6">
+            {/* Daily hours chart */}
+            <div className="ivos-card p-5">
+              <h3 className="text-sm font-bold text-gray-800 mb-4">Heures de connexion (7 jours)</h3>
+              <ResponsiveContainer width="100%" height={250}>
+                <BarChart data={dailyHoursChart}>
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis dataKey="day" />
+                  <YAxis />
+                  <Tooltip />
+                  <Bar dataKey="heures" fill="#3b82f6" radius={[8, 8, 0, 0]} />
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+
+            {/* Module activity chart */}
+            <div className="ivos-card p-5">
+              <h3 className="text-sm font-bold text-gray-800 mb-4">Activité par module</h3>
+              <ResponsiveContainer width="100%" height={250}>
+                <PieChart>
+                  <Pie data={moduleChart} cx="50%" cy="50%" labelLine={false} label={({ name, value }) => `${name}: ${value}`} outerRadius={80} fill="#8884d8" dataKey="value">
+                    {moduleChart.map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                    ))}
+                  </Pie>
+                  <Tooltip />
+                </PieChart>
+              </ResponsiveContainer>
+            </div>
+          </div>
+
+          {/* Online / Offline Users */}
+          <div className="grid lg:grid-cols-2 gap-6">
+            {/* Online Users */}
+            <div className="ivos-card">
+              <div className="px-5 py-4 border-b border-gray-100 flex items-center gap-2">
+                <div className="w-7 h-7 rounded-lg bg-green-50 flex items-center justify-center">
+                  <Wifi className="h-3.5 w-3.5 text-green-500" />
+                </div>
+                <h3 className="font-bold text-gray-900 text-sm">Utilisateurs en ligne</h3>
+                <span className="ml-auto ivos-badge-green">{onlineUsers.length}</span>
+              </div>
+              <div className="p-4 space-y-3 max-h-96 overflow-y-auto">
+                {onlineUsers.length === 0 ? (
+                  <p className="text-sm text-gray-400 text-center py-4">Aucun utilisateur en ligne</p>
+                ) : (
+                  onlineUsers.map(u => {
+                    const stats = weeklyStats.find(s => s.user.id === u.id)
+                    return (
+                      <div key={u.id} className="flex items-center gap-3 p-3 rounded-lg bg-green-50/50 border border-green-100">
+                        <Avatar user={u} size="md" online={true} />
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm font-semibold text-gray-900 truncate">{u.fullName}</p>
+                          <p className="text-xs text-green-600">{stats?.totalHours.toFixed(1) || 0}h cette semaine</p>
+                        </div>
+                      </div>
+                    )
+                  })
+                )}
+              </div>
+            </div>
+
+            {/* Offline Users */}
+            <div className="ivos-card">
+              <div className="px-5 py-4 border-b border-gray-100 flex items-center gap-2">
+                <div className="w-7 h-7 rounded-lg bg-gray-100 flex items-center justify-center">
+                  <WifiOff className="h-3.5 w-3.5 text-gray-400" />
+                </div>
+                <h3 className="font-bold text-gray-900 text-sm">Hors ligne</h3>
+                <span className="ml-auto ivos-badge-gray">{offlineUsers.length}</span>
+              </div>
+              <div className="p-4 space-y-3 max-h-96 overflow-y-auto">
+                {offlineUsers.length === 0 ? (
+                  <p className="text-sm text-gray-400 text-center py-4">Aucun utilisateur hors ligne</p>
+                ) : (
+                  offlineUsers.map(u => {
+                    const stats = weeklyStats.find(s => s.user.id === u.id)
+                    return (
+                      <div key={u.id} className="flex items-center gap-3 p-3 rounded-lg bg-gray-50 border border-gray-200">
+                        <Avatar user={u} size="md" online={false} />
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm font-semibold text-gray-900 truncate">{u.fullName}</p>
+                          <p className="text-xs text-gray-500">{stats?.lastLogin ? timeAgo(stats.lastLogin) : 'Jamais connecté'}</p>
+                        </div>
+                      </div>
+                    )
+                  })
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ═══ TAB: UTILISATEURS ═══ */}
+      {activeTab === 'users' && (
+        <div className="space-y-6">
+          {/* Pending users alert */}
+          {pendingUsers.length > 0 && (
+            <div className="ivos-card bg-amber-50 border-l-4 border-amber-400 p-4 flex items-center gap-3">
+              <AlertTriangle className="w-5 h-5 text-amber-600 flex-shrink-0" />
+              <div>
+                <p className="text-sm font-semibold text-amber-900">{pendingUsers.length} utilisateur(s) en attente d'approbation</p>
+                <p className="text-xs text-amber-700 mt-0.5">Veuillez examiner et valider ces demandes dans l'onglet Audit & Sécurité</p>
+              </div>
+            </div>
+          )}
+
+          {/* Users list */}
+          <div className="ivos-card overflow-hidden">
+            <table className="ivos-table">
+              <thead>
+                <tr>
+                  <th>Utilisateur</th>
+                  <th>Rôle</th>
+                  <th>Statut</th>
+                  <th>En ligne</th>
+                  <th>Heures / sem.</th>
+                  <th className="text-right">Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {filteredUsers.map(u => {
+                  const stats = weeklyStats.find(s => s.user.id === u.id)
+                  const isOnline = onlineUserIds.includes(u.id)
+                  return (
+                    <tr key={u.id}>
+                      <td>
+                        <div className="flex items-center gap-3">
+                          <Avatar user={u} size="md" online={isOnline} />
+                          <div>
+                            <p className="text-sm font-bold text-gray-900">{u.fullName}</p>
+                            <p className="text-xs text-gray-400 mt-0.5">{u.email}</p>
+                          </div>
+                        </div>
+                      </td>
+                      <td>
+                        <span className={`text-xs font-semibold px-2 py-1 rounded-lg ${permissionStore.isSuperAdmin(u.id) ? 'bg-red-100 text-red-700' : permissionStore.getRole(u.id) === 'Admin' ? 'bg-blue-100 text-blue-700' : 'bg-gray-100 text-gray-700'}`}>
+                          {permissionStore.getRole(u.id)}
+                        </span>
+                      </td>
+                      <td>{getStatusBadge(u.status)}</td>
+                      <td>
+                        <span className={`text-xs font-semibold px-2 py-1 rounded-lg ${isOnline ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-600'}`}>
+                          {isOnline ? 'En ligne' : 'Hors ligne'}
+                        </span>
+                      </td>
+                      <td>
+                        <span className="text-sm font-semibold text-gray-900">{stats?.totalHours.toFixed(1) || 0}h</span>
+                      </td>
+                      <td>
+                        <div className="flex items-center justify-end gap-2">
+                          <button
+                            onClick={() => activateViewAs(u.id)}
+                            className="inline-flex items-center gap-1 px-3 py-1.5 text-xs font-semibold rounded-lg bg-purple-50 text-purple-700 hover:bg-purple-100 transition-colors"
+                            title="Visualiser en tant que cet utilisateur"
+                          >
+                            <Eye className="h-3.5 w-3.5" /> Visualiser
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  )
+                })}
+                {filteredUsers.length === 0 && (
+                  <tr>
+                    <td colSpan={6} className="text-center py-8 text-gray-400">
+                      Aucun utilisateur trouvé
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
+
+      {/* ═══ TAB: PERMISSIONS ═══ */}
+      {activeTab === 'permissions' && (
+        <div className="space-y-6">
+          {/* User selector */}
+          <div className="ivos-card p-5">
+            <h3 className="text-sm font-bold text-gray-800 mb-4 flex items-center gap-2">
+              <Users className="w-4 h-4 text-red-600" /> Sélectionner un utilisateur
+            </h3>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <select
+                value={selectedUserForPerms}
+                onChange={e => setSelectedUserForPerms(e.target.value)}
+                className="w-full px-4 py-2.5 rounded-xl bg-gray-50 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-red-400 border border-gray-200"
+              >
+                <option value="">— Choisir un utilisateur —</option>
+                {approvedUsers
+                  .filter(u => u.id !== currentUser!.id)
+                  .map(u => (
+                    <option key={u.id} value={u.id}>
+                      {u.fullName} ({u.email}) — {permissionStore.getRole(u.id)}
+                    </option>
+                  ))}
+              </select>
+              {selectedUserForPerms && (
+                <div className="flex items-center gap-2">
+                  <span className="text-xs text-gray-500 font-medium">Rôle :</span>
+                  {(['Utilisateur', 'Admin', 'SuperAdmin'] as UserRole[]).map(role => (
+                    <button
+                      key={role}
+                      onClick={() => handleRoleChange(role)}
+                      className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
+                        userRole === role
+                          ? role === 'SuperAdmin'
+                            ? 'bg-red-600 text-white'
+                            : role === 'Admin'
+                              ? 'bg-blue-600 text-white'
+                              : 'bg-gray-600 text-white'
+                          : 'bg-gray-100 text-gray-500 hover:bg-gray-200'
+                      }`}
+                    >
+                      {role}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Permission matrix */}
+          {perms && selectedUserForPerms && (
+            <div className="ivos-card p-5">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-sm font-bold text-gray-800 flex items-center gap-2">
+                  <Shield className="w-4 h-4 text-red-600" /> Matrice de Permissions
+                </h3>
+                <div className="flex items-center gap-2">
+                  <button onClick={resetDefaults} className="px-3 py-1.5 text-xs text-gray-500 hover:text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg font-medium transition-colors flex items-center gap-1">
+                    <RefreshCw className="w-3 h-3" /> Réinitialiser
+                  </button>
+                  <button
+                    onClick={savePermissions}
+                    className={`px-4 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center gap-1 ${
+                      permsSaved ? 'bg-emerald-600 text-white' : 'bg-red-600 hover:bg-red-700 text-white'
+                    }`}
+                  >
+                    {permsSaved ? (
+                      <>
+                        <CheckCircle2 className="w-3 h-3" /> Enregistré
+                      </>
+                    ) : (
+                      <>
+                        <ShieldCheck className="w-3 h-3" /> Sauvegarder
+                      </>
+                    )}
+                  </button>
+                </div>
+              </div>
+
+              <div className="overflow-x-auto rounded-xl border border-gray-100">
+                <table className="min-w-full text-sm">
+                  <thead>
+                    <tr className="bg-gray-50 text-xs text-gray-500 uppercase">
+                      <th className="px-4 py-3 text-left">Module</th>
+                      {[
+                        { value: 'none' as PermissionLevel, label: 'Aucun' },
+                        { value: 'view' as PermissionLevel, label: 'Voir' },
+                        { value: 'edit' as PermissionLevel, label: 'Modifier' },
+                        { value: 'all' as PermissionLevel, label: 'Tout' },
+                      ].map(l => (
+                        <th key={l.value} className="px-4 py-3 text-center">
+                          {l.label}
+                        </th>
+                      ))}
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {APP_MODULES.map((mod: AppModule, idx: number) => {
+                      const Icon = MODULE_ICONS[mod]
+                      return (
+                        <tr key={mod} className={idx % 2 === 0 ? 'bg-white' : 'bg-gray-50/50'}>
+                          <td className="px-4 py-3">
+                            <div className="flex items-center gap-2">
+                              <Icon className="w-4 h-4 text-gray-400" />
+                              <span className="font-semibold text-gray-800">{MODULE_LABELS[mod]}</span>
+                            </div>
+                          </td>
+                          {[
+                            { value: 'none' as PermissionLevel, label: 'Aucun', color: 'bg-gray-200 text-gray-600' },
+                            { value: 'view' as PermissionLevel, label: 'Voir', color: 'bg-blue-100 text-blue-700' },
+                            { value: 'edit' as PermissionLevel, label: 'Modifier', color: 'bg-amber-100 text-amber-700' },
+                            { value: 'all' as PermissionLevel, label: 'Tout', color: 'bg-emerald-100 text-emerald-700' },
+                          ].map(l => (
+                            <td key={l.value} className="px-4 py-3 text-center">
+                              <button
+                                onClick={() => handlePermChange(mod, l.value)}
+                                className={`w-8 h-8 rounded-lg flex items-center justify-center transition-all ${
+                                  perms[mod] === l.value
+                                    ? `${l.color} ring-2 ring-offset-1 ${l.value === 'none' ? 'ring-gray-400' : l.value === 'view' ? 'ring-blue-400' : l.value === 'edit' ? 'ring-amber-400' : 'ring-emerald-400'}`
+                                    : 'bg-gray-100 text-gray-300 hover:bg-gray-200'
+                                }`}
+                              >
+                                {perms[mod] === l.value ? (l.value === 'none' ? <XCircle className="w-4 h-4" /> : <CheckCircle2 className="w-4 h-4" />) : <div className="w-2.5 h-2.5 rounded-full bg-current" />}
+                              </button>
+                            </td>
+                          ))}
+                        </tr>
+                      )
+                    })}
+                  </tbody>
+                </table>
+              </div>
+
+              <p className="text-[10px] text-gray-400 mt-3 flex items-center gap-1">
+                <Info className="w-3 h-3" /> «Aucun» = module supprimé du DOM. «Voir» = lecture seule. «Modifier» = lecture + écriture. «Tout» = accès complet.
+              </p>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* ═══ TAB: AUDIT & SÉCURITÉ ═══ */}
+      {activeTab === 'audit' && (
+        <div className="space-y-6">
+          {/* Stats cards */}
+          <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-6 gap-3">
+            {[
+              { label: 'Total', value: auditStats.total, color: 'bg-gray-50 text-gray-700' },
+              { label: 'Dernières 24h', value: auditStats.last24h, color: 'bg-blue-50 text-blue-700' },
+              { label: 'Créations', value: auditStats.creates, color: 'bg-emerald-50 text-emerald-700' },
+              { label: 'Modifications', value: auditStats.updates, color: 'bg-amber-50 text-amber-700' },
+              { label: 'Suppressions', value: auditStats.deletes, color: 'bg-red-50 text-red-700' },
+              { label: 'Critiques', value: auditStats.criticalActions, color: 'bg-red-100 text-red-800' },
+            ].map(s => (
+              <div key={s.label} className={`${s.color} rounded-xl p-3 text-center`}>
+                <p className="text-[10px] uppercase font-semibold opacity-70">{s.label}</p>
+                <p className="text-xl font-black">{s.value}</p>
+              </div>
+            ))}
+          </div>
+
+          {/* Filters */}
+          <div className="ivos-card p-4">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 flex-wrap">
+              <select value={severityFilter} onChange={e => setSeverityFilter(e.target.value as any)} className="px-3 py-2.5 rounded-xl bg-gray-50 text-sm border-0 focus:outline-none focus:ring-2 focus:ring-red-400">
+                <option value="all">Toutes sévérités</option>
+                <option value="low">Info</option>
+                <option value="medium">Moyen</option>
+                <option value="high">Élevé</option>
+                <option value="critical">Critique</option>
+              </select>
+              <select value={actionFilter} onChange={e => setActionFilter(e.target.value)} className="px-3 py-2.5 rounded-xl bg-gray-50 text-sm border-0 focus:outline-none focus:ring-2 focus:ring-red-400">
+                <option value="all">Toutes actions</option>
+                <option value="create">Création</option>
+                <option value="update">Modification</option>
+                <option value="delete">Suppression</option>
+                <option value="permission_change">Perm. changée</option>
+                <option value="role_change">Rôle changé</option>
+                <option value="critical_action">Action critique</option>
+              </select>
+              <button onClick={exportAuditCSV} className="flex items-center gap-1 px-3 py-2.5 rounded-xl bg-emerald-50 text-emerald-700 text-sm font-semibold hover:bg-emerald-100 transition-colors">
+                <Download className="w-3.5 h-3.5" /> CSV
+              </button>
+            </div>
+          </div>
+
+          {/* Audit log table */}
+          <div className="ivos-card overflow-hidden">
+            <div className="overflow-x-auto max-h-[600px] overflow-y-auto">
+              <table className="min-w-full text-xs">
+                <thead className="sticky top-0 z-10">
+                  <tr className="bg-[#4a0e0e] text-white uppercase">
+                    <th className="px-3 py-3 text-left">Date</th>
+                    <th className="px-3 py-3 text-left">Utilisateur</th>
+                    <th className="px-3 py-3 text-left">Action</th>
+                    <th className="px-3 py-3 text-left">Module</th>
+                    <th className="px-3 py-3 text-left">Description</th>
+                    <th className="px-3 py-3 text-center">Sévérité</th>
+                    <th className="px-3 py-3 text-center w-16">Détail</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {filteredAuditEntries.slice(0, 200).map((e, idx) => {
+                    const sev = SEVERITY_STYLES[e.severity]
+                    return (
+                      <tr key={e.id} className={`${idx % 2 === 0 ? 'bg-white' : 'bg-gray-50/50'} hover:bg-red-50/30 transition-colors`}>
+                        <td className="px-3 py-2.5 text-gray-500 whitespace-nowrap">
+                          {new Date(e.timestamp).toLocaleDateString('fr-FR', { day: '2-digit', month: 'short', year: 'numeric' })}
+                          <br />
+                          <span className="text-[10px] text-gray-400">{new Date(e.timestamp).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit', second: '2-digit' })}</span>
+                        </td>
+                        <td className="px-3 py-2.5">
+                          <p className="font-semibold text-gray-800">{e.userName}</p>
+                          <p className="text-[10px] text-gray-400">{e.userRole}</p>
+                        </td>
+                        <td className="px-3 py-2.5">
+                          <span
+                            className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${
+                              e.action === 'create'
+                                ? 'bg-emerald-100 text-emerald-700'
+                                : e.action === 'update'
+                                  ? 'bg-blue-100 text-blue-700'
+                                  : e.action === 'delete'
+                                    ? 'bg-red-100 text-red-700'
+                                    : 'bg-violet-100 text-violet-700'
+                            }`}
+                          >
+                            {e.action === 'create' ? 'Création' : e.action === 'update' ? 'Modification' : e.action === 'delete' ? 'Suppression' : e.action === 'permission_change' ? 'Permissions' : e.action === 'role_change' ? 'Rôle' : e.action}
+                          </span>
+                        </td>
+                        <td className="px-3 py-2.5 text-gray-700 font-medium">{e.module}</td>
+                        <td className="px-3 py-2.5 text-gray-600 max-w-[300px] truncate">{e.description}</td>
+                        <td className="px-3 py-2.5 text-center">
+                          <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${sev.bg} ${sev.text}`}>{sev.label}</span>
+                        </td>
+                        <td className="px-3 py-2.5 text-center">
+                          <button onClick={() => setDetailEntry(e)} className="text-red-600 hover:text-red-800">
+                            <Eye className="w-3.5 h-3.5" />
+                          </button>
+                        </td>
+                      </tr>
+                    )
+                  })}
+                  {filteredAuditEntries.length === 0 && (
+                    <tr>
+                      <td colSpan={7} className="text-center py-10 text-gray-400">
+                        Aucune entrée d'audit
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
+            {filteredAuditEntries.length > 200 && (
+              <div className="px-4 py-2 bg-gray-50 text-[10px] text-gray-400 text-center">Affichage des 200 premières entrées sur {filteredAuditEntries.length}</div>
+            )}
+          </div>
+
+          {/* Critical Actions Section */}
+          <div className="ivos-card p-5">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-sm font-bold text-gray-800 flex items-center gap-2">
+                <AlertTriangle className="w-4 h-4 text-red-600" /> Actions Critiques en Attente d'Approbation
+                {pendingCriticalCount > 0 && (
+                  <span className="px-2 py-0.5 rounded-full bg-red-600 text-white text-[10px] font-bold animate-pulse">{pendingCriticalCount}</span>
+                )}
+              </h3>
+              <div className="flex gap-1">
+                {(['pending', 'approved', 'rejected', 'all'] as const).map(f => (
+                  <button
+                    key={f}
+                    onClick={() => setCriticalFilter(f)}
+                    className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
+                      criticalFilter === f ? 'bg-red-600 text-white' : 'bg-gray-100 text-gray-500 hover:bg-gray-200'
+                    }`}
+                  >
+                    {f === 'pending' ? 'En attente' : f === 'approved' ? 'Approuvées' : f === 'rejected' ? 'Refusées' : 'Toutes'}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {filteredCriticalRequests.length > 0 ? (
+              <div className="space-y-3">
+                {filteredCriticalRequests.map(req => (
+                  <div
+                    key={req.id}
+                    className={`rounded-xl border p-4 transition-all ${
+                      req.status === 'pending'
+                        ? 'border-amber-200 bg-amber-50/30'
+                        : req.status === 'approved'
+                          ? 'border-emerald-200 bg-emerald-50/30'
+                          : 'border-red-200 bg-red-50/30'
+                    }`}
+                  >
+                    <div className="flex items-start justify-between">
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2 mb-1">
+                          <span
+                            className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${
+                              req.status === 'pending'
+                                ? 'bg-amber-100 text-amber-700'
+                                : req.status === 'approved'
+                                  ? 'bg-emerald-100 text-emerald-700'
+                                  : 'bg-red-100 text-red-700'
+                            }`}
+                          >
+                            {req.status === 'pending' ? 'EN ATTENTE' : req.status === 'approved' ? 'APPROUVÉE' : 'REFUSÉE'}
+                          </span>
+                          <span className="text-[10px] text-gray-400">{CRITICAL_ACTION_TYPES[req.actionType]}</span>
+                        </div>
+                        <p className="text-sm font-semibold text-gray-800">{req.description}</p>
+                        <p className="text-xs text-gray-500 mt-1">
+                          Par <strong>{req.requestedByName}</strong> — {new Date(req.requestedAt).toLocaleString('fr-FR')}
+                        </p>
+                        {req.reviewedByName && (
+                          <p className="text-xs text-gray-400 mt-1">
+                            {req.status === 'approved' ? '✅' : '❌'} Traité par {req.reviewedByName} le {new Date(req.reviewedAt!).toLocaleString('fr-FR')}
+                            {req.reviewNote && <> — <em>{req.reviewNote}</em></>}
+                          </p>
+                        )}
+                      </div>
+                      {req.status === 'pending' && (
+                        <div className="flex flex-col gap-2 ml-4">
+                          <input
+                            type="text"
+                            placeholder="Note (optionnel)"
+                            value={reviewNote}
+                            onChange={e => setReviewNote(e.target.value)}
+                            className="px-2 py-1 text-xs rounded-lg border border-gray-200 focus:outline-none focus:ring-1 focus:ring-red-400 w-48"
+                          />
+                          <div className="flex gap-2">
+                            <button
+                              onClick={() => handleApproveAction(req.id)}
+                              className="flex-1 flex items-center justify-center gap-1 px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-bold transition-colors"
+                            >
+                              <CheckCircle2 className="w-3 h-3" /> Approuver
+                            </button>
+                            <button
+                              onClick={() => handleRejectAction(req.id)}
+                              className="flex-1 flex items-center justify-center gap-1 px-3 py-1.5 bg-red-600 hover:bg-red-700 text-white rounded-lg text-xs font-bold transition-colors"
+                            >
+                              <XCircle className="w-3 h-3" /> Refuser
+                            </button>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="text-center py-10 text-gray-400 text-sm">
+                {criticalFilter === 'pending' ? 'Aucune action en attente d\'approbation' : 'Aucune action dans cette catégorie'}
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* ═══ TAB: SUPER ADMINS CONTROL ═══ */}
+      {activeTab === 'super-admins' && (
+        <div className="space-y-6">
+          {/* Security Alert Banner */}
+          <div className="bg-gradient-to-r from-red-50 to-amber-50 border-l-4 border-red-600 rounded-xl p-4 flex items-start gap-3">
+            <AlertCircle className="w-6 h-6 text-red-600 flex-shrink-0 mt-0.5" />
+            <div>
+              <p className="text-sm font-bold text-red-900">⚠️ Section à Haute Sécurité</p>
+              <p className="text-xs text-red-700 mt-1">Cette section affiche les activités critiques des Super Admins. L'accès est limité aux administrateurs systèmes autorisés.</p>
+            </div>
+          </div>
+
+          {/* Two-Column Layout */}
+          <div className="grid lg:grid-cols-3 gap-6">
+            {/* LEFT: Super Admins List */}
+            <div className="lg:col-span-1">
+              <div className="ivos-card border-l-4 border-red-600 p-5 h-full">
+                <div className="flex items-center gap-2 mb-4">
+                  <Crown className="w-5 h-5 text-red-600" />
+                  <h3 className="text-sm font-bold text-gray-900">Super Admins</h3>
+                  <span className="ml-auto ivos-badge-red">{superAdmins.length}</span>
+                </div>
+
+                {/* Filter Tabs */}
+                <div className="flex gap-1 mb-4 bg-gray-100 p-1 rounded-lg">
+                  {(['all', 'active', 'inactive'] as const).map(f => (
+                    <button
+                      key={f}
+                      onClick={() => setSuperAdminFilter(f)}
+                      className={`flex-1 px-2 py-1 text-xs font-semibold rounded transition-all ${
+                        superAdminFilter === f ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-500 hover:text-gray-700'
+                      }`}
+                    >
+                      {f === 'all' ? 'Tous' : f === 'active' ? 'Actifs' : 'Inactifs'}
+                    </button>
+                  ))}
+                </div>
+
+                {/* Super Admins Table */}
+                <div className="space-y-2 max-h-[500px] overflow-y-auto">
+                  {superAdmins
+                    .filter(sa => {
+                      const isOnline = onlineUserIds.includes(sa.id)
+                      if (superAdminFilter === 'active') return isOnline
+                      if (superAdminFilter === 'inactive') return !isOnline
+                      return true
+                    })
+                    .map(admin => {
+                      const isOnline = onlineUserIds.includes(admin.id)
+                      const lastSession = sessionsLog
+                        .filter(s => s.userId === admin.id)
+                        .sort((a, b) => new Date(b.loginAt).getTime() - new Date(a.loginAt).getTime())[0]
+                      return (
+                        <div key={admin.id} className="p-3 rounded-lg border border-red-100 bg-red-50/30 hover:bg-red-50 transition-colors">
+                          <div className="flex items-center gap-2 mb-2">
+                            <Avatar user={admin} size="sm" online={isOnline} />
+                            <div className="flex-1 min-w-0">
+                              <p className="text-xs font-bold text-gray-900 truncate">{admin.fullName}</p>
+                              <p className="text-[10px] text-gray-500 truncate">{admin.email}</p>
+                            </div>
+                            <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${isOnline ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-600'}`}>
+                              {isOnline ? '🟢' : '⚫'}
+                            </span>
+                          </div>
+                          {lastSession && (
+                            <p className="text-[10px] text-gray-400">
+                              Dernier : {new Date(lastSession.loginAt).toLocaleDateString('fr-FR', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' })}
+                            </p>
+                          )}
+                        </div>
+                      )
+                    })}
+                  {superAdmins.length === 0 && (
+                    <p className="text-xs text-gray-400 text-center py-4">Aucun Super Admin</p>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            {/* RIGHT: Super Admin Activity Log */}
+            <div className="lg:col-span-2">
+              <div className="ivos-card border-l-4 border-red-600 p-5">
+                <div className="flex items-center gap-2 mb-4">
+                  <Server className="w-5 h-5 text-red-600" />
+                  <h3 className="text-sm font-bold text-gray-900">Journal d'Activité Critique</h3>
+                  <span className="ml-auto ivos-badge-red">{superAdminAuditEntries.length}</span>
+                </div>
+
+                {/* Alert: Critical Actions Priority */}
+                <div className="mb-4 p-2 bg-amber-50 border border-amber-200 rounded-lg text-[10px] text-amber-700 font-medium">
+                  🔴 Actions critiques en priorité : Permissions, Suppressions, Logs sécurité, Config système
+                </div>
+
+                {/* Activity Log Table */}
+                <div className="overflow-x-auto max-h-[500px] overflow-y-auto rounded-lg border border-red-100">
+                  <table className="min-w-full text-xs">
+                    <thead className="sticky top-0 z-10 bg-red-600 text-white">
+                      <tr>
+                        <th className="px-3 py-2 text-left">Date & Heure</th>
+                        <th className="px-3 py-2 text-left">Admin</th>
+                        <th className="px-3 py-2 text-left">Action</th>
+                        <th className="px-3 py-2 text-left">Module</th>
+                        <th className="px-3 py-2 text-center">Sévérité</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {superAdminAuditEntries.slice(0, 100).map((entry, idx) => {
+                        const sev = SEVERITY_STYLES[entry.severity]
+                        const isHighPriority = ['permission_change', 'delete', 'critical_action'].includes(entry.action)
+                        return (
+                          <tr
+                            key={entry.id}
+                            className={`${idx % 2 === 0 ? 'bg-white' : 'bg-red-50/30'} ${isHighPriority ? 'border-l-2 border-red-600' : ''} hover:bg-red-50 transition-colors`}
+                          >
+                            <td className="px-3 py-2 text-gray-600 whitespace-nowrap">
+                              {new Date(entry.timestamp).toLocaleDateString('fr-FR', { day: '2-digit', month: 'short' })}
+                              <br />
+                              <span className="text-[9px] text-gray-400">
+                                {new Date(entry.timestamp).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit', second: '2-digit' })}
+                              </span>
+                            </td>
+                            <td className="px-3 py-2">
+                              <p className="font-semibold text-gray-800">{entry.userName}</p>
+                            </td>
+                            <td className="px-3 py-2">
+                              <span
+                                className={`px-2 py-0.5 rounded-full font-bold ${
+                                  entry.action === 'delete'
+                                    ? 'bg-red-100 text-red-700'
+                                    : entry.action === 'permission_change'
+                                      ? 'bg-orange-100 text-orange-700'
+                                      : entry.action === 'critical_action'
+                                        ? 'bg-purple-100 text-purple-700'
+                                        : 'bg-blue-100 text-blue-700'
+                                }`}
+                              >
+                                {entry.action === 'delete'
+                                  ? 'Suppression'
+                                  : entry.action === 'permission_change'
+                                    ? 'Permissions'
+                                    : entry.action === 'critical_action'
+                                      ? 'Critique'
+                                      : 'Modification'}
+                              </span>
+                            </td>
+                            <td className="px-3 py-2 text-gray-700 font-medium">{entry.module}</td>
+                            <td className="px-3 py-2 text-center">
+                              <span className={`px-2 py-0.5 rounded-full font-bold ${sev.bg} ${sev.text}`}>{sev.label}</span>
+                            </td>
+                          </tr>
+                        )
+                      })}
+                      {superAdminAuditEntries.length === 0 && (
+                        <tr>
+                          <td colSpan={5} className="text-center py-6 text-gray-400">
+                            Aucune activité critique détectée
+                          </td>
+                        </tr>
+                      )}
+                    </tbody>
+                  </table>
+                </div>
+
+                {superAdminAuditEntries.length > 100 && (
+                  <div className="px-3 py-2 bg-red-50 text-[10px] text-gray-500 text-center mt-2">
+                    Affichage des 100 premières entrées sur {superAdminAuditEntries.length}
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+
+          {/* Detailed Entries Section */}
+          {superAdminAuditEntries.length > 0 && (
+            <div className="ivos-card border-l-4 border-red-600 p-5">
+              <h3 className="text-sm font-bold text-gray-900 mb-4 flex items-center gap-2">
+                <AlertTriangle className="w-5 h-5 text-red-600" /> Entrées Critiques Détaillées
+              </h3>
+
+              <div className="space-y-3">
+                {superAdminAuditEntries
+                  .filter(e => ['permission_change', 'delete', 'critical_action'].includes(e.action))
+                  .slice(0, 5)
+                  .map(entry => (
+                    <div key={entry.id} className="p-4 rounded-lg bg-red-50 border border-red-200">
+                      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 text-sm">
+                        <div>
+                          <p className="text-[10px] text-gray-500 uppercase font-bold">Qui</p>
+                          <p className="font-semibold text-gray-900">{entry.userName}</p>
+                        </div>
+                        <div>
+                          <p className="text-[10px] text-gray-500 uppercase font-bold">Quoi</p>
+                          <p className="font-semibold text-gray-900">
+                            {entry.action === 'delete'
+                              ? '🗑️ Suppression'
+                              : entry.action === 'permission_change'
+                                ? '🔐 Permissions'
+                                : '⚠️ Action Critique'}
+                          </p>
+                        </div>
+                        <div>
+                          <p className="text-[10px] text-gray-500 uppercase font-bold">Quand</p>
+                          <p className="font-semibold text-gray-900">
+                            {new Date(entry.timestamp).toLocaleString('fr-FR', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' })}
+                          </p>
+                        </div>
+                        <div>
+                          <p className="text-[10px] text-gray-500 uppercase font-bold">Où</p>
+                          <p className="font-semibold text-gray-900">{entry.module}</p>
+                        </div>
+                      </div>
+                      <p className="text-xs text-gray-600 mt-3 p-2 bg-white rounded">{entry.description}</p>
+                    </div>
+                  ))}
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* ═══ TAB: ANALYTICS ═══ */}
+      {activeTab === 'analytics' && (
+        <div className="space-y-6">
+          {/* Global Metrics Cards */}
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+            <div className="ivos-kpi">
+              <div className="flex items-center gap-2 text-xs text-gray-500 font-semibold uppercase tracking-wider mb-2">
+                <div className="w-8 h-8 rounded-xl bg-blue-50 flex items-center justify-center">
+                  <Users className="h-4 w-4 text-blue-500" />
+                </div>
+                Utilisateurs Actifs
+              </div>
+              <p className="text-3xl font-extrabold text-gray-900">{globalMetrics.activeUsersToday}</p>
+              <p className="text-xs text-gray-400 mt-1.5 font-medium">sur {globalMetrics.totalUsers}</p>
+            </div>
+            <div className="ivos-kpi">
+              <div className="flex items-center gap-2 text-xs text-gray-500 font-semibold uppercase tracking-wider mb-2">
+                <div className="w-8 h-8 rounded-xl bg-emerald-50 flex items-center justify-center">
+                  <Gauge className="h-4 w-4 text-emerald-500" />
+                </div>
+                Heures 24h
+              </div>
+              <p className="text-3xl font-extrabold text-gray-900">{globalMetrics.totalConnectionHours}</p>
+              <p className="text-xs text-gray-400 mt-1.5 font-medium">total connecté</p>
+            </div>
+            <div className="ivos-kpi">
+              <div className="flex items-center gap-2 text-xs text-gray-500 font-semibold uppercase tracking-wider mb-2">
+                <div className="w-8 h-8 rounded-xl bg-purple-50 flex items-center justify-center">
+                  <Timer className="h-4 w-4 text-purple-500" />
+                </div>
+                Durée Moyenne
+              </div>
+              <p className="text-3xl font-extrabold text-gray-900">{globalMetrics.averageConnectionTime}</p>
+              <p className="text-xs text-gray-400 mt-1.5 font-medium">minutes par session</p>
+            </div>
+            <div className="ivos-kpi">
+              <div className="flex items-center gap-2 text-xs text-gray-500 font-semibold uppercase tracking-wider mb-2">
+                <div className="w-8 h-8 rounded-xl bg-red-50 flex items-center justify-center">
+                  <AlertTriangle className="h-4 w-4 text-red-500" />
+                </div>
+                Actions Critiques
+              </div>
+              <p className="text-3xl font-extrabold text-gray-900">{globalMetrics.criticalActionsLast24h}</p>
+              <p className="text-xs text-gray-400 mt-1.5 font-medium">dans les 24h</p>
+            </div>
+          </div>
+
+          {/* Top 5 Users and Module Stats */}
+          <div className="grid lg:grid-cols-2 gap-6">
+            {/* Top 5 Users */}
+            <div className="ivos-card">
+              <h3 className="text-sm font-bold text-gray-900 mb-4 flex items-center gap-2">
+                <TrendingUp className="w-5 h-5 text-blue-600" />
+                Top 5 Utilisateurs Actifs
+              </h3>
+              <div className="space-y-3">
+                {topUsersStats.map((stat, idx) => (
+                  <button
+                    key={stat.user.id}
+                    onClick={() => setSelectedUserForAnalytics(stat.user)}
+                    className="w-full text-left p-3 rounded-lg border border-gray-200 hover:border-blue-300 hover:bg-blue-50/30 transition-all group"
+                  >
+                    <div className="flex items-center justify-between mb-2">
+                      <div className="flex items-center gap-2 flex-1 min-w-0">
+                        <Avatar user={stat.user} size="sm" online={onlineUserIds.includes(stat.user.id)} />
+                        <div className="min-w-0 flex-1">
+                          <p className="font-semibold text-gray-900 truncate">{stat.user.fullName}</p>
+                          <p className="text-xs text-gray-500">{idx + 1}. Position</p>
+                        </div>
+                      </div>
+                      <span className="ivos-badge-blue flex-shrink-0">{stat.hours}h</span>
+                    </div>
+                    <div className="flex gap-2 text-xs text-gray-600">
+                      <span>📊 {stat.actions} actions</span>
+                      {stat.lastActivity && <span className="text-gray-400">• Actif aujourd'hui</span>}
+                    </div>
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Top Module */}
+            <div className="ivos-card">
+              <h3 className="text-sm font-bold text-gray-900 mb-4 flex items-center gap-2">
+                <Globe className="w-5 h-5 text-emerald-600" />
+                Module le Plus Utilisé
+              </h3>
+              <div className="text-center py-6">
+                <p className="text-4xl font-bold text-emerald-600 mb-2">{globalMetrics.topModule.name}</p>
+                <p className="text-sm text-gray-600 mb-4">{globalMetrics.topModule.count} utilisations</p>
+                <div className="w-full bg-gray-200 rounded-full h-2">
+                  <div className="bg-emerald-500 h-2 rounded-full" style={{ width: '75%' }}></div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Selected User Analytics Detail */}
+          {selectedUserForAnalytics && selectedUserAnalytics && (
+            <div className="ivos-card border-l-4 border-blue-600 p-6">
+              <div className="flex items-center justify-between mb-6">
+                <div className="flex items-center gap-3">
+                  <Avatar user={selectedUserForAnalytics} size="lg" online={onlineUserIds.includes(selectedUserForAnalytics.id)} />
+                  <div>
+                    <h3 className="text-lg font-bold text-gray-900">{selectedUserForAnalytics.fullName}</h3>
+                    <p className="text-sm text-gray-500">{selectedUserForAnalytics.email}</p>
+                  </div>
+                </div>
+                <button
+                  onClick={() => setSelectedUserForAnalytics(null)}
+                  className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+                >
+                  <X className="w-5 h-5 text-gray-500" />
+                </button>
+              </div>
+
+              <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6 pb-6 border-b border-gray-200">
+                <div>
+                  <p className="text-xs text-gray-500 font-semibold mb-1">Heures Totales</p>
+                  <p className="text-2xl font-bold text-gray-900">{selectedUserAnalytics.totalConnectionHours}</p>
+                </div>
+                <div>
+                  <p className="text-xs text-gray-500 font-semibold mb-1">Actions Totales</p>
+                  <p className="text-2xl font-bold text-gray-900">{selectedUserAnalytics.totalActions}</p>
+                </div>
+                <div>
+                  <p className="text-xs text-gray-500 font-semibold mb-1">Actions Critiques</p>
+                  <p className="text-2xl font-bold text-red-600">{selectedUserAnalytics.criticalActionsCount}</p>
+                </div>
+                <div>
+                  <p className="text-xs text-gray-500 font-semibold mb-1">Durée Moyenne Session</p>
+                  <p className="text-2xl font-bold text-gray-900">{selectedUserAnalytics.averageSessionDuration} min</p>
+                </div>
+              </div>
+
+              <div className="grid lg:grid-cols-2 gap-6">
+                {/* Weekly Stats Chart */}
+                <div>
+                  <h4 className="text-sm font-bold text-gray-900 mb-3">Statistiques Hebdomadaires</h4>
+                  <ResponsiveContainer width="100%" height={300}>
+                    <RechartsLineChart data={selectedUserAnalytics.weeklyStats}>
+                      <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
+                      <XAxis dataKey="day" stroke="#6b7280" style={{ fontSize: '12px' }} />
+                      <YAxis stroke="#6b7280" style={{ fontSize: '12px' }} />
+                      <Tooltip
+                        contentStyle={{
+                          backgroundColor: '#fff',
+                          border: '1px solid #e5e7eb',
+                          borderRadius: '8px',
+                          boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
+                        }}
+                      />
+                      <RechartsLine type="monotone" dataKey="hours" stroke="#3b82f6" strokeWidth={2} dot={{ fill: '#3b82f6' }} />
+                    </RechartsLineChart>
+                  </ResponsiveContainer>
+                </div>
+
+                {/* Top Modules */}
+                <div>
+                  <h4 className="text-sm font-bold text-gray-900 mb-3">Top 5 Modules Consultés</h4>
+                  <div className="space-y-2">
+                    {selectedUserAnalytics.topModules.map((m, idx) => (
+                      <div key={idx} className="flex items-center justify-between p-2 rounded-lg hover:bg-gray-50">
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm font-semibold text-gray-900 capitalize">{m.module}</p>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <span className="text-xs font-bold text-blue-600">{m.count}</span>
+                          <span className="text-xs text-gray-500">{m.percentage}%</span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Activity Log Filters */}
+          <div className="ivos-card">
+            <h3 className="text-sm font-bold text-gray-900 mb-4">Filtres du Journal d'Activité</h3>
+            <div className="grid grid-cols-2 lg:grid-cols-5 gap-3 pb-4 border-b border-gray-200 mb-4">
+              <select
+                value={analyticsDateFilter}
+                onChange={e => setAnalyticsDateFilter(e.target.value as any)}
+                className="px-3 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-900 bg-white hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              >
+                <option value="today">Aujourd'hui</option>
+                <option value="yesterday">Hier</option>
+                <option value="week">Cette semaine</option>
+                <option value="month">Ce mois</option>
+                <option value="all">Tout</option>
+              </select>
+
+              <select
+                value={analyticsUserFilter}
+                onChange={e => setAnalyticsUserFilter(e.target.value)}
+                className="px-3 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-900 bg-white hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              >
+                <option value="all">Tous les Utilisateurs</option>
+                {approvedUsers.map(u => (
+                  <option key={u.id} value={u.id}>
+                    {u.fullName}
+                  </option>
+                ))}
+              </select>
+
+              <select
+                value={analyticsSeverityFilter}
+                onChange={e => setAnalyticsSeverityFilter(e.target.value)}
+                className="px-3 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-900 bg-white hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              >
+                <option value="all">Toutes Sévérités</option>
+                <option value="low">Info</option>
+                <option value="medium">Moyen</option>
+                <option value="high">Élevé</option>
+                <option value="critical">Critique</option>
+              </select>
+
+              <select
+                value={analyticsModuleFilter}
+                onChange={e => setAnalyticsModuleFilter(e.target.value)}
+                className="px-3 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-900 bg-white hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              >
+                <option value="all">Tous les Modules</option>
+                {Object.entries(MODULE_LABELS).map(([key, label]) => (
+                  <option key={key} value={key}>
+                    {label}
+                  </option>
+                ))}
+              </select>
+
+              <input
+                type="text"
+                placeholder="Rechercher..."
+                value={analyticsSearchText}
+                onChange={e => setAnalyticsSearchText(e.target.value)}
+                className="px-3 py-2 border border-gray-300 rounded-lg text-sm text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
+
+            {/* Activity Log Table */}
+            <div className="overflow-x-auto rounded-lg border border-gray-200">
+              <table className="min-w-full text-sm">
+                <thead className="bg-gray-50 border-b border-gray-200">
+                  <tr>
+                    <th className="px-4 py-3 text-left font-semibold text-gray-700">Utilisateur</th>
+                    <th className="px-4 py-3 text-left font-semibold text-gray-700">Action</th>
+                    <th className="px-4 py-3 text-left font-semibold text-gray-700">Détails</th>
+                    <th className="px-4 py-3 text-left font-semibold text-gray-700">Module</th>
+                    <th className="px-4 py-3 text-left font-semibold text-gray-700">Date & Heure</th>
+                    <th className="px-4 py-3 text-left font-semibold text-gray-700">Appareil</th>
+                    <th className="px-4 py-3 text-center font-semibold text-gray-700">Sévérité</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {filteredActivityLogs.slice(0, 50).map((log, idx) => {
+                    const sev = SEVERITY_STYLES[log.severity]
+                    return (
+                      <tr
+                        key={log.id}
+                        className={`${idx % 2 === 0 ? 'bg-white' : 'bg-gray-50'} border-b border-gray-200 hover:bg-blue-50 transition-colors`}
+                      >
+                        <td className="px-4 py-3 font-semibold text-gray-900">{log.userName}</td>
+                        <td className="px-4 py-3 text-gray-700">{log.action}</td>
+                        <td className="px-4 py-3 text-gray-600 max-w-xs truncate">{log.details}</td>
+                        <td className="px-4 py-3 text-gray-700 capitalize">{log.module}</td>
+                        <td className="px-4 py-3 text-gray-600 whitespace-nowrap">
+                          {new Date(log.timestamp).toLocaleDateString('fr-FR', { day: '2-digit', month: 'short' })}
+                          <br />
+                          <span className="text-xs text-gray-400">
+                            {new Date(log.timestamp).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit', second: '2-digit' })}
+                          </span>
+                        </td>
+                        <td className="px-4 py-3 text-xs text-gray-600">{log.device || 'N/A'}</td>
+                        <td className="px-4 py-3 text-center">
+                          <span className={`px-2 py-1 rounded-full font-bold text-xs ${sev.bg} ${sev.text}`}>{sev.label}</span>
+                        </td>
+                      </tr>
+                    )
+                  })}
+                </tbody>
+              </table>
+              {filteredActivityLogs.length === 0 && (
+                <div className="text-center py-8 text-gray-500">
+                  Aucune activité trouvée pour les critères sélectionnés
+                </div>
+              )}
+            </div>
+
+            {filteredActivityLogs.length > 50 && (
+              <div className="text-center py-3 text-sm text-gray-500 border-t border-gray-200 mt-2">
+                Affichage des 50 premières entrées sur {filteredActivityLogs.length}
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* ═══ DETAIL MODAL ═══ */}
+      <Modal isOpen={!!detailEntry} onClose={() => setDetailEntry(null)} title="Détail de l'entrée d'audit" size="lg">
+        {detailEntry && (
+          <div className="space-y-4 py-2 text-sm">
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <p className="text-[10px] text-gray-500 uppercase font-semibold">Date & Heure</p>
+                <p className="font-medium text-gray-900">{new Date(detailEntry.timestamp).toLocaleString('fr-FR')}</p>
+              </div>
+              <div>
+                <p className="text-[10px] text-gray-500 uppercase font-semibold">Utilisateur</p>
+                <p className="font-medium text-gray-900">
+                  {detailEntry.userName} <span className="text-gray-400">({detailEntry.userRole})</span>
+                </p>
+              </div>
+              <div>
+                <p className="text-[10px] text-gray-500 uppercase font-semibold">Action</p>
+                <p className="font-medium text-gray-900">{detailEntry.action}</p>
+              </div>
+              <div>
+                <p className="text-[10px] text-gray-500 uppercase font-semibold">Module / Entité</p>
+                <p className="font-medium text-gray-900">
+                  {detailEntry.module} — {detailEntry.entity} #{detailEntry.entityId}
+                </p>
+              </div>
+            </div>
+            <div>
+              <p className="text-[10px] text-gray-500 uppercase font-semibold">Description</p>
+              <p className="font-medium text-gray-900">{detailEntry.description}</p>
+            </div>
+
+            {/* Old / New value diff */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {detailEntry.oldValue && (
+                <div className="bg-red-50 rounded-xl p-3">
+                  <p className="text-[10px] text-red-600 uppercase font-bold mb-2">Ancienne Valeur</p>
+                  <pre className="text-xs text-red-800 whitespace-pre-wrap break-words font-mono bg-red-100/50 rounded-lg p-2 max-h-60 overflow-y-auto">
+                    {JSON.stringify(detailEntry.oldValue, null, 2)}
+                  </pre>
+                </div>
+              )}
+              {detailEntry.newValue && (
+                <div className="bg-emerald-50 rounded-xl p-3">
+                  <p className="text-[10px] text-emerald-600 uppercase font-bold mb-2">Nouvelle Valeur</p>
+                  <pre className="text-xs text-emerald-800 whitespace-pre-wrap break-words font-mono bg-emerald-100/50 rounded-lg p-2 max-h-60 overflow-y-auto">
+                    {JSON.stringify(detailEntry.newValue, null, 2)}
+                  </pre>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+      </Modal>
+    </div>
+  )
+}

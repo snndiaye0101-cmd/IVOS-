@@ -1,0 +1,194 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>{{numeroBSDS}}</title>
+  <style>
+    :root {
+      --ivos: #1a5c3a;
+      --ivos-soft: #edf5f0;
+      --line: #d7e3da;
+      --text: #1f2937;
+      --muted: #6b7280;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      background: linear-gradient(180deg, #edf5f0 0%, #f7faf8 100%);
+      color: var(--text);
+      font-family: Arial, sans-serif;
+      padding: 24px;
+    }
+    .page {
+      max-width: 1180px;
+      margin: 0 auto;
+      background: white;
+      border-radius: 18px;
+      overflow: hidden;
+      box-shadow: 0 30px 80px rgba(26, 92, 58, 0.14);
+    }
+    .hero {
+      padding: 28px;
+      background: radial-gradient(circle at top right, rgba(255,255,255,0.16), transparent 35%), linear-gradient(135deg, #1a5c3a, #2a7a4f);
+      color: white;
+    }
+    .hero h1 { margin: 0 0 6px; font-size: 28px; }
+    .hero p { margin: 0; opacity: 0.86; }
+    .chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 18px;
+    }
+    .chip {
+      padding: 8px 12px;
+      border-radius: 999px;
+      background: rgba(255,255,255,0.14);
+      border: 1px solid rgba(255,255,255,0.14);
+      font-size: 12px;
+      font-weight: 700;
+    }
+    .content {
+      padding: 22px;
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 18px;
+    }
+    .section {
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      overflow: hidden;
+      background: white;
+    }
+    .section.full { grid-column: 1 / -1; }
+    .section-header {
+      padding: 14px 18px;
+      background: var(--ivos-soft);
+      border-bottom: 1px solid var(--line);
+    }
+    .section-header strong { color: var(--ivos); }
+    .fields { padding: 16px 18px; display: grid; gap: 12px; }
+    .field { display: grid; grid-template-columns: 220px 1fr; gap: 10px; align-items: start; }
+    .label {
+      font-size: 12px;
+      color: var(--muted);
+      text-transform: uppercase;
+      font-weight: 700;
+      letter-spacing: 0.03em;
+      padding-top: 10px;
+    }
+    .value {
+      min-height: 42px;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 10px 12px;
+      background: #fcfdfc;
+    }
+    .signatures {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 12px;
+    }
+    .signature {
+      border: 1px dashed #9cb7a6;
+      border-radius: 14px;
+      min-height: 140px;
+      padding: 12px;
+      background: #fafdfb;
+    }
+    .signature img { max-width: 100%; max-height: 62px; object-fit: contain; display: block; margin-top: 14px; }
+    .footer {
+      padding: 16px 22px 24px;
+      color: var(--muted);
+      font-size: 12px;
+    }
+    @media (max-width: 860px) {
+      body { padding: 10px; }
+      .content, .signatures { grid-template-columns: 1fr; }
+      .field { grid-template-columns: 1fr; }
+    }
+  </style>
+  <script>
+    window.validateForm = function validateForm() {
+      const required = ['producteurNom', 'denominationDechet', 'transporteurSociete'];
+      return required.every((name) => {
+        const value = document.querySelector('[data-token="' + name + '"]');
+        return value && value.textContent && value.textContent.trim().length > 0;
+      });
+    };
+  </script>
+</head>
+<body>
+  <div class="page">
+    <div class="hero">
+      <h1>Bordereau de Suivi des Dechets Speciaux</h1>
+      <p>Template HTML public pour affichage immediat dans l interface Operations.</p>
+      <div class="chips">
+        <span class="chip">Numero: {{numeroBSDS}}</span>
+        <span class="chip">Archive: {{numeroArchive}}</span>
+        <span class="chip">Operation: {{missionNumero}}</span>
+        <span class="chip">Statut: {{status}}</span>
+      </div>
+    </div>
+    <div class="content">
+      <section class="section">
+        <div class="section-header"><strong>Section 1</strong> Producteur du dechet</div>
+        <div class="fields">
+          <div class="field"><div class="label">Nom client</div><div class="value" data-token="producteurNom">{{producteurNom}}</div></div>
+          <div class="field"><div class="label">Email producteur</div><div class="value">{{producteurEmail}}</div></div>
+          <div class="field"><div class="label">Reference</div><div class="value">{{referenceInterne}}</div></div>
+        </div>
+      </section>
+      <section class="section">
+        <div class="section-header"><strong>Section 2</strong> Lieu de collecte</div>
+        <div class="fields">
+          <div class="field"><div class="label">Site d affectation</div><div class="value">{{lieuCollecte}}</div></div>
+          <div class="field"><div class="label">Origine du dechet</div><div class="value">{{origineDechet}}</div></div>
+          <div class="field"><div class="label">Etat physique</div><div class="value">{{etatDechet}}</div></div>
+        </div>
+      </section>
+      <section class="section full">
+        <div class="section-header"><strong>Section 3</strong> Denomination du dechet</div>
+        <div class="fields">
+          <div class="field"><div class="label">Type de dechet</div><div class="value" data-token="denominationDechet">{{denominationDechet}}</div></div>
+          <div class="field"><div class="label">Code MEDD</div><div class="value">{{codeDechet}}</div></div>
+        </div>
+      </section>
+      <section class="section full">
+        <div class="section-header"><strong>Section 5</strong> Collecteur transporteur</div>
+        <div class="fields">
+          <div class="field"><div class="label">Societe</div><div class="value" data-token="transporteurSociete">{{transporteurSociete}}</div></div>
+          <div class="field"><div class="label">Vehicule</div><div class="value">{{vehicule}}</div></div>
+          <div class="field"><div class="label">Chauffeur</div><div class="value">{{chauffeur}}</div></div>
+        </div>
+      </section>
+      <section class="section">
+        <div class="section-header"><strong>Section 8</strong> Destination</div>
+        <div class="fields">
+          <div class="field"><div class="label">Site final</div><div class="value">{{destinationSite}}</div></div>
+          <div class="field"><div class="label">Date reception</div><div class="value">{{dateReception}}</div></div>
+        </div>
+      </section>
+      <section class="section">
+        <div class="section-header"><strong>Section 9</strong> Traitement</div>
+        <div class="fields">
+          <div class="field"><div class="label">Mode</div><div class="value">{{modeTraitement}}</div></div>
+          <div class="field"><div class="label">Conformite</div><div class="value">{{certification}}</div></div>
+        </div>
+      </section>
+      <section class="section full">
+        <div class="section-header"><strong>Signatures synchronisees</strong></div>
+        <div class="fields">
+          <div class="signatures">
+            <div class="signature"><strong>Transporteur</strong><div>{{transporteurNom}}</div><img src="{{sigTransporteur}}" alt="transporteur" /></div>
+            <div class="signature"><strong>Destination</strong><div>{{destinataireNom}}</div><img src="{{sigDestinataire}}" alt="destinataire" /></div>
+            <div class="signature"><strong>Traitement</strong><div>{{traitementNom}}</div><img src="{{sigTraitement}}" alt="traitement" /></div>
+          </div>
+        </div>
+      </section>
+    </div>
+    <div class="footer">Template statique charge depuis {{templatePath}}. Aucun dangerouslySetInnerHTML requis: rendu via iframe srcDoc.</div>
+  </div>
+</body>
+</html>
