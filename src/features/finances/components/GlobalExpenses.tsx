@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { formatCleanAmount } from '../../../shared/utils/formatAmount';
 
 const daily = [
   { label: "Péages", value: 12000 },
@@ -40,7 +41,7 @@ const GlobalExpenses: React.FC = () => {
             <div className={`w-3 h-3 rounded-full ${item.label === "Salaires" ? "bg-amber-400" : "bg-emerald-400"}`} />
             <div className="flex-1">
               <div className="text-xs text-slate-500">{item.label}</div>
-              <div className={`text-lg font-semibold ${item.label === "Salaires" ? "text-amber-700" : "text-slate-800"}`}>{item.value.toLocaleString()} FCFA</div>
+              <div className={`text-lg font-semibold ${item.label === "Salaires" ? "text-amber-700" : "text-slate-800"}`}>{formatCleanAmount(item.value, 'FCFA')}</div>
             </div>
           </div>
         ))}

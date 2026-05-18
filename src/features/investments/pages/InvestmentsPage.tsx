@@ -19,6 +19,7 @@ import {
   X,
 } from 'lucide-react';
 import Modal from '../../../components/ui/Modal';
+import { formatCleanAmount } from '@/shared/utils/formatAmount';
 import { useAuth } from '../../../shared/contexts/AuthContext';
 import {
   attachVisualProof,
@@ -170,7 +171,7 @@ export default function InvestmentsPage() {
   }
 
   function formatMoney(value: number) {
-    return `${new Intl.NumberFormat('fr-FR').format(value)} FCFA`;
+    return formatCleanAmount(value, 'FCFA');
   }
 
   function getProjectExpenses(projectId: string) {

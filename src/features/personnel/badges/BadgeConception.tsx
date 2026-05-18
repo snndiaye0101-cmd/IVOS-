@@ -4,7 +4,9 @@ import { generateQRDataUrl } from '../services/badgeService';
 import BadgeRectoVerso from './BadgeRectoVerso';
 import html2canvas from 'html2canvas';
 import { Paintbrush, QrCode, Printer, ChevronDown, Loader2, CreditCard } from 'lucide-react';
-import { loadBaseConfig } from '../../settings/services/baseConfigStore';
+import { DEFAULT_BASE_CONFIG } from '../../settings/services/baseConfigStore';
+import { loadSiteSettings } from '../../settings/services/siteConfigStore';
+import { useSite } from '../../../shared/contexts/SiteContext';
 
 const BADGE_BRAND = {
   primary: '#1652C9',
@@ -18,12 +20,25 @@ const BadgeConception = () => {
   const [selectedAgent, setSelectedAgent] = useState<PersonnelAgent | null>(null);
   const [qrUrl, setQrUrl] = useState('');
   const [loadingQR, setLoadingQR] = useState(false);
-  const [baseConfig, setBaseConfig] = useState(() => loadBaseConfig());
+  const siteCtx = useSite();
+  const [baseConfig, setBaseConfig] = useState(() => {
+    try {
+      const sid = siteCtx.activeSite?.id;
+      if (sid) return loadSiteSettings(sid).baseConfig;
+    } catch {}
+    return DEFAULT_BASE_CONFIG;
+  });
 
   useEffect(() => {
     setAgents(personnelStore.load());
-    setBaseConfig(loadBaseConfig());
-  }, []);
+    try {
+      const sid = siteCtx.activeSite?.id;
+      if (sid) setBaseConfig(loadSiteSettings(sid).baseConfig);
+      else setBaseConfig(DEFAULT_BASE_CONFIG);
+    } catch {
+      setBaseConfig(DEFAULT_BASE_CONFIG);
+    }
+  }, [siteCtx.activeSite]);
 
   useEffect(() => {
     setSelectedAgent(agents.find(a => a.id === selectedId) || null);

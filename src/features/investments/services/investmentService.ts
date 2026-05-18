@@ -61,14 +61,17 @@ export function getInvestmentProjects(options?: { archived?: boolean }): Investm
   const all = load<InvestmentProject>(PROJECTS_KEY).map(project => ({
     ...project,
     dateDebut: project.dateDebut || project.createdAt.slice(0, 10),
-    acomptesPrevus: Array.isArray(project.acomptesPrevus)
-      ? project.acomptesPrevus.map((line: Partial<InvestmentInstallment>) => ({
-          id: line.id ?? '',
-          libelle: line.libelle || '',
-          montant: typeof line.montant === 'number' ? line.montant : (line.montantPrevu || 0),
-          datePrevisionnelle: line.datePrevisionnelle || project.dateLivraison || project.dateDebut || '',
-          decaisse: Boolean(line.decaisse),
-        }))
+        acomptesPrevus: Array.isArray(project.acomptesPrevus)
+        ? project.acomptesPrevus.map((line: Partial<InvestmentInstallment>) => {
+            const montantPrevuVal = (line as unknown as Record<string, unknown>)['montantPrevu'];
+            return {
+              id: line.id ?? '',
+              libelle: line.libelle || '',
+              montant: typeof line.montant === 'number' ? line.montant : (typeof montantPrevuVal === 'number' ? montantPrevuVal : 0),
+              datePrevisionnelle: line.datePrevisionnelle || project.dateLivraison || project.dateDebut || '',
+              decaisse: Boolean(line.decaisse),
+            };
+          })
       : [],
   }));
   if (options?.archived === undefined) {
@@ -315,7 +318,7 @@ export function getInvestmentDocuments(projectId?: string): InvestmentDocument[]
 
     if (legacyType === 'Photo avancement') normalizedType = 'Photo site';
     else if (legacyType === 'Photo site') normalizedType = 'Photo site';
-    else if (legacyType === 'Contrat sign' || legacyType === 'Contrat') normalizedType = 'Contrat sign';
+      else if (legacyType === 'Contrat sign' || legacyType === 'Contrat') normalizedType = 'Contrat signé';
     else if (legacyType === 'Plan technique' || legacyType === 'Plan') normalizedType = 'Plan technique';
     else if (legacyType === 'Facture') normalizedType = 'Facture';
     else normalizedType = 'Autre';

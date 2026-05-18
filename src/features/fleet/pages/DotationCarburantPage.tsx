@@ -115,7 +115,9 @@ const saveCards = (data: FuelCard[]) => {
   localStorage.setItem(CARDS_STORAGE_KEY, JSON.stringify(data))
 }
 
-const formatCFA = (v: number) => v.toLocaleString('fr-FR') + ' CFA'
+import { formatCleanAmount } from '../../../shared/utils/formatAmount';
+
+const formatCFA = (v: number) => formatCleanAmount(v, 'FCFA')
 
 const defaultForm = {
   vehicleRegistration: '',

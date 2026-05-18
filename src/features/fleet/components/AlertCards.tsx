@@ -1,31 +1,7 @@
 import { AlertTriangle, Droplets, FileCheck, ShieldAlert } from 'lucide-react';
+import type { Vehicle } from '../services/vehiclesStore';
 
-export interface Vehicle {
-  id: string;
-  registration: string;
-  brand: string;
-  model: string;
-  type: string;
-  capacity: string;
-  status: 'Disponible' | 'En opération' | 'Maintenance' | 'Hors service';
-  year: number;
-  purchaseDate: string;
-  commissionDate: string;
-  mileage: number;
-  fuelType: 'Diesel' | 'Essence' | 'Hybride' | 'Électrique';
-  insuranceExpiry: string;
-  technicalControlExpiry: string;
-  lastOilChange: string;
-  nextOilChange: string;
-  lastMaintenance?: string;
-  maintenanceHistory: any[];
-  documents: any[];
-  fuelRecords: any[];
-  expenses: any[];
-  notes?: string;
-  assignedDriver?: string;
-  siteCode?: string;
-}
+// Use the canonical `Vehicle` type from the fleet store; local helpers remain below.
 
 export interface Alert {
   type: 'vidange' | 'ct' | 'assurance';

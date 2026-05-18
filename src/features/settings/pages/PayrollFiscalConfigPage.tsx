@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { ChevronDown, HelpCircle, Pencil, Save, SlidersHorizontal, Globe2, Percent, ToggleLeft } from 'lucide-react';
 import { payrollSettingsStore, type PayrollBracket, type PayrollCountrySettings, type PayrollSettings } from '../../finances/services/payrollSettingsStore';
+import { DEFAULT_COUNTRY_ALPHA2 } from '../../../shared/constants'
 
 type CountryCode = 'SN' | 'CI' | 'GN';
 
@@ -147,15 +148,16 @@ export default function PayrollFiscalConfigPage() {
             <h2 className="text-lg font-bold text-gray-900">Sélecteur de Pays</h2>
             <p className="text-sm text-gray-500 mt-1">Choisissez un pays pour mettre à jour instantanément les taux et tranches ci-dessous.</p>
           </div>
-          <div className="relative w-full max-w-xs">
-            <select value={country} onChange={(event) => setCountry(event.target.value as CountryCode)} className="appearance-none w-full rounded-xl border border-gray-200 bg-gray-50 py-2.5 pl-10 pr-9 text-sm font-semibold text-gray-800">
-              {(Object.keys(COUNTRY_LABELS) as CountryCode[]).map((code) => (
-                <option key={code} value={code}>{COUNTRY_LABELS[code]}</option>
-              ))}
-            </select>
-            <Globe2 className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
-            <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
-          </div>
+                  <div className="relative w-full max-w-xs">
+                    {/* Sénégal-only selector: disable other country choices */}
+                    <select value={country} onChange={(event) => setCountry(event.target.value as CountryCode)} className="appearance-none w-full rounded-xl border border-gray-200 bg-gray-50 py-2.5 pl-10 pr-9 text-sm font-semibold text-gray-800">
+                      {([DEFAULT_COUNTRY_ALPHA2] as CountryCode[]).map((code) => (
+                        <option key={code} value={code}>{COUNTRY_LABELS[code]}</option>
+                      ))}
+                    </select>
+                    <Globe2 className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+                    <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+                  </div>
         </div>
       </div>
 

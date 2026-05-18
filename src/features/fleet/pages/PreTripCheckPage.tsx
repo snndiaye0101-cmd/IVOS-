@@ -9,6 +9,7 @@ import {
   Clock
 } from 'lucide-react'
 import { vehiclesStore } from '../services/vehiclesStore'
+import type { Vehicle } from '../services/vehiclesStore'
 import { driversStore } from '../services/driversStore'
 import { personalVehiclesStore } from '../services/personalVehiclesStore'
 import { sendNotification } from '../../../shared/services/notificationService'
@@ -267,18 +268,18 @@ export default function PreTripCheckPage() {
   // Load vehicles, drivers & mechanics
   const [fleetVehicles, setFleetVehicles] = useState<Vehicle[]>([])
   const [personalVehicles, setPersonalVehicles] = useState<Vehicle[]>([])
-  const [rawDrivers, setRawDrivers] = useState<{ id: string; name: string; role: string }[]>([])
-  const [mechanics, setMechanics] = useState<{ id: string; name: string; position: string }[]>([])
+  const [rawDrivers, setRawDrivers] = useState<any[]>([])
+  const [mechanics, setMechanics] = useState<any[]>([])
 
   useEffect(() => {
     setFleetVehicles(vehiclesStore.load())
-    setPersonalVehicles(personalVehiclesStore.load())
-    setRawDrivers(driversStore.load())
+    setPersonalVehicles(personalVehiclesStore.load() as any)
+    setRawDrivers(driversStore.load() as any)
     setMechanics(loadMechanics())
 
     const handleFleet = () => setFleetVehicles(vehiclesStore.load())
-    const handlePersonal = () => setPersonalVehicles(personalVehiclesStore.load())
-    const handleDrivers = () => setRawDrivers(driversStore.load())
+    const handlePersonal = () => setPersonalVehicles(personalVehiclesStore.load() as any)
+    const handleDrivers = () => setRawDrivers(driversStore.load() as any)
     const handleMechanics = () => setMechanics(loadMechanics())
     window.addEventListener('fleetVehicles:updated', handleFleet)
     window.addEventListener('personalVehicles:updated', handlePersonal)

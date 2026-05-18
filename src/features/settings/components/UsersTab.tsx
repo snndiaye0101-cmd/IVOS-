@@ -5,9 +5,10 @@
 import React, { useState, useMemo } from 'react'
 import Modal from '../../../components/ui/Modal'
 import type { User, UserSession } from '../../../shared/services/authStore'
+import { SIDEBAR_PERMISSION_TREE, type PermissionRouteItem } from '../../../shared/services/permissionStore'
 import type { AppModule } from '../../../shared/services/permissionStore'
 import { Avatar, StatusBadge, SearchFilter } from './AdminSharedComponents'
-import { Eye, Trash2, Shield, UserCheck, UserX, Lock, Plus, Save, RotateCcw, Check, X } from 'lucide-react'
+import { Eye, Trash2, Shield, UserCheck, UserX, Lock, Plus, Save, RotateCcw, Check, X, ChevronDown, ChevronRight } from 'lucide-react'
 
 type ActionResult = { success: boolean; message: string }
 
@@ -46,6 +47,79 @@ const MODULE_LABELS: Record<AppModule, string> = {
 const PERMISSION_LEVELS = ['view', 'edit', 'create', 'delete'] as const
 const PERMISSION_LABELS: Record<(typeof PERMISSION_LEVELS)[number], string> = { view: 'Voir', edit: 'Modifier', create: 'Créer', delete: 'Supprimer' }
 
+type PermissionAction = (typeof PERMISSION_LEVELS)[number]
+
+type CategoryModule = {
+  module: AppModule
+  label: string
+  routes: PermissionRouteItem[]
+}
+
+type PermissionCategoryTree = {
+  section: string
+  modules: CategoryModule[]
+}
+
+const CATEGORY_TREE: PermissionCategoryTree[] = SIDEBAR_PERMISSION_TREE.map(section => {
+  const modulesMap = section.items.reduce<Record<AppModule, CategoryModule>>((acc, item) => {
+    if (!acc[item.module]) {
+      acc[item.module] = { module: item.module, label: MODULE_LABELS[item.module], routes: [] }
+    }
+    acc[item.module].routes.push(item)
+    return acc
+  }, {} as Record<AppModule, CategoryModule>)
+
+  return {
+    section: section.section,
+    modules: Object.values(modulesMap),
+  }
+})
+
+const getPermissionKey = (target: string, action: PermissionAction) => `${target}:${action}`
+
+const getPermissionState = (userPermissions: Record<string, boolean>, target: string, action: PermissionAction) => {
+  const explicit = userPermissions[getPermissionKey(target, action)]
+  if (typeof explicit === 'boolean') return explicit
+  const moduleMatch = Object.keys(userPermissions).find(key => key.startsWith(`${target}:`))
+  return !!explicit || false
+}
+
+const resolveRoutePermission = (userPermissions: Record<string, boolean>, route: PermissionRouteItem) => {
+  const state: Record<PermissionAction, boolean> = {
+    view: false,
+    edit: false,
+    create: false,
+    delete: false,
+  }
+
+  PERMISSION_LEVELS.forEach(action => {
+    const routeKey = getPermissionKey(route.path, action)
+    const moduleKey = getPermissionKey(route.module, action)
+    if (routeKey in userPermissions) {
+      state[action] = userPermissions[routeKey]
+    } else {
+      state[action] = !!userPermissions[moduleKey]
+    }
+  })
+
+  return state
+}
+
+const getModuleLevel = (module: AppModule, userPermissions: Record<string, boolean>) => {
+  if (userPermissions[getPermissionKey(module, 'delete')] || userPermissions[getPermissionKey(module, 'create')] || userPermissions[getPermissionKey(module, 'edit')]) return 'all'
+  if (userPermissions[getPermissionKey(module, 'view')]) return 'view'
+  return 'none'
+}
+
+const makePermissionFlags = (target: string, level: 'none' | 'view' | 'all') => {
+  const flags: Record<string, boolean> = {}
+  flags[getPermissionKey(target, 'view')] = level !== 'none'
+  flags[getPermissionKey(target, 'edit')] = level === 'all'
+  flags[getPermissionKey(target, 'create')] = level === 'all'
+  flags[getPermissionKey(target, 'delete')] = level === 'all'
+  return flags
+}
+
 export function UsersTab({
   approvedUsers,
   pendingUsers,
@@ -67,6 +141,9 @@ export function UsersTab({
 }: UsersTabProps) {
   const [searchText, setSearchText] = useState('')
   const [filterStatus, setFilterStatus] = useState<'all' | 'approved' | 'pending'>('approved')
+  const [expandedSections, setExpandedSections] = useState<Record<string, boolean>>(
+    CATEGORY_TREE.reduce((acc, section) => ({ ...acc, [section.section]: true }), {} as Record<string, boolean>),
+  )
   const [previewUser, setPreviewUser] = useState<User | null>(null)
   const [userToDelete, setUserToDelete] = useState<User | null>(null)
   const [showCreateModal, setShowCreateModal] = useState(false)
@@ -79,6 +156,26 @@ export function UsersTab({
   const [isCreatingUser, setIsCreatingUser] = useState(false)
 
   const selectedUser = approvedUsers.find(u => u.id === selectedUserId)
+
+  const toggleSection = (section: string) => {
+    setExpandedSections(prev => ({ ...prev, [section]: !prev[section] }))
+  }
+
+  const handleModuleToggle = (module: AppModule, level: 'none' | 'view' | 'all') => {
+    const moduleRoutes = CATEGORY_TREE.flatMap(section => section.modules)
+      .find(item => item.module === module)?.routes || []
+
+    const flags = makePermissionFlags(module, level)
+    Object.entries(flags).forEach(([permission, granted]) => onPermissionChange(permission, granted))
+
+    moduleRoutes.forEach(route => {
+      Object.entries(makePermissionFlags(route.path, level)).forEach(([permission, granted]) => onPermissionChange(permission, granted))
+    })
+  }
+
+  const handleRouteToggle = (route: PermissionRouteItem, action: PermissionAction, currentValue: boolean) => {
+    onPermissionChange(getPermissionKey(route.path, action), !currentValue)
+  }
 
   // ──────────────────────────────────────────────────────────────
   // FILTERED DATA
@@ -391,42 +488,103 @@ export function UsersTab({
                 </div>
               )}
 
-              <div className="overflow-x-auto rounded-lg border border-gray-200">
-                <table className="w-full text-sm">
-                  <thead className="bg-gray-50 border-b border-gray-200">
-                    <tr>
-                      <th className="px-3 py-2 text-left text-xs font-semibold text-gray-700">Module</th>
-                      {PERMISSION_LEVELS.map(level => (
-                        <th key={level} className="px-2 py-2 text-center text-xs font-semibold text-gray-700">
-                          {PERMISSION_LABELS[level]}
-                        </th>
-                      ))}
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {MODULES.map(module => (
-                      <tr key={module} className="border-b border-gray-100 hover:bg-blue-50/40">
-                        <td className="px-3 py-2 text-sm font-medium text-gray-900">{MODULE_LABELS[module]}</td>
-                        {PERMISSION_LEVELS.map(level => {
-                          const permKey = `${module}:${level}`
-                          const isGranted = !!userPermissions[permKey]
+              <div className="space-y-4">
+                {CATEGORY_TREE.map(section => (
+                  <div key={section.section} className="overflow-hidden rounded-3xl border border-gray-200 bg-white">
+                    <button
+                      type="button"
+                      onClick={() => toggleSection(section.section)}
+                      className="flex w-full items-center justify-between gap-3 px-4 py-4 text-left"
+                    >
+                      <div>
+                        <p className="text-sm font-semibold text-gray-900">{section.section}</p>
+                        <p className="text-xs text-gray-500">Gestion des composants et autorisations par module.</p>
+                      </div>
+                      <ChevronDown
+                        className={`h-4 w-4 text-gray-500 transition-transform ${expandedSections[section.section] ? 'rotate-180' : ''}`}
+                      />
+                    </button>
+
+                    {expandedSections[section.section] && (
+                      <div className="space-y-4 border-t border-gray-200 px-4 pb-4">
+                        {section.modules.map(moduleBlock => {
+                          const moduleLevel = getModuleLevel(moduleBlock.module, userPermissions)
+                          const isActive = moduleLevel !== 'none'
                           return (
-                            <td key={level} className="px-2 py-2 text-center">
-                              <button
-                                onClick={() => onPermissionChange(permKey, !isGranted)}
-                                className={`mx-auto h-6 w-6 rounded-md flex items-center justify-center transition-colors ${
-                                  isGranted ? 'bg-green-100 text-green-700 hover:bg-green-200' : 'bg-gray-100 text-gray-400 hover:bg-gray-200'
-                                }`}
-                              >
-                                {isGranted ? <Check className="w-4 h-4" /> : <X className="w-4 h-4" />}
-                              </button>
-                            </td>
+                            <div key={moduleBlock.module} className="rounded-3xl border border-gray-100 bg-slate-50 p-4">
+                              <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                                <div>
+                                  <p className="text-sm font-semibold text-gray-900">{moduleBlock.label}</p>
+                                  <p className="text-xs text-gray-500">
+                                    {moduleBlock.routes.map(route => route.label).join(' • ')}
+                                  </p>
+                                </div>
+                                <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
+                                  <div className="inline-flex items-center gap-2 rounded-full border border-gray-200 bg-white px-3 py-1 text-xs font-semibold text-gray-700">
+                                    {isActive ? 'Activé' : 'Désactivé'}
+                                  </div>
+                                  <button
+                                    type="button"
+                                    onClick={() => handleModuleToggle(moduleBlock.module, isActive ? 'none' : 'view')}
+                                    className={`rounded-full px-3 py-2 text-xs font-semibold transition ${
+                                      isActive ? 'bg-red-100 text-red-700 hover:bg-red-200' : 'bg-blue-600 text-white hover:bg-blue-700'
+                                    }`}
+                                  >
+                                    {isActive ? 'Désactiver le module' : 'Activer le module'}
+                                  </button>
+                                </div>
+                              </div>
+
+                              <div className="mt-4 overflow-x-auto rounded-2xl border border-gray-200 bg-white">
+                                <table className="min-w-full text-sm">
+                                  <thead className="bg-gray-50 text-left text-xs font-semibold uppercase tracking-wide text-gray-600">
+                                    <tr>
+                                      <th className="px-3 py-3">Composant</th>
+                                      <th className="px-2 py-3 text-center">Voir</th>
+                                      <th className="px-2 py-3 text-center">Modifier</th>
+                                      <th className="px-2 py-3 text-center">Créer</th>
+                                      <th className="px-2 py-3 text-center">Supprimer</th>
+                                    </tr>
+                                  </thead>
+                                  <tbody>
+                                    {moduleBlock.routes.map(route => {
+                                      const routePerms = resolveRoutePermission(userPermissions, route)
+                                      return (
+                                        <tr key={route.path} className="border-t border-gray-100 hover:bg-slate-50">
+                                          <td className="px-3 py-3 align-middle">
+                                            <div>
+                                              <p className="font-medium text-gray-900">{route.label}</p>
+                                              <p className="text-xs text-gray-500">{route.path}</p>
+                                            </div>
+                                          </td>
+                                          {PERMISSION_LEVELS.map(action => (
+                                            <td key={action} className="px-2 py-3 text-center align-middle">
+                                              <button
+                                                type="button"
+                                                onClick={() => handleRouteToggle(route, action, routePerms[action])}
+                                                className={`mx-auto inline-flex h-7 w-7 items-center justify-center rounded-md transition ${
+                                                  routePerms[action]
+                                                    ? 'bg-green-100 text-green-700 hover:bg-green-200'
+                                                    : 'bg-gray-100 text-gray-400 hover:bg-gray-200'
+                                                }`}
+                                              >
+                                                {routePerms[action] ? <Check className="w-4 h-4" /> : <X className="w-4 h-4" />}
+                                              </button>
+                                            </td>
+                                          ))}
+                                        </tr>
+                                      )
+                                    })}
+                                  </tbody>
+                                </table>
+                              </div>
+                            </div>
                           )
                         })}
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
+                      </div>
+                    )}
+                  </div>
+                ))}
               </div>
             </div>
           )}

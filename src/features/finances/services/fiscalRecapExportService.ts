@@ -1,10 +1,11 @@
 import { jsPDF } from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import * as XLSX from 'xlsx';
+import { formatCleanAmount } from '../../../shared/utils/formatAmount';
 import type { FiscalRecap } from './fiscalReportingService';
 
-function formatAmount(value: number) {
-  return Math.round(value).toLocaleString('fr-FR');
+function formatAmount(value: number, currency: string) {
+  return formatCleanAmount(Math.round(value), currency);
 }
 
 function safeMonth(month: string) {
@@ -164,10 +165,10 @@ export function exportFiscalRecapToPdf(recap: FiscalRecap) {
   doc.setFontSize(10);
   doc.setTextColor(90, 100, 115);
   doc.text(`Pays: ${recap.countryCode}    Mois: ${recap.month}    Fiches: ${recap.slipCount}`, margin, 54);
-  doc.text(`Total salarial: ${formatAmount(recap.salarialTotal)} ${currency}`, margin, 72);
-  doc.text(`Total patronal: ${formatAmount(recap.patronalTotal)} ${currency}`, margin + 180, 72);
+  doc.text(`Total salarial: ${formatAmount(recap.salarialTotal, currency)}`, margin, 72);
+  doc.text(`Total patronal: ${formatAmount(recap.patronalTotal, currency)}`, margin + 180, 72);
   doc.setFont('helvetica', 'bold');
-  doc.text(`Total dû: ${formatAmount(recap.grandTotal)} ${currency}`, pageWidth - margin, 72, { align: 'right' });
+  doc.text(`Total dû: ${formatAmount(recap.grandTotal, currency)}`, pageWidth - margin, 72, { align: 'right' });
 
   autoTable(doc, {
     startY: 92,
@@ -175,9 +176,9 @@ export function exportFiscalRecapToPdf(recap: FiscalRecap) {
     head: [['Organisme', 'Salarial', 'Patronal', 'Total']],
     body: recap.rows.map((row) => [
       row.label,
-      `${formatAmount(row.salarial)} ${currency}`,
-      `${formatAmount(row.patronal)} ${currency}`,
-      `${formatAmount(row.total)} ${currency}`,
+      formatAmount(row.salarial, currency),
+      formatAmount(row.patronal, currency),
+      formatAmount(row.total, currency),
     ]),
     styles: {
       fontSize: 10,
@@ -206,12 +207,12 @@ export function exportFiscalRecapToPdf(recap: FiscalRecap) {
     head: [['Organisme', 'Base sal.', 'Taux sal.', 'Salarial', 'Base pat.', 'Taux pat.', 'Patronal']],
     body: recap.detailRows.map((row) => [
       row.label,
-      `${formatAmount(row.baseSalarial)} ${currency}`,
+      formatAmount(row.baseSalarial, currency),
       formatRate(row.tauxSalarial),
-      `${formatAmount(row.salarial)} ${currency}`,
-      `${formatAmount(row.basePatronal)} ${currency}`,
+      formatAmount(row.salarial, currency),
+      formatAmount(row.basePatronal, currency),
       formatRate(row.tauxPatronal),
-      `${formatAmount(row.patronal)} ${currency}`,
+      formatAmount(row.patronal, currency),
     ]),
     styles: {
       fontSize: 9,
@@ -241,7 +242,7 @@ export function exportFiscalRecapToPdf(recap: FiscalRecap) {
   doc.line(margin, totalY, pageWidth - margin, totalY);
   doc.setFont('helvetica', 'bold');
   doc.text('Total global', margin, totalY + 18);
-  doc.text(`${formatAmount(recap.grandTotal)} ${currency}`, pageWidth - margin, totalY + 18, { align: 'right' });
+  doc.text(formatAmount(recap.grandTotal, currency), pageWidth - margin, totalY + 18, { align: 'right' });
 
   doc.save(`recap-fiscal-${recap.countryCode.toLowerCase()}-${safeMonth(recap.month)}.pdf`);
 }
@@ -271,9 +272,9 @@ export function exportFiscalMonthlyStatementsByOrganism(recap: FiscalRecap) {
 
     doc.setFont('helvetica', 'bold');
     doc.setTextColor(31, 41, 55);
-    doc.text(`Salarial: ${formatAmount(row.salarial)} FCFA`, margin, 98);
-    doc.text(`Patronal: ${formatAmount(row.patronal)} FCFA`, margin + 190, 98);
-    doc.text(`Total: ${formatAmount(row.total)} FCFA`, pageWidth - margin, 98, { align: 'right' });
+    doc.text(`Salarial: ${formatCleanAmount(row.salarial, 'FCFA')}`, margin, 98);
+    doc.text(`Patronal: ${formatCleanAmount(row.patronal, 'FCFA')}`, margin + 190, 98);
+    doc.text(`Total: ${formatCleanAmount(row.total, 'FCFA')}`, pageWidth - margin, 98, { align: 'right' });
 
     const detailRows = recap.detailRows.filter((detail) => {
       const prefix = row.label.toLowerCase().split(' ')[0];
@@ -294,12 +295,12 @@ export function exportFiscalMonthlyStatementsByOrganism(recap: FiscalRecap) {
         patronal: row.patronal,
       }]).map((detail) => [
         detail.label,
-        `${formatAmount(detail.baseSalarial)} FCFA`,
+        formatCleanAmount(detail.baseSalarial, 'FCFA'),
         formatRate(detail.tauxSalarial),
-        `${formatAmount(detail.salarial)} FCFA`,
-        `${formatAmount(detail.basePatronal)} FCFA`,
+        formatCleanAmount(detail.salarial, 'FCFA'),
+        formatCleanAmount(detail.basePatronal, 'FCFA'),
         formatRate(detail.tauxPatronal),
-        `${formatAmount(detail.patronal)} FCFA`,
+        formatCleanAmount(detail.patronal, 'FCFA'),
       ]),
       styles: {
         fontSize: 9,

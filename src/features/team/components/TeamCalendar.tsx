@@ -286,7 +286,7 @@ function buildComplianceAlertEvents(): CalendarEvent[] {
   const events: CalendarEvent[] = [];
   const now = new Date();
 
-  const checks: { field: keyof typeof vehicles[0]; type: string; label: string; emoji: string }[] = [
+  const checks: { field: string; type: string; label: string; emoji: string }[] = [
     { field: 'insuranceExpiry', type: 'assurance_fleet', label: 'Assurance', emoji: '🛡' },
     { field: 'carteGriseExpiry', type: 'carte_grise', label: 'Carte Grise', emoji: '📋' },
     { field: 'vignetteExpiry', type: 'vignette', label: 'Vignette', emoji: '🏷' },
@@ -294,7 +294,7 @@ function buildComplianceAlertEvents(): CalendarEvent[] {
 
   for (const v of vehicles) {
     for (const check of checks) {
-      const dateStr = v[check.field] as string | undefined;
+      const dateStr = (v as any)[check.field] as string | undefined;
       if (!dateStr) continue;
       const expiryDate = new Date(dateStr);
       if (isNaN(expiryDate.getTime())) continue;

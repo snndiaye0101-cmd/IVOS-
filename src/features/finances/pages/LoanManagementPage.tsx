@@ -5,6 +5,7 @@ import {
   AlertCircle, CheckCircle2, DollarSign,
 } from 'lucide-react';
 import { personnelStore, type PersonnelAgent } from '../../fleet/services/personnelStore';
+import { formatCleanAmount } from '@/shared/utils/formatAmount';
 
 // ─── Types & Storage ────────────────────────────────────────────────
 type LoanStatus = 'En cours' | 'Soldé';
@@ -39,7 +40,7 @@ function saveLoans(loans: Loan[]) {
 }
 
 // ─── Helpers ────────────────────────────────────────────────────────
-function fmtPrice(n: number) { return n.toLocaleString('fr-FR') + ' FCFA'; }
+function fmtPrice(n: number) { return formatCleanAmount(n, 'FCFA'); }
 function fmtDate(d: string) { return new Date(d).toLocaleDateString('fr-FR', { day: '2-digit', month: 'short', year: 'numeric' }); }
 function formatInputPrice(value: string): string {
   const num = value.replace(/\D/g, '');

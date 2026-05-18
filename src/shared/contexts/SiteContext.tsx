@@ -5,6 +5,7 @@
 
 import { createContext, useContext, useState, useEffect, useCallback, type ReactNode } from 'react'
 import { countryStore, type ICountry, type ISite } from '../services/countryStore'
+import { DEFAULT_COUNTRY_ALPHA3, DEFAULT_COUNTRY_ALPHA2 } from '../constants'
 import { useAuth } from './AuthContext'
 import { permissionStore } from '../services/permissionStore'
 
@@ -66,14 +67,19 @@ export function SiteProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => { refresh() }, [refresh])
 
-  // User's assigned country/site
+  // Determine a sensible default country (prefer Senegal), then user's assigned values
+  const defaultCountry = allCountries.find(c => c.codeIso === DEFAULT_COUNTRY_ALPHA3 || c.codeIso === DEFAULT_COUNTRY_ALPHA2 || /sénégal|senegal/i.test(c.name)) || allCountries[0] || null
+
   const userCountry = user?.countryId
-    ? allCountries.find(c => c.id === user.countryId) || null
-    : allCountries[0] || null
+    ? allCountries.find(c => c.id === user.countryId) || defaultCountry
+    : defaultCountry
+
+  // Default site: prefer a site belonging to the default country (Senegal) when possible
+  const defaultSite = defaultCountry ? allSites.find(s => s.countryId === defaultCountry.id) || allSites[0] || null : allSites[0] || null
 
   const userSite = user?.siteId
-    ? allSites.find(s => s.id === user.siteId) || null
-    : allSites[0] || null
+    ? allSites.find(s => s.id === user.siteId) || defaultSite
+    : defaultSite
 
   // Active context (super admin override or user's own)
   const activeCountry = isSuperAdmin && viewCountry ? viewCountry : userCountry

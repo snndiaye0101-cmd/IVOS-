@@ -13,6 +13,7 @@ import {
   BarChart, Bar, XAxis, YAxis, Tooltip as RTooltip, ResponsiveContainer,
   PieChart, Pie, Cell, Legend, CartesianGrid, AreaChart, Area,
 } from 'recharts';
+import { formatCleanAmount } from '@/shared/utils/formatAmount';
 import { useAuth } from '../../../shared/contexts/AuthContext';
 import { getWorkflowInvoices, getInvoiceStats, type WorkflowInvoice } from '../services/workflowInvoiceService';
 import { getAnnualBudget } from '../../../shared/services/budgetService';
@@ -37,7 +38,7 @@ function fmt(n: number) {
   return n.toLocaleString('fr-FR');
 }
 function fmtFull(n: number) {
-  return n.toLocaleString('fr-FR') + ' FCFA';
+  return formatCleanAmount(n, 'FCFA');
 }
 function pctDelta(current: number, prev: number): { pct: string; up: boolean } {
   if (prev === 0) return { pct: current > 0 ? '+100' : '0', up: current > 0 };
@@ -91,7 +92,7 @@ function FinancePageInner() {
   const [capexTotal, setCapexTotal] = useState<number>(0);
   const [fuel, setFuel] = useState<FuelAlloc[]>([]);
   const [maint, setMaint] = useState<MaintPlan[]>([]);
-  const [annualBudget, setAnnualBudget] = useState<number>(getAnnualBudget());
+  const [annualBudget, setAnnualBudget] = useState<number>(120000000);
 
   const reload = useCallback(() => {
     setInvoices(getWorkflowInvoices());
@@ -102,11 +103,22 @@ function FinancePageInner() {
 
   useEffect(() => {
     reload();
+    let mounted = true
+    void (async () => {
+      const amount = await getAnnualBudget()
+      if (mounted) setAnnualBudget(amount)
+    })()
+
     const h = () => reload();
-    const hBudget = () => setAnnualBudget(getAnnualBudget());
+    const hBudget = () => {
+      void getAnnualBudget().then(amount => {
+        if (mounted) setAnnualBudget(amount)
+      })
+    }
     window.addEventListener('ivos_invoice_change', h);
     window.addEventListener('ivos_budget_updated', hBudget);
     return () => {
+      mounted = false
       window.removeEventListener('ivos_invoice_change', h);
       window.removeEventListener('ivos_budget_updated', hBudget);
     };

@@ -6,6 +6,21 @@ import { supabase } from "@/shared/services/supabaseClient";
 const BUCKET = "chat-files";
 const MAX_FILE_SIZE = 50 * 1024 * 1024; // 50 MB
 
+export interface StorageFileInfo {
+  id?: string;
+  name: string;
+  path: string;
+  bucketId?: string;
+  owner?: string;
+  updatedAt?: string;
+  createdAt?: string;
+  lastAccessedAt?: string;
+  size?: number;
+  mimeType?: string;
+  metadata?: Record<string, unknown> | null;
+  publicUrl?: string | null;
+}
+
 export const fileUploadService = {
   // Upload file to storage
   async uploadFile(
@@ -60,19 +75,37 @@ export const fileUploadService = {
     }
   },
 
-  // Get file metadata
-  async getFileInfo(filePath: string): Promise<{ id: string; name: string; bucket_id: string; owner: string; updated_at: string; created_at: string; last_accessed_at: string; metadata: Record<string, unknown> }> {
+  // Get file metadata (mapped to a stable app shape)
+  async getFileInfo(filePath: string): Promise<StorageFileInfo | null> {
     try {
       const path = filePath.includes("/storage/")
         ? filePath.split("/storage/")[1].replace(`${BUCKET}/`, "")
         : filePath;
 
-      const { data, error } = await supabase.storage
-        .from(BUCKET)
-        .info(path);
-
+      const { data, error } = await supabase.storage.from(BUCKET).info(path);
       if (error) throw error;
-      return data;
+      if (!data) return null;
+
+      // Normalize fields coming from Supabase Storage (camelized or snake_case)
+      const publicRes = supabase.storage.from(BUCKET).getPublicUrl(path);
+      const publicUrl = publicRes?.data?.publicUrl ?? null;
+
+      const mapped: StorageFileInfo = {
+        id: (data as any).id ?? (data as any).Key ?? undefined,
+        name: (data as any).name ?? path.split('/').pop() ?? path,
+        path: (data as any).path ?? path,
+        bucketId: (data as any).bucket_id ?? (data as any).bucketId,
+        owner: (data as any).owner ?? undefined,
+        updatedAt: (data as any).updated_at ?? (data as any).updatedAt,
+        createdAt: (data as any).created_at ?? (data as any).createdAt,
+        lastAccessedAt: (data as any).last_accessed_at ?? (data as any).lastAccessedAt,
+        size: typeof (data as any).size === 'number' ? (data as any).size : (typeof (data as any).file_size === 'number' ? (data as any).file_size : undefined),
+        mimeType: (data as any).content_type ?? (data as any).mimeType ?? undefined,
+        metadata: (data as any).metadata ?? null,
+        publicUrl,
+      };
+
+      return mapped;
     } catch (error) {
       console.error("Error getting file info:", error);
       throw error;

@@ -1,6 +1,7 @@
 import React, { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../../../shared/contexts/AuthContext'
+import { authStore } from '../../../shared/services/authStore'
 import { LogIn, Eye, EyeOff, Clock, Mail, Lock, ChevronLeft, Send, Target, Users2, Truck, Wallet } from 'lucide-react'
 import { sendNotification } from '../../../shared/services/notificationService'
 import { supabase } from '../../../shared/services/supabaseClient'
@@ -188,6 +189,28 @@ export default function LoginPage() {
               {loading ? 'Connexion en cours...' : 'Se connecter'}
             </button>
           </form>
+          {import.meta.env.DEV && (
+            <div className="mt-6 rounded-3xl border border-slate-200 bg-slate-50 p-4 text-sm text-slate-700">
+              <p className="font-semibold text-slate-900 mb-2">Super Admin local (dev)</p>
+              <p className="text-xs text-slate-500 mb-3">Crée un compte Super Admin local et connecte-toi automatiquement.</p>
+              <button
+                type="button"
+                onClick={async () => {
+                  authStore.ensureSuperAdminLocal()
+                  const password = import.meta.env.VITE_AUTH_DEMO_PASSWORD || 'SuperAdmin@IVOS2026'
+                  const result = login('superadmin@ivos.sn', password)
+                  if (result.success) {
+                    navigate('/')
+                  } else {
+                    setError(result.error || 'Impossible de se connecter en Super Admin')
+                  }
+                }}
+                className="inline-flex items-center justify-center gap-2 rounded-2xl bg-slate-900 px-4 py-2 text-white hover:bg-slate-800"
+              >
+                Se connecter en Super Admin
+              </button>
+            </div>
+          )}
 
           <div className="mt-10 text-center">
             <div className="relative mb-7">

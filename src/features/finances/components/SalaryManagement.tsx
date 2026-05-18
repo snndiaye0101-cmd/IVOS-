@@ -5,6 +5,7 @@ import {
   CheckCircle2, Clock, Shield, AlertCircle,
 } from 'lucide-react';
 import { computeFiscalParts, personnelStore, type PersonnelAgent } from '../../fleet/services/personnelStore';
+import { formatCleanAmount } from '@/shared/utils/formatAmount';
 import { heuresStore } from '../../personnel/services/heuresStore';
 import { getMonthlyLoanDeduction } from '../pages/LoanManagementPage';
 import { useAuth } from '../../../shared/contexts/AuthContext';
@@ -185,7 +186,7 @@ function savePayslips(list: Payslip[]) {
 }
 
 // ─── Helpers ────────────────────────────────────────────────────────
-function fmtPrice(n: number) { return n.toLocaleString('fr-FR') + ' FCFA'; }
+function fmtPrice(n: number) { return formatCleanAmount(n, 'FCFA'); }
 function formatInputPrice(value: string): string {
   const num = value.replace(/\D/g, '');
   if (!num) return '';
@@ -1629,7 +1630,7 @@ export default function SalaryManagement() {
                 <div className="flex flex-col gap-1">
                   <span className="text-sm text-gray-600">Brut: {fmtPrice(payrollPreview.brut)} | Retenues: {fmtPrice(payrollPreview.totalCotisations)} | Patronal: {fmtPrice(payrollPreview.totalPatronal)}</span>
                   <span className="text-xs text-gray-500">Temps de travail: {workedUnitsNum.toLocaleString('fr-FR')} {activeRule.workedUnitLabel.toLowerCase()} · Solde congés: {(leaveAcquiredNum - leaveTakenNum).toLocaleString('fr-FR')} j</span>
-                  <span className="text-xs text-gray-500">Mode fiscal: {effectiveAutoFiscal ? 'automatique' : 'manuel'} · Nuit: {Math.round(countrySettings.nightMajoration * 100)}% · CFCE: {formatPercent(countrySettings.cfce)}% · Plafond IPRES: {formatAmount(selectedAgent && isCadreRole(selectedAgent) ? countrySettings.ipresCadreCap : countrySettings.ipresGeneralCap)} FCFA</span>
+                  <span className="text-xs text-gray-500">Mode fiscal: {effectiveAutoFiscal ? 'automatique' : 'manuel'} · Nuit: {Math.round(countrySettings.nightMajoration * 100)}% · CFCE: {formatPercent(countrySettings.cfce)}% · Plafond IPRES: {fmtPrice(selectedAgent && isCadreRole(selectedAgent) ? countrySettings.ipresCadreCap : countrySettings.ipresGeneralCap)}</span>
                 </div>
                 <div className="flex items-center justify-end">
                   <span className={`text-xl font-bold ${previewNet > 0 ? 'text-emerald-700' : 'text-gray-300'}`}>

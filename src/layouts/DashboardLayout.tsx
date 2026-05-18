@@ -1,6 +1,7 @@
 
 import React, { useState, useEffect, useMemo } from 'react';
 import ContextSelector from '../shared/components/ui/ContextSelector';
+import RealTimeClock from '../shared/components/ui/RealTimeClock';
 import { Outlet, Link, useLocation, useNavigate } from 'react-router-dom';
 import {
   Home, Truck, Car, Users, ClipboardList, FileText, UserCircle,
@@ -55,6 +56,15 @@ const menuSections = [
     ],
   },
   {
+    section: 'Exploitation',
+    icon: ClipboardList,
+    items: [
+      { name: 'Opérations', href: '/exploitation', icon: ClipboardList },
+      { name: 'Opérations Spéciales', href: '/exploitation/special-operations', icon: Wrench, tooltip: 'Service de maintenance technique pour le nettoyage des cuves et citernes.' },
+      { name: 'BSD', href: '/exploitation/bsd-en-cours', icon: FileText, tooltip: 'Bordereaux de Suivi des Déchets en cours' },
+    ],
+  },
+  {
     section: 'REPORTING & IMPACT',
     icon: BarChart2,
     items: [
@@ -70,15 +80,10 @@ const menuSections = [
       { name: 'Engins de Manutention', href: '/fleet/handling-equipment', icon: Package },
       { name: 'Hub Carburant', href: '/hub-carburant', icon: Fuel },
       { name: 'Suivi en Temps Réel', href: '/flotte/tracking', icon: MapPin },
-    ],
-  },
-  {
-    section: 'Exploitation',
-    icon: ClipboardList,
-    items: [
-      { name: 'Opérations', href: '/exploitation', icon: ClipboardList },
-      { name: 'Opérations Spéciales', href: '/exploitation/special-operations', icon: Wrench, tooltip: 'Service de maintenance technique pour le nettoyage des cuves et citernes.' },
-      { name: 'BSD', href: '/exploitation/bsd-en-cours', icon: FileText, tooltip: 'Bordereaux de Suivi des Déchets en cours' },
+      { name: 'Maintenance / Pannes', href: '/maintenance', icon: Construction },
+      { name: 'Assurances & Sinistres', href: '/sinistres', icon: Shield },
+      { name: 'Pneumatique', href: '/pneumatique', icon: Wrench },
+      { name: 'Inventaire & Maintenance Matériels', href: '/inventaire-maintenance-materiels', icon: Wrench },
     ],
   },
   {
@@ -103,16 +108,6 @@ const menuSections = [
     ],
   },
   {
-    section: 'Technique',
-    icon: Wrench,
-    items: [
-      { name: 'Maintenance / Pannes', href: '/maintenance', icon: Construction },
-      { name: 'Assurances & Sinistres', href: '/sinistres', icon: Shield },
-      { name: 'Pneumatique', href: '/pneumatique', icon: Wrench },
-      { name: 'Inventaire & Maintenance Matériels', href: '/inventaire-maintenance-materiels', icon: Wrench },
-    ],
-  },
-  {
     section: 'Ressources Humaines',
     icon: Users,
     items: [
@@ -129,12 +124,12 @@ const menuSections = [
     icon: Shield,
     items: [
       { name: 'Administration Système', href: '/settings/administration-systeme', icon: ShieldAlert },
-      { name: 'Configuration Base', href: '/settings/base', icon: MapPin },
+      // 'Configuration Base' merged into System Config (Gestion des Sites)
       { name: 'Référentiels Clients', href: '/settings/clients', icon: BookOpen },
       { name: "Seuils d'Alertes", href: '/settings/alerts', icon: Bell },
       { name: 'Sauvegardes', href: '/settings/backups', icon: Download },
       { name: 'Sécurité & Accès', href: '/settings/security', icon: Shield },
-      { name: 'Configuration Système', href: '/settings/system-config', icon: Building2 },
+      { name: 'Gestion des Sites', href: '/settings/system-config', icon: Building2 },
       { name: 'Configuration Paie & Fiscalité', href: '/settings/payroll-fiscal-config', icon: DollarSign },
     ],
   },
@@ -149,6 +144,7 @@ export default function DashboardLayout() {
   const viewAs = useViewAs();
   const site = useSite();
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [permissionVersion, setPermissionVersion] = useState(0);
   const [showSiteSelector, setShowSiteSelector] = useState(false);
   const [invoiceBadge, setInvoiceBadge] = useState(0);
   const [maintenanceBadge, setMaintenanceBadge] = useState(0);
@@ -156,6 +152,7 @@ export default function DashboardLayout() {
   const [fabOpen, setFabOpen] = useState(false);
   const [fuelAlertCount, setFuelAlertCount] = useState(0);
   const [maintenanceAlertCount, setMaintenanceAlertCount] = useState(0);
+  const [technicalInspectionAlertCount, setTechnicalInspectionAlertCount] = useState(0);
 
   // Mise à jour badge maintenance
   useEffect(() => {
@@ -208,7 +205,7 @@ export default function DashboardLayout() {
     };
   }, [user?.id]);
 
-  // Alertes automatiques : carburant bas & maintenances en retard
+  // Alertes automatiques : carburant bas & maintenances en retard & visite technique
   useEffect(() => {
     const checkAlerts = () => {
       try {
@@ -221,25 +218,40 @@ export default function DashboardLayout() {
         const now = Date.now();
         const overdue = maintenances.filter((maintenance) => maintenance.nextMaintenanceDate && new Date(maintenance.nextMaintenanceDate).getTime() < now && maintenance.status !== 'completed').length;
         setMaintenanceAlertCount(overdue);
+        // Technical inspection alerts: check function vehicles with inspection expiry < 15 days or expired
+        const funcVehicles = JSON.parse(localStorage.getItem('ivos_function_vehicles') || '[]') as any[];
+        const now2 = new Date();
+        const techAlert = funcVehicles.filter((v) => {
+          if (!v.technicalInspectionExpiry) return false;
+          const expiry = new Date(v.technicalInspectionExpiry);
+          const days = Math.ceil((expiry.getTime() - now2.getTime()) / (1000 * 3600 * 24));
+          return days <= 15;
+        }).length;
+        setTechnicalInspectionAlertCount(techAlert);
       } catch { /* silent */ }
     };
     checkAlerts();
     const interval = setInterval(checkAlerts, 30000);
     window.addEventListener('ivos_vehicle_change', checkAlerts);
     window.addEventListener('ivos_maintenance_change', checkAlerts);
+    window.addEventListener('ivos_function_vehicles_change', checkAlerts);
     return () => {
       clearInterval(interval);
       window.removeEventListener('ivos_vehicle_change', checkAlerts);
       window.removeEventListener('ivos_maintenance_change', checkAlerts);
+      window.removeEventListener('ivos_function_vehicles_change', checkAlerts);
     };
   }, []);
 
   // Permission-based filtering: filter sections by access, filter items by route access
-  // Also hide 'Paramètres' for non-admins (legacy behavior preserved)
+  useEffect(() => {
+    const handlePermissionUpdate = () => setPermissionVersion((current) => current + 1)
+    window.addEventListener('permissions:updated', handlePermissionUpdate)
+    return () => window.removeEventListener('permissions:updated', handlePermissionUpdate)
+  }, [])
+
   const menuWithAdmin = useMemo(() => {
-    const base = isAdmin || viewAs.isSuperAdmin
-      ? menuSections
-      : menuSections.filter(section => section.section !== 'Paramètres');
+    const base = isAdmin || viewAs.isSuperAdmin ? menuSections : menuSections;
 
     if (!viewAs.effectiveUserId) {
       return base;
@@ -256,7 +268,7 @@ export default function DashboardLayout() {
         }),
       }))
       .filter(section => section.items.length > 0);
-  }, [isAdmin, viewAs]);
+  }, [isAdmin, viewAs, permissionVersion]);
 
   const handleLogout = () => {
     // Notification de déconnexion
@@ -374,6 +386,11 @@ export default function DashboardLayout() {
             active ? 'bg-white text-orange-600' : 'bg-orange-500 text-white'
           }`}>{fuelAlertCount}</span>
         )}
+        {item.name === 'Véhicules de fonction' && technicalInspectionAlertCount > 0 && (
+          <span className={`text-[11px] font-bold rounded-full min-w-[20px] h-5 flex items-center justify-center px-1.5 animate-pulse ${
+            active ? 'bg-white text-amber-600' : 'bg-amber-500 text-white'
+          }`}>{technicalInspectionAlertCount}</span>
+        )}
         {item.name === 'Facturation' && invoiceBadge > 0 && (
           <span className="text-[11px] font-bold rounded-full min-w-[20px] h-5 flex items-center justify-center px-1.5 bg-[#003366] text-white animate-pulse">{invoiceBadge}</span>
         )}
@@ -471,7 +488,7 @@ export default function DashboardLayout() {
                     {site.activeSite?.name || 'Base de KIGNABOUR'}
                   </div>
                   <div className="text-[10px] text-gray-300 font-medium">
-                    {site.activeCountry?.flagEmoji} {site.activeCountry?.name || ''} — {site.activeCurrencySymbol}
+                    {site.activeCountry?.name || ''} — {site.activeCurrencySymbol}
                   </div>
                 </div>
               )}
@@ -514,6 +531,7 @@ export default function DashboardLayout() {
             <button onClick={() => setSidebarOpen(true)} className="lg:hidden p-2 rounded-lg text-gray-500">
               <Menu className="h-5 w-5" />
             </button>
+
             <div className="flex-1 flex justify-center items-center gap-3">
               <ContextSelector />
               {/* Super Admin site selector */}
@@ -527,9 +545,9 @@ export default function DashboardLayout() {
                     {site.isConsolidatedView
                       ? 'Consolidé'
                       : site.viewSite
-                        ? `${site.viewCountry?.flagEmoji || ''} ${site.viewSite.name}`
+                        ? `${site.viewSite.name}`
                         : site.activeSite
-                          ? `${site.activeCountry?.flagEmoji || ''} ${site.activeSite.name}`
+                          ? `${site.activeSite.name}`
                           : 'Tous les sites'}
                     <ChevronDown className="h-3 w-3" />
                   </button>
@@ -542,27 +560,22 @@ export default function DashboardLayout() {
                         <Globe className="h-3.5 w-3.5 inline mr-2" /> Vue Consolidée
                       </button>
                       <div className="border-t border-gray-50 my-1" />
-                      {site.allCountries.map(country => (
-                        <div key={country.id}>
-                          <p className="px-4 py-1.5 text-[10px] font-semibold text-gray-400 uppercase tracking-wider">{country.flagEmoji} {country.name}</p>
-                          {site.sitesForCountry(country.id).map(s => (
-                            <button
-                              key={s.id}
-                              onClick={() => { site.setConsolidatedView(false); site.setViewCountry(country); site.setViewSite(s); setShowSiteSelector(false) }}
-                              className={`w-full text-left px-6 py-2 text-sm hover:bg-gray-50 transition-colors ${
-                                !site.isConsolidatedView && site.viewSite?.id === s.id ? 'bg-indigo-50 text-indigo-700 font-semibold' : 'text-gray-600'
-                              }`}
-                            >
-                              <MapPin className="h-3 w-3 inline mr-1.5" /> {s.name}
-                              <span className="text-[10px] text-gray-400 ml-1">({country.currencySymbol})</span>
-                            </button>
-                          ))}
-                        </div>
+                      {site.allSites.map(s => (
+                        <button
+                          key={s.id}
+                          onClick={() => { site.setConsolidatedView(false); site.setViewCountry(null); site.setViewSite(s); setShowSiteSelector(false) }}
+                          className={`w-full text-left px-4 py-2 text-sm hover:bg-gray-50 transition-colors ${!site.isConsolidatedView && site.viewSite?.id === s.id ? 'bg-indigo-50 text-indigo-700 font-semibold' : 'text-gray-600'}`}
+                        >
+                          <MapPin className="h-3 w-3 inline mr-1.5" /> {s.name}
+                        </button>
                       ))}
                     </div>
                   )}
                 </div>
               )}
+            </div>
+            <div className="hidden md:flex items-center justify-end min-w-[220px]">
+              <RealTimeClock />
             </div>
           </div>
         </header>

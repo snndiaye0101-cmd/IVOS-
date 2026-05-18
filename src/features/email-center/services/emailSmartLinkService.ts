@@ -10,7 +10,7 @@ function normalize(value: string): string {
 
 function loadVehicleTargets(): EmailLinkTarget[] {
   try {
-    const vehicles = vehiclesStore.load() as Array<Record<string, unknown>>;
+    const vehicles = vehiclesStore.load() as any[];
     return vehicles.slice(0, 400).map<EmailLinkTarget>(vehicle => {
       const registration = String(vehicle.registration || vehicle.immatriculation || vehicle.plateNumber || vehicle.numeroImmatriculation || '').trim();
       const label = registration || String(vehicle.name || 'Vehicule');

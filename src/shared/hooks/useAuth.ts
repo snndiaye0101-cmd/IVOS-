@@ -10,7 +10,7 @@
  */
 
 import { useEffect, useState, useCallback } from 'react'
-import type { AuthUser } from './supabaseAuthService'
+import type { AuthUser } from '../services/supabaseAuthService'
 import {
   getCurrentUser,
   signIn as supabaseSignIn,
@@ -19,7 +19,7 @@ import {
   resetPassword as supabaseResetPassword,
   updatePassword as supabaseUpdatePassword,
   onAuthStateChange,
-} from './supabaseAuthService'
+} from '../services/supabaseAuthService'
 
 export interface UseAuthOptions {
   autoHydrate?: boolean // Automatically load current user on mount
@@ -76,7 +76,7 @@ export function useAuth(options: UseAuthOptions = {}): UseAuthReturn {
 
   // Listen for auth state changes
   useEffect(() => {
-    const unsubscribe = onAuthStateChange((newUser) => {
+    const unsubscribe = onAuthStateChange((newUser: AuthUser | null) => {
       setUser(newUser)
     })
 

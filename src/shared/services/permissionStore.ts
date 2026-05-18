@@ -80,6 +80,156 @@ export const ROUTE_TO_MODULE: Record<string, AppModule> = {
   '/chat': 'chat',
 };
 
+export interface PermissionRouteItem {
+  path: string;
+  label: string;
+  module: AppModule;
+}
+
+export interface PermissionCategory {
+  section: string;
+  items: PermissionRouteItem[];
+}
+
+export const SIDEBAR_PERMISSION_TREE: PermissionCategory[] = [
+  {
+    section: 'PILOTAGE OPÉRATIONNEL',
+    items: [
+      { path: '/', label: 'Tableau de bord', module: 'dashboard' },
+      { path: '/communications/chat', label: 'Chat', module: 'chat' },
+      { path: '/communications/agenda', label: 'Agenda', module: 'chat' },
+      { path: '/communications/email-center', label: 'Email Center', module: 'chat' },
+      { path: '/communications/email-center/admin', label: 'Supervision Email', module: 'chat' },
+    ],
+  },
+  {
+    section: 'Exploitation',
+    items: [
+      { path: '/exploitation', label: 'Opérations', module: 'exploitation' },
+      { path: '/exploitation/special-operations', label: 'Opérations Spéciales', module: 'exploitation' },
+      { path: '/exploitation/bsd-en-cours', label: 'BSD', module: 'exploitation' },
+    ],
+  },
+  {
+    section: 'REPORTING & IMPACT',
+    items: [
+      { path: '/qhse/reporting', label: 'Reporting QHSE', module: 'finances' },
+    ],
+  },
+  {
+    section: 'Flotte',
+    items: [
+      { path: '/vehicles', label: 'Parc', module: 'fleet' },
+      { path: '/personal-vehicles', label: 'Véhicules de fonction', module: 'fleet' },
+      { path: '/fleet/handling-equipment', label: 'Engins de Manutention', module: 'fleet' },
+      { path: '/hub-carburant', label: 'Hub Carburant', module: 'hub_carburant' },
+      { path: '/flotte/tracking', label: 'Suivi en Temps Réel', module: 'fleet' },
+      { path: '/maintenance', label: 'Maintenance / Pannes', module: 'technique' },
+      { path: '/sinistres', label: 'Assurances & Sinistres', module: 'technique' },
+      { path: '/pneumatique', label: 'Pneumatique', module: 'technique' },
+      { path: '/inventaire-maintenance-materiels', label: 'Inventaire & Maintenance Matériels', module: 'technique' },
+    ],
+  },
+  {
+    section: 'Finances',
+    items: [
+      { path: '/finances', label: 'Dashboard Finance', module: 'finances' },
+      { path: '/billing', label: 'Facturation', module: 'finances' },
+      { path: '/finances/revenues', label: 'Recettes', module: 'finances' },
+      { path: '/unite-facturation', label: 'Unité de Facturation', module: 'finances' },
+      { path: '/finances/loans', label: 'Gestion des Prêts', module: 'finances' },
+      { path: '/finances/salary-deductions', label: 'Paie avec Retenues', module: 'finances' },
+      { path: '/finances/fiscal-recap', label: 'Récapitulatif Fiscal', module: 'finances' },
+      { path: '/finances/global-expenses', label: 'Dépenses Globales', module: 'finances' },
+    ],
+  },
+  {
+    section: 'Immobilisations & Infrastructures',
+    items: [
+      { path: '/investissements', label: 'Gestion des Immobilisations & Infrastructures', module: 'finances' },
+    ],
+  },
+  {
+    section: 'Ressources Humaines',
+    items: [
+      { path: '/personnel', label: 'Personnel', module: 'rh' },
+      { path: '/rh/documents', label: 'Documents Entreprise', module: 'rh' },
+      { path: '/grh', label: 'Gestion RH', module: 'rh' },
+      { path: '/borne-pointage', label: 'Borne de Pointage', module: 'rh' },
+      { path: '/demande-conges', label: 'Demande Congé', module: 'rh' },
+      { path: '/annuaire/badges', label: 'Conception de Badges', module: 'rh' },
+    ],
+  },
+  {
+    section: 'Paramètres',
+    items: [
+      { path: '/settings/administration-systeme', label: 'Administration Système', module: 'parametres' },
+      { path: '/settings/clients', label: 'Référentiels Clients', module: 'parametres' },
+      { path: '/settings/alerts', label: 'Seuils d\'Alertes', module: 'parametres' },
+      { path: '/settings/backups', label: 'Sauvegardes', module: 'parametres' },
+      { path: '/settings/security', label: 'Sécurité & Accès', module: 'parametres' },
+      { path: '/settings/system-config', label: 'Gestion des Sites', module: 'parametres' },
+      { path: '/settings/payroll-fiscal-config', label: 'Configuration Paie & Fiscalité', module: 'parametres' },
+    ],
+  },
+];
+
+const ROUTE_PERMISSIONS_KEY = 'ivos_route_permissions_v1';
+
+interface RoutePermissions {
+  userId: string;
+  routes: Record<string, PermissionLevel>;
+}
+
+function loadAllRoutePermissions(): RoutePermissions[] {
+  try { return JSON.parse(localStorage.getItem(ROUTE_PERMISSIONS_KEY) || '[]'); } catch { return []; }
+}
+
+function saveAllRoutePermissions(perms: RoutePermissions[]) {
+  localStorage.setItem(ROUTE_PERMISSIONS_KEY, JSON.stringify(perms));
+}
+
+function defaultRoutePermissionsForRole(role: UserRole): Record<string, PermissionLevel> {
+  const defaults = defaultPermissionsForRole(role);
+  return SIDEBAR_PERMISSION_TREE.flatMap(category => category.items).reduce((acc, item) => {
+    acc[item.path] = defaults[item.module];
+    return acc;
+  }, {} as Record<string, PermissionLevel>);
+}
+
+function aggregateRoutePermissionsByModule(routes: Record<string, PermissionLevel>): Record<AppModule, PermissionLevel> {
+  const modulePerms: Record<AppModule, PermissionLevel> = {} as Record<AppModule, PermissionLevel>;
+
+  for (const module of APP_MODULES) {
+    const levels = Object.entries(routes)
+      .filter(([route]) => ROUTE_TO_MODULE[route] === module)
+      .map(([, level]) => level);
+
+    if (levels.includes('all')) {
+      modulePerms[module] = 'all';
+    } else if (levels.includes('edit')) {
+      modulePerms[module] = 'edit';
+    } else if (levels.includes('view')) {
+      modulePerms[module] = 'view';
+    } else {
+      modulePerms[module] = 'none';
+    }
+  }
+
+  return modulePerms;
+}
+
+function findRoutePermission(routes: Record<string, PermissionLevel>, path: string): PermissionLevel | null {
+  if (routes[path]) return routes[path];
+  const sorted = Object.keys(routes).sort((a, b) => b.length - a.length);
+  for (const prefix of sorted) {
+    if (prefix !== '/' && path.startsWith(prefix)) {
+      return routes[prefix];
+    }
+  }
+  return null;
+}
+
 export interface UserPermissions {
   userId: string;
   modules: Record<AppModule, PermissionLevel>;
@@ -125,6 +275,38 @@ function saveRoles(roles: Record<string, UserRole>) {
   localStorage.setItem(ROLE_KEY, JSON.stringify(roles));
 }
 
+function loadRoutePermissionsForUser(userId: string): RoutePermissions | undefined {
+  const all = loadAllRoutePermissions();
+  return all.find(p => p.userId === userId);
+}
+
+function getDefaultRoutePermissions(userId: string): Record<string, PermissionLevel> {
+  return defaultRoutePermissionsForRole(loadRoles()[userId] || 'Utilisateur');
+}
+
+function getRoutePermissionsForUser(userId: string): Record<string, PermissionLevel> {
+  const custom = loadRoutePermissionsForUser(userId);
+  return custom ? custom.routes : getDefaultRoutePermissions(userId);
+}
+
+function saveRoutePermissionsForUser(userId: string, routes: Record<string, PermissionLevel>) {
+  const all = loadAllRoutePermissions();
+  const idx = all.findIndex(p => p.userId === userId);
+  if (idx >= 0) {
+    all[idx].routes = routes;
+  } else {
+    all.push({ userId, routes });
+  }
+  saveAllRoutePermissions(all);
+  window.dispatchEvent(new Event('permissions:updated'));
+}
+
+function resetRoutePermissionsForUser(userId: string) {
+  const all = loadAllRoutePermissions().filter(p => p.userId !== userId);
+  saveAllRoutePermissions(all);
+  window.dispatchEvent(new Event('permissions:updated'));
+}
+
 export const permissionStore = {
   /** Get user role (SuperAdmin > Admin > Utilisateur) */
   getRole(userId: string): UserRole {
@@ -167,7 +349,27 @@ export const permissionStore = {
   resetToDefaults(userId: string) {
     const all = loadAllPermissions().filter(p => p.userId !== userId);
     saveAllPermissions(all);
+    resetRoutePermissionsForUser(userId);
     window.dispatchEvent(new Event('permissions:updated'));
+  },
+
+  getRoutePermissions(userId: string): Record<string, PermissionLevel> {
+    if (this.isSuperAdmin(userId)) {
+      const defaults = defaultPermissionsForRole('SuperAdmin');
+      return SIDEBAR_PERMISSION_TREE.flatMap(category => category.items).reduce((acc, item) => {
+        acc[item.path] = defaults[item.module];
+        return acc;
+      }, {} as Record<string, PermissionLevel>);
+    }
+    return getRoutePermissionsForUser(userId);
+  },
+
+  setRoutePermissions(userId: string, routes: Record<string, PermissionLevel>) {
+    saveRoutePermissionsForUser(userId, routes);
+  },
+
+  resetRoutePermissions(userId: string) {
+    resetRoutePermissionsForUser(userId);
   },
 
   /** Check if user can access a module at a given level */
@@ -185,8 +387,12 @@ export const permissionStore = {
   /** Check if user can access a route */
   canAccessRoute(userId: string, path: string): boolean {
     if (this.isSuperAdmin(userId)) return true;
-    // Find the matching module for the route
-    // Try exact match first, then prefix match
+    const routePerms = this.getRoutePermissions(userId);
+    const permission = findRoutePermission(routePerms, path);
+    if (permission) {
+      return permission !== 'none';
+    }
+
     let mod = ROUTE_TO_MODULE[path];
     if (!mod) {
       const sorted = Object.keys(ROUTE_TO_MODULE).sort((a, b) => b.length - a.length);
@@ -197,16 +403,21 @@ export const permissionStore = {
         }
       }
     }
-    if (!mod) return true; // Unknown route = allow
+    if (!mod) return true;
     return this.canAccess(userId, mod, 'view');
   },
 
   /** Get modules visible in sidebar for a section */
   canAccessSection(userId: string, sectionName: string): boolean {
     if (this.isSuperAdmin(userId)) return true;
-    const mod = SECTION_TO_MODULE[sectionName];
-    if (!mod) return true;
-    return this.canAccess(userId, mod, 'view');
+    const category = SIDEBAR_PERMISSION_TREE.find(c => c.section === sectionName);
+    if (!category) return true;
+    const routePerms = this.getRoutePermissions(userId);
+    return category.items.some(item => {
+      const routePermission = findRoutePermission(routePerms, item.path);
+      if (routePermission) return routePermission !== 'none';
+      return this.canAccess(userId, item.module, 'view');
+    });
   },
 
   /** Ensure first admin is promoted to SuperAdmin on init */

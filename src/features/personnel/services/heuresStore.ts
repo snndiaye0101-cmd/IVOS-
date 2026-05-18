@@ -1,6 +1,8 @@
 import { personnelStore, type PersonnelAgent } from '../../fleet/services/personnelStore';
 import { pointageStore } from './pointageStore';
-import { loadBaseConfig } from '../../settings/services/baseConfigStore';
+import { DEFAULT_BASE_CONFIG } from '../../settings/services/baseConfigStore';
+import { loadSiteSettings } from '../../settings/services/siteConfigStore';
+import { useAppContext } from '../../../shared/store/useAppContext';
 import { congesStore } from './congesStore';
 
 const KEY = 'ivos_heures_gestion_v1';
@@ -108,8 +110,17 @@ function saveStoredData(data: StoredData) {
 }
 
 function buildAutoRows(month: string, agents: PersonnelAgent[]): WorkHoursRow[] {
-  const config = loadBaseConfig();
-  const shifts = config.shifts || [];
+  // Prefer site-specific shifts when a current site is selected; fallback to global defaults
+  let shifts = DEFAULT_BASE_CONFIG.shifts;
+  try {
+    const siteId = useAppContext.getState().currentSiteId;
+    if (siteId) {
+      const s = loadSiteSettings(siteId);
+      shifts = s.baseConfig?.shifts || DEFAULT_BASE_CONFIG.shifts;
+    }
+  } catch {
+    shifts = DEFAULT_BASE_CONFIG.shifts;
+  }
   const pointages = pointageStore
     .loadPointages()
     .filter((p) => p.date.startsWith(month) && !!p.heureArrivee && !!p.heureDepart);

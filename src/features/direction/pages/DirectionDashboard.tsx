@@ -10,7 +10,9 @@ import {
 } from 'recharts';
 import { jsPDF } from 'jspdf';
 import autoTable from 'jspdf-autotable';
+import { formatCleanAmount } from '@/shared/utils/formatAmount';
 import { vehiclesStore } from '../../fleet/services/vehiclesStore';
+import type { Vehicle } from '../../fleet/services/vehiclesStore';
 import { carburantStore, type Plein } from '../../fleet/services/carburantStore';
 import { personnelStore } from '../../fleet/services/personnelStore';
 import { getWorkflowInvoices, type WorkflowInvoice } from '../../finances/services/workflowInvoiceService';
@@ -48,22 +50,11 @@ interface ExploitationOperation {
   createdAt?: string;
 }
 
-interface Vehicle {
-  id: string;
-  registration: string;
-  brand: string;
-  model: string;
-  type: string;
-  status: string;
-  insuranceExpiry: string;
-  technicalControlExpiry: string;
-  fuelRecords?: { totalCost: number; date: string }[];
-}
+// Use centralized Vehicle type from vehiclesStore
 
 // ── Helpers ────────────────────────────────────────────────────────────────────
 
-const FCFA = (n: number) =>
-  n.toLocaleString('fr-FR', { maximumFractionDigits: 0 }) + ' FCFA';
+const FCFA = (n: number) => formatCleanAmount(n, 'FCFA');
 
 function getMonthKey(date: Date): string {
   return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
@@ -331,15 +322,15 @@ export default function DirectionDashboard() {
       startY: y,
       head: [['Indicateur', 'Montant (FCFA)']],
       body: [
-        ['Masse Salariale (Salaires + Primes + Cotisations)', data.masseSalariale.toLocaleString('fr-FR')],
-        ['  └ Salaires de base', data.totalBaseSalary.toLocaleString('fr-FR')],
-        ['  └ Primes', data.totalBonus.toLocaleString('fr-FR')],
-        ['  └ Cotisations / Retenues', data.totalRetenues.toLocaleString('fr-FR')],
-        ['Total Facturé', data.totalFacture.toLocaleString('fr-FR')],
-        ['Recouvrement en Cours (Impayés)', data.recouvrementEnCours.toLocaleString('fr-FR')],
-        ['Dépenses Globales', data.depensesGlobales.toLocaleString('fr-FR')],
-        ['Carburant Total', data.carburantTotal.toLocaleString('fr-FR')],
-        ['Marge Opérationnelle', data.margeOperationnelle.toLocaleString('fr-FR')],
+        ['Masse Salariale (Salaires + Primes + Cotisations)', FCFA(data.masseSalariale)],
+        ['  └ Salaires de base', FCFA(data.totalBaseSalary)],
+        ['  └ Primes', FCFA(data.totalBonus)],
+        ['  └ Cotisations / Retenues', FCFA(data.totalRetenues)],
+        ['Total Facturé', FCFA(data.totalFacture)],
+        ['Recouvrement en Cours (Impayés)', FCFA(data.recouvrementEnCours)],
+        ['Dépenses Globales', FCFA(data.depensesGlobales)],
+        ['Carburant Total', FCFA(data.carburantTotal)],
+        ['Marge Opérationnelle', FCFA(data.margeOperationnelle)],
       ],
       theme: 'grid',
       headStyles: { fillColor: [26, 26, 46] },
@@ -352,10 +343,10 @@ export default function DirectionDashboard() {
       startY: y,
       head: [['Carburant', 'Litres', 'Coût (FCFA)']],
       body: [
-        ['Mois en cours', data.carburantLitresCurrent.toLocaleString('fr-FR'), data.carburantTotal.toLocaleString('fr-FR')],
-        ['Mois précédent', data.carburantLitresPrev.toLocaleString('fr-FR'), data.carburantTotalPrev.toLocaleString('fr-FR')],
-        ['Véhicules de Fonction', '—', data.carburantFonction.toLocaleString('fr-FR')],
-        ['Véhicules de Parc', '—', data.carburantParc.toLocaleString('fr-FR')],
+        ['Mois en cours', data.carburantLitresCurrent.toLocaleString('fr-FR'), FCFA(data.carburantTotal)],
+        ['Mois précédent', data.carburantLitresPrev.toLocaleString('fr-FR'), FCFA(data.carburantTotalPrev)],
+        ['Véhicules de Fonction', '—', FCFA(data.carburantFonction)],
+        ['Véhicules de Parc', '—', FCFA(data.carburantParc)],
       ],
       theme: 'grid',
       headStyles: { fillColor: [26, 26, 46] },
@@ -369,7 +360,7 @@ export default function DirectionDashboard() {
         startY: y,
         head: [['Rang', 'Véhicule', 'Coût Carburant (FCFA)']],
         body: data.topFuelVehicles.map((v, i) => [
-          `#${i + 1}`, v.vehicule, v.montant.toLocaleString('fr-FR'),
+          `#${i + 1}`, v.vehicule, FCFA(v.montant),
         ]),
         theme: 'grid',
         headStyles: { fillColor: [26, 26, 46] },

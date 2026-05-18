@@ -16,6 +16,19 @@ CREATE TABLE IF NOT EXISTS user_permissions (
     UNIQUE(user_id, module)
 );
 
+CREATE TABLE IF NOT EXISTS user_route_permissions (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+    route_path TEXT NOT NULL,
+    permission_level TEXT NOT NULL DEFAULT 'none' CHECK (permission_level IN ('none', 'view', 'edit', 'all')),
+    created_at TIMESTAMPTZ DEFAULT now(),
+    updated_at TIMESTAMPTZ DEFAULT now(),
+    UNIQUE(user_id, route_path)
+);
+
+CREATE INDEX IF NOT EXISTS idx_user_route_permissions_user ON user_route_permissions(user_id);
+CREATE INDEX IF NOT EXISTS idx_user_route_permissions_route ON user_route_permissions(route_path);
+
 -- 2. Table des logs d'audit (serveur)
 CREATE TABLE IF NOT EXISTS audit_logs_v2 (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -122,6 +135,30 @@ CREATE POLICY "superadmin_full_access_permissions" ON user_permissions
 CREATE POLICY "users_read_own_permissions" ON user_permissions
     FOR SELECT USING (user_id = auth.uid());
 
+-- Enable RLS on user_route_permissions
+ALTER TABLE user_route_permissions ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "superadmin_full_access_route_permissions" ON user_route_permissions
+    FOR ALL USING (get_user_role(auth.uid()) = 'SuperAdmin');
+
+CREATE POLICY "users_read_own_route_permissions" ON user_route_permissions
+    FOR SELECT USING (user_id = auth.uid());
+
+CREATE POLICY "superadmin_insert_route_permissions" ON user_route_permissions
+    FOR INSERT WITH CHECK (get_user_role(auth.uid()) = 'SuperAdmin');
+
+CREATE POLICY "superadmin_update_route_permissions" ON user_route_permissions
+    FOR UPDATE USING (get_user_role(auth.uid()) = 'SuperAdmin') WITH CHECK (get_user_role(auth.uid()) = 'SuperAdmin');
+
+CREATE POLICY "superadmin_delete_route_permissions" ON user_route_permissions
+    FOR DELETE USING (get_user_role(auth.uid()) = 'SuperAdmin');
+
+CREATE POLICY "users_insert_own_route_permissions" ON user_route_permissions
+    FOR INSERT WITH CHECK (user_id = auth.uid());
+
+CREATE POLICY "users_update_own_route_permissions" ON user_route_permissions
+    FOR UPDATE USING (user_id = auth.uid()) WITH CHECK (user_id = auth.uid());
+
 -- Enable RLS on audit_logs_v2
 ALTER TABLE audit_logs_v2 ENABLE ROW LEVEL SECURITY;
 
@@ -175,3 +212,59 @@ $$ LANGUAGE plpgsql SECURITY DEFINER;
 -- Apply auto-audit trigger to key tables (add more as needed)
 -- Example: DROP TRIGGER IF EXISTS audit_vehicles ON vehicles; CREATE TRIGGER audit_vehicles AFTER INSERT OR UPDATE OR DELETE ON vehicles FOR EACH ROW EXECUTE FUNCTION auto_audit_trigger();
 -- Example: DROP TRIGGER IF EXISTS audit_missions ON missions; CREATE TRIGGER audit_missions AFTER INSERT OR UPDATE OR DELETE ON missions FOR EACH ROW EXECUTE FUNCTION auto_audit_trigger();
+
+-- 6. RLS pour les données financières
+CREATE OR REPLACE FUNCTION get_user_subsidiary(uid UUID)
+RETURNS UUID AS $$
+  SELECT subsidiary_id FROM user_profiles WHERE id = uid LIMIT 1;
+$$ LANGUAGE SQL SECURITY DEFINER STABLE;
+
+CREATE OR REPLACE FUNCTION is_super_admin(uid UUID)
+RETURNS BOOLEAN AS $$
+  SELECT get_user_role(uid) = 'SuperAdmin';
+$$ LANGUAGE SQL SECURITY DEFINER STABLE;
+
+ALTER TABLE budget_settings ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "budget_settings_select" ON budget_settings
+  FOR SELECT USING (is_super_admin(auth.uid()) OR subsidiary_id = get_user_subsidiary(auth.uid()));
+CREATE POLICY "budget_settings_insert" ON budget_settings
+  FOR INSERT WITH CHECK (is_super_admin(auth.uid()) OR subsidiary_id = get_user_subsidiary(auth.uid()));
+CREATE POLICY "budget_settings_update" ON budget_settings
+  FOR UPDATE USING (is_super_admin(auth.uid()) OR subsidiary_id = get_user_subsidiary(auth.uid()))
+  WITH CHECK (is_super_admin(auth.uid()) OR subsidiary_id = get_user_subsidiary(auth.uid()));
+CREATE POLICY "budget_settings_delete" ON budget_settings
+  FOR DELETE USING (is_super_admin(auth.uid()) OR subsidiary_id = get_user_subsidiary(auth.uid()));
+
+ALTER TABLE billing_invoices ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "billing_invoices_select" ON billing_invoices
+  FOR SELECT USING (is_super_admin(auth.uid()) OR subsidiary_id = get_user_subsidiary(auth.uid()));
+CREATE POLICY "billing_invoices_insert" ON billing_invoices
+  FOR INSERT WITH CHECK (is_super_admin(auth.uid()) OR subsidiary_id = get_user_subsidiary(auth.uid()));
+CREATE POLICY "billing_invoices_update" ON billing_invoices
+  FOR UPDATE USING (is_super_admin(auth.uid()) OR subsidiary_id = get_user_subsidiary(auth.uid()))
+  WITH CHECK (is_super_admin(auth.uid()) OR subsidiary_id = get_user_subsidiary(auth.uid()));
+CREATE POLICY "billing_invoices_delete" ON billing_invoices
+  FOR DELETE USING (is_super_admin(auth.uid()) OR subsidiary_id = get_user_subsidiary(auth.uid()));
+
+ALTER TABLE payroll_management ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "payroll_management_select" ON payroll_management
+  FOR SELECT USING (is_super_admin(auth.uid()) OR subsidiary_id = get_user_subsidiary(auth.uid()));
+CREATE POLICY "payroll_management_insert" ON payroll_management
+  FOR INSERT WITH CHECK (is_super_admin(auth.uid()) OR subsidiary_id = get_user_subsidiary(auth.uid()));
+CREATE POLICY "payroll_management_update" ON payroll_management
+  FOR UPDATE USING (is_super_admin(auth.uid()) OR subsidiary_id = get_user_subsidiary(auth.uid()))
+  WITH CHECK (is_super_admin(auth.uid()) OR subsidiary_id = get_user_subsidiary(auth.uid()));
+CREATE POLICY "payroll_management_delete" ON payroll_management
+  FOR DELETE USING (is_super_admin(auth.uid()) OR subsidiary_id = get_user_subsidiary(auth.uid()));
+
+ALTER TABLE financial_transactions ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "financial_transactions_select" ON financial_transactions
+  FOR SELECT USING (is_super_admin(auth.uid()) OR subsidiary_id = get_user_subsidiary(auth.uid()));
+CREATE POLICY "financial_transactions_insert" ON financial_transactions
+  FOR INSERT WITH CHECK (is_super_admin(auth.uid()) OR subsidiary_id = get_user_subsidiary(auth.uid()));
+CREATE POLICY "financial_transactions_update" ON financial_transactions
+  FOR UPDATE USING (is_super_admin(auth.uid()) OR subsidiary_id = get_user_subsidiary(auth.uid()))
+  WITH CHECK (is_super_admin(auth.uid()) OR subsidiary_id = get_user_subsidiary(auth.uid()));
+CREATE POLICY "financial_transactions_delete" ON financial_transactions
+  FOR DELETE USING (is_super_admin(auth.uid()) OR subsidiary_id = get_user_subsidiary(auth.uid()));
+

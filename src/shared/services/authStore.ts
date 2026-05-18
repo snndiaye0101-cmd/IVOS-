@@ -99,20 +99,38 @@ type DbUser = {
   created_at: string
 }
 
+type FailedLoginMeta = {
+  failedAttempts: number
+  firstAttemptAt: string
+  lockoutUntil: string | null
+}
+
+type SessionMeta = {
+  lastActivityAt: string
+}
+
 type LocalAuthSnapshot = {
   users: User[]
   passwordEntries: Array<[string, string]>
   sessions: UserSession[]
+  sessionMeta: Record<string, SessionMeta>
+  failedLoginMeta: Record<string, FailedLoginMeta>
   activity: ActivityLog[]
   onlineUserIds: string[]
   currentSessionUserId: string | null
 }
 
 const AUTH_SNAPSHOT_KEY = 'ivos_auth_snapshot_v1'
+const SESSION_TIMEOUT_MINUTES = 15
+const MAX_FAILED_LOGIN_ATTEMPTS = 5
+const FAILED_LOGIN_WINDOW_MINUTES = 15
+const LOCKOUT_DURATION_MINUTES = 15
 
 let usersCache: User[] = []
 let passwordByUserId = new Map<string, string>()
 let sessionsCache: UserSession[] = []
+let sessionMetaByUserId = new Map<string, SessionMeta>()
+let failedLoginMetaByEmail = new Map<string, FailedLoginMeta>()
 let activityCache: ActivityLog[] = []
 let onlineUserIdsCache: string[] = []
 let currentSessionUserId: string | null = null
@@ -138,6 +156,8 @@ function writeLocalAuthSnapshot() {
       users: usersCache,
       passwordEntries: Array.from(passwordByUserId.entries()),
       sessions: sessionsCache,
+      sessionMeta: Object.fromEntries(sessionMetaByUserId.entries()),
+      failedLoginMeta: Object.fromEntries(failedLoginMetaByEmail.entries()),
       activity: activityCache,
       onlineUserIds: onlineUserIdsCache,
       currentSessionUserId,
@@ -146,6 +166,102 @@ function writeLocalAuthSnapshot() {
   } catch {
     // best effort only
   }
+}
+
+function getNow(): string {
+  return new Date().toISOString()
+}
+
+function parseDate(value: string): Date {
+  return new Date(value)
+}
+
+function getLockoutMessage(email: string): string {
+  const meta = failedLoginMetaByEmail.get(email.toLowerCase())
+  if (!meta || !meta.lockoutUntil) return ''
+  const remainingMs = parseDate(meta.lockoutUntil).getTime() - Date.now()
+  const remainingMinutes = Math.ceil(Math.max(remainingMs, 0) / 60000)
+  return `Trop de tentatives de connexion. Réessayez dans ${remainingMinutes} minute(s).`
+}
+
+function purgeStaleFailedAttempts(email: string) {
+  const meta = failedLoginMetaByEmail.get(email.toLowerCase())
+  if (!meta) return
+  if (meta.lockoutUntil) return
+  const windowStart = Date.now() - FAILED_LOGIN_WINDOW_MINUTES * 60000
+  if (parseDate(meta.firstAttemptAt).getTime() < windowStart) {
+    failedLoginMetaByEmail.delete(email.toLowerCase())
+  }
+}
+
+function setFailedLogin(email: string) {
+  const normalized = email.toLowerCase()
+  const now = getNow()
+  const meta = failedLoginMetaByEmail.get(normalized)
+
+  if (!meta) {
+    failedLoginMetaByEmail.set(normalized, {
+      failedAttempts: 1,
+      firstAttemptAt: now,
+      lockoutUntil: null,
+    })
+    return
+  }
+
+  const lastWindowStart = Date.now() - FAILED_LOGIN_WINDOW_MINUTES * 60000
+  if (parseDate(meta.firstAttemptAt).getTime() < lastWindowStart) {
+    meta.failedAttempts = 1
+    meta.firstAttemptAt = now
+    meta.lockoutUntil = null
+  } else {
+    meta.failedAttempts += 1
+    if (meta.failedAttempts >= MAX_FAILED_LOGIN_ATTEMPTS) {
+      meta.lockoutUntil = new Date(Date.now() + LOCKOUT_DURATION_MINUTES * 60000).toISOString()
+    }
+  }
+  failedLoginMetaByEmail.set(normalized, meta)
+}
+
+function clearFailedLogin(email: string) {
+  failedLoginMetaByEmail.delete(email.toLowerCase())
+}
+
+function getSessionMeta(userId: string): SessionMeta {
+  return sessionMetaByUserId.get(userId) || { lastActivityAt: getNow() }
+}
+
+function updateSessionActivity(userId: string) {
+  sessionMetaByUserId.set(userId, { lastActivityAt: getNow() })
+}
+
+function isSessionExpired(userId: string): boolean {
+  const meta = sessionMetaByUserId.get(userId)
+  if (!meta) return true
+  const lastActivity = parseDate(meta.lastActivityAt).getTime()
+  return Date.now() - lastActivity > SESSION_TIMEOUT_MINUTES * 60000
+}
+
+function setOnlineLocal(userId: string, online: boolean) {
+  const set = new Set(onlineUserIdsCache)
+  if (online) set.add(userId)
+  else set.delete(userId)
+  onlineUserIdsCache = [...set]
+}
+
+function expireIdleSession() {
+  if (!currentSessionUserId) return false
+  if (!isSessionExpired(currentSessionUserId)) return false
+  const userId = currentSessionUserId
+  currentSessionUserId = null
+  sessionMetaByUserId.delete(userId)
+  setOnlineLocal(userId, false)
+  writeLocalAuthSnapshot()
+  try {
+    window.dispatchEvent(new Event('auth:updated'))
+  } catch {
+    // no-op
+  }
+  return true
 }
 
 function emitAuthUpdated() {
@@ -280,6 +396,8 @@ export const authStore = {
         usersCache = local.users || []
         passwordByUserId = new Map(local.passwordEntries || [])
         sessionsCache = local.sessions || []
+        sessionMetaByUserId = new Map(Object.entries(local.sessionMeta || {}))
+        failedLoginMetaByEmail = new Map(Object.entries(local.failedLoginMeta || {}))
         activityCache = local.activity || []
         onlineUserIdsCache = local.onlineUserIds || []
         currentSessionUserId = local.currentSessionUserId || null
@@ -369,7 +487,8 @@ export const authStore = {
     usersCache = [admin]
     // ⚠️ SECURITY: Demo password is base64-encoded (not hashed!)
     // Change VITE_AUTH_DEMO_PASSWORD in .env for each environment
-    const demoPassword = import.meta.env.VITE_AUTH_DEMO_PASSWORD || 'admin';
+    const viteEnv = readViteEnv() as Record<string, string> | undefined
+    const demoPassword = viteEnv?.VITE_AUTH_DEMO_PASSWORD || 'admin'
     passwordByUserId.set(admin.id, btoa(demoPassword))
     currentSessionUserId = admin.id
     this.startSession(admin.id)
@@ -383,7 +502,61 @@ export const authStore = {
     const superAdminEmail = 'superadmin@ivos.sn'
     // ⚠️ SECURITY: Password is base64-encoded (not hashed!)
     // Change VITE_AUTH_DEMO_PASSWORD in .env for each environment
-    const superAdminPassword = import.meta.env.VITE_AUTH_DEMO_PASSWORD || 'SuperAdmin@IVOS2026'
+    const viteEnv = readViteEnv() as Record<string, string> | undefined
+    const superAdminPassword = viteEnv?.VITE_AUTH_DEMO_PASSWORD || 'SuperAdmin@IVOS2026'
+    const existing = users.find(u => u.email.toLowerCase() === superAdminEmail)
+
+    if (!existing) {
+      const superAdmin: User = {
+        id: globalThis.crypto?.randomUUID?.() || `super_admin_${Date.now()}`,
+        fullName: 'Super Administrateur IVOS',
+        email: superAdminEmail,
+        role: 'Admin',
+        fonction: 'Super Admin',
+        status: 'approved',
+        siteAccessBlocked: false,
+        systemAccessBlocked: false,
+        createdAt: new Date().toISOString(),
+      }
+      users.push(superAdmin)
+      passwordByUserId.set(superAdmin.id, btoa(superAdminPassword))
+      this.saveUsers(users)
+      return
+    }
+
+    let changed = false
+    if (existing.role !== 'Admin') {
+      existing.role = 'Admin'
+      changed = true
+    }
+    if (existing.status !== 'approved') {
+      existing.status = 'approved'
+      changed = true
+    }
+    if (existing.systemAccessBlocked) {
+      existing.systemAccessBlocked = false
+      changed = true
+    }
+    if (existing.siteAccessBlocked) {
+      existing.siteAccessBlocked = false
+      changed = true
+    }
+    if (!passwordByUserId.get(existing.id)) {
+      passwordByUserId.set(existing.id, btoa(superAdminPassword))
+      changed = true
+    }
+
+    if (changed) {
+      this.saveUsers(users)
+    }
+  },
+
+  ensureSuperAdminLocal() {
+    const viteEnv = readViteEnv() as Record<string, string> | undefined
+    if (viteEnv?.DEV !== 'true') return
+    const users = this.getUsers()
+    const superAdminEmail = 'superadmin@ivos.sn'
+    const superAdminPassword = viteEnv?.VITE_AUTH_DEMO_PASSWORD || 'SuperAdmin@IVOS2026'
     const existing = users.find(u => u.email.toLowerCase() === superAdminEmail)
 
     if (!existing) {
@@ -458,14 +631,27 @@ export const authStore = {
   },
 
   login(email: string, password: string): { success: boolean; user?: User; error?: string; pending?: boolean } {
+    const normalizedEmail = email.toLowerCase()
+    const lockoutMeta = failedLoginMetaByEmail.get(normalizedEmail)
+    if (lockoutMeta?.lockoutUntil) {
+      if (parseDate(lockoutMeta.lockoutUntil).getTime() > Date.now()) {
+        return { success: false, error: getLockoutMessage(normalizedEmail) }
+      }
+      failedLoginMetaByEmail.delete(normalizedEmail)
+    }
+
     const users = this.getUsers()
-    const user = users.find(u => u.email.toLowerCase() === email.toLowerCase())
+    const user = users.find(u => u.email.toLowerCase() === normalizedEmail)
     if (!user) {
+      setFailedLogin(normalizedEmail)
+      emitAuthUpdated()
       return { success: false, error: 'Email ou mot de passe incorrect' }
     }
 
     const storedPwd = passwordByUserId.get(user.id)
     if (!storedPwd || atob(storedPwd) !== password) {
+      setFailedLogin(normalizedEmail)
+      emitAuthUpdated()
       return { success: false, error: 'Email ou mot de passe incorrect' }
     }
 
@@ -479,22 +665,33 @@ export const authStore = {
       return { success: false, error: 'Votre demande de compte a été refusée. Contactez un administrateur.' }
     }
 
+    clearFailedLogin(normalizedEmail)
     currentSessionUserId = user.id
     this.startSession(user.id)
     this.setOnline(user.id, true)
     this.logActivity(user.id, user.fullName, 'login', 'Auth', 'Connexion au système')
+    updateSessionActivity(user.id)
     emitAuthUpdated()
     return { success: true, user }
   },
 
   getSession(): User | null {
+    if (expireIdleSession()) return null
     if (!currentSessionUserId) return null
-    const user = this.getUsers().find(u => u.id === currentSessionUserId) || null
-    if (user?.systemAccessBlocked) {
-      this.setOnline(user.id, false)
+    const user = this.getUsers().find(u => u.id === currentSessionUserId)
+    if (!user) {
       currentSessionUserId = null
+      emitAuthUpdated()
       return null
     }
+    if (user.systemAccessBlocked) {
+      this.setOnline(user.id, false)
+      currentSessionUserId = null
+      emitAuthUpdated()
+      return null
+    }
+    updateSessionActivity(user.id)
+    emitAuthUpdated()
     return user
   },
 
@@ -623,6 +820,7 @@ export const authStore = {
       durationMinutes: null,
     }
     sessionsCache = [entry, ...sessionsCache]
+    sessionMetaByUserId.set(userId, { lastActivityAt: getNow() })
     void persistSessions()
   },
 

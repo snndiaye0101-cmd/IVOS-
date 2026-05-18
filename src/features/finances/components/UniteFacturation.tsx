@@ -3,6 +3,7 @@ import {
   Database, Edit3, Plus, Trash2, Search, Check, X,
   DollarSign, Tag, Ruler, FolderOpen, Clock,
 } from 'lucide-react';
+import { formatCleanAmount } from '@/shared/utils/formatAmount';
 import {
   getUniteFacturation,
   addUniteFacturation,
@@ -24,7 +25,7 @@ const UNITS = ['Tonne', 'm³', 'Forfait', 'Heure', 'Fût', 'kg', 'L'];
 const CATEGORIES = ['Exploitation', 'Opérations Spéciales', 'Maintenance'];
 
 function fmtPrice(n: number) {
-  return n.toLocaleString('fr-FR') + ' FCFA';
+  return formatCleanAmount(n, 'FCFA');
 }
 function fmtDate(dateStr?: string) {
   if (!dateStr) return '—';

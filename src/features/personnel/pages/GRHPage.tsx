@@ -4,6 +4,7 @@ import { congesStore, Conge, TypeAbsence, StatutValidation, EtatPresence, JourFe
 import { pointageStore, Pointage } from '../services/pointageStore';
 import { heuresStore, type WorkHoursRow } from '../services/heuresStore';
 import { payrollSettingsStore } from '../../finances/services/payrollSettingsStore';
+import { formatCleanAmount } from '@/shared/utils/formatAmount';
 import Modal from '../../../components/ui/Modal';
 import {
   Users, CalendarDays, PlusCircle, Search, Eye, Edit, Trash2,
@@ -92,7 +93,7 @@ function formatWeekLabel(dates: string[]) {
 }
 
 function formatFcfa(value: number) {
-  return `${Math.round(value).toLocaleString('fr-FR')} FCFA`;
+  return formatCleanAmount(Math.round(value), 'FCFA');
 }
 
 function formatHours(value: number) {
@@ -823,7 +824,7 @@ export default function GRHPage() {
                             </div>
                           </div>
                           <div className="text-right">
-                            {hrs > 0 && <p className="text-sm font-bold text-orange-700">+{maj.toLocaleString('fr-FR')} FCFA</p>}
+                            {hrs > 0 && <p className="text-sm font-bold text-orange-700">+{formatFcfa(maj)}</p>}
                             <p className="text-[10px] text-orange-500">{p.isFerie ? 'Majoration 100%' : 'Majoration 40%'}</p>
                           </div>
                         </div>

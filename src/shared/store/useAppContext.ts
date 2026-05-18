@@ -1,4 +1,6 @@
 import { create } from 'zustand'
+import { countryStore } from '../services/countryStore'
+import { DEFAULT_COUNTRY_ALPHA3, DEFAULT_COUNTRY_ALPHA2 } from '../constants'
 
 interface AppContextState {
   currentCountryId: string | null
@@ -10,26 +12,43 @@ interface AppContextState {
 
 const STORAGE_KEY = 'ivos_app_context_v1'
 
+function getDefaultCountryId(): string | null {
+  try {
+    const countries = countryStore.getCountries()
+    if (!countries || countries.length === 0) return null
+    const sen = countries.find(c => c.codeIso === DEFAULT_COUNTRY_ALPHA3 || c.codeIso === DEFAULT_COUNTRY_ALPHA2 || c.name.toLowerCase().includes('sénégal') || c.name.toLowerCase().includes('senegal'))
+    return sen ? sen.id : countries[0].id
+  } catch { return null }
+}
+
 export const useAppContext = create<AppContextState>((set, get) => ({
-  currentCountryId: null,
+  // Implicit Senegal root: always prefer the Senegal country if present
+  currentCountryId: getDefaultCountryId(),
   currentSiteId: null,
+  // Prevent changing the global country from the UI — keep Senegal implicit
   setCurrentCountryId: (id) => {
-    set({ currentCountryId: id })
+    const defaultId = getDefaultCountryId()
+    set({ currentCountryId: defaultId })
     const { currentSiteId } = get()
-    window.localStorage.setItem(STORAGE_KEY, JSON.stringify({ country: id, site: currentSiteId }))
+    try { window.localStorage.setItem(STORAGE_KEY, JSON.stringify({ country: defaultId, site: currentSiteId })) } catch {}
   },
   setCurrentSiteId: (id) => {
     set({ currentSiteId: id })
     const { currentCountryId } = get()
-    window.localStorage.setItem(STORAGE_KEY, JSON.stringify({ country: currentCountryId, site: id }))
+    try { window.localStorage.setItem(STORAGE_KEY, JSON.stringify({ country: currentCountryId, site: id })) } catch {}
   },
   hydrateFromStorage: () => {
-    const raw = window.localStorage.getItem(STORAGE_KEY)
-    if (raw) {
-      try {
-        const { country, site } = JSON.parse(raw)
-        set({ currentCountryId: country || null, currentSiteId: site || null })
-      } catch {}
-    }
+    try {
+      const raw = window.localStorage.getItem(STORAGE_KEY)
+      const defaultId = getDefaultCountryId()
+      if (raw) {
+        try {
+          const { site } = JSON.parse(raw)
+          set({ currentCountryId: defaultId, currentSiteId: site || null })
+          return
+        } catch {}
+      }
+      set({ currentCountryId: defaultId, currentSiteId: null })
+    } catch {}
   },
 }))

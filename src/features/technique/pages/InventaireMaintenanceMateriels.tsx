@@ -8,6 +8,7 @@ import Button from '../../../components/ui/Button';
 import Select from '../../../components/ui/Select';
 import Modal from '../../../components/ui/Modal';
 import { Wrench, Plus, FileText, AlertTriangle, History, Edit, Trash2, ChevronDown, ChevronUp, Search, Package, Settings, Shield } from 'lucide-react';
+import { formatCleanAmount } from '@/shared/utils/formatAmount';
 import { useNavigate } from 'react-router-dom';
 
 const CATEGORIES = ['Mécanique', 'Électrique', 'Levage', 'Outillage', 'EPI', 'Autre'];
@@ -95,7 +96,7 @@ export default function InventaireMaintenanceMateriels() {
   function handleExport() {
     const lines = filtered.map(m => {
       const dep = m.historique.reduce((s, h) => s + h.total, 0);
-      return `${m.codeSerie} | ${m.designation} | ${m.categorie} | ${m.etat} | ${m.localisation} | ${m.historique.length} interventions | ${dep.toLocaleString()} FCFA`;
+      return `${m.codeSerie} | ${m.designation} | ${m.categorie} | ${m.etat} | ${m.localisation} | ${m.historique.length} interventions | ${formatCleanAmount(dep, 'FCFA')}`;
     });
     const blob = new Blob(['Rapport Inventaire & Maintenance Matériels\n' + '='.repeat(50) + '\n\n' + lines.join('\n')], { type: 'text/plain' });
     const url = URL.createObjectURL(blob);
@@ -165,7 +166,7 @@ export default function InventaireMaintenanceMateriels() {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
         <div className="bg-white rounded-2xl shadow-md p-4">
           <p className="text-xs text-gray-500 mb-1">Dépenses Maintenance Totales</p>
-          <p className="text-lg font-bold text-blue-700">{stats.totalDepenses.toLocaleString()} FCFA</p>
+          <p className="text-lg font-bold text-blue-700">{formatCleanAmount(stats.totalDepenses, 'FCFA')}</p>
         </div>
         <div className="bg-white rounded-2xl shadow-md p-4">
           <p className="text-xs text-gray-500 mb-1">Rentabilité Faible</p>
@@ -443,7 +444,7 @@ function PanneForm({ mat, onDone }: { mat: Materiel; onDone: () => void }) {
       <Input label="Coût Pièces (FCFA)" name="coutPieces" value={f.coutPieces} onChange={h} type="number" required />
       <Input label="Coût Main d'Œuvre (FCFA)" name="coutMo" value={f.coutMo} onChange={h} type="number" required />
       <div className="sm:col-span-2 flex items-center justify-between mt-2">
-        <p className="text-sm font-semibold text-gray-700">Total : <span className="text-blue-700">{total.toLocaleString()} FCFA</span></p>
+        <p className="text-sm font-semibold text-gray-700">Total : <span className="text-blue-700">{formatCleanAmount(total, 'FCFA')}</span></p>
         <Button type="submit" variant="primary">Enregistrer la Panne</Button>
       </div>
     </form>
@@ -457,7 +458,7 @@ function HistoriqueView({ mat }: { mat: Materiel }) {
     <div className="space-y-4 py-2">
       <div className="flex items-center justify-between">
         <p className="text-sm text-gray-500">{mat.historique.length} intervention{mat.historique.length !== 1 ? 's' : ''}</p>
-        <p className="text-sm font-semibold">Total dépenses : <span className="text-blue-700">{totalDep.toLocaleString()} FCFA</span></p>
+        <p className="text-sm font-semibold">Total dépenses : <span className="text-blue-700">{formatCleanAmount(totalDep, 'FCFA')}</span></p>
       </div>
       {mat.historique.length === 0 ? (
         <p className="text-gray-400 text-sm text-center py-4">Aucune intervention enregistrée</p>
@@ -480,9 +481,9 @@ function HistoriqueView({ mat }: { mat: Materiel }) {
                   <td className="px-4 py-2 text-sm">{h.date}</td>
                   <td className="px-4 py-2 text-sm">{h.description}</td>
                   <td className="px-4 py-2 text-sm">{h.reparateur}</td>
-                  <td className="px-4 py-2 text-sm">{h.coutPieces.toLocaleString()}</td>
-                  <td className="px-4 py-2 text-sm">{h.coutMo.toLocaleString()}</td>
-                  <td className="px-4 py-2 text-sm font-bold text-blue-700">{h.total.toLocaleString()} FCFA</td>
+                  <td className="px-4 py-2 text-sm">{formatCleanAmount(h.coutPieces, 'FCFA')}</td>
+                  <td className="px-4 py-2 text-sm">{formatCleanAmount(h.coutMo, 'FCFA')}</td>
+                  <td className="px-4 py-2 text-sm font-bold text-blue-700">{formatCleanAmount(h.total, 'FCFA')}</td>
                 </tr>
               ))}
             </tbody>
@@ -491,7 +492,7 @@ function HistoriqueView({ mat }: { mat: Materiel }) {
       )}
       {mat.valeurNeuf > 0 && (
         <div className="bg-gray-50 rounded-xl p-3 text-sm">
-          <p>Valeur à neuf : <span className="font-semibold">{mat.valeurNeuf.toLocaleString()} FCFA</span></p>
+          <p>Valeur à neuf : <span className="font-semibold">{formatCleanAmount(mat.valeurNeuf, 'FCFA')}</span></p>
           <p>Ratio réparations / valeur : <span className={`font-bold ${totalDep / mat.valeurNeuf > 0.5 ? 'text-red-600' : 'text-green-600'}`}>{(totalDep / mat.valeurNeuf * 100).toFixed(0)}%</span></p>
         </div>
       )}

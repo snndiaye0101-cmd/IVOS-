@@ -21,6 +21,7 @@ import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend,
   ResponsiveContainer, PieChart, Pie, Cell
 } from 'recharts';
+import { formatCleanAmount } from '@/shared/utils/formatAmount';
 
 // ── Types ──────────────────────────────────────────────────────────────────────
 
@@ -71,8 +72,7 @@ interface AutoTableCarrier {
 
 // ── Helpers ────────────────────────────────────────────────────────────────────
 
-const FCFA = (n: number) =>
-  n.toLocaleString('fr-FR', { maximumFractionDigits: 0 }) + ' FCFA';
+const FCFA = (n: number) => formatCleanAmount(n, 'FCFA');
 
 function monthLabel(key: string): string {
   const [y, m] = key.split('-');
@@ -312,15 +312,15 @@ export default function DashboardPage() {
       startY: y,
       head: [['Indicateur Financier', 'Montant (FCFA)']],
       body: [
-        ['Masse Salariale', data.masseSalariale.toLocaleString('fr-FR')],
-        ['  └ Salaires de base', data.totalBaseSalary.toLocaleString('fr-FR')],
-        ['  └ Primes', data.totalBonus.toLocaleString('fr-FR')],
-        ['  └ Cotisations / Retenues', data.totalRetenues.toLocaleString('fr-FR')],
-        ['Total Facturé (CA)', data.totalFacture.toLocaleString('fr-FR')],
-        ['Recouvrement en Cours', data.recouvrementEnCours.toLocaleString('fr-FR')],
-        ['Dépenses Globales', data.depensesGlobales.toLocaleString('fr-FR')],
-        ['Carburant', data.carburantTotal.toLocaleString('fr-FR')],
-        ['Marge Opérationnelle', data.margeOperationnelle.toLocaleString('fr-FR')],
+        ['Masse Salariale', FCFA(data.masseSalariale)],
+        ['  └ Salaires de base', FCFA(data.totalBaseSalary)],
+        ['  └ Primes', FCFA(data.totalBonus)],
+        ['  └ Cotisations / Retenues', FCFA(data.totalRetenues)],
+        ['Total Facturé (CA)', FCFA(data.totalFacture)],
+        ['Recouvrement en Cours', FCFA(data.recouvrementEnCours)],
+        ['Dépenses Globales', FCFA(data.depensesGlobales)],
+        ['Carburant', FCFA(data.carburantTotal)],
+        ['Marge Opérationnelle', FCFA(data.margeOperationnelle)],
       ],
       theme: 'grid',
       headStyles: { fillColor: [26, 26, 46] },
@@ -331,10 +331,10 @@ export default function DashboardPage() {
       startY: y,
       head: [['Carburant', 'Litres', 'Coût (FCFA)']],
       body: [
-        ['Mois en cours', data.carburantLitresCurrent.toLocaleString('fr-FR'), data.carburantTotal.toLocaleString('fr-FR')],
-        ['Mois précédent', data.carburantLitresPrev.toLocaleString('fr-FR'), data.carburantTotalPrev.toLocaleString('fr-FR')],
-        ['Véhicules de Fonction', '—', data.carburantFonction.toLocaleString('fr-FR')],
-        ['Véhicules de Parc', '—', data.carburantParc.toLocaleString('fr-FR')],
+        ['Mois en cours', data.carburantLitresCurrent.toLocaleString('fr-FR'), FCFA(data.carburantTotal)],
+        ['Mois précédent', data.carburantLitresPrev.toLocaleString('fr-FR'), FCFA(data.carburantTotalPrev)],
+        ['Véhicules de Fonction', '—', FCFA(data.carburantFonction)],
+        ['Véhicules de Parc', '—', FCFA(data.carburantParc)],
       ],
       theme: 'grid',
       headStyles: { fillColor: [26, 26, 46] },
@@ -345,7 +345,7 @@ export default function DashboardPage() {
       autoTable(doc, {
         startY: y,
         head: [['Rang', 'Véhicule', 'Coût Carburant (FCFA)']],
-        body: data.topFuelVehicles.map((v, i) => [`#${i + 1}`, v.vehicule, v.montant.toLocaleString('fr-FR')]),
+        body: data.topFuelVehicles.map((v, i) => [`#${i + 1}`, v.vehicule, FCFA(v.montant)]),
         theme: 'grid',
         headStyles: { fillColor: [26, 26, 46] },
       });

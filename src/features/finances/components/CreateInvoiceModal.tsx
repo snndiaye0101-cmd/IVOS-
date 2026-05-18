@@ -5,6 +5,7 @@
 
 import { useState } from 'react';
 import { X, Plus, Trash2, FileText, DollarSign } from 'lucide-react';
+import { formatCleanAmount } from '../../../shared/utils/formatAmount';
 import type { NewInvoiceData, InvoiceLine, PaymentMethod } from '../types/invoice.types';
 
 interface Client {
@@ -316,7 +317,7 @@ export default function CreateInvoiceModal({ isOpen, onClose, onSubmit, clients 
                           Total HT
                         </label>
                         <div className="px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-sm font-bold text-gray-800">
-                          {ligne.totalHT.toLocaleString('fr-FR')} FCFA
+                          {formatCleanAmount(ligne.totalHT, 'FCFA')}
                         </div>
                       </div>
                     </div>
@@ -404,16 +405,16 @@ export default function CreateInvoiceModal({ isOpen, onClose, onSubmit, clients 
               <div className="space-y-2">
                 <div className="flex justify-between items-center text-sm">
                   <span className="text-gray-700">Total HT</span>
-                  <span className="font-semibold text-gray-900">{totalHT.toLocaleString('fr-FR')} FCFA</span>
+                  <span className="font-semibold text-gray-900">{formatCleanAmount(totalHT, 'FCFA')}</span>
                 </div>
                 <div className="flex justify-between items-center text-sm">
                   <span className="text-gray-700">TVA ({tauxTVA}%)</span>
-                  <span className="font-semibold text-gray-900">{totalTVA.toLocaleString('fr-FR')} FCFA</span>
+                  <span className="font-semibold text-gray-900">{formatCleanAmount(totalTVA, 'FCFA')}</span>
                 </div>
                 <div className="h-px bg-indigo-300 my-2" />
                 <div className="flex justify-between items-center">
                   <span className="text-base font-bold text-indigo-900">Total TTC</span>
-                  <span className="text-xl font-bold text-indigo-600">{totalTTC.toLocaleString('fr-FR')} FCFA</span>
+                  <span className="text-xl font-bold text-indigo-600">{formatCleanAmount(totalTTC, 'FCFA')}</span>
                 </div>
               </div>
             </div>

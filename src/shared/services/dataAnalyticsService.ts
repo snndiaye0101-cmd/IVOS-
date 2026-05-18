@@ -175,9 +175,12 @@ function extractWeight(operation: Operation): number {
   }
   
   // Fallback sur quantité estimée, qui est plus fiable que 'quantite'
-  if ((operation as any).quantiteEstimee) {
-    const weight = parseFloat((operation as any).quantiteEstimee);
-    if (!isNaN(weight)) return weight;
+  if ('quantiteEstimee' in operation) {
+    const est = (operation as unknown as Record<string, unknown>)['quantiteEstimee'];
+    if (est !== undefined && est !== null) {
+      const weight = parseFloat(String(est));
+      if (!isNaN(weight)) return weight;
+    }
   }
   
   return 0;

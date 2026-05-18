@@ -1,5 +1,6 @@
 import React, { useState, useMemo, useEffect, useCallback } from 'react';
 import { Tabs, Tab } from '../../../components/ui/Tab';
+import { formatCleanAmount } from '../../../shared/utils/formatAmount';
 import { pneumatiqueStore, Pneu } from '../services/pneumatiqueStore';
 import { vehiclesStore } from '../services/vehiclesStore';
 import Input from '../../../components/ui/Input';
@@ -128,7 +129,7 @@ export default function PneumatiquePage() {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
         <div className="bg-white rounded-2xl shadow-md p-4">
           <p className="text-xs text-gray-500 mb-1">Coût Total Stock</p>
-          <p className="text-lg font-bold text-gray-900">{stats.coutTotal.toLocaleString()} FCFA</p>
+          <p className="text-lg font-bold text-gray-900">{formatCleanAmount(stats.coutTotal, 'FCFA')}</p>
         </div>
         <div className="bg-white rounded-2xl shadow-md p-4">
           <p className="text-xs text-gray-500 mb-1">CPK Moyen (montés)</p>
@@ -329,7 +330,7 @@ export default function PneumatiquePage() {
                         <td className="px-4 py-3 text-sm font-semibold">{marque}</td>
                         <td className="px-4 py-3 text-sm">{d.count}</td>
                         <td className="px-4 py-3 text-sm font-bold text-blue-700">{d.count > 0 ? (d.totalCpk / d.count).toFixed(2) : '—'}</td>
-                        <td className="px-4 py-3 text-sm">{Math.round(d.totalPrix / d.count).toLocaleString()} FCFA</td>
+                        <td className="px-4 py-3 text-sm">{formatCleanAmount(Math.round(d.totalPrix / d.count), 'FCFA')}</td>
                         <td className="px-4 py-3 text-sm">{Math.round(d.totalKm / d.count).toLocaleString()} km</td>
                       </tr>
                     ));

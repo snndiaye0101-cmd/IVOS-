@@ -6,6 +6,7 @@ import {
   Fuel, Wrench, HardHat, Package, Building2, MoreHorizontal,
   RefreshCw, Lock,
 } from 'lucide-react';
+import { formatCleanAmount } from '@/shared/utils/formatAmount';
 import { personnelStore, type PersonnelAgent } from '../../fleet/services/personnelStore';
 import { vehiclesStore } from '../../fleet/services/vehiclesStore';
 import { carburantStore } from '../../fleet/services/carburantStore';
@@ -53,7 +54,7 @@ function _loadExpensesWithSeed(): Expense[] {
 }
 
 // ─── Helpers ────────────────────────────────────────────────────────
-function fmtPrice(n: number) { return n.toLocaleString('fr-FR') + ' FCFA'; }
+function fmtPrice(n: number) { return formatCleanAmount(n, 'FCFA'); }
 function fmtDate(d: string) { return new Date(d).toLocaleDateString('fr-FR', { day: '2-digit', month: 'short', year: 'numeric' }); }
 function formatInputPrice(value: string): string {
   const num = value.replace(/\D/g, '');
@@ -110,12 +111,12 @@ export default function GlobalExpensesPage() {
   useEffect(() => {
     try {
       const v = vehiclesStore.load();
-      setVehicles(v.map((veh: Record<string, string>) => ({ id: veh.id || veh.registration, registration: veh.registration || veh.immatriculation || 'N/A' })));
+      setVehicles(v.map((veh: any) => ({ id: veh.id || veh.registration, registration: veh.registration || veh.immatriculation || 'N/A' })));
     } catch { /* no vehicles */ }
     const h = () => {
       try {
         const v = vehiclesStore.load();
-        setVehicles(v.map((veh: Record<string, string>) => ({ id: veh.id || veh.registration, registration: veh.registration || veh.immatriculation || 'N/A' })));
+        setVehicles(v.map((veh: any) => ({ id: veh.id || veh.registration, registration: veh.registration || veh.immatriculation || 'N/A' })));
       } catch { /* ignore */ }
     };
     window.addEventListener('fleetVehicles:updated', h);

@@ -4,51 +4,28 @@
 import React, { createContext, useContext, ReactNode } from "react";
 import { useChat } from "../services";
 import { useAuth } from "@/shared/contexts/AuthContext";
-
-export interface ChatChannel {
-  id: string;
-  name: string;
-  type: 'public' | 'private' | 'dm';
-  members: string[];
-  createdAt: string;
-}
-
-export interface ChatMessage {
-  id: string;
-  channelId: string;
-  senderId: string;
-  senderName: string;
-  content: string;
-  createdAt: string;
-  editedAt?: string;
-}
-
-export interface ChatMember {
-  id: string;
-  name: string;
-  presence: 'online' | 'offline' | 'away';
-}
+import type { Channel, ChatMessage as ChatMsg, ChatUser } from "../types/chat.types";
 
 interface ChatContextType {
   userId: string;
   userName: string;
-  channels: ChatChannel[];
-  currentChannel: ChatChannel | null;
-  messages: ChatMessage[];
-  members: ChatMember[];
-  onlineUsers: ChatMember[];
+  channels: Channel[];
+  currentChannel: Channel | null;
+  messages: ChatMsg[];
+  members: ChatUser[];
+  onlineUsers: ChatUser[];
   loading: boolean;
   error: string | null;
-  setCurrentChannel: (channel: ChatChannel) => void;
-  createChannel: (input: { name: string; type: 'public' | 'private' | 'dm'; members?: string[] }) => Promise<ChatChannel>;
+  setCurrentChannel: (channel: Channel) => void;
+  createChannel: (input: { name: string; type: 'public' | 'private' | 'direct'; members?: string[] }) => Promise<Channel>;
   deleteChannel: (id: string) => Promise<void>;
-  sendMessage: (input: { channelId: string; content: string }) => Promise<ChatMessage>;
-  editMessage: (id: string, content: string) => Promise<ChatMessage>;
+  sendMessage: (input: { channel_id: string; content: string }) => Promise<ChatMsg>;
+  editMessage: (id: string, content: string) => Promise<ChatMsg>;
   deleteMessage: (id: string) => Promise<void>;
   addMember: (channelId: string, memberId: string) => Promise<void>;
   removeMember: (channelId: string, memberId: string) => Promise<void>;
-  openDirectMessage: (otherUserId: string) => Promise<ChatChannel>;
-  setUserPresence: (status: 'online' | 'offline' | 'away') => Promise<void>;
+  openDirectMessage: (otherUserId: string) => Promise<Channel>;
+  setUserPresence: (status: 'online' | 'offline' | 'away' | 'do_not_disturb') => Promise<void>;
 }
 
 const ChatContext = createContext<ChatContextType | null>(null);

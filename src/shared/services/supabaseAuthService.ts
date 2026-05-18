@@ -91,7 +91,7 @@ export async function signUp(
     const { error: profileError } = await supabase.from('app_users').insert([
       {
         id: data.user.id,
-        email: data.user.email,
+        email: data.user.email ?? '',
         full_name: fullName,
         role: 'client', // Default role
         status: 'pending', // Pending admin approval
@@ -115,7 +115,7 @@ export async function signUp(
     return {
       data: {
         id: data.user.id,
-        email: data.user.email,
+        email: data.user.email ?? '',
         fullName,
         role: 'client',
         subsidiaryId,
@@ -192,6 +192,9 @@ export async function signIn(
     // Log authentication event
     await logAuthEvent('login', data.user.id, email)
 
+    // Remove legacy auth snapshot once Supabase Auth is working
+    clearLegacyAuth()
+
     return {
       data: {
         user: {
@@ -226,6 +229,7 @@ export async function signIn(
  */
 export async function signOut(): Promise<AuthResponse<null>> {
   try {
+    const currentUser = await getCurrentUser()
     const { error } = await supabase.auth.signOut()
 
     if (error) {
@@ -238,12 +242,12 @@ export async function signOut(): Promise<AuthResponse<null>> {
       }
     }
 
-    // Log logout event
-    const user = await getCurrentUser()
-    if (user) {
-      await logAuthEvent('logout', user.id, user.email)
+    // Log logout event after the session is ended
+    if (currentUser) {
+      await logAuthEvent('logout', currentUser.id, currentUser.email)
     }
 
+    clearLegacyAuth()
     return { data: null }
   } catch (error) {
     console.error('Sign out exception:', error)

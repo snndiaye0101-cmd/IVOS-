@@ -26,12 +26,30 @@ export interface Vehicle {
   mileage: number
   fuelType: string
   status: string
-  source: 'parc' | 'personnel'
+  source?: 'parc' | 'personnel'
   assignedDriver?: string
   agentName?: string
   insuranceExpiry?: string
   technicalControlExpiry?: string
   lastMaintenance?: string
+  // Additional optional fields used across the app
+  capacity?: string | number
+  purchaseDate?: string
+  commissionDate?: string
+  carteGriseExpiry?: string
+  vignetteExpiry?: string
+  lastOilChange?: string
+  nextOilChange?: string
+  lastOilMileage?: number
+  maintenanceHistory?: any[]
+  documents?: any[]
+  complianceDocs?: any[]
+  fuelRecords?: any[]
+  expenses?: any[]
+  notes?: string
+  siteCode?: string
+  dateFinMiseDisposition?: string
+  kilometrageAuPret?: number
 }
 
 let cache: Vehicle[] = []

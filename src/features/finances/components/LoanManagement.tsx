@@ -1,4 +1,5 @@
 import React from "react";
+import { formatCleanAmount } from '../../../shared/utils/formatAmount';
 
 interface Loan {
   employee: string;
@@ -28,6 +29,8 @@ const loans: Loan[] = [
   },
 ];
 
+const formatCurrency = (n: number) => formatCleanAmount(n, 'FCFA');
+
 const LoanManagement: React.FC = () => {
   return (
     <div className="overflow-x-auto rounded-lg border border-amber-200 bg-white shadow-sm p-4">
@@ -49,10 +52,10 @@ const LoanManagement: React.FC = () => {
             return (
               <tr key={idx} className="hover:bg-amber-50">
                 <td className="px-4 py-2 text-sm text-amber-900">{loan.employee}</td>
-                <td className="px-4 py-2 text-sm text-amber-900">{loan.totalLoan.toLocaleString()} FCFA</td>
-                <td className="px-4 py-2 text-sm text-amber-900">{loan.monthlyPayment.toLocaleString()} FCFA</td>
-                <td className="px-4 py-2 text-sm text-amber-900">{loan.amountRepaid.toLocaleString()} FCFA</td>
-                <td className="px-4 py-2 text-sm text-amber-900">{remaining.toLocaleString()} FCFA</td>
+                <td className="px-4 py-2 text-sm text-amber-900">{formatCurrency(loan.totalLoan)}</td>
+                <td className="px-4 py-2 text-sm text-amber-900">{formatCurrency(loan.monthlyPayment)}</td>
+                <td className="px-4 py-2 text-sm text-amber-900">{formatCurrency(loan.amountRepaid)}</td>
+                <td className="px-4 py-2 text-sm text-amber-900">{formatCurrency(remaining)}</td>
                 <td className="px-4 py-2">
                   <div className="w-32 h-3 bg-amber-100 rounded-full overflow-hidden">
                     <div

@@ -17,6 +17,7 @@ const KANBAN_COLUMNS = [
 const MOCK_OPERATIONS: Operation[] = [
   {
     id: "MS-202604-001",
+    siteCode: "DKR",
     client: "SEDIMA",
     type: "Tank Cleaning",
     responsable: "A. Diop",
@@ -35,6 +36,7 @@ const MOCK_OPERATIONS: Operation[] = [
   },
   {
     id: "MS-202604-002",
+    siteCode: "DKR",
     client: "TOTAL",
     type: "Nettoyage Cuve",
     responsable: "B. Sarr",
@@ -53,6 +55,7 @@ const MOCK_OPERATIONS: Operation[] = [
   },
   {
     id: "MS-202604-003",
+    siteCode: "DKR",
     client: "SENEGAL MINES",
     type: "Transport Déchets",
     responsable: "C. Fall",

@@ -5,6 +5,7 @@
 
 import React, { useState } from 'react';
 import { Save, X, DollarSign, CreditCard, Banknote, FileText, AlertCircle } from 'lucide-react';
+import { formatCleanAmount } from '../../../shared/utils/formatAmount';
 import type { PaymentMethod, PaymentDetails } from '../../finances/services/paymentService';
 import { createPayment } from '../../finances/services/paymentService';
 import type { WorkflowInvoice } from '../../finances/services/workflowInvoiceService';
@@ -133,7 +134,7 @@ export default function PaymentForm({ invoice, onClose, onSuccess, currentUserNa
                 <div>
                   <span className="font-semibold text-gray-600">Montant Facture:</span>
                   <p className="text-gray-900 font-bold">
-                    {invoice.montantHT.toLocaleString('fr-FR')} FCFA
+                    {formatCleanAmount(invoice.montantHT, 'FCFA')}
                   </p>
                 </div>
               </div>

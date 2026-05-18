@@ -34,13 +34,35 @@ if ((!supabaseUrl || !supabaseAnonKey) && runtimeEnv.NODE_ENV !== 'test') {
 const resolvedUrl = supabaseUrl || 'https://test-project.supabase.co'
 const resolvedAnonKey = supabaseAnonKey || 'test-anon-key'
 
+function getBrowserAuthStorage(): Storage | undefined {
+  if (typeof window === 'undefined') return undefined
+
+  try {
+    const storage = window.sessionStorage
+    storage.setItem('__supabase_storage_test__', '1')
+    storage.removeItem('__supabase_storage_test__')
+    return storage
+  } catch {
+    try {
+      const fallbackStorage = window.localStorage
+      fallbackStorage.setItem('__supabase_storage_test__', '1')
+      fallbackStorage.removeItem('__supabase_storage_test__')
+      return fallbackStorage
+    } catch {
+      return undefined
+    }
+  }
+}
+
+export const supabaseAuthStorage = getBrowserAuthStorage()
+
 // Client Supabase typé avec le schéma de la base
 export const supabase = createClient(resolvedUrl, resolvedAnonKey, {
   auth: {
     persistSession: true,
     autoRefreshToken: true,
     detectSessionInUrl: true,
-    storage: window.localStorage,
+    storage: supabaseAuthStorage,
   },
   db: {
     schema: 'public',

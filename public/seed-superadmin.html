@@ -1,0 +1,108 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Seed Super Admin (DEV only)</title>
+  <style>
+    body { font-family: system-ui, -apple-system, Segoe UI, Roboto, 'Helvetica Neue', Arial; padding: 28px; background:#f8fafc }
+    .card { background:#fff; padding:20px; border-radius:12px; box-shadow:0 6px 20px rgba(2,6,23,0.08); max-width:720px; margin:18px auto }
+    label { display:block; font-size:13px; color:#334155; margin-top:12px }
+    input { width:100%; padding:10px 12px; border-radius:8px; border:1px solid #e6e9ef; margin-top:6px }
+    button { margin-top:16px; padding:10px 14px; border-radius:10px; background:#1652C9; color:#fff; border:none; cursor:pointer }
+    .warn { margin-top:12px; color:#92400e; background:#fff7ed; padding:10px; border-radius:8px; font-size:13px }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h2>Seed Super Admin — Développement uniquement</h2>
+    <p>Cet outil écrit des clés dans <code>localStorage</code> pour créer un compte super‑admin localement. Ne PAS utiliser en production.</p>
+
+    <label>Email du compte
+      <input id="email" value="superadmin@ivos.sn" />
+    </label>
+    <label>Nom complet
+      <input id="fullname" value="Super Administrateur IVOS" />
+    </label>
+    <label>Mot de passe (modifiez si nécessaire)
+      <input id="password" value="SuperAdmin@IVOS2026" />
+    </label>
+
+    <div class="warn">
+      Note: le compte créé aura le rôle applicatif <strong>Admin</strong> et recevra la permission globale <strong>SuperAdmin</strong> via la table des rôles (localStorage). Ce script sert uniquement à réinitialiser l'accès en développement.
+    </div>
+
+    <button id="seed">Créer le super‑admin local</button>
+
+    <p style="margin-top:14px; font-size:13px; color:#475569">Après création, rechargez l'application principale (ex: <code>/</code>) et connectez‑vous avec l'email et le mot de passe ci‑dessus.</p>
+  </div>
+
+  <script>
+    document.getElementById('seed').addEventListener('click', function () {
+      const email = document.getElementById('email').value.trim() || 'superadmin@ivos.sn'
+      const fullName = document.getElementById('fullname').value.trim() || 'Super Administrateur IVOS'
+      const passwordPlain = document.getElementById('password').value || 'SuperAdmin@IVOS2026'
+      const uid = (crypto && crypto.randomUUID) ? crypto.randomUUID() : ('super_admin_' + Date.now())
+
+      const user = {
+        id: uid,
+        fullName,
+        email,
+        role: 'Admin',
+        fonction: 'Super Admin',
+        status: 'approved',
+        siteAccessBlocked: false,
+        systemAccessBlocked: false,
+        createdAt: new Date().toISOString(),
+        countryId: null,
+        siteId: null
+      }
+
+      const passwordB64 = btoa(passwordPlain)
+
+      // Local auth snapshot (compat with authStore.readLocalAuthSnapshot)
+      const snapshot = {
+        users: [user],
+        passwordEntries: [[uid, passwordB64]],
+        sessions: [{ userId: uid, loginAt: new Date().toISOString(), logoutAt: null, durationMinutes: null }],
+        activity: [],
+        onlineUserIds: [uid],
+        currentSessionUserId: uid
+      }
+
+      try {
+        localStorage.setItem('ivos_auth_snapshot_v1', JSON.stringify(snapshot))
+
+        // Grant SuperAdmin role in permissionStore (roles mapping)
+        const rolesKey = 'ivos_user_roles_v1'
+        const roles = JSON.parse(localStorage.getItem(rolesKey) || '{}')
+        roles[uid] = 'SuperAdmin'
+        localStorage.setItem(rolesKey, JSON.stringify(roles))
+
+        // Grant full permissions in permissions store
+        const permsKey = 'ivos_permissions_v1'
+        const existing = JSON.parse(localStorage.getItem(permsKey) || '[]')
+        const modules = {
+          dashboard:'all', fleet:'all', exploitation:'all', finances:'all', technique:'all', rh:'all', parametres:'all', chat:'all', hub_carburant:'all'
+        }
+        existing.push({ userId: uid, modules })
+        localStorage.setItem(permsKey, JSON.stringify(existing))
+
+        // Also ensure users list for legacy lookups
+        localStorage.setItem('ivos_users', JSON.stringify([{
+          id: user.id,
+          full_name: user.fullName,
+          email: user.email,
+          role: user.role,
+          status: user.status
+        }]))
+
+        alert('Super‑admin créé localement. Email: ' + email + '\nMot de passe: ' + passwordPlain + '\nReload de l\'app recommandé.')
+      } catch (err) {
+        console.error('Erreur lors du seed:', err)
+        alert('Erreur lors de l\'écriture en localStorage — vérifiez la console.')
+      }
+    })
+  </script>
+</body>
+</html>

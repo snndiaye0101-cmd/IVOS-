@@ -8,6 +8,7 @@
 // ============================================
 
 import { supabase } from '@shared/services/supabaseClient'
+import { withCircuitBreaker } from '@shared/services/circuitBreakerService'
 import type {
   WasteTrackingForm,
   CreateWasteTrackingFormInput,
@@ -250,31 +251,43 @@ export const saveSignature = async (
   return data as WasteTrackingForm
 }
 
-// Déclencher la génération du PDF via webhook
+// Déclencher la génération du PDF via webhook avec circuit breaker
 export const triggerPDFGeneration = async (formId: string) => {
   // Récupérer les données complètes du bordereau
   const form = await getWasteFormById(formId)
 
-  // Appeler le webhook n8n
+  // Appeler le webhook n8n avec circuit breaker protection
   const webhookUrl = `${import.meta.env.VITE_N8N_WEBHOOK_BASE_URL}${import.meta.env.VITE_N8N_PDF_GENERATION_WEBHOOK}`
 
-  const response = await fetch(webhookUrl, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
+  const result = await withCircuitBreaker(
+    'pdf-generation-webhook',
+    async () => {
+      const response = await fetch(webhookUrl, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          formId,
+          formNumber: form.form_number,
+          data: form,
+        }),
+      })
+
+      if (!response.ok) {
+        throw new Error(`Webhook returned ${response.status}: ${response.statusText}`)
+      }
+
+      return response.json()
     },
-    body: JSON.stringify({
-      formId,
-      formNumber: form.form_number,
-      data: form,
-    }),
-  })
-
-  if (!response.ok) {
-    throw new Error('Échec de la génération du PDF')
-  }
-
-  const result = await response.json()
+    {
+      failureThreshold: 5,
+      successThreshold: 2,
+      timeout: 60000,
+      retryDelay: 2000,
+      maxRetries: 3,
+    }
+  )
 
   // Mettre à jour le bordereau avec l'URL du PDF
   await supabase
@@ -293,7 +306,7 @@ export const triggerPDFGeneration = async (formId: string) => {
     entity_id: formId,
     webhook_url: webhookUrl,
     payload: { formId, formNumber: form.form_number },
-    response_status: response.status,
+    response_status: 200,
     response_body: JSON.stringify(result),
     success: true,
   })

@@ -5,11 +5,12 @@
 
 import { useState, useMemo, useRef, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { 
+import {
   FileText, Search, Filter, Download, Trash2, 
   CheckCircle, Clock, XCircle, Plus, Calendar,
   ExternalLink, AlertCircle, CreditCard, FileCheck, Tag, Paperclip, File, Eye
 } from 'lucide-react';
+import { formatCleanAmount } from '@/shared/utils/formatAmount';
 import {
   searchInvoices,
   getInvoiceStats,
@@ -197,10 +198,7 @@ export default function InvoicesPage() {
   
   // Formatage
   const formatCurrency = (amount: number) => {
-    const rounded = Math.round((amount + Number.EPSILON) * 100) / 100;
-    const [intPart, decimalPart] = rounded.toFixed(2).split('.');
-    const withSpaces = intPart.replace(/\B(?=(\d{3})+(?!\d))/g, ' ');
-    return decimalPart === '00' ? `${withSpaces} FCFA` : `${withSpaces},${decimalPart} FCFA`;
+    return formatCleanAmount(Math.round(amount), 'FCFA');
   };
   
   const formatDate = (dateStr: string) => {
@@ -877,6 +875,12 @@ export default function InvoicesPage() {
         <div className="fixed inset-0 z-50 bg-black/45 backdrop-blur-sm p-3 sm:p-6 overflow-y-auto" onClick={() => setPreviewInvoice(null)}>
           <div className="w-full max-w-6xl mx-auto" onClick={(e) => e.stopPropagation()}>
             <div className="bg-white rounded-2xl shadow-2xl border border-gray-200 overflow-hidden" style={{ fontFamily: 'Inter, Roboto, Montserrat, Arial, sans-serif' }}>
+              <style>{`@page { size: A4; margin: 10mm 15mm 15mm 15mm; } body { margin-bottom: 10mm; }`}</style>
+              <div style={{ position: 'absolute', top: '-10mm', left: '-15mm', right: '-15mm', height: '19px', backgroundColor: '#1a365d', textAlign: 'center', lineHeight: '19px', WebkitPrintColorAdjust: 'exact', printColorAdjust: 'exact', zIndex: 9999 }}>
+                <span style={{ color: '#ffffff', fontSize: '7.5pt', fontFamily: 'Arial, sans-serif', fontWeight: 'bold', letterSpacing: '1px' }}>
+                  IVOS LOGISTIQUE — FACTURE CERTIFIÉE
+                </span>
+              </div>
               <div className="flex items-center justify-between px-5 py-3 border-b border-gray-100 bg-gray-50">
                 <h3 className="text-sm sm:text-base font-bold text-gray-800">Aperçu Facture — {previewInvoice.numeroFacture}</h3>
                 <button onClick={() => setPreviewInvoice(null)} className="px-3 py-1.5 text-xs font-semibold rounded-lg border border-gray-300 text-gray-600 hover:bg-gray-100">
@@ -886,26 +890,31 @@ export default function InvoicesPage() {
 
               <div className="p-4 sm:p-8">
                 {/* Header logo + identité */}
-                <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4 pb-5 border-b border-gray-200">
-                  <div className="flex items-start gap-5">
-                    <img
-                      src="/logo-ivos.jpg"
-                      alt="Logo IVOS"
-                      className="w-32 h-16 object-contain rounded bg-white"
-                    />
-                    <div>
-                      <p className="font-black text-[#1a1a2e]">{baseConfig.baseName || 'IVOS'}</p>
-                      <p className="text-sm text-gray-600">Gestion des Déchets & Opérations</p>
-                      <p className="text-xs text-gray-500 mt-1">Tél: {baseConfig.phone}</p>
-                      <p className="text-xs text-gray-500">{baseConfig.address}</p>
-                    </div>
-                  </div>
-                  <div className="text-left sm:text-right">
-                    <p className="text-2xl font-black text-[#1a1a2e]">FACTURE</p>
-                    <p className="text-sm font-semibold text-gray-700">N° {previewInvoice.numeroFacture}</p>
-                    <p className="text-xs text-gray-500 mt-1">Date: {formatDate(previewInvoice.date)}</p>
-                    <p className="text-xs text-gray-500">Échéance: {formatDate(previewInvoice.dateEcheance)}</p>
-                  </div>
+                <div style={{ width: '100%', marginTop: '15px', marginBottom: '25px' }}>
+                  <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                    <tbody>
+                      <tr>
+                        <td style={{ verticalAlign: 'top' }}>
+                          <h1 style={{ fontSize: '26pt', fontWeight: 800, color: '#1a365d', margin: 0, lineHeight: 1.1 }}>
+                            IVOS
+                          </h1>
+                          <p style={{ fontSize: '8.5pt', textTransform: 'uppercase', letterSpacing: '2px', color: '#4a5568', margin: '2px 0 0 0', fontWeight: 600 }}>
+                            LOGISTIQUE & TRANSPORT INDUSTRIALISÉ
+                          </p>
+                        </td>
+                        <td style={{ fontSize: '9pt', color: '#718096', lineHeight: 1.4, textAlign: 'right', verticalAlign: 'top' }}>
+                          <strong>IVOS S.A.R.L.</strong><br />
+                          Immeuble Horizon, Les Mamelles, Dakar
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+                <div className="text-left sm:text-right">
+                  <p className="text-2xl font-black text-[#1a1a2e]">FACTURE</p>
+                  <p className="text-sm font-semibold text-gray-700">N° {previewInvoice.numeroFacture}</p>
+                  <p className="text-xs text-gray-500 mt-1">Date: {formatDate(previewInvoice.date)}</p>
+                  <p className="text-xs text-gray-500">Échéance: {formatDate(previewInvoice.dateEcheance)}</p>
                 </div>
 
                 {/* Référence et client */}
@@ -945,7 +954,7 @@ export default function InvoicesPage() {
                     <tbody className="divide-y divide-gray-100 bg-white">
                       {previewInvoice.lignes.map((ligne) => (
                         <tr key={ligne.id}>
-                          <td className="px-4 py-4 text-gray-800">{ligne.description}</td>
+                          <td className="px-4 py-4 text-gray-800 break-words whitespace-normal">{ligne.description}</td>
                           <td className="px-4 py-4 text-right text-gray-700">{ligne.quantite}</td>
                           <td className="px-4 py-4 text-right text-gray-700">{ligne.unite}</td>
                           <td className="px-4 py-4 text-right text-gray-700">{formatCurrency(ligne.prixUnitaireHT)}</td>
@@ -998,6 +1007,32 @@ export default function InvoicesPage() {
                   <p>{baseConfig.address} • Document généré automatiquement</p>
                 </div>
               </div>
+            </div>
+            <div
+              className="invoice-footer-bande-bleue"
+              style={{
+                position: 'fixed',
+                bottom: '-15mm',
+                left: '-15mm',
+                right: '-15mm',
+                height: '19px',
+                backgroundColor: '#1a365d',
+                color: '#ffffff',
+                paddingTop: '4px',
+                paddingBottom: '14px',
+                paddingLeft: '20px',
+                paddingRight: '20px',
+                textAlign: 'center',
+                fontSize: '7.5pt',
+                lineHeight: 1.4,
+                fontFamily: 'Arial, sans-serif',
+                WebkitPrintColorAdjust: 'exact',
+                printColorAdjust: 'exact',
+                zIndex: 9999,
+              }}
+            >
+              IVOS SARL — Capital Social: 10 000 000 FCFA — NINEA: 008765432 2G3 — RC: SN.DKR.2017.B.1234<br />
+              Immeuble Horizon, Les Mamelles, Dakar, Sénégal — Contact: contact@ivos.sn
             </div>
           </div>
         </div>

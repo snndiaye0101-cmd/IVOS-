@@ -13,6 +13,7 @@ export interface BaseConfig {
   phone: string;
   email: string;
   shifts: Shift[];
+  attendanceToleranceMinutes?: number;
 }
 
 export const DEFAULT_BASE_CONFIG: BaseConfig = {
@@ -25,6 +26,7 @@ export const DEFAULT_BASE_CONFIG: BaseConfig = {
     { id: 2, name: 'Après-midi', start: '14:00', end: '22:00' },
     { id: 3, name: 'Nuit', start: '22:00', end: '06:00' },
   ],
+  attendanceToleranceMinutes: 15,
 };
 
 export function loadBaseConfig(): BaseConfig {

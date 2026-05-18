@@ -3,6 +3,7 @@ import {
   Car, Shield, Camera, X, FileText, MapPin, DollarSign,
   CheckCircle, Upload, ShieldCheck, ShieldAlert, ShieldOff, ArrowUpRight,
 } from 'lucide-react'
+import { formatCleanAmount } from '@/shared/utils/formatAmount';
 import React, { useState, useMemo, useEffect, useRef, useCallback } from 'react'
 import { useAuth } from '../../../shared/contexts/AuthContext'
 import { useLocation } from 'react-router-dom'
@@ -78,7 +79,7 @@ type SinistreFormState = {
 
 type ExpenseWithAssuranceLink = Expense & { assuranceContractId?: string }
 
-function formatCurrency(val: number) { return val.toLocaleString('fr-FR') + ' FCFA' }
+function formatCurrency(val: number) { return formatCleanAmount(val, 'FCFA') }
 
 function getStatusColor(status: string) {
   switch (status) {

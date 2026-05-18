@@ -1,11 +1,13 @@
 import { Plus, Search, Edit, Eye, Trash2, AlertTriangle, Wrench, Fuel, Shield, FileText, Activity, Upload, X, Paperclip, DollarSign, TrendingUp, Truck, CheckCircle, Droplets, FileCheck, ShieldAlert, Calendar, Gauge, ShieldCheck, UploadCloud, Info, ClipboardCheck, Camera, ShieldOff, ArrowUpRight } from 'lucide-react'
 import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react'
+import { formatCleanAmount } from '../../../shared/utils/formatAmount' 
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../../../shared/contexts/AuthContext'
 import { assuranceStore, computeStatut, type InsuranceContract, ASSURANCE_CHANGE_EVENT } from '../services/assuranceStore'
 import { claimsStore } from '../services/claimsStore'
 import { driversStore } from '../services/driversStore'
 import { vehiclesStore, isVisiteTechniqueExpired } from '../services/vehiclesStore'
+import type { Vehicle } from '../services/vehiclesStore'
 import { toast } from 'sonner'
 import Modal from '../../../components/ui/Modal'
 import Input from '../../../components/ui/Input'
@@ -73,37 +75,7 @@ const EXPENSE_TYPES = [
   'Stationnement', 'Amendes', 'Assurance', 'Contrôle technique', 'Autre'
 ] as const
 
-interface Vehicle {
-  id: string
-  registration: string
-  brand: string
-  model: string
-  type: string
-  capacity: string
-  status: 'Disponible' | 'En opération' | 'Maintenance' | 'Hors service'
-  year: number
-  purchaseDate: string
-  commissionDate: string
-  mileage: number
-  fuelType: 'Diesel' | 'Essence' | 'Hybride' | 'Électrique'
-  insuranceExpiry: string
-  technicalControlExpiry: string
-  carteGriseExpiry: string
-  vignetteExpiry: string
-  lastOilChange: string
-  nextOilChange: string
-  lastMaintenance?: string
-  maintenanceHistory: MaintenanceRecord[]
-  documents: VehicleDocument[]
-  complianceDocs: ComplianceDocument[]
-  fuelRecords: FuelRecord[]
-  expenses: ExpenseRecord[]
-  notes?: string
-  assignedDriver?: string
-  siteCode?: string // Ajout pour filtrage par site
-  dateFinMiseDisposition?: string
-  kilometrageAuPret?: number
-}
+
 
 interface ComplianceDocument {
   id: string
@@ -295,7 +267,7 @@ export default function VehiclesPage() {
   const [isEditModalOpen, setIsEditModalOpen] = useState(false)
   const [isViewModalOpen, setIsViewModalOpen] = useState(false)
   const [isMaintenanceModalOpen, setIsMaintenanceModalOpen] = useState(false)
-  const [selectedVehicle, setSelectedVehicle] = useState<Vehicle | null>(null)
+  const [selectedVehicle, setSelectedVehicle] = useState<any | null>(null)
   const [isClaimsModalOpen, setIsClaimsModalOpen] = useState(false)
   const [claimsForVehicle, setClaimsForVehicle] = useState<any[]>([])
   const [isCreateClaimModalOpen, setIsCreateClaimModalOpen] = useState(false)
@@ -387,7 +359,7 @@ export default function VehiclesPage() {
   const [revisionPhotos, setRevisionPhotos] = useState<ExpenseDocument[]>([])
   const revisionPhotoRef = useRef<HTMLInputElement>(null)
 
-  const defaultVehicles: Vehicle[] = [
+  const defaultVehicles: any[] = [
     { 
       id: '1', 
       registration: 'SN-8765-AB', 
@@ -538,7 +510,7 @@ export default function VehiclesPage() {
     },
   ]
 
-  const [vehicles, setVehicles] = useState<Vehicle[]>(() => {
+  const [vehicles, setVehicles] = useState<any[]>(() => {
     const stored = vehiclesStore.load()
     return stored.length > 0 ? stored : defaultVehicles
   })
@@ -609,22 +581,23 @@ export default function VehiclesPage() {
     const currentMonth = now.getMonth()
     const currentYear = now.getFullYear()
 
-    const monthRecords = vehicle.fuelRecords.filter(r => {
+    const records = vehicle.fuelRecords || []
+    const monthRecords = records.filter((r: any) => {
       const d = new Date(r.date)
       return d.getMonth() === currentMonth && d.getFullYear() === currentYear
     })
-    const yearRecords = vehicle.fuelRecords.filter(r => {
+    const yearRecords = records.filter((r: any) => {
       const d = new Date(r.date)
       return d.getFullYear() === currentYear
     })
 
     return {
-      monthLiters: monthRecords.reduce((sum, r) => sum + r.liters, 0),
-      monthCost: monthRecords.reduce((sum, r) => sum + r.totalCost, 0),
-      yearLiters: yearRecords.reduce((sum, r) => sum + r.liters, 0),
-      yearCost: yearRecords.reduce((sum, r) => sum + r.totalCost, 0),
-      totalRecords: vehicle.fuelRecords.length,
-      lastFill: vehicle.fuelRecords.length > 0 ? vehicle.fuelRecords[0] : null,
+      monthLiters: monthRecords.reduce((sum: number, r: any) => sum + (r.liters || 0), 0),
+      monthCost: monthRecords.reduce((sum: number, r: any) => sum + (r.totalCost || 0), 0),
+      yearLiters: yearRecords.reduce((sum: number, r: any) => sum + (r.liters || 0), 0),
+      yearCost: yearRecords.reduce((sum: number, r: any) => sum + (r.totalCost || 0), 0),
+      totalRecords: records.length,
+      lastFill: records.length > 0 ? records[0] : null,
     }
   }
 
@@ -634,25 +607,26 @@ export default function VehiclesPage() {
     const currentMonth = now.getMonth()
     const currentYear = now.getFullYear()
 
-    const monthExpenses = vehicle.expenses.filter(e => {
+    const expenses = vehicle.expenses || []
+    const monthExpenses = expenses.filter((e: any) => {
       const d = new Date(e.date)
       return d.getMonth() === currentMonth && d.getFullYear() === currentYear
     })
-    const yearExpenses = vehicle.expenses.filter(e => {
+    const yearExpenses = expenses.filter((e: any) => {
       const d = new Date(e.date)
       return d.getFullYear() === currentYear
     })
 
     const byType: Record<string, number> = {}
-    yearExpenses.forEach(e => {
-      byType[e.type] = (byType[e.type] || 0) + e.amount
+    yearExpenses.forEach((e: any) => {
+      byType[e.type] = (byType[e.type] || 0) + (e.amount || 0)
     })
 
     return {
-      monthTotal: monthExpenses.reduce((sum, e) => sum + e.amount, 0),
-      yearTotal: yearExpenses.reduce((sum, e) => sum + e.amount, 0),
+      monthTotal: monthExpenses.reduce((sum: number, e: any) => sum + (e.amount || 0), 0),
+      yearTotal: yearExpenses.reduce((sum: number, e: any) => sum + (e.amount || 0), 0),
       byType,
-      totalRecords: vehicle.expenses.length,
+      totalRecords: expenses.length,
     }
   }
 
@@ -672,10 +646,10 @@ export default function VehiclesPage() {
     }
     setVehicles(vehicles.map(v =>
       v.id === selectedVehicle.id
-        ? { ...v, fuelRecords: [newRecord, ...v.fuelRecords] }
+        ? { ...v, fuelRecords: [newRecord, ...(v.fuelRecords || [])] }
         : v
     ))
-    setSelectedVehicle(prev => prev ? { ...prev, fuelRecords: [newRecord, ...prev.fuelRecords] } : prev)
+    setSelectedVehicle((prev: any) => prev ? { ...prev, fuelRecords: [newRecord, ...(prev.fuelRecords || [])] } : prev)
     setIsFuelModalOpen(false)
     setFuelForm({ date: '', liters: 0, costPerLiter: 0, totalCost: 0, mileageAtFill: 0, station: '', notes: '' })
     setFuelReceipt(null)
@@ -720,10 +694,10 @@ export default function VehiclesPage() {
     }
     setVehicles(vehicles.map(v =>
       v.id === selectedVehicle.id
-        ? { ...v, expenses: [newExpense, ...v.expenses] }
+        ? { ...v, expenses: [newExpense, ...(v.expenses || [])] }
         : v
     ))
-    setSelectedVehicle(prev => prev ? { ...prev, expenses: [newExpense, ...prev.expenses] } : prev)
+    setSelectedVehicle((prev: any) => prev ? { ...prev, expenses: [newExpense, ...(prev.expenses || [])] } : prev)
     setIsExpenseModalOpen(false)
     setExpenseForm({ date: '', type: 'Réparation', description: '', amount: 0, notes: '' })
     setExpenseReceipt(null)
@@ -745,14 +719,14 @@ export default function VehiclesPage() {
       if (contract) {
         setResolveInsuranceContract(contract)
         setResolveInsuranceForm({
-          newDate: contract.dateEcheance,
-          numeroPolice: contract.numeroPolice,
+          newDate: contract.dateEcheance || '',
+          numeroPolice: contract.numeroPolice || '',
           contratScan: undefined,
         })
       } else {
         setResolveInsuranceContract(null)
         setResolveInsuranceForm({
-          newDate: vehicle.insuranceExpiry,
+          newDate: vehicle.insuranceExpiry || '',
           numeroPolice: '',
           contratScan: undefined,
         })
@@ -764,9 +738,9 @@ export default function VehiclesPage() {
     setResolveAlert({ vehicle, alert })
     // Pre-fill form based on alert type
     if (alert.type === 'ct') {
-      setResolveForm({ newDate: vehicle.technicalControlExpiry, newMileage: vehicle.mileage })
+      setResolveForm({ newDate: vehicle.technicalControlExpiry || '', newMileage: vehicle.mileage || 0 })
     } else if (alert.type === 'vidange') {
-      setResolveForm({ newDate: new Date().toISOString().split('T')[0], newMileage: vehicle.mileage })
+      setResolveForm({ newDate: new Date().toISOString().split('T')[0], newMileage: vehicle.mileage || 0 })
     }
     // Reset revision form state
     setRevisionCheckState({})
@@ -862,7 +836,7 @@ export default function VehiclesPage() {
 
     setVehicles(prev => prev.map(v => {
       if (v.id !== vehicle.id) return v
-      const updated = { ...v, mileage: mileageNow, maintenanceHistory: [newRecord, ...v.maintenanceHistory], lastMaintenance: resolveForm.newDate || today }
+      const updated = { ...v, mileage: mileageNow, maintenanceHistory: [newRecord, ...(v.maintenanceHistory || [])], lastMaintenance: resolveForm.newDate || today }
 
       if (alert.type === 'assurance') {
         return { ...updated, insuranceExpiry: resolveForm.newDate }
@@ -1154,19 +1128,19 @@ export default function VehiclesPage() {
       brand: vehicle.brand,
       model: vehicle.model,
       type: vehicle.type,
-      capacity: vehicle.capacity,
+      capacity: String(vehicle.capacity || ''),
       status: vehicle.status,
       year: vehicle.year,
-      purchaseDate: vehicle.purchaseDate,
-      commissionDate: vehicle.commissionDate,
+      purchaseDate: vehicle.purchaseDate || '',
+      commissionDate: vehicle.commissionDate || '',
       mileage: vehicle.mileage,
       fuelType: vehicle.fuelType,
-      insuranceExpiry: vehicle.insuranceExpiry,
-      technicalControlExpiry: vehicle.technicalControlExpiry,
+      insuranceExpiry: vehicle.insuranceExpiry || '',
+      technicalControlExpiry: vehicle.technicalControlExpiry || '',
       carteGriseExpiry: vehicle.carteGriseExpiry || '',
       vignetteExpiry: vehicle.vignetteExpiry || '',
-      lastOilChange: vehicle.lastOilChange,
-      nextOilChange: vehicle.nextOilChange,
+      lastOilChange: vehicle.lastOilChange || '',
+      nextOilChange: vehicle.nextOilChange || '',
       notes: vehicle.notes || '',
       assignedDriver: vehicle.assignedDriver || '',
       dateFinMiseDisposition: vehicle.dateFinMiseDisposition || '',
@@ -1246,7 +1220,7 @@ export default function VehiclesPage() {
               <div className="text-sm text-gray-600">Lieu: {c.location || '—'}</div>
               <div className="text-sm text-gray-600">Conducteur: {c.driver || '—'}</div>
               <div className="text-sm text-gray-600">Sévérité: {c.severity}</div>
-              <div className="text-sm text-gray-600">Coût estimé: {c.costEstimate ? c.costEstimate.toLocaleString('fr-FR') + ' CFA' : '—'}</div>
+              <div className="text-sm text-gray-600">Coût estimé: {c.costEstimate ? formatCleanAmount(c.costEstimate, 'FCFA') : '—'}</div>
               {c.description && <div className="mt-2 text-gray-800 bg-gray-50 p-2 rounded">{c.description}</div>}
             </div>
           ))}
@@ -1452,19 +1426,19 @@ export default function VehiclesPage() {
                         <span className="flex items-center gap-1 font-semibold text-emerald-700">
                           <Fuel className="h-3.5 w-3.5" /> Carburant ce mois
                         </span>
-                        <span className="font-bold text-emerald-800">{fuelStats.monthLiters} L • {fuelStats.monthCost.toLocaleString('fr-FR')} CFA</span>
+                        <span className="font-bold text-emerald-800">{fuelStats.monthLiters} L • {formatCleanAmount(fuelStats.monthCost, 'FCFA')}</span>
                       </div>
                       <div className="flex items-center justify-between text-xs">
                         <span className="flex items-center gap-1 font-semibold text-blue-700">
                           <TrendingUp className="h-3.5 w-3.5" /> Carburant année
                         </span>
-                        <span className="font-bold text-blue-800">{fuelStats.yearLiters} L • {fuelStats.yearCost.toLocaleString('fr-FR')} CFA</span>
+                        <span className="font-bold text-blue-800">{fuelStats.yearLiters} L • {formatCleanAmount(fuelStats.yearCost, 'FCFA')}</span>
                       </div>
                       <div className="flex items-center justify-between text-xs border-t border-gray-200 pt-2">
                         <span className="flex items-center gap-1 font-semibold text-orange-700">
                           <DollarSign className="h-3.5 w-3.5" /> Dépenses année
                         </span>
-                        <span className="font-bold text-orange-800">{expStats.yearTotal.toLocaleString('fr-FR')} CFA</span>
+                        <span className="font-bold text-orange-800">{formatCleanAmount(expStats.yearTotal, 'FCFA')}</span>
                       </div>
                     </div>
                   )
@@ -2484,7 +2458,7 @@ export default function VehiclesPage() {
                       {statut === 'À jour' ? <ShieldCheck className="h-3 w-3" /> : statut === 'À renouveler bientôt' ? <ShieldAlert className="h-3 w-3" /> : <ShieldOff className="h-3 w-3" />}
                       {statut}
                     </span>
-                    <span className="text-xs text-gray-500 font-medium">{contract.montantPrime.toLocaleString('fr-FR')} FCFA / an</span>
+                    <span className="text-xs text-gray-500 font-medium">{formatCleanAmount(contract.montantPrime, 'FCFA')} / an</span>
                   </div>
                   {timeline.length > 0 && (
                     <div className="pt-2 border-t border-white/70">
@@ -2504,7 +2478,7 @@ export default function VehiclesPage() {
                             </div>
                             <div className="mt-1 flex items-center justify-between text-[11px] text-gray-600 gap-3">
                               <span>{new Date(entry.dateDebut).toLocaleDateString('fr-FR')} → {new Date(entry.dateEcheance).toLocaleDateString('fr-FR')}</span>
-                              <span className="font-semibold text-gray-800">{entry.montantPrime.toLocaleString('fr-FR')} FCFA</span>
+                              <span className="font-semibold text-gray-800">{formatCleanAmount(entry.montantPrime, 'FCFA')}</span>
                             </div>
                           </div>
                         ))}
@@ -2534,12 +2508,12 @@ export default function VehiclesPage() {
                       <div className="bg-emerald-50 p-3 rounded-lg text-center">
                         <p className="text-xs text-emerald-600 font-medium">Ce mois</p>
                         <p className="text-lg font-bold text-emerald-800">{stats.monthLiters} L</p>
-                        <p className="text-xs text-emerald-600">{stats.monthCost.toLocaleString('fr-FR')} CFA</p>
+                        <p className="text-xs text-emerald-600">{formatCleanAmount(stats.monthCost, 'FCFA')}</p>
                       </div>
                       <div className="bg-blue-50 p-3 rounded-lg text-center">
                         <p className="text-xs text-blue-600 font-medium">Cette année</p>
                         <p className="text-lg font-bold text-blue-800">{stats.yearLiters} L</p>
-                        <p className="text-xs text-blue-600">{stats.yearCost.toLocaleString('fr-FR')} CFA</p>
+                        <p className="text-xs text-blue-600">{formatCleanAmount(stats.yearCost, 'FCFA')}</p>
                       </div>
                       <div className="bg-gray-50 p-3 rounded-lg text-center">
                         <p className="text-xs text-gray-600 font-medium">Pleins enregistrés</p>
@@ -2548,7 +2522,7 @@ export default function VehiclesPage() {
                     </div>
                     {selectedVehicle.fuelRecords.length > 0 && (
                       <div className="space-y-2 max-h-48 overflow-y-auto">
-                        {selectedVehicle.fuelRecords.map(r => (
+                        {selectedVehicle.fuelRecords.map((r: any) => (
                           <div key={r.id} className="p-2 border border-gray-200 rounded-lg text-sm">
                             <div className="flex items-center justify-between">
                               <div className="flex items-center gap-3">
@@ -2560,7 +2534,7 @@ export default function VehiclesPage() {
                                 </div>
                               </div>
                               <div className="text-right">
-                                <p className="font-semibold text-gray-900">{r.totalCost.toLocaleString('fr-FR')} CFA</p>
+                                <p className="font-semibold text-gray-900">{formatCleanAmount(r.totalCost, 'FCFA')}</p>
                                 <p className="text-xs text-gray-500">{new Date(r.date).toLocaleDateString('fr-FR')} • {r.mileageAtFill.toLocaleString()} km</p>
                               </div>
                             </div>
@@ -2599,11 +2573,11 @@ export default function VehiclesPage() {
                     <div className="grid grid-cols-2 gap-3">
                       <div className="bg-orange-50 p-3 rounded-lg text-center">
                         <p className="text-xs text-orange-600 font-medium">Ce mois</p>
-                        <p className="text-lg font-bold text-orange-800">{stats.monthTotal.toLocaleString('fr-FR')} CFA</p>
+                        <p className="text-lg font-bold text-orange-800">{formatCleanAmount(stats.monthTotal, 'FCFA')}</p>
                       </div>
                       <div className="bg-red-50 p-3 rounded-lg text-center">
                         <p className="text-xs text-red-600 font-medium">Cette année</p>
-                        <p className="text-lg font-bold text-red-800">{stats.yearTotal.toLocaleString('fr-FR')} CFA</p>
+                        <p className="text-lg font-bold text-red-800">{formatCleanAmount(stats.yearTotal, 'FCFA')}</p>
                       </div>
                     </div>
                     {Object.keys(stats.byType).length > 0 && (
@@ -2613,7 +2587,7 @@ export default function VehiclesPage() {
                           {Object.entries(stats.byType).sort((a, b) => b[1] - a[1]).map(([type, amount]) => (
                             <div key={type} className="flex items-center justify-between text-sm">
                               <span className="text-gray-700">{type}</span>
-                              <span className="font-medium text-gray-900">{amount.toLocaleString('fr-FR')} CFA</span>
+                              <span className="font-medium text-gray-900">{formatCleanAmount(amount, 'FCFA')}</span>
                             </div>
                           ))}
                         </div>
@@ -2621,7 +2595,7 @@ export default function VehiclesPage() {
                     )}
                     {selectedVehicle.expenses.length > 0 && (
                       <div className="space-y-2 max-h-48 overflow-y-auto">
-                        {selectedVehicle.expenses.map(exp => (
+                        {selectedVehicle.expenses.map((exp: any) => (
                           <div key={exp.id} className="p-2 border border-gray-200 rounded-lg text-sm">
                             <div className="flex items-center justify-between">
                               <div className="flex items-center gap-3">
@@ -2632,7 +2606,7 @@ export default function VehiclesPage() {
                                 </div>
                               </div>
                               <div className="text-right">
-                                <p className="font-semibold text-gray-900">{exp.amount.toLocaleString('fr-FR')} CFA</p>
+                                <p className="font-semibold text-gray-900">{formatCleanAmount(exp.amount, 'FCFA')}</p>
                                 <p className="text-xs text-gray-500">{new Date(exp.date).toLocaleDateString('fr-FR')}</p>
                               </div>
                             </div>
@@ -2658,7 +2632,7 @@ export default function VehiclesPage() {
               <h4 className="text-sm font-semibold text-gray-700 mb-3">📄 Documents ({selectedVehicle.documents?.length || 0})</h4>
               {selectedVehicle.documents && selectedVehicle.documents.length > 0 ? (
                 <div className="space-y-2">
-                  {selectedVehicle.documents.map(doc => (
+                  {selectedVehicle.documents.map((doc: any) => (
                     <div key={doc.id} className="flex items-center justify-between p-2 border border-gray-200 rounded-lg">
                       <div className="flex items-center gap-2">
                         <Paperclip className="h-4 w-4 text-blue-600" />
@@ -2719,7 +2693,7 @@ export default function VehiclesPage() {
 
             {selectedVehicle.maintenanceHistory.length > 0 ? (
               <div className="space-y-3">
-                {selectedVehicle.maintenanceHistory.map((record) => (
+                {selectedVehicle.maintenanceHistory.map((record: any) => (
                   <div key={record.id} className="border border-gray-200 rounded-lg p-4 hover:bg-gray-50">
                     <div className="flex items-start justify-between mb-2">
                       <div className="flex items-center gap-2">
@@ -2785,7 +2759,7 @@ export default function VehiclesPage() {
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Total (CFA)</label>
                 <div className="px-3 py-2 bg-gray-100 border border-gray-300 rounded-md text-sm font-bold text-emerald-700">
-                  {fuelForm.totalCost.toLocaleString('fr-FR')} CFA
+                  {formatCleanAmount(fuelForm.totalCost, 'FCFA')}
                 </div>
               </div>
             </div>
@@ -3072,13 +3046,13 @@ export default function VehiclesPage() {
                   {/* Alert-specific: assurance date */}
                   {resolveAlert.alert.type === 'assurance' && (
                     <div className="mb-4 p-3 bg-violet-50 border border-violet-200 rounded-lg">
-                      <p className="text-xs text-violet-600 font-semibold mb-2">Expiration actuelle : {new Date(resolveAlert.vehicle.insuranceExpiry).toLocaleDateString('fr-FR')}</p>
+                      <p className="text-xs text-violet-600 font-semibold mb-2">Expiration actuelle : {resolveAlert.vehicle.insuranceExpiry ? new Date(resolveAlert.vehicle.insuranceExpiry).toLocaleDateString('fr-FR') : '—'}</p>
                       <p className="text-xs text-gray-500 mb-1">La date ci-dessus sera la nouvelle date d'expiration de l'assurance.</p>
                     </div>
                   )}
                   {resolveAlert.alert.type === 'ct' && (
                     <div className="mb-4 p-3 bg-violet-50 border border-violet-200 rounded-lg">
-                      <p className="text-xs text-violet-600 font-semibold mb-2">Expiration actuelle CT : {new Date(resolveAlert.vehicle.technicalControlExpiry).toLocaleDateString('fr-FR')}</p>
+                      <p className="text-xs text-violet-600 font-semibold mb-2">Expiration actuelle CT : {resolveAlert.vehicle.technicalControlExpiry ? new Date(resolveAlert.vehicle.technicalControlExpiry).toLocaleDateString('fr-FR') : '—'}</p>
                       <p className="text-xs text-gray-500 mb-1">La date ci-dessus sera la nouvelle date d'expiration du contrôle technique.</p>
                     </div>
                   )}

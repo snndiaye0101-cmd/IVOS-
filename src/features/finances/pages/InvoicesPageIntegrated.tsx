@@ -10,6 +10,7 @@
  */
 
 import React, { useState, useEffect } from 'react';
+import { formatCleanAmount } from '../../../shared/utils/formatAmount';
 import {
   DollarSign,
   FileText,
@@ -48,6 +49,7 @@ export default function InvoicesPageIntegrated() {
   const [filter, setFilter] = useState<InvoiceStatus | 'all'>('all');
 
   const isSuperAdmin = user?.role === 'Directeur Général' || user?.role === 'Admin';
+  const formatCurrency = (value: number) => formatCleanAmount(value, 'FCFA');
 
   // ══════════════════════════════════════════════════════════════
   // DATA LOADING
@@ -201,19 +203,19 @@ export default function InvoicesPageIntegrated() {
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
           <StatCard
             label="Total Facturé"
-            value={`${totalInvoiced.toLocaleString('fr-FR')} FCFA`}
+            value={formatCurrency(totalInvoiced)}
             icon={FileText}
             color="blue"
           />
           <StatCard
             label="Total Encaissé"
-            value={`${paymentStats.montantEncaisse.toLocaleString('fr-FR')} FCFA`}
+            value={formatCurrency(paymentStats.montantEncaisse)}
             icon={DollarSign}
             color="green"
           />
           <StatCard
             label="En Attente"
-            value={`${totalPending.toLocaleString('fr-FR')} FCFA`}
+            value={formatCurrency(totalPending)}
             icon={Clock}
             color="yellow"
           />
@@ -299,7 +301,7 @@ export default function InvoicesPageIntegrated() {
                           <div>
                             <span className="text-gray-500">Montant:</span>
                             <span className="ml-2 font-bold text-green-600">
-                              {invoice.montantHT.toLocaleString('fr-FR')} FCFA
+                              {formatCurrency(invoice.montantHT)}
                             </span>
                           </div>
                           <div>
@@ -436,7 +438,7 @@ export default function InvoicesPageIntegrated() {
                 <div className="text-right">
                   <div className="text-sm text-gray-500">Montant Total</div>
                   <div className="text-2xl font-bold text-green-600">
-                    {selectedInvoice.montantHT.toLocaleString('fr-FR')} FCFA
+                    {formatCurrency(selectedInvoice.montantHT)}
                   </div>
                 </div>
               </div>
@@ -464,7 +466,7 @@ export default function InvoicesPageIntegrated() {
                   </div>
                   <div>
                     <span className="text-gray-500">Prix Unitaire:</span>
-                    <div className="font-semibold">{selectedInvoice.prixUnitaire.toLocaleString()} FCFA</div>
+                    <div className="font-semibold">{formatCleanAmount(selectedInvoice.prixUnitaire, 'FCFA')}</div>
                   </div>
                   <div>
                     <span className="text-gray-500">Catégorie:</span>

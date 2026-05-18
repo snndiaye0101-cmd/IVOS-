@@ -3,6 +3,7 @@
 // Crée un brouillon de facture à la clôture d'une operation (Étape 6)
 // ============================================
 import { findUniteFacturationByType } from '../components/uniteFacturationService';
+import { formatCleanAmount } from '../../../shared/utils/formatAmount';
 
 // Minimal local type representing a closed operation passed to createInvoiceFromWorkflow
 interface ExploitationOperation {
@@ -206,7 +207,7 @@ export function createInvoiceFromWorkflow(operation: ExploitationOperation): Wor
   addInvoiceNotification(
     invoice.id,
     invoice.numeroOfficiel,
-    `💰 Nouvelle facture à valider : ${clientNom} — ${montantHT.toLocaleString('fr-FR')} FCFA (${docLabel} N°${invoice.numeroOfficiel})`
+    `💰 Nouvelle facture à valider : ${clientNom} — ${formatCleanAmount(montantHT, 'FCFA')} (${docLabel} N°${invoice.numeroOfficiel})`
   );
 
   return invoice;

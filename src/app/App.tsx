@@ -164,7 +164,7 @@ function App() {
                     {/* Paramètres */}
                     <Route path="settings" element={<UserManagementWithSuperAdmin />} />
                     <Route path="settings/administration-systeme" element={<AdministrationSysteme />} />
-                    <Route path="settings/base" element={<BaseConfigPage />} />
+                    <Route path="settings/base" element={<Navigate to="/settings/system-config" replace />} />
                     <Route path="settings/clients" element={<ClientsReferencePage />} />
                     <Route path="settings/alerts" element={<AlertThresholdsPage />} />
                     <Route path="settings/backups" element={<BackupsPage />} />

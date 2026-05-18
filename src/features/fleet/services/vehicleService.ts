@@ -1,8 +1,10 @@
 /**
  * Service de gestion des véhicules (CRUD local)
  */
+import type { Vehicle as CanonicalVehicle } from './vehiclesStore'
 
-type Vehicle = { id: string; subsidiaryId?: string; [key: string]: unknown };
+// Local flexible vehicle shape for this in-memory service
+type Vehicle = Partial<CanonicalVehicle> & { id: string; subsidiaryId?: string; [key: string]: unknown };
 const vehicles: Vehicle[] = [];
 
 export const vehicleService = {

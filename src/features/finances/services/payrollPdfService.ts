@@ -218,20 +218,11 @@ function resolveBracketsAtDate(rule: PayrollCountryRule, calculationDate: Date):
   ];
 }
 
-const moneyFormatter = new Intl.NumberFormat('fr-FR', {
-  maximumFractionDigits: 0,
-  minimumFractionDigits: 0,
-});
+import { formatCleanAmount } from '@/shared/utils/formatAmount';
 
-const formatMoney = (value: number, currency: string) => {
-  const clean = moneyFormatter
-    .format(roundCurrency(value))
-    .replace(/[\u00A0\u202F]/g, ' ')
-    .replace(/\//g, '')
-    .replace(/\s+/g, ' ')
-    .trim();
-  return `${clean} ${currency}`;
-};
+const formatMoney = (value: number, currency: string) => formatCleanAmount(value, currency);
+
+const numberFormatter = new Intl.NumberFormat('fr-FR', { maximumFractionDigits: 0 });
 
 const formatRate = (value: number) => `${(value * 100).toFixed(2)}%`;
 
@@ -591,7 +582,7 @@ export async function generatePayrollPdf(
   doc.rect(marginLeft, periodTop, contentWidth, 32);
   doc.setFont('helvetica', 'normal');
   doc.setFontSize(9.5);
-  doc.text(`Temps de travail: ${moneyFormatter.format(payload.period.workedUnits)} ${payload.period.workedUnitLabel.toLowerCase()}  |  Mois de paie: ${payload.period.monthLabel}`, marginLeft + 12, periodTop + 20);
+  doc.text(`Temps de travail: ${numberFormatter.format(payload.period.workedUnits)} ${payload.period.workedUnitLabel.toLowerCase()}  |  Mois de paie: ${payload.period.monthLabel}`, marginLeft + 12, periodTop + 20);
 
   const sectionRows: Array<[string, string, string, string, string, string]> = payload.computation.lines.map(line => [
     line.rubrique,
@@ -669,7 +660,7 @@ export async function generatePayrollPdf(
       const baseMajoree = line.baseRate * line.multiplier;
       return [
         line.label,
-        `${moneyFormatter.format(line.quantity)} ${line.unitLabel} x ${formatMoney(baseMajoree, payload.rule.currency)}`,
+        `${numberFormatter.format(line.quantity)} ${line.unitLabel} x ${formatMoney(baseMajoree, payload.rule.currency)}`,
         formatMoney(line.amount, payload.rule.currency),
       ];
     });
@@ -726,28 +717,28 @@ export async function generatePayrollPdf(
   doc.text(`Salaire Brut`, marginLeft, cursorY + 28);
   doc.setFont('helvetica', 'bold');
   doc.setTextColor(31, 41, 55);
-  doc.text(moneyFormatter.format(payload.computation.brut) + ' ' + payload.rule.currency, marginLeft + contentWidth - 8, cursorY + 28, { align: 'right' });
+  doc.text(formatMoney(payload.computation.brut, payload.rule.currency), marginLeft + contentWidth - 8, cursorY + 28, { align: 'right' });
 
   doc.setFont('helvetica', 'normal');
   doc.setTextColor(22, 22, 22);
   doc.text(`Brut imposable`, marginLeft, cursorY + 44);
   doc.setFont('helvetica', 'bold');
   doc.setTextColor(59, 69, 84);
-  doc.text(moneyFormatter.format(payload.computation.brutImposable) + ' ' + payload.rule.currency, marginLeft + contentWidth - 8, cursorY + 44, { align: 'right' });
+  doc.text(formatMoney(payload.computation.brutImposable, payload.rule.currency), marginLeft + contentWidth - 8, cursorY + 44, { align: 'right' });
 
   doc.setFont('helvetica', 'normal');
   doc.setTextColor(22, 22, 22);
   doc.text(`Total retenues salariales`, marginLeft, cursorY + 60);
   doc.setFont('helvetica', 'bold');
   doc.setTextColor(200, 50, 50);
-  doc.text(moneyFormatter.format(payload.computation.totalCotisations) + ' ' + payload.rule.currency, marginLeft + contentWidth - 8, cursorY + 60, { align: 'right' });
+  doc.text(formatMoney(payload.computation.totalCotisations, payload.rule.currency), marginLeft + contentWidth - 8, cursorY + 60, { align: 'right' });
 
   doc.setFont('helvetica', 'normal');
   doc.setTextColor(22, 22, 22);
   doc.text(`Total cotisations patronales`, marginLeft, cursorY + 76);
   doc.setFont('helvetica', 'bold');
   doc.setTextColor(80, 100, 130);
-  doc.text(moneyFormatter.format(payload.computation.totalPatronal) + ' ' + payload.rule.currency, marginLeft + contentWidth - 8, cursorY + 76, { align: 'right' });
+  doc.text(formatMoney(payload.computation.totalPatronal, payload.rule.currency), marginLeft + contentWidth - 8, cursorY + 76, { align: 'right' });
 
   const netBoxTop = cursorY + 94;
   doc.setDrawColor(31, 41, 55);
@@ -767,7 +758,7 @@ export async function generatePayrollPdf(
   
   doc.setFontSize(14);
   doc.setTextColor(26, 82, 182);
-  const netAmount = moneyFormatter.format(payload.computation.net) + ' ' + payload.rule.currency;
+  const netAmount = formatMoney(payload.computation.net, payload.rule.currency);
   doc.text(netAmount, marginLeft + contentWidth - 12, netBoxTop + 28, { align: 'right' });
 
   doc.setFont('helvetica', 'normal');
@@ -785,14 +776,14 @@ export async function generatePayrollPdf(
   doc.setFont('helvetica', 'normal');
   doc.setFontSize(9);
   doc.setTextColor(70, 80, 90);
-  doc.text(`Brut imposable: ${moneyFormatter.format(payload.annualCumulative.brutImposable)} ${payload.rule.currency}`, marginLeft, cumBoxTop + 16);
-  doc.text(`IR versé: ${moneyFormatter.format(payload.annualCumulative.irVerse)} ${payload.rule.currency}`, marginLeft, cumBoxTop + 32);
-  doc.text(`Net payé: ${moneyFormatter.format(payload.annualCumulative.netPaye)} ${payload.rule.currency}`, marginLeft, cumBoxTop + 48);
+  doc.text(`Brut imposable: ${formatMoney(payload.annualCumulative.brutImposable, payload.rule.currency)}`, marginLeft, cumBoxTop + 16);
+  doc.text(`IR versé: ${formatMoney(payload.annualCumulative.irVerse, payload.rule.currency)}`, marginLeft, cumBoxTop + 32);
+  doc.text(`Net payé: ${formatMoney(payload.annualCumulative.netPaye, payload.rule.currency)}`, marginLeft, cumBoxTop + 48);
 
   // Leave balance
   doc.setFontSize(8.5);
   doc.setTextColor(70, 80, 90);
-  const leaveLabel = `Congés acquis: ${moneyFormatter.format(payload.leave.acquis)} j  |  Congés pris: ${moneyFormatter.format(payload.leave.pris)} j  |  Solde: ${moneyFormatter.format(payload.leave.solde)} j`;
+  const leaveLabel = `Congés acquis: ${numberFormatter.format(payload.leave.acquis)} j  |  Congés pris: ${numberFormatter.format(payload.leave.pris)} j  |  Solde: ${numberFormatter.format(payload.leave.solde)} j`;
   doc.text(leaveLabel, marginLeft, cumBoxTop + 68);
 
   const footerTop = netBoxTop + 114;

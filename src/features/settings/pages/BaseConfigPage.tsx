@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { formatCleanAmount } from '@/shared/utils/formatAmount';
 import Input from '../../../components/ui/Input';
 import Button from '../../../components/ui/Button';
 import { Settings, Clock, Plus, Trash2, Save, MapPin, Building2, Navigation, Loader2, CheckCircle2, DollarSign, AlertTriangle } from 'lucide-react';
@@ -31,9 +32,22 @@ export default function BaseConfigPage() {
   const [saved, setSaved] = useState(false);
 
   // --- Gestion Budget ---
-  const [annualBudget, setAnnualBudget] = useState<string>(getAnnualBudget().toString());
+  const [annualBudget, setAnnualBudget] = useState<string>('120000000');
   const [budgetSaved, setBudgetSaved] = useState(false);
   const [budgetError, setBudgetError] = useState('');
+
+  useEffect(() => {
+    let mounted = true
+    void (async () => {
+      try {
+        const amount = await getAnnualBudget()
+        if (mounted) setAnnualBudget(amount.toString())
+      } catch {
+        // ignore budget load errors, keep default
+      }
+    })()
+    return () => { mounted = false }
+  }, [])
 
   // --- Site Opérationnel ---
   const [siteConfig, setSiteConfig] = useState<SiteConfig>(loadSiteConfig);
@@ -108,18 +122,18 @@ export default function BaseConfigPage() {
     setTimeout(() => setSaved(false), 3000);
   }
 
-  function handleSaveBudget() {
+  async function handleSaveBudget() {
     const amount = parseFloat(annualBudget);
     if (isNaN(amount) || amount <= 0) {
       setBudgetError('Veuillez saisir un montant valide');
       return;
     }
-    
+
     // Vérifier si le budget est inférieur aux dépenses actuelles
     // Simuler un calcul de dépenses pour la démo (à remplacer par vos vraies données)
     const currentExpenses = 0; // TODO: récupérer depuis le Dashboard Finance
-    
-    saveAnnualBudget(amount);
+
+    await saveAnnualBudget(amount);
     setBudgetSaved(true);
     setBudgetError('');
     setTimeout(() => setBudgetSaved(false), 3000);
@@ -334,7 +348,7 @@ export default function BaseConfigPage() {
               </p>
             )}
             <p className="text-xs text-gray-500">
-              Montant formaté : {parseFloat(annualBudget || '0').toLocaleString('fr-FR')} FCFA
+              Montant formaté : {formatCleanAmount(parseFloat(annualBudget || '0'), 'FCFA')}
             </p>
           </div>
 

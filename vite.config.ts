@@ -74,7 +74,10 @@ if (process.env.SENTRY_AUTH_TOKEN) {
     })
   )
 }
-  
+
+export default defineConfig({
+  plugins,
+
   // Alias pour imports propres
   resolve: {
     alias: {
@@ -98,7 +101,7 @@ if (process.env.SENTRY_AUTH_TOKEN) {
   // Configuration build optimisée (fusionnée)
   build: {
     outDir: 'dist',
-    target: 'es2015',
+    target: 'es2020',
     minify: 'esbuild',
     sourcemap: true,
     chunkSizeWarningLimit: 500, // Target performance budget

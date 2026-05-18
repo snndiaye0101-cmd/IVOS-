@@ -1,6 +1,7 @@
 
 import { useState, FormEvent } from 'react';
 import { YearProvider, useYear, YearSelector } from '../../../shared/contexts/YearContext';
+import { formatCleanAmount } from '@/shared/utils/formatAmount';
 import { Wrench, Eye, Edit2, Trash2, X, CheckCircle, AlertTriangle, Package } from 'lucide-react';
 import { useAuth } from '../../../shared/contexts/AuthContext';
 import { createEquipment, updateEquipment as updateHandlingEquipment } from '../../fleet/services/handlingEquipmentService';
@@ -539,7 +540,7 @@ export default function InventaireMateriels() {
                   <tr key={idx} className="border-b last:border-b-0">
                     <td className="p-2">{h.reparateur}</td>
                     <td className="p-2">{h.date}</td>
-                    <td className="p-2">{h.cout.toLocaleString()} FCFA</td>
+                    <td className="p-2">{formatCleanAmount(h.cout, 'FCFA')}</td>
                   </tr>
                 ))}
               </tbody>

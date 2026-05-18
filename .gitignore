@@ -51,3 +51,6 @@ workbox-*.js.map
 .env
 .env.staging
 .env.save
+
+# Local Netlify folder
+.netlify

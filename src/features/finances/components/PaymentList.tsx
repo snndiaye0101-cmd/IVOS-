@@ -5,6 +5,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { DollarSign, CheckCircle2, Clock, XCircle, Eye, Filter } from 'lucide-react';
+import { formatCleanAmount } from '../../../shared/utils/formatAmount';
 import {
   loadPayments,
   formatPaymentMethod,
@@ -180,7 +181,7 @@ export default function PaymentList({
                       <div>
                         <span className="text-gray-500">Montant:</span>
                         <span className="ml-2 font-bold text-green-600">
-                          {payment.montant.toLocaleString('fr-FR')} FCFA
+                          {formatCleanAmount(payment.montant, 'FCFA')}
                         </span>
                       </div>
                       <div className="col-span-2">
@@ -284,7 +285,7 @@ export default function PaymentList({
                 <div>
                   <span className="font-semibold text-gray-600">Montant:</span>
                   <p className="text-lg font-bold text-green-600">
-                    {selectedPayment.montant.toLocaleString('fr-FR')} FCFA
+                    {formatCleanAmount(selectedPayment.montant, 'FCFA')}
                   </p>
                 </div>
                 <div>

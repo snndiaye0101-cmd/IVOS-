@@ -5,7 +5,9 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react'
 import { useAuth } from '../../../shared/contexts/AuthContext'
 import { useViewAs } from '../../../shared/contexts/ViewAsContext'
-import { permissionStore, type AppModule, type PermissionLevel } from '../../../shared/services/permissionStore'
+import { authStore } from '../../../shared/services/authStore'
+import { permissionStore, SIDEBAR_PERMISSION_TREE, type AppModule, type PermissionLevel } from '../../../shared/services/permissionStore'
+import { getUserPermissionsFromDb, getUserRoutePermissionsFromDb, saveUserPermissionsToDb, saveUserRoutePermissionsToDb } from '../../../shared/services/permissionService'
 import { auditService, type AuditEntry } from '../../../shared/services/auditService'
 import { criticalActionService, type CriticalActionRequest } from '../../../shared/services/criticalActionService'
 import { userAnalyticsService, type UserActivityLog } from '../../../shared/services/userAnalyticsService'
@@ -91,16 +93,16 @@ export default function AdministrationSysteme() {
   const weeklyHours = useMemo(() => {
     const weekAgo = Date.now() - 7 * 24 * 60 * 60 * 1000
     const minutes = sessionsLog
-      .filter((s: { loginAt: string; durationMinutes?: number }) => new Date(s.loginAt).getTime() >= weekAgo)
-      .reduce((sum: number, s: { durationMinutes?: number }) => sum + (s.durationMinutes || 0), 0)
+      .filter((s) => new Date(s.loginAt).getTime() >= weekAgo)
+      .reduce((sum: number, s) => sum + (s.durationMinutes || 0), 0)
     return Math.round((minutes / 60) * 10) / 10
   }, [sessionsLog])
 
   const monthlyHours = useMemo(() => {
     const monthAgo = Date.now() - 30 * 24 * 60 * 60 * 1000
     const minutes = sessionsLog
-      .filter((s: { loginAt: string; durationMinutes?: number }) => new Date(s.loginAt).getTime() >= monthAgo)
-      .reduce((sum: number, s: { durationMinutes?: number }) => sum + (s.durationMinutes || 0), 0)
+      .filter((s) => new Date(s.loginAt).getTime() >= monthAgo)
+      .reduce((sum: number, s) => sum + (s.durationMinutes || 0), 0)
     return Math.round((minutes / 60) * 10) / 10
   }, [sessionsLog])
 
@@ -108,7 +110,7 @@ export default function AdministrationSysteme() {
     const now = new Date()
     const weekAgo = now.getTime() - 7 * 24 * 60 * 60 * 1000
     const weekLogs = analyticsActivityLogs.filter((log: UserActivityLog) => new Date(log.timestamp).getTime() >= weekAgo)
-    const weekSessions = sessionsLog.filter((s: { loginAt: string }) => new Date(s.loginAt).getTime() >= weekAgo)
+    const weekSessions = sessionsLog.filter((s) => new Date(s.loginAt).getTime() >= weekAgo)
     const activeUsersSet = new Set(weekLogs.map((log: UserActivityLog) => log.userId))
 
     return {
@@ -198,8 +200,8 @@ export default function AdministrationSysteme() {
   const topUsersStats = useMemo(() => {
     const stats = approvedUsers.map((user: { id: string }) => {
       const userLogs = analyticsActivityLogs.filter((log: UserActivityLog) => log.userId === user.id)
-      const userSessions = sessionsLog.filter((s: { userId: string; loginAt: string; durationMinutes?: number }) => s.userId === user.id && new Date(s.loginAt) > new Date(Date.now() - 7 * 24 * 60 * 60 * 1000))
-      const hours = userSessions.reduce((sum: number, s: { durationMinutes?: number }) => sum + (s.durationMinutes || 0), 0) / 60
+      const userSessions = sessionsLog.filter((s) => s.userId === user.id && new Date(s.loginAt) > new Date(Date.now() - 7 * 24 * 60 * 60 * 1000))
+      const hours = userSessions.reduce((sum: number, s) => sum + (s.durationMinutes || 0), 0) / 60
 
       return {
         user,
@@ -225,20 +227,62 @@ export default function AdministrationSysteme() {
   }, [activitySearchText, activitySourceFilter, activitySeverityFilter, activityUserFilter, activityModuleFilter, activityEntityFilter])
 
   useEffect(() => {
-    if (!selectedUserForPerms) return
-    const currentPerms = permissionStore.getPermissions(selectedUserForPerms)
-    const next: Record<string, boolean> = {}
+    if (!selectedUserForPerms) {
+      setUserPermissions({})
+      return
+    }
 
-    APP_MODULES.forEach(module => {
-      const level = currentPerms[module]
-      next[`${module}:view`] = level === 'view' || level === 'edit' || level === 'all'
-      next[`${module}:edit`] = level === 'edit' || level === 'all'
-      next[`${module}:create`] = level === 'edit' || level === 'all'
-      next[`${module}:delete`] = level === 'all'
-    })
+    let active = true
 
-    setUserPermissions(next)
-  }, [selectedUserForPerms, allUsers])
+    const buildPermissionsFromLevel = (perms: Record<AppModule, PermissionLevel>, routePerms: Record<string, PermissionLevel>) => {
+      const next: Record<string, boolean> = {}
+      APP_MODULES.forEach(module => {
+        const level = perms[module]
+        next[`${module}:view`] = level === 'view' || level === 'edit' || level === 'all'
+        next[`${module}:edit`] = level === 'edit' || level === 'all'
+        next[`${module}:create`] = level === 'edit' || level === 'all'
+        next[`${module}:delete`] = level === 'all'
+      })
+
+      const effectiveRoutePerms = Object.keys(routePerms).length > 0 ? routePerms : permissionStore.getRoutePermissions(selectedUserForPerms)
+      Object.entries(effectiveRoutePerms).forEach(([path, routeLevel]) => {
+        next[`${path}:view`] = routeLevel !== 'none'
+        next[`${path}:edit`] = routeLevel === 'edit' || routeLevel === 'all'
+        next[`${path}:create`] = routeLevel === 'all'
+        next[`${path}:delete`] = routeLevel === 'all'
+      })
+
+      return next
+    }
+
+    const loadPermissions = async () => {
+      try {
+        const [persistedModules, persistedRoutePerms] = await Promise.all([
+          getUserPermissionsFromDb(selectedUserForPerms),
+          getUserRoutePermissionsFromDb(selectedUserForPerms),
+        ])
+
+        if (active && (Object.keys(persistedModules).length > 0 || Object.keys(persistedRoutePerms).length > 0)) {
+          setUserPermissions(buildPermissionsFromLevel(persistedModules, persistedRoutePerms))
+          return
+        }
+      } catch (err) {
+        console.warn('Unable to load persisted permissions:', err)
+      }
+
+      if (active) {
+        const currentPerms = permissionStore.getPermissions(selectedUserForPerms)
+        const currentRoutePerms = permissionStore.getRoutePermissions(selectedUserForPerms)
+        setUserPermissions(buildPermissionsFromLevel(currentPerms, currentRoutePerms))
+      }
+    }
+
+    void loadPermissions()
+
+    return () => {
+      active = false
+    }
+  }, [selectedUserForPerms])
 
   // Load data
   useEffect(() => {
@@ -384,8 +428,8 @@ export default function AdministrationSysteme() {
       if (!selectedUserForPerms) {
         return { success: false, message: 'Sélectionnez un utilisateur.' }
       }
-      const nextModules = {} as Record<AppModule, PermissionLevel>
 
+      const nextModules = {} as Record<AppModule, PermissionLevel>
       APP_MODULES.forEach(module => {
         const canView = !!userPermissions[`${module}:view`]
         const canEdit = !!userPermissions[`${module}:edit`]
@@ -404,6 +448,36 @@ export default function AdministrationSysteme() {
       })
 
       permissionStore.setPermissions(selectedUserForPerms, nextModules)
+
+      const nextRoutePermissions: Record<string, PermissionLevel> = {}
+      SIDEBAR_PERMISSION_TREE.flatMap(section => section.items).forEach(item => {
+        const view = !!userPermissions[`${item.path}:view`] || !!userPermissions[`${item.module}:view`]
+        const edit = !!userPermissions[`${item.path}:edit`] || !!userPermissions[`${item.module}:edit`]
+        const create = !!userPermissions[`${item.path}:create`] || !!userPermissions[`${item.module}:create`]
+        const del = !!userPermissions[`${item.path}:delete`] || !!userPermissions[`${item.module}:delete`]
+
+        if (del) {
+          nextRoutePermissions[item.path] = 'all'
+        } else if (edit || create) {
+          nextRoutePermissions[item.path] = 'edit'
+        } else if (view) {
+          nextRoutePermissions[item.path] = 'view'
+        } else {
+          nextRoutePermissions[item.path] = 'none'
+        }
+      })
+      permissionStore.setRoutePermissions(selectedUserForPerms, nextRoutePermissions)
+
+      const result = await saveUserPermissionsToDb(selectedUserForPerms, nextModules, user?.role || 'Utilisateur')
+      if (!result.success) {
+        return { success: false, message: `Impossible de sauvegarder les permissions : ${result.error || 'erreur inconnue'}` }
+      }
+
+      const routeResult = await saveUserRoutePermissionsToDb(selectedUserForPerms, nextRoutePermissions)
+      if (!routeResult.success) {
+        return { success: false, message: `Impossible de sauvegarder les permissions de route : ${routeResult.error || 'erreur inconnue'}` }
+      }
+
       await auditService.log({ userId: user?.id || '', userName: user?.fullName || 'System', userRole: user?.role || '', action: 'permission_change', module: 'parametres', entity: 'User', entityId: selectedUserForPerms, description: `Updated permissions for: ${selectedUserForPerms}`, oldValue: null, newValue: userPermissions, severity: 'high' })
       setPermissionsSaved(true)
       setTimeout(() => setPermissionsSaved(false), 3000)
@@ -413,6 +487,23 @@ export default function AdministrationSysteme() {
       return { success: false, message: 'Erreur pendant l\'enregistrement des permissions.' }
     }
   }, [user?.id, user?.fullName, user?.role, selectedUserForPerms, userPermissions])
+
+  const handleUpdateUserSite = useCallback(async (userId: string, siteId: string | null): Promise<boolean> => {
+    try {
+      const users = authStore.getUsers()
+      const nextUsers = users.map(userItem => {
+        if (userItem.id !== userId) return userItem
+        return { ...userItem, siteId: siteId || undefined }
+      })
+      authStore.saveUsers(nextUsers)
+      refreshUsers()
+      await auditService.log({ userId: user?.id || '', userName: user?.fullName || 'System', userRole: user?.role || '', action: 'update', module: 'parametres', entity: 'User', entityId: userId, description: `Updated site for: ${userId} to ${siteId}`, oldValue: null, newValue: { siteId }, severity: 'medium' })
+      return true
+    } catch (error) {
+      console.error('Error updating user site:', error)
+      return false
+    }
+  }, [refreshUsers, user?.id, user?.fullName, user?.role])
 
   const handleResetPermissions = useCallback(async (): Promise<ActionResult> => {
     try {

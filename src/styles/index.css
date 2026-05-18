@@ -326,6 +326,11 @@
 }
 
 /* Print styles pour les bordereaux */
+@page {
+  size: A4;
+  margin: 10mm 15mm 15mm 15mm;
+}
+
 @media print {
   .no-print {
     display: none !important;
@@ -341,6 +346,42 @@
 
   .waste-form-print {
     @apply border border-black;
+  }
+
+  .header-table {
+    width: 100%;
+    margin-top: 0px !important;
+    margin-bottom: 25px;
+    border-collapse: collapse;
+    border-top: 6px solid #1a365d;
+    padding-top: 5px;
+  }
+
+  .logo-text {
+    font-size: 28pt;
+    font-weight: 800;
+    color: #1a365d !important;
+    margin: 0 !important;
+    line-height: 1.1;
+  }
+
+  .invoice-footer-bande-bleue {
+    position: fixed;
+    bottom: -15mm;
+    left: -15mm;
+    right: -15mm;
+    background-color: #1a365d !important;
+    color: #ffffff !important;
+    padding-top: 6px;
+    padding-bottom: 12px;
+    padding-left: 20px;
+    padding-right: 20px;
+    text-align: center;
+    font-size: 7.5pt;
+    line-height: 1.4;
+    font-family: 'Helvetica Neue', Arial, sans-serif;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
   }
 }
 
