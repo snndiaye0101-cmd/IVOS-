@@ -1,4 +1,5 @@
 import React from "react";
+import { formatCleanAmount } from '../../../utils/formatCleanAmount';
 
 interface SalaryDetail {
   employee: string;
@@ -53,13 +54,13 @@ const SalaryWithDeductions: React.FC = () => {
             return (
               <tr key={idx} className="hover:bg-slate-50">
                 <td className="px-4 py-2 text-sm text-slate-700">{row.employee}</td>
-                <td className="px-4 py-2 text-sm text-slate-700">{row.baseSalary.toLocaleString()} FCFA</td>
-                <td className="px-4 py-2 text-sm text-slate-700">{row.advance.toLocaleString()} FCFA</td>
-                <td className="px-4 py-2 text-sm text-slate-700">{row.bonus.toLocaleString()} FCFA</td>
+                <td className="px-4 py-2 text-sm text-slate-700">{formatCleanAmount(row.baseSalary, 'FCFA')}</td>
+                <td className="px-4 py-2 text-sm text-slate-700">{formatCleanAmount(row.advance, 'FCFA')}</td>
+                <td className="px-4 py-2 text-sm text-slate-700">{formatCleanAmount(row.bonus, 'FCFA')}</td>
                 <td className="px-4 py-2 text-sm text-amber-700 font-semibold">
-                  {loan > 0 ? `- ${loan.toLocaleString()} FCFA` : <span className="text-slate-400">—</span>}
+                  {loan > 0 ? `- ${formatCleanAmount(loan, 'FCFA')}` : <span className="text-slate-400">—</span>}
                 </td>
-                <td className="px-4 py-2 text-sm font-semibold text-emerald-700">{netPay.toLocaleString()} FCFA</td>
+                <td className="px-4 py-2 text-sm font-semibold text-emerald-700">{formatCleanAmount(netPay, 'FCFA')}</td>
               </tr>
             );
           })}

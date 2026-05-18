@@ -1,4 +1,5 @@
 import { Component, type ReactNode, useEffect, useMemo, useState } from 'react';
+import { formatCleanAmount } from '../../../utils/formatCleanAmount';
 import { Link } from 'react-router-dom';
 import {
   ArrowUpRight,
@@ -66,7 +67,7 @@ class RevenuesErrorBoundary extends Component<{ children: ReactNode }, ErrorBoun
 }
 
 function formatFCFA(value: number): string {
-  return `${new Intl.NumberFormat('fr-FR', { maximumFractionDigits: 0 }).format(Math.round(value))} FCFA`;
+  return formatCleanAmount(Math.round(value), 'FCFA');
 }
 
 function formatDateTime(iso: string): string {

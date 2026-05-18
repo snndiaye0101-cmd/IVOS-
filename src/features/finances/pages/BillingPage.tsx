@@ -16,6 +16,7 @@ import {
   type InvoiceStatus,
 } from '../services/workflowInvoiceService';
 import { useAuth } from '../../../shared/contexts/AuthContext';
+import { formatMonetaryValue } from '@/shared/utils/formatAmount';
 
 const STATUS_CONFIG: Record<InvoiceStatus, { label: string; color: string; icon: typeof CheckCircle2 }> = {
   a_valider:  { label: 'À Valider',  color: 'bg-amber-100 text-amber-700 border-amber-300',   icon: Clock },
@@ -26,7 +27,7 @@ const STATUS_CONFIG: Record<InvoiceStatus, { label: string; color: string; icon:
 };
 
 function formatMontant(n: number) {
-  return n.toLocaleString('fr-FR') + ' FCFA';
+  return formatMonetaryValue(n, 'FCFA');
 }
 
 export default function BillingPage() {
@@ -79,49 +80,73 @@ export default function BillingPage() {
   };
 
   const handleDownloadPDF = (inv: WorkflowInvoice) => {
-    const doc = new jsPDF();
+    const doc = new jsPDF({ unit: 'mm', format: 'a4' });
+    const pageWidth = doc.internal.pageSize.getWidth();
+
+    const primary = [26, 54, 93];
+    const slate = [113, 128, 150];
+    const lightFill = [247, 250, 252];
     const docLabel = inv.documentType === 'BSD' ? 'BSD' : 'DN';
 
     // Header
-    doc.setFillColor(0, 51, 102);
-    doc.rect(0, 0, 210, 40, 'F');
+    (doc as any).setFillColor(...(primary as any[]));
+    doc.rect(0, 0, pageWidth, 32, 'F');
     doc.setTextColor(255, 255, 255);
-    doc.setFontSize(22);
-    doc.text('FACTURE', 20, 20);
-    doc.setFontSize(11);
-    doc.text(`Réf. : ${inv.id}`, 20, 30);
-    doc.text(`Date : ${new Date(inv.createdAt).toLocaleDateString('fr-FR')}`, 120, 30);
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(18);
+    doc.text('FACTURE', 16, 20);
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(10);
+    doc.text(`Réf. : ${inv.id}`, 16, 26);
+    doc.text(`Date : ${new Date(inv.createdAt).toLocaleDateString('fr-FR')}`, pageWidth - 16, 26, { align: 'right' });
 
-    // Client
-    doc.setTextColor(0, 0, 0);
-    doc.setFontSize(13);
-    doc.text('Client', 20, 55);
-    doc.setFontSize(11);
-    doc.text(inv.clientNom, 20, 63);
-    if (inv.clientAdresse) doc.text(inv.clientAdresse, 20, 70);
-    if (inv.clientContact) doc.text(`Contact : ${inv.clientContact}`, 20, 77);
-
-    // Prestation
-    doc.setFontSize(13);
-    doc.text('Prestation', 20, 95);
-    doc.setFontSize(11);
-    doc.text(inv.prestationLabel, 20, 103);
-    doc.text(`Catégorie : ${inv.categorieDechet}`, 20, 111);
-    doc.text(`Quantité : ${inv.quantite} ${inv.unite}`, 20, 119);
-    doc.text(`Prix unitaire : ${formatMontant(inv.prixUnitaire)} / ${inv.unite}`, 20, 127);
-
-    // Total
-    doc.setFillColor(245, 245, 245);
-    doc.rect(15, 140, 180, 20, 'F');
-    doc.setFontSize(15);
-    doc.setTextColor(0, 51, 102);
-    doc.text(`MONTANT HT : ${formatMontant(inv.montantHT)}`, 20, 153);
-
-    // Lien opération
-    doc.setTextColor(100, 100, 100);
+    const sectionY = 42;
     doc.setFontSize(9);
-    doc.text(`${docLabel} associé : N°${inv.numeroOfficiel} — Operation ${inv.operationNumero}`, 20, 175);
-    doc.text(`Statut : ${STATUS_CONFIG[inv.status].label}`, 20, 182);
+    (doc as any).setFillColor(...(lightFill as any[]));
+    doc.roundedRect(16, sectionY, pageWidth - 32, 40, 2, 2, 'F');
+    (doc as any).setDrawColor(...(primary as any[]));
+    doc.setLineWidth(0.7);
+    doc.line(22, sectionY, 22, sectionY + 40);
+
+    doc.setFont('helvetica', 'bold');
+    (doc as any).setTextColor(...(primary as any[]));
+    doc.text('Client', 20, sectionY + 10);
+    doc.setFont('helvetica', 'normal');
+    doc.setTextColor(30, 41, 59);
+    doc.text(inv.clientNom, 20, sectionY + 16);
+    if (inv.clientAdresse) doc.text(inv.clientAdresse, 20, sectionY + 22);
+    if (inv.clientContact) doc.text(`Contact : ${inv.clientContact}`, 20, sectionY + 28);
+
+    doc.setFont('helvetica', 'bold');
+    (doc as any).setTextColor(...(primary as any[]));
+    doc.text('Prestation', pageWidth / 2 + 10, sectionY + 10);
+    doc.setFont('helvetica', 'normal');
+    doc.setTextColor(30, 41, 59);
+    doc.text(inv.prestationLabel, pageWidth / 2 + 10, sectionY + 16, { maxWidth: pageWidth / 2 - 26 });
+    doc.text(`Catégorie : ${inv.categorieDechet}`, pageWidth / 2 + 10, sectionY + 22);
+    doc.text(`Quantité : ${inv.quantite} ${inv.unite}`, pageWidth / 2 + 10, sectionY + 28);
+    doc.text(`Prix unitaire : ${formatMontant(inv.prixUnitaire)} / ${inv.unite}`, pageWidth / 2 + 10, sectionY + 34);
+
+    (doc as any).setFillColor(...(lightFill as any[]));
+    doc.roundedRect(16, sectionY + 50, pageWidth - 32, 24, 2, 2, 'F');
+    doc.setFont('helvetica', 'bold');
+    (doc as any).setTextColor(...(primary as any[]));
+    doc.text(`MONTANT HT : ${formatMontant(inv.montantHT)}`, 20, sectionY + 66);
+
+    doc.setFont('helvetica', 'normal');
+    (doc as any).setTextColor(...(slate as any[]));
+    doc.setFontSize(8.5);
+    doc.text(`${docLabel} associé : N°${inv.numeroOfficiel} • Opération ${inv.operationNumero}`, 16, pageWidth > 0 ? sectionY + 85 : sectionY + 85);
+    doc.text(`Statut : ${STATUS_CONFIG[inv.status].label}`, 16, sectionY + 91);
+
+    const footerTop = doc.internal.pageSize.getHeight() - 22;
+    doc.setDrawColor(226, 232, 240);
+    doc.setLineWidth(0.5);
+    doc.line(16, footerTop, pageWidth - 16, footerTop);
+    doc.setFontSize(8);
+    (doc as any).setTextColor(...(slate as any[]));
+    doc.text('NINEA: 0000000 • RC: B 1234567 • Mamelles, Dakar', pageWidth / 2, footerTop + 6, { align: 'center' });
+    doc.text('Contact : contact@ivos-kignabour.sn • +221 33 000 00 00', pageWidth / 2, footerTop + 12, { align: 'center' });
 
     doc.save(`Facture_${inv.clientNom.replace(/\s+/g, '_')}_${inv.numeroOfficiel}.pdf`);
     toast.success('PDF facture téléchargé');

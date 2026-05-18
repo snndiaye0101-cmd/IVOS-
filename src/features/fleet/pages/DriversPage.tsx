@@ -1,4 +1,5 @@
 import { Plus, Search, Phone, Mail, Edit, Eye, Trash2, Award, Clock, Calendar, AlertTriangle, TrendingUp, Upload, X, Paperclip, Globe, Camera, Users, Truck } from 'lucide-react'
+import { formatCleanAmount } from '../../../utils/formatCleanAmount';
 import React, { useState, useEffect, useRef } from 'react'
 import { useAuth } from '../../../shared/contexts/AuthContext'
 import { driversStore } from '../services/driversStore'
@@ -1209,7 +1210,7 @@ export default function DriversPage() {
                       </div>
                       <div className="text-gray-600 text-sm">Lieu: {acc.location || '—'}</div>
                       <div className="text-gray-600 text-sm">Sévérité: {acc.severity}</div>
-                      <div className="text-gray-600 text-sm">Coût estimé: {acc.costEstimate ? acc.costEstimate.toLocaleString('fr-FR') + ' CFA' : '—'}</div>
+                      <div className="text-gray-600 text-sm">Coût estimé: {acc.costEstimate ? formatCleanAmount(acc.costEstimate, 'FCFA') : '—'}</div>
                       {acc.description && <div className="mt-2 text-gray-800 bg-gray-50 p-2 rounded">{acc.description}</div>}
                     </div>
                   ))}

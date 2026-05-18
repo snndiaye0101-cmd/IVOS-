@@ -1,4 +1,5 @@
 import { useContextSelector } from '../../../shared/contexts/ContextProvider';
+import { formatCleanAmount } from '../../../utils/formatCleanAmount';
 import { Search, Edit, Eye, Trash2, Car, Plus, AlertTriangle, Wrench, Fuel, CreditCard, FileText, UserCheck, Calendar, Gauge, CheckCircle, ShieldAlert, Info, ChevronDown, Shield, ShieldCheck, ShieldOff, ArrowUpRight, Upload, X } from 'lucide-react';
 import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -39,6 +40,7 @@ interface PersonalVehicle {
   fuelAllocationLiters?: number;
   fuelCardNumber?: string;
   insuranceExpiry?: string;
+  technicalInspectionExpiry?: string;
   lastOilChangeKm?: number;
   nextOilChangeKm?: number;
   siteCode?: string;
@@ -67,6 +69,17 @@ function checkFnAlerts(vehicle: PersonalVehicle, agent: PersonnelAgent | undefin
       alerts.push({ type: 'assurance', priority: 'danger', message: `Assurance expirée le ${ins.toLocaleDateString('fr-FR')}`, vehicleId: vehicle.id });
     } else if (days <= 30) {
       alerts.push({ type: 'assurance', priority: 'warning', message: `Assurance expire dans ${days} jours`, vehicleId: vehicle.id });
+    }
+  }
+
+  // Technical inspection expired or < 30 days
+  if (vehicle.technicalInspectionExpiry) {
+    const tech = new Date(vehicle.technicalInspectionExpiry);
+    const days = Math.ceil((tech.getTime() - now.getTime()) / (1000 * 3600 * 24));
+    if (days < 0) {
+      alerts.push({ type: 'admin', priority: 'danger', message: `Visite technique expirée le ${tech.toLocaleDateString('fr-FR')}`, vehicleId: vehicle.id });
+    } else if (days <= 30) {
+      alerts.push({ type: 'admin', priority: 'warning', message: `Visite technique expire dans ${days} jours`, vehicleId: vehicle.id });
     }
   }
 
@@ -110,6 +123,7 @@ const initialVehicles: PersonalVehicle[] = [
     fuelAllocationLiters: 120,
     fuelCardNumber: 'FC-2024-0057',
     insuranceExpiry: '2026-09-30',
+    technicalInspectionExpiry: '2026-12-15',
     lastOilChangeKm: 60000,
     nextOilChangeKm: 70000,
   },
@@ -130,6 +144,7 @@ const initialVehicles: PersonalVehicle[] = [
     fuelAllocationLiters: 100,
     fuelCardNumber: 'FC-2024-0102',
     insuranceExpiry: '2026-04-20',
+    technicalInspectionExpiry: '2026-05-10',
     lastOilChangeKm: 25000,
     nextOilChangeKm: 35000,
   },
@@ -148,6 +163,7 @@ const initialVehicles: PersonalVehicle[] = [
     assignedAgentId: 'ag5',
     fuelAllocationLiters: 40,
     insuranceExpiry: '2026-03-01',
+    technicalInspectionExpiry: '2026-02-28',
     lastOilChangeKm: 6000,
     nextOilChangeKm: 9000,
   },
@@ -168,6 +184,7 @@ const initialVehicles: PersonalVehicle[] = [
     fuelAllocationLiters: 150,
     fuelCardNumber: 'FC-2023-0811',
     insuranceExpiry: '2027-01-15',
+    technicalInspectionExpiry: '2026-08-22',
     lastOilChangeKm: 40000,
     nextOilChangeKm: 50000,
   },
@@ -269,6 +286,12 @@ export default function VehiculesPersonnelsPage() {
     return () => window.removeEventListener(ASSURANCE_CHANGE_EVENT, handle);
   }, []);
 
+  // Persist personal vehicles to localStorage and trigger global alerts
+  useEffect(() => {
+    localStorage.setItem('ivos_function_vehicles', JSON.stringify(vehicles));
+    window.dispatchEvent(new CustomEvent('ivos_function_vehicles_change'));
+  }, [vehicles]);
+
   // Close dropdown on click outside
   useEffect(() => {
     const handleClick = (e: MouseEvent) => {
@@ -334,6 +357,7 @@ export default function VehiculesPersonnelsPage() {
       fuelAllocationLiters: 0,
       fuelCardNumber: '',
       insuranceExpiry: '',
+      technicalInspectionExpiry: '',
       lastOilChangeKm: 0,
       nextOilChangeKm: 0,
     });
@@ -606,6 +630,17 @@ export default function VehiculesPersonnelsPage() {
                               Assurance {insuranceStatus}
                             </span>
                           )}
+                          {vehicle.technicalInspectionExpiry && (() => {
+                            const techDate = new Date(vehicle.technicalInspectionExpiry);
+                            const now = new Date();
+                            const days = Math.ceil((techDate.getTime() - now.getTime()) / (1000 * 3600 * 24));
+                            if (days < 0) {
+                              return <span className="px-2 py-0.5 text-xs font-bold rounded-full inline-flex items-center gap-1 bg-red-100 text-red-700"><AlertTriangle className="h-3 w-3" />Visite à renouveler</span>;
+                            } else if (days <= 30) {
+                              return <span className="px-2 py-0.5 text-xs font-bold rounded-full inline-flex items-center gap-1 bg-orange-100 text-orange-700"><AlertTriangle className="h-3 w-3" />Visite proche</span>;
+                            }
+                            return null;
+                          })()}
                         </div>
                         <p className="text-sm text-gray-600">{vehicle.brand} {vehicle.model} — {vehicle.color}</p>
                         <p className="text-xs text-gray-500 mt-0.5">{vehicle.type} • {vehicle.year} • {vehicle.fuelType}</p>
@@ -738,6 +773,7 @@ export default function VehiculesPersonnelsPage() {
                   <div className="grid grid-cols-2 gap-4">
                     <Input label="Date d'attribution" name="assignmentDate" type="date" value={formData.assignmentDate} onChange={e => setFormData(f => ({ ...f, assignmentDate: e.target.value }))} required icon={<Calendar size={16} />} />
                     <Input label="Expiration assurance" name="insuranceExpiry" type="date" value={formData.insuranceExpiry || ''} onChange={e => setFormData(f => ({ ...f, insuranceExpiry: e.target.value }))} icon={<FileText size={16} />} />
+                    <Input label="Expiration visite technique" name="technicalInspectionExpiry" type="date" value={formData.technicalInspectionExpiry || ''} onChange={e => setFormData(f => ({ ...f, technicalInspectionExpiry: e.target.value }))} required icon={<CheckCircle size={16} />} />
                     <Input label="Dernière vidange (km)" name="lastOilChangeKm" type="number" value={formData.lastOilChangeKm || ''} onChange={e => setFormData(f => ({ ...f, lastOilChangeKm: Number(e.target.value) || 0 }))} icon={<Wrench size={16} />} />
                     <Input label="Prochaine vidange (km)" name="nextOilChangeKm" type="number" value={formData.nextOilChangeKm || ''} onChange={e => setFormData(f => ({ ...f, nextOilChangeKm: Number(e.target.value) || 0 }))} icon={<Wrench size={16} />} />
                   </div>
@@ -1002,7 +1038,7 @@ export default function VehiculesPersonnelsPage() {
                         {statut === 'À jour' ? <ShieldCheck className="h-3 w-3" /> : statut === 'À renouveler bientôt' ? <ShieldAlert className="h-3 w-3" /> : <ShieldOff className="h-3 w-3" />}
                         {statut}
                       </span>
-                      <span className="text-xs text-gray-500 font-medium">{contract.montantPrime.toLocaleString('fr-FR')} FCFA / an</span>
+                      <span className="text-xs text-gray-500 font-medium">{formatCleanAmount(contract.montantPrime, 'FCFA')} / an</span>
                     </div>
                     {timeline.length > 0 && (
                       <div className="pt-2 border-t border-white/70">
@@ -1022,7 +1058,7 @@ export default function VehiculesPersonnelsPage() {
                               </div>
                               <div className="mt-1 flex items-center justify-between text-[11px] text-gray-600 gap-3">
                                 <span>{new Date(entry.dateDebut).toLocaleDateString('fr-FR')} → {new Date(entry.dateEcheance).toLocaleDateString('fr-FR')}</span>
-                                <span className="font-semibold text-gray-800">{entry.montantPrime.toLocaleString('fr-FR')} FCFA</span>
+                                <span className="font-semibold text-gray-800">{formatCleanAmount(entry.montantPrime, 'FCFA')}</span>
                               </div>
                             </div>
                           ))}

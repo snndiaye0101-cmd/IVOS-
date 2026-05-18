@@ -1,7 +1,8 @@
 import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react'
+import { formatCleanAmount } from '../../../utils/formatCleanAmount';
 import { Search, Truck, Car, CheckCircle, Clock, AlertTriangle, Eye, ChevronDown, ChevronUp, X, Camera, History, Trash2, Wrench, Activity, CalendarPlus, Calendar, Shield } from 'lucide-react'
 import { toast } from 'sonner'
-import { vehiclesStore, maintenancePlansStore, type MaintenancePlan } from '../services/vehiclesStore'
+import { vehiclesStore, maintenancePlansStore, type MaintenancePlan, type Vehicle } from '../services/vehiclesStore'
 import { personalVehiclesStore } from '../services/personalVehiclesStore'
 import { driversStore } from '../services/driversStore'
 import { personnelStore, type PersonnelAgent } from '../services/personnelStore'
@@ -118,8 +119,8 @@ export default function MaintenancePage() {
 
   const [fleetVehicles, setFleetVehicles] = useState<Vehicle[]>([])
   const [personalVehicles, setPersonalVehicles] = useState<Vehicle[]>([])
-  const [drivers, setDrivers] = useState<PersonnelAgent[]>([])
-  const [mechanics, setMechanics] = useState<{ id: string; name: string; position: string }[]>([])
+  const [drivers, setDrivers] = useState<any[]>([])
+  const [mechanics, setMechanics] = useState<any[]>([])
   const [chauffeurs, setChauffeurs] = useState<PersonnelAgent[]>([])
 
   const [form, setForm] = useState({
@@ -140,8 +141,8 @@ export default function MaintenancePage() {
 
   const loadVehicles = useCallback(() => {
     setFleetVehicles(vehiclesStore.load())
-    setPersonalVehicles(personalVehiclesStore.load())
-    setDrivers(driversStore.load())
+    setPersonalVehicles(personalVehiclesStore.load() as any)
+    setDrivers(driversStore.load() as any)
     setChauffeurs(personnelStore.load().filter(a => a.role === 'Chauffeurs'))
     // Load mechanics from localStorage (same key as MechanicsPage)
     try {
@@ -153,7 +154,7 @@ export default function MaintenancePage() {
   useEffect(() => {
     loadVehicles()
     const handleFleetUpdate = () => setFleetVehicles(vehiclesStore.load())
-    const handlePersonalUpdate = () => setPersonalVehicles(personalVehiclesStore.load())
+    const handlePersonalUpdate = () => setPersonalVehicles(personalVehiclesStore.load() as any)
     const handlePersonnelUpdate = () => setChauffeurs(personnelStore.load().filter(a => a.role === 'Chauffeurs'))
     window.addEventListener('fleetVehicles:updated', handleFleetUpdate)
     window.addEventListener('personalVehicles:updated', handlePersonalUpdate)
@@ -882,7 +883,7 @@ export default function MaintenancePage() {
                         </div>
                         <div>
                           <p className="text-gray-500 text-xs mb-0.5">Coût estimé</p>
-                          <p className="font-semibold text-gray-900">{breakdown.estimatedCost > 0 ? `${breakdown.estimatedCost.toLocaleString('fr-FR')} CFA` : '—'}</p>
+                          <p className="font-semibold text-gray-900">{breakdown.estimatedCost > 0 ? formatCleanAmount(breakdown.estimatedCost, 'FCFA') : '—'}</p>
                         </div>
                         <div>
                           <p className="text-gray-500 text-xs mb-0.5">Mécanicien / Garage</p>
@@ -1210,7 +1211,7 @@ export default function MaintenancePage() {
                                 </div>
                                 <div>
                                   <p className="text-gray-500 text-xs mb-0.5">Coût estimé</p>
-                                  <p className="font-semibold text-gray-900">{existingPlan.estimatedCost ? existingPlan.estimatedCost.toLocaleString('fr-FR') + ' CFA' : '—'}</p>
+                                  <p className="font-semibold text-gray-900">{existingPlan.estimatedCost ? formatCleanAmount(existingPlan.estimatedCost, 'FCFA') : '—'}</p>
                                 </div>
                                 <div>
                                   <p className="text-gray-500 text-xs mb-0.5">Statut</p>
@@ -1342,7 +1343,7 @@ export default function MaintenancePage() {
                       </div>
                       <div>
                         <p className="text-gray-500 text-xs">Coût estimé</p>
-                        <p className="font-medium">{plan.estimatedCost ? plan.estimatedCost.toLocaleString('fr-FR') + ' CFA' : '—'}</p>
+                        <p className="font-medium">{plan.estimatedCost ? formatCleanAmount(plan.estimatedCost, 'FCFA') : '—'}</p>
                       </div>
                     </div>
                     {plan.notes && <p className="text-sm text-gray-600 mb-3">💬 {plan.notes}</p>}
@@ -1693,7 +1694,7 @@ export default function MaintenancePage() {
                 </div>
                 <div className="bg-gray-50 rounded-lg p-3">
                   <p className="text-xs text-gray-500 mb-0.5">Coût estimé</p>
-                  <p className="font-semibold text-gray-900">{selectedBreakdown.estimatedCost > 0 ? `${selectedBreakdown.estimatedCost.toLocaleString('fr-FR')} CFA` : '—'}</p>
+                  <p className="font-semibold text-gray-900">{selectedBreakdown.estimatedCost > 0 ? formatCleanAmount(selectedBreakdown.estimatedCost, 'FCFA') : '—'}</p>
                 </div>
                 <div className="bg-gray-50 rounded-lg p-3">
                   <p className="text-xs text-gray-500 mb-0.5">Source</p>
