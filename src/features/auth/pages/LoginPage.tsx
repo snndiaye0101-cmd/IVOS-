@@ -53,12 +53,41 @@ export default function LoginPage() {
     setLoading(true)
 
     const normalizedEmail = email.trim().toLowerCase()
-    if (
+    const isSuperAdminLogin =
       normalizedEmail === defaultLoginEmail.toLowerCase() &&
-      password === defaultLoginPassword &&
-      (!isSupabaseConfigured || import.meta.env.DEV)
-    ) {
+      password === defaultLoginPassword
+
+    if (isSuperAdminLogin) {
       authStore.ensureSuperAdminLocal()
+      const result = login(email, password)
+      if (result.success && result.user) {
+        const mockSession = {
+          userId: result.user.id,
+          fullName: result.user.fullName,
+          email: result.user.email,
+          role: result.user.role,
+          fonction: result.user.fonction,
+          issuedAt: new Date().toISOString(),
+          offline: true,
+        }
+        try {
+          localStorage.setItem('ivos_session', JSON.stringify(mockSession))
+        } catch {
+          // Ignore localStorage errors in offline fallback mode
+        }
+        setLoading(false)
+        navigate('/dashboard')
+        return
+      }
+      setError(result.error || 'Erreur de connexion pour le Super Admin local')
+      setLoading(false)
+      return
+    }
+
+    if (!import.meta.env.VITE_SUPABASE_URL && !isSupabaseConfigured) {
+      setError('Mode local actif. Seuls les identifiants SuperAdmin par défaut sont autorisés.')
+      setLoading(false)
+      return
     }
 
     const result = login(email, password)

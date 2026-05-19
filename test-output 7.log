@@ -1,0 +1,237 @@
+
+> ivos-fleet-management@1.0.0 test
+> jest --passWithNoTests
+
+PASS src/features/fleet/services/assuranceStore.test.ts
+FAIL src/shared/services/__tests__/backupService.test.ts
+  ● Test suite failed to run
+
+    Jest encountered an unexpected token
+
+    Jest failed to parse a file. This happens e.g. when your code or its dependencies use non-standard JavaScript syntax, or when Jest is not configured to support such syntax.
+
+    Out of the box Jest supports Babel, which will be used to transform your files into valid JS based on your Babel configuration.
+
+    By default "node_modules" folder is ignored by transformers.
+
+    Here's what you can do:
+     • If you are trying to use ECMAScript Modules, see https://jestjs.io/docs/ecmascript-modules for how to enable it.
+     • If you are trying to use TypeScript, see https://jestjs.io/docs/getting-started#using-typescript
+     • To have some of your "node_modules" files transformed, you can specify a custom "transformIgnorePatterns" in your config.
+     • If you need a custom transformation specify a "transform" option in your config.
+     • If you simply want to mock your non-JS modules (e.g. binary assets) you can stub them out with the "moduleNameMapper" config option.
+
+    You'll find more details and examples of these config options in the docs:
+    https://jestjs.io/docs/configuration
+    For information about custom transformations, see:
+    https://jestjs.io/docs/code-transformation
+
+    Details:
+
+    /Users/useruser/Desktop/IVOS 61.1/src/shared/services/backupService.ts:359
+        const BACKUP_PASSWORD = import.meta.env.VITE_BACKUP_ADMIN_PASSWORD || 'SambaIVOS2026';
+                                       ^^^^
+
+    SyntaxError: Cannot use 'import.meta' outside a module
+
+      4 |  */
+      5 |
+    > 6 | import {
+        | ^
+      7 |   getBackupActions,
+      8 |   logBackupAction,
+      9 |   getRecentActions,
+
+      at Runtime.createScriptFromCode (node_modules/jest-runtime/build/index.js:1505:14)
+      at Object.<anonymous> (src/shared/services/__tests__/backupService.test.ts:6:1)
+
+PASS src/features/finances/services/payrollSettingsStore.test.ts
+PASS src/shared/services/__tests__/certificateService.test.ts
+  ● Console
+
+    console.log
+      ✅ Certificat généré : CERT-KIG-2026-0001
+
+      at generateCertificate (src/shared/services/certificateService.ts:145:11)
+
+    console.log
+      ✅ Certificat généré : CERT-KIG-2026-0001
+
+      at generateCertificate (src/shared/services/certificateService.ts:145:11)
+
+    console.log
+      ✅ Certificat généré : CERT-KIG-2026-0002
+
+      at generateCertificate (src/shared/services/certificateService.ts:145:11)
+
+    console.log
+      ✅ Certificat généré : CERT-KIG-2026-0001
+
+      at generateCertificate (src/shared/services/certificateService.ts:145:11)
+
+    console.log
+      ✅ Certificat généré : CERT-KIG-2026-0001
+
+      at generateCertificate (src/shared/services/certificateService.ts:145:11)
+
+    console.log
+      ✅ Certificat généré : CERT-KIG-2026-0002
+
+      at generateCertificate (src/shared/services/certificateService.ts:145:11)
+
+    console.log
+      ✅ Certificat généré : CERT-KIG-2026-0001
+
+      at generateCertificate (src/shared/services/certificateService.ts:145:11)
+
+    console.log
+      ✅ Certificat généré : CERT-KIG-2026-0001
+
+      at generateCertificate (src/shared/services/certificateService.ts:145:11)
+
+    console.log
+      ✅ Certificat généré : CERT-KIG-2026-0001
+
+      at generateCertificate (src/shared/services/certificateService.ts:145:11)
+
+    console.log
+      ✅ Certificat généré : CERT-KIG-2026-0001
+
+      at generateCertificate (src/shared/services/certificateService.ts:145:11)
+
+    console.log
+      ✅ Certificat généré : CERT-KIG-2026-0001
+
+      at generateCertificate (src/shared/services/certificateService.ts:145:11)
+
+    console.log
+      ✅ Certificat généré : CERT-KIG-2026-0001
+
+      at generateCertificate (src/shared/services/certificateService.ts:145:11)
+
+    console.log
+      ✅ Certificat généré : CERT-KIG-2026-0001
+
+      at generateCertificate (src/shared/services/certificateService.ts:145:11)
+
+    console.log
+      ✅ Certificat généré : CERT-KIG-2026-0001
+
+      at generateCertificate (src/shared/services/certificateService.ts:145:11)
+
+    console.log
+      ✅ Certificat généré : CERT-KIG-2026-0001
+
+      at generateCertificate (src/shared/services/certificateService.ts:145:11)
+
+    console.log
+      ✅ Certificat généré : CERT-KIG-2026-0001
+
+      at generateCertificate (src/shared/services/certificateService.ts:145:11)
+
+    console.log
+      ✅ Certificat généré : CERT-KIG-2026-0002
+
+      at generateCertificate (src/shared/services/certificateService.ts:145:11)
+
+PASS src/features/missions/services/operationService.test.ts
+PASS src/features/waste-tracking/services/wasteFormService.test.ts
+PASS src/features/finances/services/payrollFiscalEngine.test.ts
+PASS src/features/fleet/services/vehicleService.test.ts
+PASS src/features/fleet/hooks/useClaims.test.ts
+PASS src/features/clients/services/clientService.test.ts
+PASS src/features/fleet/services/driverService.test.ts
+PASS src/features/settings/services/settingsService.test.ts
+PASS src/features/reporting/services/reportingService.test.ts
+PASS src/features/fleet/hooks/useVehicles.test.ts
+FAIL src/features/operations/pages/OperationsDashboard.test.tsx
+  ● Test suite failed to run
+
+    Jest encountered an unexpected token
+
+    Jest failed to parse a file. This happens e.g. when your code or its dependencies use non-standard JavaScript syntax, or when Jest is not configured to support such syntax.
+
+    Out of the box Jest supports Babel, which will be used to transform your files into valid JS based on your Babel configuration.
+
+    By default "node_modules" folder is ignored by transformers.
+
+    Here's what you can do:
+     • If you are trying to use ECMAScript Modules, see https://jestjs.io/docs/ecmascript-modules for how to enable it.
+     • If you are trying to use TypeScript, see https://jestjs.io/docs/getting-started#using-typescript
+     • To have some of your "node_modules" files transformed, you can specify a custom "transformIgnorePatterns" in your config.
+     • If you need a custom transformation specify a "transform" option in your config.
+     • If you simply want to mock your non-JS modules (e.g. binary assets) you can stub them out with the "moduleNameMapper" config option.
+
+    You'll find more details and examples of these config options in the docs:
+    https://jestjs.io/docs/configuration
+    For information about custom transformations, see:
+    https://jestjs.io/docs/code-transformation
+
+    Details:
+
+    /Users/useruser/Desktop/IVOS 61.1/src/shared/services/authStore.ts:273
+            const demoPassword = import.meta.env.VITE_AUTH_DEMO_PASSWORD || 'admin';
+                                        ^^^^
+
+    SyntaxError: Cannot use 'import.meta' outside a module
+
+      1 | import { createContext, useContext, useState, useEffect, useCallback, type ReactNode } from 'react'
+    > 2 | import { authStore, type User, type UserSession, type ActivityLog } from '../services/authStore'
+        | ^
+      3 | import { permissionStore } from '../services/permissionStore'
+      4 |
+      5 | type RuntimeGlobal = {
+
+      at Runtime.createScriptFromCode (node_modules/jest-runtime/build/index.js:1505:14)
+      at Object.<anonymous> (src/shared/contexts/AuthContext.tsx:2:1)
+      at Object.<anonymous> (src/test-utils.tsx:9:1)
+      at Object.<anonymous> (src/features/operations/pages/OperationsDashboard.test.tsx:1:1)
+
+FAIL src/features/operations/pages/OperationsPage.test.tsx
+  ● Test suite failed to run
+
+    Jest encountered an unexpected token
+
+    Jest failed to parse a file. This happens e.g. when your code or its dependencies use non-standard JavaScript syntax, or when Jest is not configured to support such syntax.
+
+    Out of the box Jest supports Babel, which will be used to transform your files into valid JS based on your Babel configuration.
+
+    By default "node_modules" folder is ignored by transformers.
+
+    Here's what you can do:
+     • If you are trying to use ECMAScript Modules, see https://jestjs.io/docs/ecmascript-modules for how to enable it.
+     • If you are trying to use TypeScript, see https://jestjs.io/docs/getting-started#using-typescript
+     • To have some of your "node_modules" files transformed, you can specify a custom "transformIgnorePatterns" in your config.
+     • If you need a custom transformation specify a "transform" option in your config.
+     • If you simply want to mock your non-JS modules (e.g. binary assets) you can stub them out with the "moduleNameMapper" config option.
+
+    You'll find more details and examples of these config options in the docs:
+    https://jestjs.io/docs/configuration
+    For information about custom transformations, see:
+    https://jestjs.io/docs/code-transformation
+
+    Details:
+
+    /Users/useruser/Desktop/IVOS 61.1/src/shared/services/authStore.ts:273
+            const demoPassword = import.meta.env.VITE_AUTH_DEMO_PASSWORD || 'admin';
+                                        ^^^^
+
+    SyntaxError: Cannot use 'import.meta' outside a module
+
+      1 | import { createContext, useContext, useState, useEffect, useCallback, type ReactNode } from 'react'
+    > 2 | import { authStore, type User, type UserSession, type ActivityLog } from '../services/authStore'
+        | ^
+      3 | import { permissionStore } from '../services/permissionStore'
+      4 |
+      5 | type RuntimeGlobal = {
+
+      at Runtime.createScriptFromCode (node_modules/jest-runtime/build/index.js:1505:14)
+      at Object.<anonymous> (src/shared/contexts/AuthContext.tsx:2:1)
+      at Object.<anonymous> (src/test-utils.tsx:9:1)
+      at Object.<anonymous> (src/features/operations/pages/OperationsPage.test.tsx:1:1)
+
+Test Suites: 3 failed, 13 passed, 16 total
+Tests:       59 passed, 59 total
+Snapshots:   0 total
+Time:        6.145 s
+Ran all test suites.
