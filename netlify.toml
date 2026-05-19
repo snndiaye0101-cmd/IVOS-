@@ -3,6 +3,9 @@
   publish = "dist"
   functions = "netlify/functions"
 
+[build.environment]
+  NODE_ENV = "production"
+
 [dev]
   command = "npm run dev"
   port = 5173
@@ -12,10 +15,9 @@
   to = "/index.html"
   status = 200
 
-[env.production]
-  [env.production.build.environment]
-    NODE_ENV = "production"
+[context.production.environment]
+  VITE_DEFAULT_LOGIN_EMAIL = "superadmin@ivos.sn"
+  VITE_DEFAULT_LOGIN_PASSWORD = "SuperAdmin@IVOS2026"
 
-[env.staging]
-  [env.staging.build.environment]
-    NODE_ENV = "production"
+[context.staging.environment]
+  NODE_ENV = "production"
