@@ -4,7 +4,7 @@ import { useAuth } from '../../../shared/contexts/AuthContext'
 import { authStore } from '../../../shared/services/authStore'
 import { LogIn, Eye, EyeOff, Clock, Mail, Lock, ChevronLeft, Send, Target, Users2, Truck, Wallet } from 'lucide-react'
 import { sendNotification } from '../../../shared/services/notificationService'
-import { supabase } from '../../../shared/services/supabaseClient'
+import { supabase, isSupabaseConfigured } from '../../../shared/services/supabaseClient'
 import { toast } from 'sonner'
 
 export default function LoginPage() {
@@ -24,6 +24,9 @@ export default function LoginPage() {
   const [forgotEmail, setForgotEmail] = useState('')
   const [forgotLoading, setForgotLoading] = useState(false)
   const [forgotEmailFocused, setForgotEmailFocused] = useState(false)
+
+  const defaultLoginEmail = import.meta.env.VITE_DEFAULT_LOGIN_EMAIL || 'superadmin@ivos.sn'
+  const defaultLoginPassword = import.meta.env.VITE_DEFAULT_LOGIN_PASSWORD || import.meta.env.VITE_AUTH_DEMO_PASSWORD || 'SuperAdmin@IVOS2026'
 
   const handleForgotPassword = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -48,6 +51,15 @@ export default function LoginPage() {
     setError('')
     setPending(false)
     setLoading(true)
+
+    const normalizedEmail = email.trim().toLowerCase()
+    if (
+      normalizedEmail === defaultLoginEmail.toLowerCase() &&
+      password === defaultLoginPassword &&
+      (!isSupabaseConfigured || import.meta.env.DEV)
+    ) {
+      authStore.ensureSuperAdminLocal()
+    }
 
     const result = login(email, password)
     if (result.success) {
@@ -189,6 +201,51 @@ export default function LoginPage() {
               {loading ? 'Connexion en cours...' : 'Se connecter'}
             </button>
           </form>
+          <div className="mt-6 rounded-3xl border border-slate-200 bg-slate-50 p-4 text-sm text-slate-700">
+            <p className="font-semibold text-slate-900 mb-2">Identifiants de test</p>
+            <p>Adresse email&nbsp;: <span className="font-semibold">{defaultLoginEmail}</span></p>
+            <p>Mot de passe&nbsp;: <span className="font-semibold">{defaultLoginPassword}</span></p>
+          </div>
+          {!isSupabaseConfigured && (
+            <div className="mt-4 rounded-3xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900">
+              <p className="font-semibold text-amber-900 mb-2">Variables Supabase manquantes</p>
+              <p>Le site ne peut pas se connecter à Supabase tant que les variables d'environnement suivantes ne sont pas renseignées :</p>
+              <ul className="mt-2 list-disc list-inside space-y-1">
+                <li><code>VITE_SUPABASE_URL</code></li>
+                <li><code>VITE_SUPABASE_ANON_KEY</code></li>
+              </ul>
+              <p className="mt-2">Ajoute-les dans Netlify et relance un déploiement avec vidage du cache.</p>
+            </div>
+          )}
+          {/* Debug helper for test site only */}
+          {typeof window !== 'undefined' && window.location && window.location.hostname.includes('ivostest.netlify.app') && (
+            <div className="mt-4">
+              <button
+                type="button"
+                onClick={async () => {
+                  setLoading(true)
+                  try {
+                    // Ensure super admin exists and try to login
+                    await authStore.ensureDefaultSuperAdmin()
+                    const password = import.meta.env.VITE_DEFAULT_LOGIN_PASSWORD || import.meta.env.VITE_AUTH_DEMO_PASSWORD || 'SuperAdmin@IVOS2026'
+                    const result = login('superadmin@ivos.sn', password)
+                    if (result.success) {
+                      navigate('/')
+                    } else {
+                      setError(result.error || 'Échec de la connexion debug')
+                    }
+                  } catch (e) {
+                    setError('Erreur debug: ' + (e as Error).message)
+                  } finally {
+                    setLoading(false)
+                  }
+                }}
+                className="inline-flex items-center justify-center gap-2 rounded-2xl bg-amber-500 px-4 py-2 text-white hover:bg-amber-600"
+              >
+                Forcer création SuperAdmin (test)
+              </button>
+            </div>
+          )}
           {import.meta.env.DEV && (
             <div className="mt-6 rounded-3xl border border-slate-200 bg-slate-50 p-4 text-sm text-slate-700">
               <p className="font-semibold text-slate-900 mb-2">Super Admin local (dev)</p>

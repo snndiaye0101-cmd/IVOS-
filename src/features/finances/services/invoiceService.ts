@@ -86,14 +86,52 @@ function calculateAmounts(lignes: InvoiceLine[], tauxTVA: number) {
 /**
  * Récupère toutes les factures
  */
+const MOCK_INVOICES: Invoice[] = [
+  {
+    id: 'sample-invoice-1',
+    numeroFacture: `FAC-${new Date().getFullYear()}-0001`,
+    date: new Date().toISOString(),
+    dateEcheance: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
+    typeFacture: 'Facture libre',
+    clientId: 'client-demo-001',
+    clientNom: 'Société de test IVOS',
+    clientAdresse: '12 Rue de l’Industrie, Dakar',
+    clientSiret: 'SN123456789',
+    montantHT: 150000,
+    tauxTVA: 18,
+    montantTVA: 27000,
+    montantTTC: 177000,
+    statutPaiement: 'Non payé',
+    modeReglement: 'Virement',
+    montantEncaisse: 0,
+    soldeRestant: 177000,
+    payments: [],
+    lignes: [
+      {
+        id: 'sample-invoice-line-1',
+        description: 'Prestation de collecte et traitement',
+        quantite: 1,
+        unite: 'forfait',
+        prixUnitaireHT: 150000,
+        totalHT: 150000,
+      },
+    ],
+    notes: 'Facture de démonstration locale pour affichage sans connexion Supabase.',
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+    createdBy: 'system',
+  },
+]
+
 export function getAllInvoices(): Invoice[] {
   const stored = localStorage.getItem(STORAGE_KEY);
-  if (!stored) return [];
+  if (!stored) return [...MOCK_INVOICES];
   
   try {
-    return JSON.parse(stored);
+    const parsed = JSON.parse(stored);
+    return parsed && Array.isArray(parsed) ? parsed : [...MOCK_INVOICES];
   } catch {
-    return [];
+    return [...MOCK_INVOICES];
   }
 }
 
@@ -468,7 +506,7 @@ export async function generateInvoicePDF(invoiceId: string): Promise<void> {
         'FAST'
       );
       if ((doc as any).setGState) {
-        doc.setGState(new (doc as any).GState({ opacity: 1 }));
+        doc.setGState(new ((doc as any).GState)({ opacity: 1 }));
       }
     } catch {
       doc.setFont('helvetica', 'bold');
@@ -485,7 +523,7 @@ export async function generateInvoicePDF(invoiceId: string): Promise<void> {
     doc.addImage(logoDataUrl, 'JPEG', margin, headerTop + 4, 34, 20, undefined, 'FAST');
   }
 
-  (doc as any).setFillColor(...(primary as any[]));
+  (doc as any).setFillColor(...(primary as [number, number, number]));
   doc.rect(0, headerTop, pageWidth, headerHeight, 'F');
   doc.setFont('helvetica', 'bold');
   doc.setFontSize(18);
@@ -505,9 +543,9 @@ export async function generateInvoicePDF(invoiceId: string): Promise<void> {
 
   const infoBoxTop = headerTop + headerHeight + 8;
   const infoBoxHeight = 44;
-  (doc as any).setFillColor(...(lightFill as any[]));
+  (doc as any).setFillColor(...(lightFill as [number, number, number]));
   doc.roundedRect(margin, infoBoxTop, contentWidth, infoBoxHeight, 2, 2, 'F');
-  (doc as any).setDrawColor(...(primary as any[]));
+  (doc as any).setDrawColor(...(primary as [number, number, number]));
   doc.setLineWidth(0.8);
   doc.line(margin + 10, infoBoxTop, margin + 10, infoBoxTop + infoBoxHeight);
   doc.setFont('helvetica', 'bold');
@@ -518,22 +556,22 @@ export async function generateInvoicePDF(invoiceId: string): Promise<void> {
   doc.text(invoice.numeroFacture, margin + 12, infoBoxTop + 18);
   doc.text(`Date : ${new Date(invoice.date).toLocaleDateString('fr-FR')}`, margin + 12, infoBoxTop + 24);
   doc.setFont('helvetica', 'bold');
-  (doc as any).setTextColor(...(primary as any[]));
+  (doc as any).setTextColor(...(primary as [number, number, number]));
   doc.text('Échéance', pageWidth - margin, infoBoxTop + 12, { align: 'right' });
   doc.setFont('helvetica', 'normal');
-  (doc as any).setTextColor(...(darkText as any[]));
+  (doc as any).setTextColor(...(darkText as [number, number, number]));
   doc.text(new Date(invoice.dateEcheance).toLocaleDateString('fr-FR'), pageWidth - margin, infoBoxTop + 18, { align: 'right' });
   doc.text(invoiceReference, pageWidth - margin, infoBoxTop + 24, { align: 'right' });
 
   const clientTop = infoBoxTop + infoBoxHeight + 10;
   doc.setFont('helvetica', 'bold');
   doc.setFontSize(10);
-  (doc as any).setTextColor(...(primary as any[]));
+  (doc as any).setTextColor(...(primary as [number, number, number]));
   doc.text('CLIENT', margin, clientTop);
   let clientLineY = clientTop + 6;
   doc.setFont('helvetica', 'normal');
   doc.setFontSize(9);
-  (doc as any).setTextColor(...(darkText as any[]));
+  (doc as any).setTextColor(...(darkText as [number, number, number]));
   doc.text(invoice.clientNom, margin, clientLineY);
   clientLineY += 6;
   if (invoice.clientAdresse) {
@@ -554,9 +592,9 @@ export async function generateInvoicePDF(invoiceId: string): Promise<void> {
 
   doc.setFontSize(9);
   doc.setFont('helvetica', 'bold');
-  (doc as any).setFillColor(...(lightFill as any[]));
+  (doc as any).setFillColor(...(lightFill as [number, number, number]));
   doc.rect(margin, currentY - 4, contentWidth, 8, 'F');
-  (doc as any).setTextColor(...(primary as any[]));
+  (doc as any).setTextColor(...(primary as [number, number, number]));
   doc.text('DÉSIGNATION', xDesignation, currentY);
   doc.text('QTÉ', xQty, currentY, { align: 'right' });
   doc.text('UNITÉ', xUnit, currentY, { align: 'right' });
@@ -569,7 +607,7 @@ export async function generateInvoicePDF(invoiceId: string): Promise<void> {
   doc.setFont('helvetica', 'normal');
   const descriptionWidth = xQty - xDesignation - 6;
 
-  invoice.lignes.forEach((ligne, index) => {
+  invoice.lignes.forEach((ligne: InvoiceLine, index: number) => {
     const descriptionLines = doc.splitTextToSize(String(ligne.description ?? '—'), descriptionWidth);
     const rowHeight = Math.max(6, descriptionLines.length * 5.5);
     const pageInnerBottom = pageHeight - footerBandHeight - 10;
@@ -581,16 +619,18 @@ export async function generateInvoicePDF(invoiceId: string): Promise<void> {
     }
 
     if (index % 2 === 0) {
-      (doc as any).setFillColor(...(lightFill as any[]));
+      (doc as any).setFillColor(...(lightFill as [number, number, number]));
       doc.rect(margin, currentY - 4, contentWidth, rowHeight + 4, 'F');
     }
 
-    (doc as any).setTextColor(...(darkText as any[]));
+    (doc as any).setTextColor(...(darkText as [number, number, number]));
     doc.text(descriptionLines, xDesignation, currentY);
     doc.text(formatQty(ligne.quantite), xQty, currentY, { align: 'right' });
     doc.text(ligne.unite || '—', xUnit, currentY, { align: 'right' });
-    doc.text(purgerEtFormatFCFA(ligne.prixUnitaireHT), xUnitPrice, currentY, { align: 'right' });
-    doc.text(purgerEtFormatFCFA(ligne.totalHT), xTotal, currentY, { align: 'right' });
+    const prixFormatted = purgerEtFormatFCFA(ligne.prixUnitaireHT as unknown);
+    const totalFormatted = purgerEtFormatFCFA(ligne.totalHT as unknown);
+    doc.text(prixFormatted, xUnitPrice, currentY, { align: 'right' });
+    doc.text(totalFormatted, xTotal, currentY, { align: 'right' });
     doc.setDrawColor(233, 236, 239);
     doc.line(margin, currentY + rowHeight + 2, pageWidth - margin, currentY + rowHeight + 2);
     currentY += rowHeight + 4;
@@ -623,11 +663,11 @@ export async function generateInvoicePDF(invoiceId: string): Promise<void> {
   }
   doc.setFont('helvetica', 'bold');
   doc.setFontSize(9);
-  (doc as any).setTextColor(...(darkText as any[]));
+  (doc as any).setTextColor(...(darkText as [number, number, number]));
   doc.text('VÉRIFICATION', leftCellX + 4, footerCellTop + qrSide + 18);
   doc.setFont('helvetica', 'normal');
   doc.setFontSize(8);
-  (doc as any).setTextColor(...(mutedText as any[]));
+  (doc as any).setTextColor(...(mutedText as [number, number, number]));
   doc.text('Scannez ce QR code pour valider la facture sur IVOS.', leftCellX + 4, footerCellTop + qrSide + 24, {
     maxWidth: leftCellWidth - 8,
   });
@@ -637,17 +677,19 @@ export async function generateInvoicePDF(invoiceId: string): Promise<void> {
   let totalsY = footerCellTop + 12;
   doc.setFont('helvetica', 'bold');
   doc.setFontSize(9);
-  (doc as any).setTextColor(...(primary as any[]));
+  (doc as any).setTextColor(...(primary as [number, number, number]));
   doc.text('TOTALS FACTURE', totalsLabelX, totalsY);
   totalsY += 8;
   doc.setFont('helvetica', 'normal');
-  (doc as any).setTextColor(...(darkText as any[]));
+  (doc as any).setTextColor(...(darkText as [number, number, number]));
   doc.setFontSize(9);
+  const totalHTFormatted = purgerEtFormatFCFA(invoice.montantHT as unknown);
+  const totalTVAFormatted = purgerEtFormatFCFA(invoice.montantTVA as unknown);
   doc.text('Total HT', totalsLabelX, totalsY);
-  doc.text(purgerEtFormatFCFA(invoice.montantHT), totalsValueX, totalsY, { align: 'right' });
+  doc.text(totalHTFormatted, totalsValueX, totalsY, { align: 'right' });
   totalsY += 7;
   doc.text(`TVA (${invoice.tauxTVA}%)`, totalsLabelX, totalsY);
-  doc.text(purgerEtFormatFCFA(invoice.montantTVA), totalsValueX, totalsY, { align: 'right' });
+  doc.text(totalTVAFormatted, totalsValueX, totalsY, { align: 'right' });
   totalsY += 7;
   doc.setDrawColor(210, 210, 210);
   doc.line(rightCellX + 4, totalsY, rightCellX + rightCellWidth - 4, totalsY);
@@ -656,9 +698,10 @@ export async function generateInvoicePDF(invoiceId: string): Promise<void> {
   doc.setFontSize(10);
   doc.setFillColor(236, 246, 255);
   doc.rect(rightCellX + 3, totalsY - 5, rightCellWidth - 6, 10, 'F');
-  (doc as any).setTextColor(...(primary as any[]));
+  (doc as any).setTextColor(...(primary as [number, number, number]));
+  const totalTTCFormatted = purgerEtFormatFCFA(invoice.montantTTC as unknown);
   doc.text('TOTAL TTC', totalsLabelX, totalsY);
-  doc.text(purgerEtFormatFCFA(invoice.montantTTC), totalsValueX, totalsY, { align: 'right' });
+  doc.text(totalTTCFormatted, totalsValueX, totalsY, { align: 'right' });
   totalsY += 16;
 
   const arrestBoxTop = totalsY;
@@ -669,11 +712,11 @@ export async function generateInvoicePDF(invoiceId: string): Promise<void> {
   doc.roundedRect(rightCellX + 3, arrestBoxTop, rightCellWidth - 6, arrestBoxHeight, 2, 2, 'FD');
   doc.setFont('helvetica', 'bold');
   doc.setFontSize(8.5);
-  (doc as any).setTextColor(...(darkText as any[]));
+  (doc as any).setTextColor(...(darkText as [number, number, number]));
   doc.text('Arrêtée la présente facture à la somme de :', rightCellX + 5, arrestBoxTop + 8);
   doc.setFont('helvetica', 'normal');
   doc.setFontSize(8.5);
-  (doc as any).setTextColor(...(mutedText as any[]));
+  (doc as any).setTextColor(...(mutedText as [number, number, number]));
   doc.text(`${amountInWords.charAt(0).toUpperCase() + amountInWords.slice(1)} (${purgerEtFormatFCFA(invoice.montantTTC)})`, rightCellX + 5, arrestBoxTop + 16, {
     maxWidth: rightCellWidth - 14,
   });

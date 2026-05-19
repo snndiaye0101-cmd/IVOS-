@@ -466,7 +466,7 @@ export async function restoreFromFile(file: File, password: string): Promise<boo
   // ⚠️ SECURITY NOTE: This password check is NOT secure in production!
   // The password is hardcoded or in env vars, visible in browser bundle.
   // For production: Use Supabase Auth + backend verification
-  const viteEnv = Function('return (typeof import.meta !== "undefined" && import.meta.env) ? import.meta.env : undefined')() as Record<string, string> | undefined
+  const viteEnv = typeof import.meta !== 'undefined' ? (import.meta.env as Record<string, string> | undefined) : undefined
   const BACKUP_PASSWORD = viteEnv?.VITE_BACKUP_ADMIN_PASSWORD || 'SambaIVOS2026'
   
   if (password !== BACKUP_PASSWORD) {

@@ -134,7 +134,7 @@ export default function BillingPage() {
     doc.text(`MONTANT HT : ${formatMontant(inv.montantHT)}`, 20, sectionY + 66);
 
     doc.setFont('helvetica', 'normal');
-    (doc as any).setTextColor(...(slate as any[]));
+    (doc as any).setTextColor(...(slate as [number, number, number]));
     doc.setFontSize(8.5);
     doc.text(`${docLabel} associé : N°${inv.numeroOfficiel} • Opération ${inv.operationNumero}`, 16, pageWidth > 0 ? sectionY + 85 : sectionY + 85);
     doc.text(`Statut : ${STATUS_CONFIG[inv.status].label}`, 16, sectionY + 91);

@@ -13,10 +13,10 @@
 
 import React from 'react'
 import { Navigate } from 'react-router-dom'
-import { useAuth } from '@/shared/hooks/useAuth'
-import type { AuthUser } from '@/shared/services/supabaseAuthService'
+import { useAuth } from '../contexts/AuthContext'
+import type { User } from '../services/authStore'
 
-export type UserRole = AuthUser['role']
+export type UserRole = User['role']
 
 export interface ProtectedRouteProps {
   children: React.ReactNode
@@ -45,7 +45,7 @@ export function ProtectedRoute({
 
   // Not authenticated
   if (!user) {
-    return <Navigate to="/auth/login" replace />
+    return <Navigate to="/login" replace />
   }
 
   // User not approved (pending or rejected status)

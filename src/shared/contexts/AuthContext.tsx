@@ -10,7 +10,8 @@ type RuntimeGlobal = {
 
 function isDemoBootstrapEnabled(): boolean {
   const runtimeEnv = ((globalThis as unknown as RuntimeGlobal).process?.env || {}) as Record<string, string>
-  return runtimeEnv.VITE_ENABLE_DEMO_AUTH_BOOTSTRAP === 'true'
+  const viteEnv = typeof import.meta !== 'undefined' ? (import.meta.env as Record<string, string> | undefined) : undefined
+  return (viteEnv?.VITE_ENABLE_DEMO_AUTH_BOOTSTRAP || runtimeEnv.VITE_ENABLE_DEMO_AUTH_BOOTSTRAP) === 'true'
 }
 
 interface AuthContextType {
@@ -33,6 +34,7 @@ interface AuthContextType {
   sessionsLog: UserSession[]
   activityLogs: ActivityLog[]
   refreshActivity: () => void
+  isLoading: boolean
 }
 
 const AuthContext = createContext<AuthContextType | null>(null)
@@ -43,29 +45,36 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [onlineUserIds, setOnlineUserIds] = useState<string[]>(() => authStore.getOnlineUserIds())
   const [sessionsLog, setSessionsLog] = useState<UserSession[]>(() => authStore.getSessionsLog())
   const [activityLogs, setActivityLogs] = useState<ActivityLog[]>(() => authStore.getActivityLogs())
+  const [isLoading, setIsLoading] = useState(true)
 
   useEffect(() => {
     void (async () => {
-      await authStore.initialize()
-      // Migrate old accounts that don't have status/role fields
-      authStore.migrateExistingUsers()
-      if (isDemoBootstrapEnabled()) {
-        // Demo-only bootstrap helpers are opt-in and disabled by default.
-        authStore.seedSampleData()
-        authStore.ensureSuperAdminAccess()
-        authStore.ensureAdminSession()
+      setIsLoading(true)
+      try {
+        await authStore.initialize()
+        // Migrate old accounts that don't have status/role fields
+        authStore.migrateExistingUsers()
+        authStore.ensureDefaultSuperAdmin()
+        if (isDemoBootstrapEnabled()) {
+          // Demo-only bootstrap helpers are opt-in and disabled by default.
+          authStore.seedSampleData()
+          authStore.ensureSuperAdminAccess()
+          authStore.ensureAdminSession()
+        }
+        // Ensure Super Admin role exists
+        permissionStore.ensureSuperAdmin()
+        const superAdminUser = authStore.getUsers().find(u => u.email.toLowerCase() === 'superadmin@ivos.sn')
+        if (superAdminUser) {
+          permissionStore.setRole(superAdminUser.id, 'SuperAdmin')
+        }
+        setUser(authStore.getSession())
+        setAllUsers(authStore.getUsers())
+        setOnlineUserIds(authStore.getOnlineUserIds())
+        setSessionsLog(authStore.getSessionsLog())
+        setActivityLogs(authStore.getActivityLogs())
+      } finally {
+        setIsLoading(false)
       }
-      // Ensure Super Admin role exists
-      permissionStore.ensureSuperAdmin()
-      const superAdminUser = authStore.getUsers().find(u => u.email.toLowerCase() === 'superadmin@ivos.sn')
-      if (superAdminUser) {
-        permissionStore.setRole(superAdminUser.id, 'SuperAdmin')
-      }
-      setUser(authStore.getSession())
-      setAllUsers(authStore.getUsers())
-      setOnlineUserIds(authStore.getOnlineUserIds())
-      setSessionsLog(authStore.getSessionsLog())
-      setActivityLogs(authStore.getActivityLogs())
     })()
     const syncAuthState = () => {
       setUser(authStore.getSession())
@@ -160,7 +169,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const pendingUsers = allUsers.filter(u => u.status === 'pending')
 
   return (
-    <AuthContext.Provider value={{ user, login, register, logout, isAdmin, pendingUsers, allUsers, refreshUsers, approveUser, rejectUser, deleteUser, toggleAdmin, toggleSiteAccess, toggleSystemAccess, updateUserPhoto, onlineUserIds, sessionsLog, activityLogs, refreshActivity }}>
+    <AuthContext.Provider value={{ user, login, register, logout, isAdmin, pendingUsers, allUsers, refreshUsers, approveUser, rejectUser, deleteUser, toggleAdmin, toggleSiteAccess, toggleSystemAccess, updateUserPhoto, onlineUserIds, sessionsLog, activityLogs, refreshActivity, isLoading }}>
       {children}
     </AuthContext.Provider>
   )

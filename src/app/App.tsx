@@ -12,6 +12,7 @@ import { ViewAsProvider } from '../shared/contexts/ViewAsContext'
 import DashboardLayout from '../layouts/DashboardLayout'
 import { ContextProvider } from '../shared/contexts/ContextProvider'
 import { SiteProvider } from '../shared/contexts/SiteContext'
+import { ProtectedRoute } from '../shared/components/ProtectedRoute'
 
 // Loading fallback component
 const PageLoader = () => (
@@ -124,7 +125,7 @@ function App() {
             <>
               <Suspense fallback={<PageLoader />}>
                 <Routes>
-                  <Route path="/" element={<DashboardLayout />}>
+                  <Route path="/" element={<ProtectedRoute><DashboardLayout /></ProtectedRoute>}>
                     <Route index element={<DashboardPage />} />
                     {/* Flotte */}
                     <Route path="vehicles" element={<VehiclesPage />} />

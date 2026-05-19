@@ -111,12 +111,12 @@ export default function GlobalExpensesPage() {
   useEffect(() => {
     try {
       const v = vehiclesStore.load();
-      setVehicles(v.map((veh: any) => ({ id: veh.id || veh.registration, registration: veh.registration || veh.immatriculation || 'N/A' })));
+      setVehicles(v.map((veh: Record<string, unknown>) => ({ id: (veh.id || veh.registration) as string, registration: ((veh.registration || veh.immatriculation) as string) || 'N/A' })));
     } catch { /* no vehicles */ }
     const h = () => {
       try {
         const v = vehiclesStore.load();
-        setVehicles(v.map((veh: any) => ({ id: veh.id || veh.registration, registration: veh.registration || veh.immatriculation || 'N/A' })));
+        setVehicles(v.map((veh: Record<string, unknown>) => ({ id: (veh.id || veh.registration) as string, registration: ((veh.registration || veh.immatriculation) as string) || 'N/A' })));
       } catch { /* ignore */ }
     };
     window.addEventListener('fleetVehicles:updated', h);

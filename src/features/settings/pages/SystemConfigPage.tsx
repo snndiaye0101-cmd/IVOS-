@@ -15,6 +15,11 @@ export default function SystemConfigPage() {
   const { allCountries, allSites, refresh, viewSite, isConsolidatedView } = siteCtx
   const { currentCountryId, hydrateFromStorage } = useAppContext()
 
+  // Edit drawer state (must be before early return)
+  const [editSiteForDrawer, setEditSiteForDrawer] = useState<ISite | null>(null)
+  const [portalsSiteForDrawer, setPortalsSiteForDrawer] = useState<ISite | null>(null)
+  const [previewSite, setPreviewSite] = useState<ISite | null>(null)
+
   useEffect(() => { hydrateFromStorage() }, [hydrateFromStorage])
 
   // Access control
@@ -43,13 +48,6 @@ export default function SystemConfigPage() {
 
   // filteredSites: reflect header site selector (viewSite) — if a specific site is chosen, show only it
   const filteredSites = viewSite ? baseSites.filter(s => s.id === viewSite.id) : baseSites
-
-  // Edit drawer state
-  const [editSiteForDrawer, setEditSiteForDrawer] = useState<ISite | null>(null)
-  const [portalsSiteForDrawer, setPortalsSiteForDrawer] = useState<ISite | null>(null)
-
-  // Preview drawer
-  const [previewSite, setPreviewSite] = useState<ISite | null>(null)
 
 
   const openEdit = (s: ISite) => { setEditSiteForDrawer(s) }

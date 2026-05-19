@@ -10,20 +10,18 @@ type RuntimeGlobal = {
   }
 }
 
-function readViteEnv() {
-  try {
-    // Avoid direct import.meta usage for Jest/CJS environments.
-    return Function('return (typeof import.meta !== "undefined" && import.meta.env) ? import.meta.env : undefined')()
-  } catch {
-    return undefined
-  }
+function getViteEnv(): Record<string, string> | undefined {
+  const runtimeEnv = ((globalThis as unknown as RuntimeGlobal).process?.env) || {}
+  const viteEnv = typeof import.meta !== 'undefined' ? (import.meta.env as Record<string, string> | undefined) : undefined
+  return viteEnv || runtimeEnv
 }
 
-const viteEnv = readViteEnv() as Record<string, string> | undefined
+const viteEnv = getViteEnv()
 const runtimeEnv = ((globalThis as unknown as RuntimeGlobal).process?.env) || {}
 
-const supabaseUrl = viteEnv?.VITE_SUPABASE_URL || runtimeEnv.VITE_SUPABASE_URL
-const supabaseAnonKey = viteEnv?.VITE_SUPABASE_ANON_KEY || runtimeEnv.VITE_SUPABASE_ANON_KEY
+export const supabaseUrl = viteEnv?.VITE_SUPABASE_URL || runtimeEnv.VITE_SUPABASE_URL
+export const supabaseAnonKey = viteEnv?.VITE_SUPABASE_ANON_KEY || runtimeEnv.VITE_SUPABASE_ANON_KEY
+export const isSupabaseConfigured = Boolean(supabaseUrl && supabaseAnonKey)
 
 if ((!supabaseUrl || !supabaseAnonKey) && runtimeEnv.NODE_ENV !== 'test') {
   console.warn(
