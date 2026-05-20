@@ -53,9 +53,9 @@ export const purgerEtFormatFCFA = (montantBrut: any): string => {
   if (montantBrut === undefined || montantBrut === null) return '0 FCFA';
 
   const initial = String(montantBrut);
-  let str = initial.replace(/[\/\\]/g, '').replace(/\s+/g, '');
+  let str = initial.replace(/[/\\]/g, '').replace(/\s+/g, '');
 
-  const hasSlashGroup = /[\/\\]/.test(initial);
+  const hasSlashGroup = /[/\\]/.test(initial);
   const lastDot = str.lastIndexOf('.');
   const lastComma = str.lastIndexOf(',');
   const lastSepPos = Math.max(lastDot, lastComma);
