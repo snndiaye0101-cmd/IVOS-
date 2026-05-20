@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState } from 'react';
 
 export type Releve = {
   id: number;
@@ -12,11 +12,8 @@ export type Releve = {
 export function useControleStore() {
   const [releves, setReleves] = useState<Releve[]>([]);
 
-  function addReleve(releve: Omit<Releve, "id">) {
-    setReleves((prev) => [
-      ...prev,
-      { ...releve, id: Date.now() },
-    ]);
+  function addReleve(releve: Omit<Releve, 'id'>) {
+    setReleves((prev) => [...prev, { ...releve, id: Date.now() }]);
   }
 
   return { releves, addReleve };

@@ -13,6 +13,7 @@ const plugins = [
 
   // Configuration PWA pour usage mobile
   VitePWA({
+    disable: !!process.env.CI,
     registerType: 'autoUpdate',
     includeAssets: ['favicon.ico', 'robots.txt', 'icons/*.png'],
     manifest: {

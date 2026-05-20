@@ -46,14 +46,16 @@ class RevenuesErrorBoundary extends Component<{ children: ReactNode }, ErrorBoun
   render() {
     if (this.state.hasError) {
       return (
-        <div className="w-full px-4 sm:px-6 lg:px-8 py-6">
-          <div className="rounded-2xl border border-red-200 bg-red-50 p-6 text-center space-y-3">
-            <p className="text-red-700 font-semibold text-sm">Une erreur est survenue dans le module Recettes</p>
-            <p className="text-red-400 text-xs font-mono break-all">{this.state.message}</p>
+        <div className="w-full px-4 py-6 sm:px-6 lg:px-8">
+          <div className="space-y-3 rounded-2xl border border-red-200 bg-red-50 p-6 text-center">
+            <p className="text-sm font-semibold text-red-700">
+              Une erreur est survenue dans le module Recettes
+            </p>
+            <p className="break-all font-mono text-xs text-red-400">{this.state.message}</p>
             <button
               type="button"
               onClick={() => this.setState({ hasError: false, message: '' })}
-              className="mt-2 px-4 py-2 rounded-lg bg-red-600 text-white text-sm font-semibold hover:bg-red-700 transition-colors"
+              className="mt-2 rounded-lg bg-red-600 px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-red-700"
             >
               Reessayer
             </button>
@@ -101,7 +103,15 @@ const EMPTY_META: FormMeta = {
   idTransaction: '',
 };
 
-const VALID_MODES: PayMode[] = ['Especes', 'Wave', 'Orange Money', 'Virement', 'Cheque', 'Carte', 'Autre'];
+const VALID_MODES: PayMode[] = [
+  'Especes',
+  'Wave',
+  'Orange Money',
+  'Virement',
+  'Cheque',
+  'Carte',
+  'Autre',
+];
 
 const inputCls =
   'w-full px-3 py-2.5 rounded-lg border border-gray-300 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-500 transition-colors bg-white';
@@ -209,7 +219,10 @@ function RevenuesInner() {
     return null;
   };
 
-  const extractMetadataByMode = (targetMode: PayMode, targetMeta: FormMeta): Record<string, string> => {
+  const extractMetadataByMode = (
+    targetMode: PayMode,
+    targetMeta: FormMeta
+  ): Record<string, string> => {
     const metadata: Record<string, string> = {};
     if (targetMode === 'Cheque') {
       metadata.chequeNum = targetMeta.chequeNum;
@@ -292,7 +305,9 @@ function RevenuesInner() {
   const handleSave = () => {
     const amount = Number(montant.replace(/\s/g, '').replace(',', '.'));
     if (!date || !client.trim() || !libelle.trim() || !Number.isFinite(amount) || amount <= 0) {
-      setFormError('Veuillez remplir tous les champs obligatoires (date, client, libelle, montant > 0).');
+      setFormError(
+        'Veuillez remplir tous les champs obligatoires (date, client, libelle, montant > 0).'
+      );
       return;
     }
 
@@ -398,7 +413,9 @@ function RevenuesInner() {
       metadata,
     };
 
-    setLines((prev) => prev.map((line) => (line.id === confirmTarget.id ? { ...line, ...patch } : line)));
+    setLines((prev) =>
+      prev.map((line) => (line.id === confirmTarget.id ? { ...line, ...patch } : line))
+    );
     updateRevenueEntry(confirmTarget.id, patch);
 
     if (confirmMode === 'Especes') {
@@ -444,69 +461,96 @@ function RevenuesInner() {
     <>
       <div className="w-full">
         <div className="w-full max-w-none space-y-6">
-          <div className="bg-white border border-gray-200 rounded-2xl p-5 shadow-sm">
-            <div className="flex items-center justify-between gap-3 flex-wrap">
+          <div className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm">
+            <div className="flex flex-wrap items-center justify-between gap-3">
               <div>
                 <h1 className="text-2xl font-bold text-gray-900">Recettes</h1>
-                <p className="text-sm text-gray-500 mt-1">Suivi, controle et tracabilite des encaissements</p>
+                <p className="mt-1 text-sm text-gray-500">
+                  Suivi, controle et tracabilite des encaissements
+                </p>
               </div>
               <button
                 type="button"
                 onClick={openCreateForm}
-                className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-emerald-600 text-white font-semibold hover:bg-emerald-700 transition-colors text-sm"
+                className="inline-flex items-center gap-2 rounded-xl bg-emerald-600 px-4 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-emerald-700"
               >
-                <Plus className="w-4 h-4" />
+                <Plus className="h-4 w-4" />
                 Ajouter une recette manuelle
               </button>
             </div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+          <div className="grid grid-cols-1 gap-5 md:grid-cols-3">
             <div className="rounded-2xl border border-emerald-100 bg-white p-4 shadow-sm">
               <div className="flex items-center justify-between">
                 <p className={labelCls}>Recettes du mois</p>
-                <Wallet className="w-5 h-5 text-emerald-600" />
+                <Wallet className="h-5 w-5 text-emerald-600" />
               </div>
-              <p className="text-2xl font-bold text-emerald-700 mt-2 tabular-nums">{formatFCFA(stats.recettesDuMois)}</p>
+              <p className="mt-2 text-2xl font-bold tabular-nums text-emerald-700">
+                {formatFCFA(stats.recettesDuMois)}
+              </p>
             </div>
             <div className="rounded-2xl border border-amber-100 bg-white p-4 shadow-sm">
               <div className="flex items-center justify-between">
                 <p className={labelCls}>En attente d'encaissement</p>
-                <Hourglass className="w-5 h-5 text-amber-600" />
+                <Hourglass className="h-5 w-5 text-amber-600" />
               </div>
-              <p className="text-2xl font-bold text-amber-700 mt-2 tabular-nums">{formatFCFA(stats.enAttenteEncaissement)}</p>
+              <p className="mt-2 text-2xl font-bold tabular-nums text-amber-700">
+                {formatFCFA(stats.enAttenteEncaissement)}
+              </p>
             </div>
             <div className="rounded-2xl border border-blue-100 bg-white p-4 shadow-sm">
               <div className="flex items-center justify-between">
                 <p className={labelCls}>Total encaisse</p>
-                <BadgeCheck className="w-5 h-5 text-blue-600" />
+                <BadgeCheck className="h-5 w-5 text-blue-600" />
               </div>
-              <p className="text-2xl font-bold text-blue-700 mt-2 tabular-nums">{formatFCFA(stats.totalEncaisse)}</p>
+              <p className="mt-2 text-2xl font-bold tabular-nums text-blue-700">
+                {formatFCFA(stats.totalEncaisse)}
+              </p>
             </div>
           </div>
 
           {showForm && (
-            <div className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm space-y-5 animate-form-field-in">
-              <h2 className="text-sm font-bold text-gray-800 border-b border-gray-100 pb-3">
+            <div className="animate-form-field-in space-y-5 rounded-2xl border border-gray-200 bg-white p-5 shadow-sm">
+              <h2 className="border-b border-gray-100 pb-3 text-sm font-bold text-gray-800">
                 {formMode === 'edit' ? 'Modifier une recette' : 'Nouvelle recette manuelle'}
               </h2>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
                 <div>
                   <label className={labelCls}>Date</label>
-                  <input type="date" value={date} onChange={(e) => setDate(e.target.value)} className={inputCls} />
+                  <input
+                    type="date"
+                    value={date}
+                    onChange={(e) => setDate(e.target.value)}
+                    className={inputCls}
+                  />
                 </div>
                 <div className="lg:col-span-2">
                   <label className={labelCls}>Client</label>
-                  <input value={client} onChange={(e) => setClient(e.target.value)} placeholder="Nom du client" className={inputCls} />
+                  <input
+                    value={client}
+                    onChange={(e) => setClient(e.target.value)}
+                    placeholder="Nom du client"
+                    className={inputCls}
+                  />
                 </div>
                 <div className="sm:col-span-2 lg:col-span-3">
                   <label className={labelCls}>Libelle</label>
-                  <input value={libelle} onChange={(e) => setLibelle(e.target.value)} placeholder="Objet du reglement" className={inputCls} />
+                  <input
+                    value={libelle}
+                    onChange={(e) => setLibelle(e.target.value)}
+                    placeholder="Objet du reglement"
+                    className={inputCls}
+                  />
                 </div>
                 <div>
                   <label className={labelCls}>Mode de paiement</label>
-                  <select value={mode} onChange={(e) => setMode(e.target.value as PayMode)} className={inputCls}>
+                  <select
+                    value={mode}
+                    onChange={(e) => setMode(e.target.value as PayMode)}
+                    className={inputCls}
+                  >
                     <option value="Especes">Especes</option>
                     <option value="Wave">Wave Mobile Money</option>
                     <option value="Orange Money">Orange Money</option>
@@ -518,11 +562,21 @@ function RevenuesInner() {
                 </div>
                 <div>
                   <label className={labelCls}>Montant (FCFA)</label>
-                  <input value={montant} onChange={(e) => setMontant(e.target.value)} placeholder="Ex : 750000" inputMode="numeric" className={inputCls} />
+                  <input
+                    value={montant}
+                    onChange={(e) => setMontant(e.target.value)}
+                    placeholder="Ex : 750000"
+                    inputMode="numeric"
+                    className={inputCls}
+                  />
                 </div>
                 <div>
                   <label className={labelCls}>Statut</label>
-                  <select value={status} onChange={(e) => setStatus(e.target.value as 'encaisse' | 'en_attente')} className={inputCls}>
+                  <select
+                    value={status}
+                    onChange={(e) => setStatus(e.target.value as 'encaisse' | 'en_attente')}
+                    className={inputCls}
+                  >
                     <option value="encaisse">Encaisse</option>
                     <option value="en_attente">En attente</option>
                   </select>
@@ -530,62 +584,100 @@ function RevenuesInner() {
               </div>
 
               {showManualCheque && (
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 border-t border-dashed border-gray-200 pt-4 animate-form-field-in">
+                <div className="animate-form-field-in grid grid-cols-1 gap-4 border-t border-dashed border-gray-200 pt-4 sm:grid-cols-3">
                   <div className="sm:col-span-3">
-                    <span className="text-[11px] font-bold uppercase tracking-wider text-indigo-600">Informations cheque</span>
+                    <span className="text-[11px] font-bold uppercase tracking-wider text-indigo-600">
+                      Informations cheque
+                    </span>
                   </div>
                   <div>
                     <label className={labelCls}>Numero de cheque *</label>
-                    <input value={meta.chequeNum} onChange={(e) => setMetaField('chequeNum', e.target.value)} className={inputCls} />
+                    <input
+                      value={meta.chequeNum}
+                      onChange={(e) => setMetaField('chequeNum', e.target.value)}
+                      className={inputCls}
+                    />
                   </div>
                   <div>
                     <label className={labelCls}>Banque *</label>
-                    <input value={meta.banque} onChange={(e) => setMetaField('banque', e.target.value)} className={inputCls} />
+                    <input
+                      value={meta.banque}
+                      onChange={(e) => setMetaField('banque', e.target.value)}
+                      className={inputCls}
+                    />
                   </div>
                   <div>
                     <label className={labelCls}>Date d'echeance *</label>
-                    <input type="date" value={meta.echeance} onChange={(e) => setMetaField('echeance', e.target.value)} className={inputCls} />
+                    <input
+                      type="date"
+                      value={meta.echeance}
+                      onChange={(e) => setMetaField('echeance', e.target.value)}
+                      className={inputCls}
+                    />
                   </div>
                 </div>
               )}
 
               {showManualVirement && (
-                <div className="border-t border-dashed border-gray-200 pt-4 space-y-3 animate-form-field-in">
-                  <span className="text-[11px] font-bold uppercase tracking-wider text-blue-600">Informations virement</span>
+                <div className="animate-form-field-in space-y-3 border-t border-dashed border-gray-200 pt-4">
+                  <span className="text-[11px] font-bold uppercase tracking-wider text-blue-600">
+                    Informations virement
+                  </span>
                   <div className="max-w-sm">
                     <label className={labelCls}>Reference / code transaction *</label>
-                    <input value={meta.refVirement} onChange={(e) => setMetaField('refVirement', e.target.value)} className={inputCls} />
+                    <input
+                      value={meta.refVirement}
+                      onChange={(e) => setMetaField('refVirement', e.target.value)}
+                      className={inputCls}
+                    />
                   </div>
                 </div>
               )}
 
               {showManualMobile && (
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 border-t border-dashed border-gray-200 pt-4 animate-form-field-in">
+                <div className="animate-form-field-in grid grid-cols-1 gap-4 border-t border-dashed border-gray-200 pt-4 sm:grid-cols-2">
                   <div className="sm:col-span-2">
-                    <span className="text-[11px] font-bold uppercase tracking-wider text-orange-600">Informations {mode}</span>
+                    <span className="text-[11px] font-bold uppercase tracking-wider text-orange-600">
+                      Informations {mode}
+                    </span>
                   </div>
                   <div>
                     <label className={labelCls}>Telephone emetteur *</label>
-                    <input value={meta.telephone} onChange={(e) => setMetaField('telephone', e.target.value)} inputMode="tel" className={inputCls} />
+                    <input
+                      value={meta.telephone}
+                      onChange={(e) => setMetaField('telephone', e.target.value)}
+                      inputMode="tel"
+                      className={inputCls}
+                    />
                   </div>
                   <div>
                     <label className={labelCls}>ID Transaction *</label>
-                    <input value={meta.idTransaction} onChange={(e) => setMetaField('idTransaction', e.target.value)} className={inputCls} />
+                    <input
+                      value={meta.idTransaction}
+                      onChange={(e) => setMetaField('idTransaction', e.target.value)}
+                      className={inputCls}
+                    />
                   </div>
                 </div>
               )}
 
               {formError && (
-                <p className="text-sm text-red-600 font-medium bg-red-50 px-3 py-2 rounded-lg border border-red-200">{formError}</p>
+                <p className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm font-medium text-red-600">
+                  {formError}
+                </p>
               )}
 
               {showDecharge && (
-                <div className="flex items-start gap-3 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 animate-form-field-in">
-                  <FileCheck className="w-5 h-5 text-emerald-600 flex-shrink-0 mt-0.5" />
-                  <p className="text-sm text-emerald-800 font-medium flex-1">
+                <div className="animate-form-field-in flex items-start gap-3 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3">
+                  <FileCheck className="mt-0.5 h-5 w-5 flex-shrink-0 text-emerald-600" />
+                  <p className="flex-1 text-sm font-medium text-emerald-800">
                     Recette enregistree. Pensez a faire signer la decharge de remise en especes.
                   </p>
-                  <button type="button" onClick={closeForm} className="text-emerald-700 text-xs font-semibold hover:underline flex-shrink-0">
+                  <button
+                    type="button"
+                    onClick={closeForm}
+                    className="flex-shrink-0 text-xs font-semibold text-emerald-700 hover:underline"
+                  >
                     Fermer
                   </button>
                 </div>
@@ -595,57 +687,83 @@ function RevenuesInner() {
                 <button
                   type="button"
                   onClick={closeForm}
-                  className="px-4 py-2.5 rounded-lg border border-gray-300 text-sm text-gray-700 font-medium hover:bg-gray-50 transition-colors"
+                  className="rounded-lg border border-gray-300 px-4 py-2.5 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50"
                 >
                   Annuler
                 </button>
                 <button
                   type="button"
                   onClick={handleSave}
-                  className="px-5 py-2.5 rounded-lg bg-[#1a1a2e] text-white text-sm font-semibold hover:bg-[#2a2a4e] transition-colors"
+                  className="rounded-lg bg-[#1a1a2e] px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-[#2a2a4e]"
                 >
-                  {formMode === 'edit' ? 'Enregistrer les modifications' : mode === 'Especes' ? 'Enregistrer & Generer decharge' : 'Enregistrer'}
+                  {formMode === 'edit'
+                    ? 'Enregistrer les modifications'
+                    : mode === 'Especes'
+                      ? 'Enregistrer & Generer decharge'
+                      : 'Enregistrer'}
                 </button>
               </div>
             </div>
           )}
 
-          <div className="rounded-2xl border border-gray-200 bg-white shadow-sm overflow-hidden">
+          <div className="overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm">
             <div className="overflow-x-auto">
               <table className="w-full min-w-[980px]">
-                <thead className="bg-gray-50 border-b border-gray-100">
+                <thead className="border-b border-gray-100 bg-gray-50">
                   <tr>
-                    <th className="w-[16%] px-5 py-3 text-left text-[11px] tracking-wide uppercase text-gray-500 font-bold">Enregistre le</th>
-                    <th className="w-[18%] px-5 py-3 text-left text-[11px] tracking-wide uppercase text-gray-500 font-bold">Client</th>
-                    <th className="w-[28%] px-5 py-3 text-left text-[11px] tracking-wide uppercase text-gray-500 font-bold">Libelle</th>
-                    <th className="w-[12%] px-5 py-3 text-left text-[11px] tracking-wide uppercase text-gray-500 font-bold">Source</th>
-                    <th className="w-[10%] px-5 py-3 text-left text-[11px] tracking-wide uppercase text-gray-500 font-bold">Mode</th>
-                    <th className="w-[9%] px-5 py-3 text-left text-[11px] tracking-wide uppercase text-gray-500 font-bold">Statut</th>
-                    <th className="w-[10%] px-5 py-3 text-right text-[11px] tracking-wide uppercase text-gray-500 font-bold">Montant</th>
-                    <th className="w-[7%] px-5 py-3 text-center text-[11px] tracking-wide uppercase text-gray-500 font-bold">Actions</th>
+                    <th className="w-[16%] px-5 py-3 text-left text-[11px] font-bold uppercase tracking-wide text-gray-500">
+                      Enregistre le
+                    </th>
+                    <th className="w-[18%] px-5 py-3 text-left text-[11px] font-bold uppercase tracking-wide text-gray-500">
+                      Client
+                    </th>
+                    <th className="w-[28%] px-5 py-3 text-left text-[11px] font-bold uppercase tracking-wide text-gray-500">
+                      Libelle
+                    </th>
+                    <th className="w-[12%] px-5 py-3 text-left text-[11px] font-bold uppercase tracking-wide text-gray-500">
+                      Source
+                    </th>
+                    <th className="w-[10%] px-5 py-3 text-left text-[11px] font-bold uppercase tracking-wide text-gray-500">
+                      Mode
+                    </th>
+                    <th className="w-[9%] px-5 py-3 text-left text-[11px] font-bold uppercase tracking-wide text-gray-500">
+                      Statut
+                    </th>
+                    <th className="w-[10%] px-5 py-3 text-right text-[11px] font-bold uppercase tracking-wide text-gray-500">
+                      Montant
+                    </th>
+                    <th className="w-[7%] px-5 py-3 text-center text-[11px] font-bold uppercase tracking-wide text-gray-500">
+                      Actions
+                    </th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-100">
                   {lines.length === 0 ? (
                     <tr>
-                      <td colSpan={8} className="px-5 py-12 text-center text-sm text-gray-400">Aucune recette disponible</td>
+                      <td colSpan={8} className="px-5 py-12 text-center text-sm text-gray-400">
+                        Aucune recette disponible
+                      </td>
                     </tr>
                   ) : (
                     lines.map((line) => (
-                      <tr key={line.id} className="hover:bg-gray-50 transition-colors">
-                        <td className="px-5 py-3 text-sm text-gray-700 whitespace-nowrap">{formatDateTime(line.created_at || line.date)}</td>
-                        <td className="px-5 py-3 text-sm text-gray-800 font-medium">{line.client}</td>
+                      <tr key={line.id} className="transition-colors hover:bg-gray-50">
+                        <td className="whitespace-nowrap px-5 py-3 text-sm text-gray-700">
+                          {formatDateTime(line.created_at || line.date)}
+                        </td>
+                        <td className="px-5 py-3 text-sm font-medium text-gray-800">
+                          {line.client}
+                        </td>
                         <td className="px-5 py-3 text-sm text-gray-700">{line.libelle}</td>
                         <td className="px-5 py-3 text-sm">
                           {line.source === 'Facture' && line.invoiceId ? (
                             <Link
                               to={`/billing?invoiceId=${encodeURIComponent(line.invoiceId)}`}
-                              className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-indigo-50 text-indigo-700 text-xs font-bold border border-indigo-200 hover:bg-indigo-100 transition-colors"
+                              className="inline-flex items-center gap-1.5 rounded-full border border-indigo-200 bg-indigo-50 px-2.5 py-1 text-xs font-bold text-indigo-700 transition-colors hover:bg-indigo-100"
                             >
-                              Facture <ArrowUpRight className="w-3 h-3" />
+                              Facture <ArrowUpRight className="h-3 w-3" />
                             </Link>
                           ) : (
-                            <span className="inline-flex items-center px-2.5 py-1 rounded-full bg-gray-100 text-gray-600 text-xs font-bold border border-gray-200">
+                            <span className="inline-flex items-center rounded-full border border-gray-200 bg-gray-100 px-2.5 py-1 text-xs font-bold text-gray-600">
                               Saisie manuelle
                             </span>
                           )}
@@ -653,20 +771,22 @@ function RevenuesInner() {
                         <td className="px-5 py-3 text-sm text-gray-700">{line.mode}</td>
                         <td className="px-5 py-3 text-sm">
                           {line.status === 'encaisse' ? (
-                            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-700 text-xs font-bold border border-emerald-200">
-                              <Check className="w-3 h-3" /> Encaisse
+                            <span className="inline-flex items-center gap-1.5 rounded-full border border-emerald-200 bg-emerald-50 px-2.5 py-1 text-xs font-bold text-emerald-700">
+                              <Check className="h-3 w-3" /> Encaisse
                             </span>
                           ) : (
                             <button
                               type="button"
                               onClick={() => openConfirm(line)}
-                              className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-amber-50 text-amber-700 text-xs font-bold border border-amber-200 hover:bg-amber-100 transition-colors"
+                              className="inline-flex items-center gap-1.5 rounded-full border border-amber-200 bg-amber-50 px-2.5 py-1 text-xs font-bold text-amber-700 transition-colors hover:bg-amber-100"
                             >
-                              <Clock className="w-3 h-3" /> En attente
+                              <Clock className="h-3 w-3" /> En attente
                             </button>
                           )}
                         </td>
-                        <td className="px-5 py-3 text-sm font-bold text-gray-900 text-right tabular-nums whitespace-nowrap">{formatFCFA(line.montant)}</td>
+                        <td className="whitespace-nowrap px-5 py-3 text-right text-sm font-bold tabular-nums text-gray-900">
+                          {formatFCFA(line.montant)}
+                        </td>
                         <td className="px-5 py-3 text-sm">
                           <div className="relative flex items-center justify-center">
                             <button
@@ -680,13 +800,13 @@ function RevenuesInner() {
                               }}
                               className={iconBtnCls}
                             >
-                              <MoreVertical className="w-4 h-4" />
+                              <MoreVertical className="h-4 w-4" />
                             </button>
 
                             {openActionMenuId === line.id && (
                               <div
                                 role="menu"
-                                className="absolute right-0 top-9 z-20 w-44 rounded-xl border border-gray-200 bg-white shadow-lg py-1"
+                                className="absolute right-0 top-9 z-20 w-44 rounded-xl border border-gray-200 bg-white py-1 shadow-lg"
                                 onClick={(e) => e.stopPropagation()}
                               >
                                 <button
@@ -696,9 +816,9 @@ function RevenuesInner() {
                                     setPreviewTarget(line);
                                     setOpenActionMenuId(null);
                                   }}
-                                  className="w-full px-3 py-2 text-left text-sm text-gray-700 hover:bg-gray-50 inline-flex items-center gap-2"
+                                  className="inline-flex w-full items-center gap-2 px-3 py-2 text-left text-sm text-gray-700 hover:bg-gray-50"
                                 >
-                                  <Eye className="w-4 h-4" />
+                                  <Eye className="h-4 w-4" />
                                   APERCU
                                 </button>
 
@@ -709,10 +829,14 @@ function RevenuesInner() {
                                     openEditForm(line);
                                     setOpenActionMenuId(null);
                                   }}
-                                  className="w-full px-3 py-2 text-left text-sm text-gray-700 hover:bg-gray-50 inline-flex items-center gap-2"
-                                  title={line.status === 'encaisse' ? 'Modifier (autorisation requise)' : 'Modifier'}
+                                  className="inline-flex w-full items-center gap-2 px-3 py-2 text-left text-sm text-gray-700 hover:bg-gray-50"
+                                  title={
+                                    line.status === 'encaisse'
+                                      ? 'Modifier (autorisation requise)'
+                                      : 'Modifier'
+                                  }
                                 >
-                                  <Pencil className="w-4 h-4" />
+                                  <Pencil className="h-4 w-4" />
                                   MODIFIER
                                 </button>
 
@@ -723,9 +847,9 @@ function RevenuesInner() {
                                     setDeleteTarget(line);
                                     setOpenActionMenuId(null);
                                   }}
-                                  className="w-full px-3 py-2 text-left text-sm text-red-600 hover:bg-red-50 inline-flex items-center gap-2"
+                                  className="inline-flex w-full items-center gap-2 px-3 py-2 text-left text-sm text-red-600 hover:bg-red-50"
                                 >
-                                  <Trash2 className="w-4 h-4" />
+                                  <Trash2 className="h-4 w-4" />
                                   SUPPRIMER
                                 </button>
                               </div>
@@ -749,23 +873,31 @@ function RevenuesInner() {
             if (e.target === e.currentTarget) closeConfirm();
           }}
         >
-          <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-lg mx-4 animate-form-field-in overflow-hidden">
-            <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100">
+          <div className="animate-form-field-in relative mx-4 w-full max-w-lg overflow-hidden rounded-2xl bg-white shadow-2xl">
+            <div className="flex items-center justify-between border-b border-gray-100 px-6 py-4">
               <h3 className="text-base font-bold text-gray-900">Confirmer l'encaissement</h3>
-              <button type="button" onClick={closeConfirm} className="p-1.5 rounded-lg hover:bg-gray-100 transition-colors">
-                <X className="w-4 h-4 text-gray-500" />
+              <button
+                type="button"
+                onClick={closeConfirm}
+                className="rounded-lg p-1.5 transition-colors hover:bg-gray-100"
+              >
+                <X className="h-4 w-4 text-gray-500" />
               </button>
             </div>
 
-            <div className="px-6 py-5 space-y-5">
-              <div className="rounded-xl bg-gray-50 border border-gray-100 px-4 py-3 grid grid-cols-2 gap-x-6 gap-y-2">
+            <div className="space-y-5 px-6 py-5">
+              <div className="grid grid-cols-2 gap-x-6 gap-y-2 rounded-xl border border-gray-100 bg-gray-50 px-4 py-3">
                 <div>
                   <p className={labelCls}>Client</p>
-                  <p className="text-sm font-semibold text-gray-800 truncate">{confirmTarget.client}</p>
+                  <p className="truncate text-sm font-semibold text-gray-800">
+                    {confirmTarget.client}
+                  </p>
                 </div>
                 <div>
                   <p className={labelCls}>Montant</p>
-                  <p className="text-sm font-bold text-gray-900 tabular-nums">{formatFCFA(confirmTarget.montant)}</p>
+                  <p className="text-sm font-bold tabular-nums text-gray-900">
+                    {formatFCFA(confirmTarget.montant)}
+                  </p>
                 </div>
                 <div className="col-span-2">
                   <p className={labelCls}>Libelle</p>
@@ -773,10 +905,15 @@ function RevenuesInner() {
                 </div>
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                 <div>
                   <label className={labelCls}>Date effective de reception</label>
-                  <input type="date" value={confirmDate} onChange={(e) => setConfirmDate(e.target.value)} className={inputCls} />
+                  <input
+                    type="date"
+                    value={confirmDate}
+                    onChange={(e) => setConfirmDate(e.target.value)}
+                    className={inputCls}
+                  />
                 </div>
                 <div>
                   <label className={labelCls}>Mode de paiement</label>
@@ -801,62 +938,101 @@ function RevenuesInner() {
               </div>
 
               {showConfirmCheque && (
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 border-t border-dashed border-gray-200 pt-4 animate-form-field-in">
-                  <div className="sm:col-span-3 text-[11px] font-bold uppercase tracking-wider text-indigo-600">Informations cheque</div>
+                <div className="animate-form-field-in grid grid-cols-1 gap-3 border-t border-dashed border-gray-200 pt-4 sm:grid-cols-3">
+                  <div className="text-[11px] font-bold uppercase tracking-wider text-indigo-600 sm:col-span-3">
+                    Informations cheque
+                  </div>
                   <div>
                     <label className={labelCls}>Numero de cheque *</label>
-                    <input value={confirmMeta.chequeNum} onChange={(e) => setConfirmMeta((p) => ({ ...p, chequeNum: e.target.value }))} className={inputCls} />
+                    <input
+                      value={confirmMeta.chequeNum}
+                      onChange={(e) => setConfirmMeta((p) => ({ ...p, chequeNum: e.target.value }))}
+                      className={inputCls}
+                    />
                   </div>
                   <div>
                     <label className={labelCls}>Banque *</label>
-                    <input value={confirmMeta.banque} onChange={(e) => setConfirmMeta((p) => ({ ...p, banque: e.target.value }))} className={inputCls} />
+                    <input
+                      value={confirmMeta.banque}
+                      onChange={(e) => setConfirmMeta((p) => ({ ...p, banque: e.target.value }))}
+                      className={inputCls}
+                    />
                   </div>
                   <div>
                     <label className={labelCls}>Echeance *</label>
-                    <input type="date" value={confirmMeta.echeance} onChange={(e) => setConfirmMeta((p) => ({ ...p, echeance: e.target.value }))} className={inputCls} />
+                    <input
+                      type="date"
+                      value={confirmMeta.echeance}
+                      onChange={(e) => setConfirmMeta((p) => ({ ...p, echeance: e.target.value }))}
+                      className={inputCls}
+                    />
                   </div>
                 </div>
               )}
 
               {showConfirmVirement && (
-                <div className="border-t border-dashed border-gray-200 pt-4 space-y-3 animate-form-field-in">
-                  <div className="text-[11px] font-bold uppercase tracking-wider text-blue-600">Informations virement</div>
+                <div className="animate-form-field-in space-y-3 border-t border-dashed border-gray-200 pt-4">
+                  <div className="text-[11px] font-bold uppercase tracking-wider text-blue-600">
+                    Informations virement
+                  </div>
                   <div>
                     <label className={labelCls}>Reference / code transaction *</label>
-                    <input value={confirmMeta.refVirement} onChange={(e) => setConfirmMeta((p) => ({ ...p, refVirement: e.target.value }))} className={inputCls} />
+                    <input
+                      value={confirmMeta.refVirement}
+                      onChange={(e) =>
+                        setConfirmMeta((p) => ({ ...p, refVirement: e.target.value }))
+                      }
+                      className={inputCls}
+                    />
                   </div>
                 </div>
               )}
 
               {showConfirmMobile && (
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 border-t border-dashed border-gray-200 pt-4 animate-form-field-in">
-                  <div className="sm:col-span-2 text-[11px] font-bold uppercase tracking-wider text-orange-600">Informations {confirmMode}</div>
+                <div className="animate-form-field-in grid grid-cols-1 gap-3 border-t border-dashed border-gray-200 pt-4 sm:grid-cols-2">
+                  <div className="text-[11px] font-bold uppercase tracking-wider text-orange-600 sm:col-span-2">
+                    Informations {confirmMode}
+                  </div>
                   <div>
                     <label className={labelCls}>Telephone emetteur *</label>
-                    <input value={confirmMeta.telephone} onChange={(e) => setConfirmMeta((p) => ({ ...p, telephone: e.target.value }))} className={inputCls} />
+                    <input
+                      value={confirmMeta.telephone}
+                      onChange={(e) => setConfirmMeta((p) => ({ ...p, telephone: e.target.value }))}
+                      className={inputCls}
+                    />
                   </div>
                   <div>
                     <label className={labelCls}>ID Transaction *</label>
-                    <input value={confirmMeta.idTransaction} onChange={(e) => setConfirmMeta((p) => ({ ...p, idTransaction: e.target.value }))} className={inputCls} />
+                    <input
+                      value={confirmMeta.idTransaction}
+                      onChange={(e) =>
+                        setConfirmMeta((p) => ({ ...p, idTransaction: e.target.value }))
+                      }
+                      className={inputCls}
+                    />
                   </div>
                 </div>
               )}
 
               {confirmError && (
-                <p className="text-sm text-red-600 font-medium bg-red-50 px-3 py-2 rounded-lg border border-red-200">{confirmError}</p>
+                <p className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm font-medium text-red-600">
+                  {confirmError}
+                </p>
               )}
 
               {confirmDone && (
-                <div className="flex items-start gap-3 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 animate-form-field-in">
-                  <FileCheck className="w-5 h-5 text-emerald-600 flex-shrink-0 mt-0.5" />
+                <div className="animate-form-field-in flex items-start gap-3 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3">
+                  <FileCheck className="mt-0.5 h-5 w-5 flex-shrink-0 text-emerald-600" />
                   <div className="flex-1">
-                    <p className="text-sm text-emerald-800 font-medium">Encaissement confirme. Imprimez la decharge especes.</p>
+                    <p className="text-sm font-medium text-emerald-800">
+                      Encaissement confirme. Imprimez la decharge especes.
+                    </p>
                     <button
                       type="button"
                       onClick={() => window.print()}
-                      className="mt-2 inline-flex items-center gap-2 px-3 py-1.5 rounded-lg border border-emerald-400 text-emerald-700 text-xs font-semibold hover:bg-emerald-100 transition-colors"
+                      className="mt-2 inline-flex items-center gap-2 rounded-lg border border-emerald-400 px-3 py-1.5 text-xs font-semibold text-emerald-700 transition-colors hover:bg-emerald-100"
                     >
-                      <Printer className="w-3.5 h-3.5" />
+                      <Printer className="h-3.5 w-3.5" />
                       Imprimer la decharge
                     </button>
                   </div>
@@ -865,16 +1041,20 @@ function RevenuesInner() {
             </div>
 
             {!confirmDone && (
-              <div className="flex justify-end gap-3 px-6 py-4 bg-gray-50 border-t border-gray-100">
-                <button type="button" onClick={closeConfirm} className="px-4 py-2.5 rounded-lg border border-gray-300 text-sm text-gray-700 font-medium hover:bg-white transition-colors">
+              <div className="flex justify-end gap-3 border-t border-gray-100 bg-gray-50 px-6 py-4">
+                <button
+                  type="button"
+                  onClick={closeConfirm}
+                  className="rounded-lg border border-gray-300 px-4 py-2.5 text-sm font-medium text-gray-700 transition-colors hover:bg-white"
+                >
                   Annuler
                 </button>
                 <button
                   type="button"
                   onClick={confirmEncaissement}
-                  className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg bg-emerald-600 text-white text-sm font-semibold hover:bg-emerald-700 transition-colors"
+                  className="inline-flex items-center gap-2 rounded-lg bg-emerald-600 px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-emerald-700"
                 >
-                  <Check className="w-4 h-4" />
+                  <Check className="h-4 w-4" />
                   Confirmer l'encaissement
                 </button>
               </div>
@@ -884,23 +1064,34 @@ function RevenuesInner() {
       )}
 
       {previewTarget && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm" onClick={(e) => e.target === e.currentTarget && setPreviewTarget(null)}>
-          <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-2xl mx-4 overflow-hidden">
-            <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100">
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm"
+          onClick={(e) => e.target === e.currentTarget && setPreviewTarget(null)}
+        >
+          <div className="relative mx-4 w-full max-w-2xl overflow-hidden rounded-2xl bg-white shadow-2xl">
+            <div className="flex items-center justify-between border-b border-gray-100 px-6 py-4">
               <h3 className="text-base font-bold text-gray-900">Apercu recette</h3>
-              <button type="button" onClick={() => setPreviewTarget(null)} className="p-1.5 rounded-lg hover:bg-gray-100 transition-colors">
-                <X className="w-4 h-4 text-gray-500" />
+              <button
+                type="button"
+                onClick={() => setPreviewTarget(null)}
+                className="rounded-lg p-1.5 transition-colors hover:bg-gray-100"
+              >
+                <X className="h-4 w-4 text-gray-500" />
               </button>
             </div>
-            <div className="px-6 py-5 space-y-4 text-sm">
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="space-y-4 px-6 py-5 text-sm">
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                 <div>
                   <p className={labelCls}>Heure d'enregistrement</p>
-                  <p className="text-gray-800 font-semibold">{formatDateTime(previewTarget.created_at || previewTarget.date)}</p>
+                  <p className="font-semibold text-gray-800">
+                    {formatDateTime(previewTarget.created_at || previewTarget.date)}
+                  </p>
                 </div>
                 <div>
                   <p className={labelCls}>Date comptable</p>
-                  <p className="text-gray-800 font-semibold">{new Date(previewTarget.date).toLocaleDateString('fr-FR')}</p>
+                  <p className="font-semibold text-gray-800">
+                    {new Date(previewTarget.date).toLocaleDateString('fr-FR')}
+                  </p>
                 </div>
                 <div>
                   <p className={labelCls}>Client</p>
@@ -908,7 +1099,9 @@ function RevenuesInner() {
                 </div>
                 <div>
                   <p className={labelCls}>Montant</p>
-                  <p className="text-gray-900 font-bold tabular-nums">{formatFCFA(previewTarget.montant)}</p>
+                  <p className="font-bold tabular-nums text-gray-900">
+                    {formatFCFA(previewTarget.montant)}
+                  </p>
                 </div>
                 <div className="sm:col-span-2">
                   <p className={labelCls}>Libelle</p>
@@ -920,17 +1113,22 @@ function RevenuesInner() {
                 </div>
                 <div>
                   <p className={labelCls}>Statut</p>
-                  <p className="text-gray-800">{previewTarget.status === 'encaisse' ? 'Encaisse' : 'En attente'}</p>
+                  <p className="text-gray-800">
+                    {previewTarget.status === 'encaisse' ? 'Encaisse' : 'En attente'}
+                  </p>
                 </div>
               </div>
               <div className="rounded-xl border border-gray-200 bg-gray-50 p-4">
                 <p className={`${labelCls} mb-2`}>Justificatifs / metadata</p>
                 {previewTarget.metadata && Object.keys(previewTarget.metadata).length > 0 ? (
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
+                  <div className="grid grid-cols-1 gap-2 text-xs sm:grid-cols-2">
                     {Object.entries(previewTarget.metadata).map(([k, v]) => (
-                      <div key={k} className="px-2.5 py-2 rounded-lg bg-white border border-gray-200">
-                        <p className="font-semibold text-gray-500 uppercase tracking-wide">{k}</p>
-                        <p className="text-gray-800 mt-0.5">{v}</p>
+                      <div
+                        key={k}
+                        className="rounded-lg border border-gray-200 bg-white px-2.5 py-2"
+                      >
+                        <p className="font-semibold uppercase tracking-wide text-gray-500">{k}</p>
+                        <p className="mt-0.5 text-gray-800">{v}</p>
                       </div>
                     ))}
                   </div>
@@ -944,20 +1142,35 @@ function RevenuesInner() {
       )}
 
       {deleteTarget && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm" onClick={(e) => e.target === e.currentTarget && setDeleteTarget(null)}>
-          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md mx-4 overflow-hidden">
-            <div className="px-6 py-4 border-b border-gray-100">
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm"
+          onClick={(e) => e.target === e.currentTarget && setDeleteTarget(null)}
+        >
+          <div className="mx-4 w-full max-w-md overflow-hidden rounded-2xl bg-white shadow-2xl">
+            <div className="border-b border-gray-100 px-6 py-4">
               <h3 className="text-base font-bold text-gray-900">Confirmation de suppression</h3>
             </div>
             <div className="px-6 py-5">
-              <p className="text-sm text-gray-700">Etes-vous sur de vouloir supprimer cette recette ?</p>
-              <p className="text-xs text-gray-500 mt-2">{deleteTarget.client} - {deleteTarget.libelle}</p>
+              <p className="text-sm text-gray-700">
+                Etes-vous sur de vouloir supprimer cette recette ?
+              </p>
+              <p className="mt-2 text-xs text-gray-500">
+                {deleteTarget.client} - {deleteTarget.libelle}
+              </p>
             </div>
-            <div className="flex justify-end gap-3 px-6 py-4 bg-gray-50 border-t border-gray-100">
-              <button type="button" onClick={() => setDeleteTarget(null)} className="px-4 py-2.5 rounded-lg border border-gray-300 text-sm text-gray-700 font-medium hover:bg-white transition-colors">
+            <div className="flex justify-end gap-3 border-t border-gray-100 bg-gray-50 px-6 py-4">
+              <button
+                type="button"
+                onClick={() => setDeleteTarget(null)}
+                className="rounded-lg border border-gray-300 px-4 py-2.5 text-sm font-medium text-gray-700 transition-colors hover:bg-white"
+              >
                 Annuler
               </button>
-              <button type="button" onClick={confirmDelete} className="px-4 py-2.5 rounded-lg bg-red-600 text-white text-sm font-semibold hover:bg-red-700 transition-colors">
+              <button
+                type="button"
+                onClick={confirmDelete}
+                className="rounded-lg bg-red-600 px-4 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-red-700"
+              >
                 Supprimer
               </button>
             </div>
@@ -966,25 +1179,43 @@ function RevenuesInner() {
       )}
 
       {authTarget && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm" onClick={(e) => e.target === e.currentTarget && setAuthTarget(null)}>
-          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md mx-4 overflow-hidden">
-            <div className="px-6 py-4 border-b border-gray-100 flex items-center gap-2">
-              <ShieldAlert className="w-5 h-5 text-amber-600" />
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm"
+          onClick={(e) => e.target === e.currentTarget && setAuthTarget(null)}
+        >
+          <div className="mx-4 w-full max-w-md overflow-hidden rounded-2xl bg-white shadow-2xl">
+            <div className="flex items-center gap-2 border-b border-gray-100 px-6 py-4">
+              <ShieldAlert className="h-5 w-5 text-amber-600" />
               <h3 className="text-base font-bold text-gray-900">Autorisation speciale requise</h3>
             </div>
-            <div className="px-6 py-5 space-y-3">
-              <p className="text-sm text-gray-700">Cette recette est deja encaissee. Entrez le code d'autorisation pour la modifier.</p>
+            <div className="space-y-3 px-6 py-5">
+              <p className="text-sm text-gray-700">
+                Cette recette est deja encaissee. Entrez le code d'autorisation pour la modifier.
+              </p>
               <div>
                 <label className={labelCls}>Code d'autorisation</label>
-                <input value={authCode} onChange={(e) => setAuthCode(e.target.value)} className={inputCls} placeholder="Ex : ADMIN-RECETTES" />
+                <input
+                  value={authCode}
+                  onChange={(e) => setAuthCode(e.target.value)}
+                  className={inputCls}
+                  placeholder="Ex : ADMIN-RECETTES"
+                />
               </div>
               {authError && <p className="text-sm text-red-600">{authError}</p>}
             </div>
-            <div className="flex justify-end gap-3 px-6 py-4 bg-gray-50 border-t border-gray-100">
-              <button type="button" onClick={() => setAuthTarget(null)} className="px-4 py-2.5 rounded-lg border border-gray-300 text-sm text-gray-700 font-medium hover:bg-white transition-colors">
+            <div className="flex justify-end gap-3 border-t border-gray-100 bg-gray-50 px-6 py-4">
+              <button
+                type="button"
+                onClick={() => setAuthTarget(null)}
+                className="rounded-lg border border-gray-300 px-4 py-2.5 text-sm font-medium text-gray-700 transition-colors hover:bg-white"
+              >
                 Annuler
               </button>
-              <button type="button" onClick={submitSpecialAuth} className="px-4 py-2.5 rounded-lg bg-amber-600 text-white text-sm font-semibold hover:bg-amber-700 transition-colors">
+              <button
+                type="button"
+                onClick={submitSpecialAuth}
+                className="rounded-lg bg-amber-600 px-4 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-amber-700"
+              >
                 Valider
               </button>
             </div>

@@ -1,4 +1,4 @@
-import React from "react";
+import React from 'react';
 
 interface SalaryDetail {
   employee: string;
@@ -19,20 +19,30 @@ const SalaryDetails: React.FC<SalaryDetailsProps> = ({ data }) => {
         <thead className="bg-slate-50">
           <tr>
             <th className="px-4 py-2 text-left text-xs font-semibold text-slate-600">Employé</th>
-            <th className="px-4 py-2 text-left text-xs font-semibold text-slate-600">Salaire de Base</th>
-            <th className="px-4 py-2 text-left text-xs font-semibold text-slate-600">Acomptes (max 40%)</th>
+            <th className="px-4 py-2 text-left text-xs font-semibold text-slate-600">
+              Salaire de Base
+            </th>
+            <th className="px-4 py-2 text-left text-xs font-semibold text-slate-600">
+              Acomptes (max 40%)
+            </th>
             <th className="px-4 py-2 text-left text-xs font-semibold text-slate-600">Primes</th>
-            <th className="px-4 py-2 text-left text-xs font-semibold text-slate-600">Net à Payer</th>
+            <th className="px-4 py-2 text-left text-xs font-semibold text-slate-600">
+              Net à Payer
+            </th>
           </tr>
         </thead>
         <tbody className="divide-y divide-slate-100">
           {data.map((row, idx) => (
             <tr key={idx} className="hover:bg-slate-50">
               <td className="px-4 py-2 text-sm text-slate-700">{row.employee}</td>
-              <td className="px-4 py-2 text-sm text-slate-700">{row.baseSalary.toLocaleString()} €</td>
+              <td className="px-4 py-2 text-sm text-slate-700">
+                {row.baseSalary.toLocaleString()} €
+              </td>
               <td className="px-4 py-2 text-sm text-slate-700">{row.advance.toLocaleString()} €</td>
               <td className="px-4 py-2 text-sm text-slate-700">{row.bonus.toLocaleString()} €</td>
-              <td className="px-4 py-2 text-sm font-semibold text-emerald-700">{row.netPay.toLocaleString()} €</td>
+              <td className="px-4 py-2 text-sm font-semibold text-emerald-700">
+                {row.netPay.toLocaleString()} €
+              </td>
             </tr>
           ))}
         </tbody>

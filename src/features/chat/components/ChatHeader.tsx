@@ -8,13 +8,13 @@ interface ChatHeaderProps {
 
 export default function ChatHeader({ channelName, onlineUsers }: ChatHeaderProps) {
   return (
-    <div className="flex items-center justify-between px-4 py-3 border-b bg-[#003366] text-white shadow">
+    <div className="flex items-center justify-between border-b bg-[#003366] px-4 py-3 text-white shadow">
       <div className="flex items-center gap-3">
         <User size={22} />
-        <span className="font-bold text-lg">{channelName}</span>
+        <span className="text-lg font-bold">{channelName}</span>
       </div>
       <div className="flex items-center gap-2">
-        {onlineUsers.map(user => (
+        {onlineUsers.map((user) => (
           <motion.div
             key={user.id}
             className="flex items-center gap-1"

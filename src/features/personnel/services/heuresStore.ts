@@ -30,13 +30,16 @@ export interface WorkHoursRow {
   updatedAt: string;
 }
 
-type StoredData = Record<string, {
-  hs15Hours: number;
-  hs40Hours: number;
-  hs60Hours: number;
-  applyHS: boolean;
-  updatedAt: string;
-}>;
+type StoredData = Record<
+  string,
+  {
+    hs15Hours: number;
+    hs40Hours: number;
+    hs60Hours: number;
+    applyHS: boolean;
+    updatedAt: string;
+  }
+>;
 
 type ManualWorkHoursOverride = StoredData[string];
 
@@ -65,7 +68,7 @@ function parseTimeToMinutes(time: string): number {
 function diffMinutes(start: string, end: string): number {
   const startMin = parseTimeToMinutes(start);
   const endMin = parseTimeToMinutes(end);
-  if (endMin < startMin) return (24 * 60 - startMin) + endMin;
+  if (endMin < startMin) return 24 * 60 - startMin + endMin;
   return endMin - startMin;
 }
 
@@ -143,8 +146,12 @@ function buildAutoRows(month: string, agents: PersonnelAgent[]): WorkHoursRow[] 
       const worked = Math.max(0, diffMinutes(entry.heureArrivee, entry.heureDepart));
       workedMinutes += worked;
 
-      const matchedShift = shifts.find((s) => s.start === entry.shiftDebut && s.end === entry.shiftFin);
-      const shiftLabel = matchedShift ? matchedShift.name : `${entry.shiftDebut} - ${entry.shiftFin}`;
+      const matchedShift = shifts.find(
+        (s) => s.start === entry.shiftDebut && s.end === entry.shiftFin
+      );
+      const shiftLabel = matchedShift
+        ? matchedShift.name
+        : `${entry.shiftDebut} - ${entry.shiftFin}`;
       shiftCounter[shiftLabel] = (shiftCounter[shiftLabel] || 0) + 1;
 
       const scheduled = getShiftMinutes(entry.shiftDebut, entry.shiftFin);
@@ -171,17 +178,18 @@ function buildAutoRows(month: string, agents: PersonnelAgent[]): WorkHoursRow[] 
       nightMinutesFromPointage += nightOverlap;
     }
 
-    const shiftReference = Object.entries(shiftCounter)
-      .sort((a, b) => b[1] - a[1])[0]?.[0] || 'N/A';
+    const shiftReference =
+      Object.entries(shiftCounter).sort((a, b) => b[1] - a[1])[0]?.[0] || 'N/A';
 
     const shiftStart = agent.shiftNuitDebut || '22:00';
     const shiftEnd = agent.shiftNuitFin || '06:00';
     const nightsCount = agent.shiftNuit
       ? Math.max(0, Math.floor(agent.nombreNuits || 0))
       : nightsCountFromPointage;
-    const nightHours = nightsCount > 0
-      ? round2(nightsCount * congesStore.calcHeuresNuit(shiftStart, shiftEnd))
-      : round2(nightMinutesFromPointage / 60);
+    const nightHours =
+      nightsCount > 0
+        ? round2(nightsCount * congesStore.calcHeuresNuit(shiftStart, shiftEnd))
+        : round2(nightMinutesFromPointage / 60);
 
     return {
       employeeId: agent.id,
@@ -207,7 +215,10 @@ function buildAutoRows(month: string, agents: PersonnelAgent[]): WorkHoursRow[] 
   });
 }
 
-function mergeAutoWithManual(autoRow: WorkHoursRow, manual?: ManualWorkHoursOverride): WorkHoursRow {
+function mergeAutoWithManual(
+  autoRow: WorkHoursRow,
+  manual?: ManualWorkHoursOverride
+): WorkHoursRow {
   if (!manual) return autoRow;
   return {
     ...autoRow,
@@ -249,8 +260,16 @@ function updateRow(employeeId: string, month: string, patch: Partial<WorkHoursRo
   };
   saveStoredData(stored);
 
-  if (patch.nightsCount !== undefined || patch.shiftStart !== undefined || patch.shiftEnd !== undefined || patch.applyNight !== undefined) {
-    const nextNights = Math.max(0, Math.floor(Number((patch.nightsCount ?? base.nightsCount) || 0)));
+  if (
+    patch.nightsCount !== undefined ||
+    patch.shiftStart !== undefined ||
+    patch.shiftEnd !== undefined ||
+    patch.applyNight !== undefined
+  ) {
+    const nextNights = Math.max(
+      0,
+      Math.floor(Number((patch.nightsCount ?? base.nightsCount) || 0))
+    );
     const nextShiftStart = (patch.shiftStart ?? base.shiftStart) || '';
     const nextShiftEnd = (patch.shiftEnd ?? base.shiftEnd) || '';
     const nextApplyNight = patch.applyNight ?? base.applyNight;

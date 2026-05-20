@@ -1,9 +1,9 @@
-import React from "react";
-import ExpenseAnalytics from "./ExpenseAnalytics";
+import React from 'react';
+import ExpenseAnalytics from './ExpenseAnalytics';
 
 const ExpenseAnalyticsExample: React.FC = () => {
   return (
-    <div className="min-h-screen bg-slate-100 flex items-center justify-center">
+    <div className="flex min-h-screen items-center justify-center bg-slate-100">
       <ExpenseAnalytics />
     </div>
   );

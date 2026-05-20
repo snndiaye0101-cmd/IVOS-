@@ -1,10 +1,10 @@
 // ============= CHAT CONTEXT =============
 // Provides chat state globally to all components
 
-import React, { createContext, useContext, ReactNode } from "react";
-import { useChat } from "../services";
-import { useAuth } from "@/shared/contexts/AuthContext";
-import type { Channel, ChatMessage as ChatMsg, ChatUser } from "../types/chat.types";
+import React, { createContext, useContext, ReactNode } from 'react';
+import { useChat } from '../services';
+import { useAuth } from '@/shared/contexts/AuthContext';
+import type { Channel, ChatMessage as ChatMsg, ChatUser } from '../types/chat.types';
 
 interface ChatContextType {
   userId: string;
@@ -17,7 +17,11 @@ interface ChatContextType {
   loading: boolean;
   error: string | null;
   setCurrentChannel: (channel: Channel) => void;
-  createChannel: (input: { name: string; type: 'public' | 'private' | 'direct'; members?: string[] }) => Promise<Channel>;
+  createChannel: (input: {
+    name: string;
+    type: 'public' | 'private' | 'direct';
+    members?: string[];
+  }) => Promise<Channel>;
   deleteChannel: (id: string) => Promise<void>;
   sendMessage: (input: { channel_id: string; content: string }) => Promise<ChatMsg>;
   editMessage: (id: string, content: string) => Promise<ChatMsg>;
@@ -32,8 +36,8 @@ const ChatContext = createContext<ChatContextType | null>(null);
 
 export function ChatProvider({ children }: { children: ReactNode }) {
   const authContext = useAuth();
-  const userId = authContext?.user?.id || "";
-  const userName = authContext?.user?.fullName || "Anonymous";
+  const userId = authContext?.user?.id || '';
+  const userName = authContext?.user?.fullName || 'Anonymous';
 
   const chatHook = useChat({ userId, userName });
 
@@ -43,15 +47,13 @@ export function ChatProvider({ children }: { children: ReactNode }) {
     ...chatHook,
   };
 
-  return (
-    <ChatContext.Provider value={value}>{children}</ChatContext.Provider>
-  );
+  return <ChatContext.Provider value={value}>{children}</ChatContext.Provider>;
 }
 
 export function useAppChat() {
   const context = useContext(ChatContext);
   if (!context) {
-    throw new Error("useAppChat must be used within ChatProvider");
+    throw new Error('useAppChat must be used within ChatProvider');
   }
   return context;
 }

@@ -2,7 +2,8 @@ import type { EmailAttachment, IvosDocumentOption } from './types';
 
 function invoiceDocuments(): IvosDocumentOption[] {
   try {
-    const raw = localStorage.getItem('ivos_finance_invoices_v2') || localStorage.getItem('ivos_invoices_v1');
+    const raw =
+      localStorage.getItem('ivos_finance_invoices_v2') || localStorage.getItem('ivos_invoices_v1');
     if (!raw) return [];
     const invoices = JSON.parse(raw) as Array<Record<string, unknown>>;
 

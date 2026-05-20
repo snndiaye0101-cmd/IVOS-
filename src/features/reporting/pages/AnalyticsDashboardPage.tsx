@@ -55,7 +55,7 @@ export default function AnalyticsDashboardPage() {
   const [metrics, setMetrics] = useState<ImpactMetrics | null>(null);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
-  
+
   // Filtres
   const [selectedPeriod, setSelectedPeriod] = useState<PeriodType>('month');
   const [customStartDate, setCustomStartDate] = useState('');
@@ -63,7 +63,7 @@ export default function AnalyticsDashboardPage() {
   const [selectedClient, setSelectedClient] = useState<string>('all');
   const [selectedSite, setSelectedSite] = useState<string>('all');
   const [showFilters, setShowFilters] = useState(false);
-  
+
   // Modal export
   const [showWebExport, setShowWebExport] = useState(false);
 
@@ -74,11 +74,11 @@ export default function AnalyticsDashboardPage() {
 
   const loadData = async () => {
     setLoading(true);
-    
+
     try {
       // Déterminer la période
       let period: AnalyticsPeriod;
-      
+
       switch (selectedPeriod) {
         case 'month':
           period = getCurrentMonthPeriod();
@@ -99,24 +99,24 @@ export default function AnalyticsDashboardPage() {
         default:
           period = getCurrentMonthPeriod();
       }
-      
+
       // Extraire les métriques
       const extracted = extractImpactMetrics(period);
-      
+
       // Ajouter l'évolution si année
       if (selectedPeriod === 'year') {
         const year = new Date().getFullYear();
         extracted.evolutionData = extractMonthlyEvolution(year);
       }
-      
+
       // Filtrer par client si sélectionné
       if (selectedClient !== 'all') {
         // Filtrer les données par secteur
         extracted.sectorBreakdown = extracted.sectorBreakdown.filter(
-          s => s.sector === selectedClient
+          (s) => s.sector === selectedClient
         );
       }
-      
+
       setMetrics(extracted);
     } catch (error) {
       console.error('Failed to load analytics:', error);
@@ -134,7 +134,7 @@ export default function AnalyticsDashboardPage() {
   // Clients uniques pour le filtre
   const availableClients = useMemo(() => {
     if (!metrics) return [];
-    return ['all', ...metrics.sectorBreakdown.map(s => s.sector)];
+    return ['all', ...metrics.sectorBreakdown.map((s) => s.sector)];
   }, [metrics]);
 
   // Sites disponibles (mock pour l'instant)
@@ -155,10 +155,12 @@ export default function AnalyticsDashboardPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 flex items-center justify-center">
+      <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-16 w-16 border-b-4 border-blue-600 mx-auto" />
-          <p className="mt-4 text-lg font-medium text-gray-700">Chargement des données analytiques...</p>
+          <div className="mx-auto h-16 w-16 animate-spin rounded-full border-b-4 border-blue-600" />
+          <p className="mt-4 text-lg font-medium text-gray-700">
+            Chargement des données analytiques...
+          </p>
         </div>
       </div>
     );
@@ -166,11 +168,11 @@ export default function AnalyticsDashboardPage() {
 
   if (!metrics) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 flex items-center justify-center">
-        <div className="bg-white rounded-2xl shadow-xl p-8 max-w-md text-center">
-          <BarChart2 className="w-16 h-16 text-orange-500 mx-auto" />
-          <h2 className="text-xl font-bold text-gray-900 mt-4">Aucune Donnée</h2>
-          <p className="text-gray-600 mt-2">
+      <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50">
+        <div className="max-w-md rounded-2xl bg-white p-8 text-center shadow-xl">
+          <BarChart2 className="mx-auto h-16 w-16 text-orange-500" />
+          <h2 className="mt-4 text-xl font-bold text-gray-900">Aucune Donnée</h2>
+          <p className="mt-2 text-gray-600">
             Aucun BSD finalisé trouvé pour la période sélectionnée.
           </p>
         </div>
@@ -180,47 +182,47 @@ export default function AnalyticsDashboardPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 p-6">
-      <div className="max-w-[1920px] mx-auto space-y-6">
+      <div className="mx-auto max-w-[1920px] space-y-6">
         {/* Header */}
-        <div className="bg-white rounded-2xl shadow-lg p-6">
+        <div className="rounded-2xl bg-white p-6 shadow-lg">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
-              <div className="w-14 h-14 bg-gradient-to-br from-blue-500 to-blue-600 rounded-2xl flex items-center justify-center">
-                <BarChart2 className="w-7 h-7 text-white" />
+              <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-blue-500 to-blue-600">
+                <BarChart2 className="h-7 w-7 text-white" />
               </div>
               <div>
                 <h1 className="text-3xl font-bold text-gray-900">Reporting & Impact</h1>
-                <p className="text-gray-600 mt-1">Analyse avancée des opérations QHSE</p>
+                <p className="mt-1 text-gray-600">Analyse avancée des opérations QHSE</p>
               </div>
             </div>
 
             <div className="flex items-center gap-3">
               <button
                 onClick={() => setShowFilters(!showFilters)}
-                className={`flex items-center gap-2 px-4 py-2 rounded-xl transition-colors ${
+                className={`flex items-center gap-2 rounded-xl px-4 py-2 transition-colors ${
                   showFilters
                     ? 'bg-blue-600 text-white'
                     : 'border-2 border-gray-300 text-gray-700 hover:bg-gray-50'
                 }`}
               >
-                <Filter className="w-5 h-5" />
+                <Filter className="h-5 w-5" />
                 <span>Filtres</span>
               </button>
 
               <button
                 onClick={handleRefresh}
                 disabled={refreshing}
-                className="flex items-center gap-2 px-4 py-2 border-2 border-gray-300 text-gray-700 rounded-xl hover:bg-gray-50 transition-colors disabled:opacity-50"
+                className="flex items-center gap-2 rounded-xl border-2 border-gray-300 px-4 py-2 text-gray-700 transition-colors hover:bg-gray-50 disabled:opacity-50"
               >
-                <RefreshCw className={`w-5 h-5 ${refreshing ? 'animate-spin' : ''}`} />
+                <RefreshCw className={`h-5 w-5 ${refreshing ? 'animate-spin' : ''}`} />
                 <span>Actualiser</span>
               </button>
 
               <button
                 onClick={() => setShowWebExport(true)}
-                className="flex items-center gap-2 px-6 py-2 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-xl hover:from-blue-700 hover:to-blue-800 transition-all shadow-lg"
+                className="flex items-center gap-2 rounded-xl bg-gradient-to-r from-blue-600 to-blue-700 px-6 py-2 text-white shadow-lg transition-all hover:from-blue-700 hover:to-blue-800"
               >
-                <Globe className="w-5 h-5" />
+                <Globe className="h-5 w-5" />
                 <span>Générer Infographie</span>
               </button>
             </div>
@@ -228,12 +230,12 @@ export default function AnalyticsDashboardPage() {
 
           {/* Filtres */}
           {showFilters && (
-            <div className="mt-6 pt-6 border-t border-gray-200">
+            <div className="mt-6 border-t border-gray-200 pt-6">
               <div className="grid grid-cols-4 gap-4">
                 {/* Période */}
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    <Calendar className="w-4 h-4 inline mr-1" />
+                  <label className="mb-2 block text-sm font-medium text-gray-700">
+                    <Calendar className="mr-1 inline h-4 w-4" />
                     Période
                   </label>
                   <div className="flex gap-2">
@@ -241,10 +243,10 @@ export default function AnalyticsDashboardPage() {
                       <button
                         key={period}
                         onClick={() => setSelectedPeriod(period)}
-                        className={`flex-1 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
+                        className={`flex-1 rounded-lg px-3 py-2 text-sm font-medium transition-colors ${
                           selectedPeriod === period
                             ? 'bg-blue-600 text-white'
-                            : 'bg-white border-2 border-gray-200 text-gray-700 hover:border-blue-300'
+                            : 'border-2 border-gray-200 bg-white text-gray-700 hover:border-blue-300'
                         }`}
                       >
                         {period === 'month' && 'Mois'}
@@ -257,34 +259,36 @@ export default function AnalyticsDashboardPage() {
 
                 {/* Client */}
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    <Users className="w-4 h-4 inline mr-1" />
+                  <label className="mb-2 block text-sm font-medium text-gray-700">
+                    <Users className="mr-1 inline h-4 w-4" />
                     Secteur
                   </label>
                   <select
                     value={selectedClient}
                     onChange={(e) => setSelectedClient(e.target.value)}
-                    className="w-full px-3 py-2 border-2 border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    className="w-full rounded-lg border-2 border-gray-200 px-3 py-2 focus:border-blue-500 focus:ring-2 focus:ring-blue-500"
                   >
                     <option value="all">Tous les secteurs</option>
-                    {availableClients.filter(c => c !== 'all').map((client) => (
-                      <option key={client} value={client}>
-                        {client}
-                      </option>
-                    ))}
+                    {availableClients
+                      .filter((c) => c !== 'all')
+                      .map((client) => (
+                        <option key={client} value={client}>
+                          {client}
+                        </option>
+                      ))}
                   </select>
                 </div>
 
                 {/* Site */}
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    <MapPin className="w-4 h-4 inline mr-1" />
+                  <label className="mb-2 block text-sm font-medium text-gray-700">
+                    <MapPin className="mr-1 inline h-4 w-4" />
                     Site
                   </label>
                   <select
                     value={selectedSite}
                     onChange={(e) => setSelectedSite(e.target.value)}
-                    className="w-full px-3 py-2 border-2 border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    className="w-full rounded-lg border-2 border-gray-200 px-3 py-2 focus:border-blue-500 focus:ring-2 focus:ring-blue-500"
                   >
                     {availableSites.map((site) => (
                       <option key={site} value={site}>
@@ -296,12 +300,8 @@ export default function AnalyticsDashboardPage() {
 
                 {/* Période */}
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Affichage
-                  </label>
-                  <div className="text-lg font-bold text-blue-600">
-                    {metrics.period.label}
-                  </div>
+                  <label className="mb-2 block text-sm font-medium text-gray-700">Affichage</label>
+                  <div className="text-lg font-bold text-blue-600">{metrics.period.label}</div>
                 </div>
               </div>
             </div>
@@ -311,76 +311,74 @@ export default function AnalyticsDashboardPage() {
         {/* KPIs */}
         <div className="grid grid-cols-4 gap-6">
           {/* Tonnage Total */}
-          <div className="bg-white rounded-2xl shadow-lg p-6 border-l-4 border-green-500">
-            <div className="flex items-center justify-between mb-4">
-              <div className="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center">
-                <Package className="w-6 h-6 text-green-600" />
+          <div className="rounded-2xl border-l-4 border-green-500 bg-white p-6 shadow-lg">
+            <div className="mb-4 flex items-center justify-between">
+              <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-green-100">
+                <Package className="h-6 w-6 text-green-600" />
               </div>
-              <TrendingUp className="w-5 h-5 text-green-600" />
+              <TrendingUp className="h-5 w-5 text-green-600" />
             </div>
-            <p className="text-sm text-gray-600 mb-1">Tonnage Total Collecté</p>
-            <p className="text-3xl font-bold text-gray-900">{formatTonnage(metrics.totalTonnage)}</p>
-            <p className="text-xs text-gray-500 mt-2">
-              {metrics.totalOperations} opérations
+            <p className="mb-1 text-sm text-gray-600">Tonnage Total Collecté</p>
+            <p className="text-3xl font-bold text-gray-900">
+              {formatTonnage(metrics.totalTonnage)}
             </p>
+            <p className="mt-2 text-xs text-gray-500">{metrics.totalOperations} opérations</p>
           </div>
 
           {/* BSD Finalisés */}
-          <div className="bg-white rounded-2xl shadow-lg p-6 border-l-4 border-blue-500">
-            <div className="flex items-center justify-between mb-4">
-              <div className="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center">
-                <FileText className="w-6 h-6 text-blue-600" />
+          <div className="rounded-2xl border-l-4 border-blue-500 bg-white p-6 shadow-lg">
+            <div className="mb-4 flex items-center justify-between">
+              <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-blue-100">
+                <FileText className="h-6 w-6 text-blue-600" />
               </div>
-              <CheckCircle className="w-5 h-5 text-blue-600" />
+              <CheckCircle className="h-5 w-5 text-blue-600" />
             </div>
-            <p className="text-sm text-gray-600 mb-1">BSD Finalisés</p>
-            <p className="text-3xl font-bold text-gray-900">{formatNumber(metrics.totalOperations)}</p>
-            <p className="text-xs text-gray-500 mt-2">
+            <p className="mb-1 text-sm text-gray-600">BSD Finalisés</p>
+            <p className="text-3xl font-bold text-gray-900">
+              {formatNumber(metrics.totalOperations)}
+            </p>
+            <p className="mt-2 text-xs text-gray-500">
               Moy. {formatTonnage(metrics.averagePerOperation)} / BSD
             </p>
           </div>
 
           {/* Taux de Valorisation */}
-          <div className="bg-white rounded-2xl shadow-lg p-6 border-l-4 border-purple-500">
-            <div className="flex items-center justify-between mb-4">
-              <div className="w-12 h-12 bg-purple-100 rounded-xl flex items-center justify-center">
-                <Recycle className="w-6 h-6 text-purple-600" />
+          <div className="rounded-2xl border-l-4 border-purple-500 bg-white p-6 shadow-lg">
+            <div className="mb-4 flex items-center justify-between">
+              <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-purple-100">
+                <Recycle className="h-6 w-6 text-purple-600" />
               </div>
-              <TrendingUp className="w-5 h-5 text-purple-600" />
+              <TrendingUp className="h-5 w-5 text-purple-600" />
             </div>
-            <p className="text-sm text-gray-600 mb-1">Taux de Valorisation</p>
+            <p className="mb-1 text-sm text-gray-600">Taux de Valorisation</p>
             <p className="text-3xl font-bold text-gray-900">
               {Math.round(metrics.valorisationRate)}%
             </p>
-            <p className="text-xs text-gray-500 mt-2">
-              Recyclage & valorisation
-            </p>
+            <p className="mt-2 text-xs text-gray-500">Recyclage & valorisation</p>
           </div>
 
           {/* Secteurs */}
-          <div className="bg-white rounded-2xl shadow-lg p-6 border-l-4 border-orange-500">
-            <div className="flex items-center justify-between mb-4">
-              <div className="w-12 h-12 bg-orange-100 rounded-xl flex items-center justify-center">
-                <Users className="w-6 h-6 text-orange-600" />
+          <div className="rounded-2xl border-l-4 border-orange-500 bg-white p-6 shadow-lg">
+            <div className="mb-4 flex items-center justify-between">
+              <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-orange-100">
+                <Users className="h-6 w-6 text-orange-600" />
               </div>
-              <Users className="w-5 h-5 text-orange-600" />
+              <Users className="h-5 w-5 text-orange-600" />
             </div>
-            <p className="text-sm text-gray-600 mb-1">Secteurs Accompagnés</p>
+            <p className="mb-1 text-sm text-gray-600">Secteurs Accompagnés</p>
             <p className="text-3xl font-bold text-gray-900">
               {formatNumber(metrics.sectorBreakdown.length)}
             </p>
-            <p className="text-xs text-gray-500 mt-2">
-              Clients anonymisés
-            </p>
+            <p className="mt-2 text-xs text-gray-500">Clients anonymisés</p>
           </div>
         </div>
 
         {/* Graphiques */}
         <div className="grid grid-cols-2 gap-6">
           {/* Répartition par Type */}
-          <div className="bg-white rounded-2xl shadow-lg p-6">
-            <h3 className="text-lg font-bold text-gray-900 mb-6 flex items-center gap-2">
-              <PieChartIcon className="w-5 h-5 text-blue-600" />
+          <div className="rounded-2xl bg-white p-6 shadow-lg">
+            <h3 className="mb-6 flex items-center gap-2 text-lg font-bold text-gray-900">
+              <PieChartIcon className="h-5 w-5 text-blue-600" />
               Répartition par Type de Déchet
             </h3>
             <ResponsiveContainer width="100%" height={300}>
@@ -418,9 +416,9 @@ export default function AnalyticsDashboardPage() {
           </div>
 
           {/* Répartition par Secteur */}
-          <div className="bg-white rounded-2xl shadow-lg p-6">
-            <h3 className="text-lg font-bold text-gray-900 mb-6 flex items-center gap-2">
-              <Users className="w-5 h-5 text-blue-600" />
+          <div className="rounded-2xl bg-white p-6 shadow-lg">
+            <h3 className="mb-6 flex items-center gap-2 text-lg font-bold text-gray-900">
+              <Users className="h-5 w-5 text-blue-600" />
               Répartition par Secteur (Anonymisé)
             </h3>
             <ResponsiveContainer width="100%" height={300}>
@@ -434,7 +432,10 @@ export default function AnalyticsDashboardPage() {
               >
                 <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
                 <XAxis dataKey="name" stroke="#6b7280" />
-                <YAxis stroke="#6b7280" label={{ value: 'Tonnes', angle: -90, position: 'insideLeft' }} />
+                <YAxis
+                  stroke="#6b7280"
+                  label={{ value: 'Tonnes', angle: -90, position: 'insideLeft' }}
+                />
                 <Tooltip
                   contentStyle={{
                     backgroundColor: 'white',
@@ -452,9 +453,9 @@ export default function AnalyticsDashboardPage() {
 
         {/* Évolution Mensuelle */}
         {metrics.evolutionData && metrics.evolutionData.length > 0 && (
-          <div className="bg-white rounded-2xl shadow-lg p-6">
-            <h3 className="text-lg font-bold text-gray-900 mb-6 flex items-center gap-2">
-              <TrendingUp className="w-5 h-5 text-green-600" />
+          <div className="rounded-2xl bg-white p-6 shadow-lg">
+            <h3 className="mb-6 flex items-center gap-2 text-lg font-bold text-gray-900">
+              <TrendingUp className="h-5 w-5 text-green-600" />
               Évolution Mensuelle du Volume de Collecte
             </h3>
             <ResponsiveContainer width="100%" height={350}>
@@ -474,7 +475,10 @@ export default function AnalyticsDashboardPage() {
                 </defs>
                 <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
                 <XAxis dataKey="month" stroke="#6b7280" />
-                <YAxis stroke="#6b7280" label={{ value: 'Tonnes', angle: -90, position: 'insideLeft' }} />
+                <YAxis
+                  stroke="#6b7280"
+                  label={{ value: 'Tonnes', angle: -90, position: 'insideLeft' }}
+                />
                 <Tooltip
                   contentStyle={{
                     backgroundColor: 'white',
@@ -502,30 +506,26 @@ export default function AnalyticsDashboardPage() {
         )}
 
         {/* Méthodes de Traitement */}
-        <div className="bg-white rounded-2xl shadow-lg p-6">
-          <h3 className="text-lg font-bold text-gray-900 mb-6 flex items-center gap-2">
-            <Recycle className="w-5 h-5 text-purple-600" />
+        <div className="rounded-2xl bg-white p-6 shadow-lg">
+          <h3 className="mb-6 flex items-center gap-2 text-lg font-bold text-gray-900">
+            <Recycle className="h-5 w-5 text-purple-600" />
             Méthodes de Traitement et Valorisation
           </h3>
           <div className="grid grid-cols-3 gap-4">
             {metrics.treatmentBreakdown.map((tb, index) => (
               <div
                 key={index}
-                className={`p-5 rounded-xl border-2 transition-all hover:shadow-md ${
+                className={`rounded-xl border-2 p-5 transition-all hover:shadow-md ${
                   tb.isValorization
-                    ? 'bg-purple-50 border-purple-200 hover:border-purple-300'
-                    : 'bg-gray-50 border-gray-200 hover:border-gray-300'
+                    ? 'border-purple-200 bg-purple-50 hover:border-purple-300'
+                    : 'border-gray-200 bg-gray-50 hover:border-gray-300'
                 }`}
               >
-                <div className="flex items-center justify-between mb-3">
+                <div className="mb-3 flex items-center justify-between">
                   <span className="font-semibold text-gray-900">{tb.methodLabel}</span>
-                  {tb.isValorization && (
-                    <Recycle className="w-5 h-5 text-purple-600" />
-                  )}
+                  {tb.isValorization && <Recycle className="h-5 w-5 text-purple-600" />}
                 </div>
-                <p className="text-3xl font-bold text-gray-900 mb-1">
-                  {formatTonnage(tb.tonnage)}
-                </p>
+                <p className="mb-1 text-3xl font-bold text-gray-900">{formatTonnage(tb.tonnage)}</p>
                 <div className="flex items-center justify-between text-sm">
                   <span className="text-gray-600">{tb.count} opérations</span>
                   <span className="font-medium text-gray-900">{Math.round(tb.percentage)}%</span>
@@ -538,10 +538,7 @@ export default function AnalyticsDashboardPage() {
 
       {/* Modal Export Web */}
       {showWebExport && (
-        <WebExportModal
-          metrics={metrics}
-          onClose={() => setShowWebExport(false)}
-        />
+        <WebExportModal metrics={metrics} onClose={() => setShowWebExport(false)} />
       )}
     </div>
   );

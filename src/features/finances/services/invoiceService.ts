@@ -18,7 +18,12 @@ import { syncRevenuesFromInvoices } from './revenueService';
 import jsPDF from 'jspdf';
 import QRCode from 'qrcode';
 import { numberToFrenchWords } from './payrollPdfService';
-import { cleanAmountToInteger, formatMontantFCFA, formatMonetaryValue, purgerEtFormatFCFA } from '@/shared/utils/formatAmount';
+import {
+  cleanAmountToInteger,
+  formatMontantFCFA,
+  formatMonetaryValue,
+  purgerEtFormatFCFA,
+} from '@/shared/utils/formatAmount';
 
 const STORAGE_KEY = 'ivos_invoices_v1';
 
@@ -62,12 +67,10 @@ async function getLogoDataUrl(): Promise<string | null> {
 export function generateInvoiceNumber(): string {
   const year = new Date().getFullYear();
   const all = getAllInvoices();
-  
+
   // Compter les factures de l'année en cours
-  const currentYearInvoices = all.filter(inv => 
-    inv.numeroFacture.startsWith(`FAC-${year}-`)
-  );
-  
+  const currentYearInvoices = all.filter((inv) => inv.numeroFacture.startsWith(`FAC-${year}-`));
+
   const nextNumber = (currentYearInvoices.length + 1).toString().padStart(4, '0');
   return `FAC-${year}-${nextNumber}`;
 }
@@ -79,7 +82,7 @@ function calculateAmounts(lignes: InvoiceLine[], tauxTVA: number) {
   const montantHT = lignes.reduce((sum, ligne) => sum + ligne.totalHT, 0);
   const montantTVA = montantHT * (tauxTVA / 100);
   const montantTTC = montantHT + montantTVA;
-  
+
   return { montantHT, montantTVA, montantTTC };
 }
 
@@ -121,12 +124,12 @@ const MOCK_INVOICES: Invoice[] = [
     updatedAt: new Date().toISOString(),
     createdBy: 'system',
   },
-]
+];
 
 export function getAllInvoices(): Invoice[] {
   const stored = localStorage.getItem(STORAGE_KEY);
   if (!stored) return [...MOCK_INVOICES];
-  
+
   try {
     const parsed = JSON.parse(stored);
     return parsed && Array.isArray(parsed) ? parsed : [...MOCK_INVOICES];
@@ -149,7 +152,7 @@ function saveInvoices(invoices: Invoice[]): void {
  */
 export function getInvoiceById(id: string): Invoice | null {
   const all = getAllInvoices();
-  return all.find(inv => inv.id === id) || null;
+  return all.find((inv) => inv.id === id) || null;
 }
 
 /**
@@ -157,46 +160,47 @@ export function getInvoiceById(id: string): Invoice | null {
  */
 export function searchInvoices(filters: InvoiceFilters): Invoice[] {
   let invoices = getAllInvoices();
-  
+
   // Recherche par numéro de facture ou BSD
   if (filters.search) {
     const searchLower = filters.search.toLowerCase();
-    invoices = invoices.filter(inv => 
-      inv.numeroFacture.toLowerCase().includes(searchLower) ||
-      (inv.bsdReference && inv.bsdReference.toLowerCase().includes(searchLower)) ||
-      inv.clientNom.toLowerCase().includes(searchLower)
+    invoices = invoices.filter(
+      (inv) =>
+        inv.numeroFacture.toLowerCase().includes(searchLower) ||
+        (inv.bsdReference && inv.bsdReference.toLowerCase().includes(searchLower)) ||
+        inv.clientNom.toLowerCase().includes(searchLower)
     );
   }
-  
+
   // Filtre par statut de paiement
   if (filters.statutPaiement) {
-    invoices = invoices.filter(inv => inv.statutPaiement === filters.statutPaiement);
+    invoices = invoices.filter((inv) => inv.statutPaiement === filters.statutPaiement);
   }
-  
+
   // Filtre par mode de règlement
   if (filters.modeReglement) {
-    invoices = invoices.filter(inv => inv.modeReglement === filters.modeReglement);
+    invoices = invoices.filter((inv) => inv.modeReglement === filters.modeReglement);
   }
-  
+
   // Filtre par date
   if (filters.dateDebut) {
-    invoices = invoices.filter(inv => inv.date >= filters.dateDebut!);
+    invoices = invoices.filter((inv) => inv.date >= filters.dateDebut!);
   }
   if (filters.dateFin) {
-    invoices = invoices.filter(inv => inv.date <= filters.dateFin!);
+    invoices = invoices.filter((inv) => inv.date <= filters.dateFin!);
   }
-  
+
   // Filtre par client
   if (filters.clientId) {
-    invoices = invoices.filter(inv => inv.clientId === filters.clientId);
+    invoices = invoices.filter((inv) => inv.clientId === filters.clientId);
   }
 
   // Filtre par source
   if (filters.sourceModule) {
     const src = filters.sourceModule;
-    invoices = invoices.filter(inv => (inv.sourceModule ?? 'BSD') === src);
+    invoices = invoices.filter((inv) => (inv.sourceModule ?? 'BSD') === src);
   }
-  
+
   // Trier par date décroissante
   return invoices.sort((a, b) => b.date.localeCompare(a.date));
 }
@@ -207,9 +211,9 @@ export function searchInvoices(filters: InvoiceFilters): Invoice[] {
 export function createInvoice(data: NewInvoiceData, userId: string): Invoice {
   const all = getAllInvoices();
   const now = new Date().toISOString();
-  
+
   // Créer les lignes avec IDs
-const lignes: InvoiceLine[] = data.lignes.map((ligne, index) => {
+  const lignes: InvoiceLine[] = data.lignes.map((ligne, index) => {
     const quantite = Number.isFinite(ligne.quantite) ? ligne.quantite : 0;
     const prixUnitaireHT = cleanAmountToInteger(ligne.prixUnitaireHT);
     const totalHT = cleanAmountToInteger(ligne.totalHT ?? quantite * prixUnitaireHT);
@@ -223,13 +227,17 @@ const lignes: InvoiceLine[] = data.lignes.map((ligne, index) => {
       totalHT,
     };
   });
-  
+
   // Calculer les montants
   const { montantHT, montantTVA, montantTTC } = calculateAmounts(lignes, data.tauxTVA);
-  
-  const typeFacture = data.typeFacture || (data.bsdReference ? 'BSD' : data.specialOperationId ? 'Opération Spéciale' : 'Facture libre');
-  const sourceModule = data.sourceModule ?? (data.bsdReference ? 'BSD' : data.specialOperationId ? 'operation_speciale' : 'libre');
-  
+
+  const typeFacture =
+    data.typeFacture ||
+    (data.bsdReference ? 'BSD' : data.specialOperationId ? 'Opération Spéciale' : 'Facture libre');
+  const sourceModule =
+    data.sourceModule ??
+    (data.bsdReference ? 'BSD' : data.specialOperationId ? 'operation_speciale' : 'libre');
+
   const newInvoice: Invoice = {
     id: `inv-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
     numeroFacture: generateInvoiceNumber(),
@@ -260,29 +268,33 @@ const lignes: InvoiceLine[] = data.lignes.map((ligne, index) => {
     updatedAt: now,
     createdBy: userId,
   };
-  
+
   all.push(newInvoice);
   saveInvoices(all);
-  
+
   return newInvoice;
 }
 
 /**
  * Met à jour une facture existante
  */
-export function updateInvoice(id: string, updates: Partial<Invoice>, userId: string): Invoice | null {
+export function updateInvoice(
+  id: string,
+  updates: Partial<Invoice>,
+  userId: string
+): Invoice | null {
   const all = getAllInvoices();
-  const index = all.findIndex(inv => inv.id === id);
-  
+  const index = all.findIndex((inv) => inv.id === id);
+
   if (index === -1) return null;
-  
+
   const updated: Invoice = {
     ...all[index],
     ...updates,
     updatedAt: new Date().toISOString(),
     updatedBy: userId,
   };
-  
+
   // Recalculer les montants si les lignes ont changé
   if (updates.lignes) {
     updated.lignes = updates.lignes.map((ligne) => ({
@@ -295,10 +307,10 @@ export function updateInvoice(id: string, updates: Partial<Invoice>, userId: str
     updated.montantTVA = amounts.montantTVA;
     updated.montantTTC = amounts.montantTTC;
   }
-  
+
   all[index] = updated;
   saveInvoices(all);
-  
+
   return updated;
 }
 
@@ -311,7 +323,7 @@ export function markInvoiceAsPaid(
   userId: string,
   paymentDetails?: Invoice['paymentDetails'],
   paymentAttachment?: Invoice['paymentAttachment'],
-  paidAmount?: number,
+  paidAmount?: number
 ): Invoice | null {
   const invoice = getInvoiceById(id);
   if (!invoice) return null;
@@ -336,16 +348,20 @@ export function markInvoiceAsPaid(
 
   const payments = [...(invoice.payments || []), paymentEntry];
 
-  return updateInvoice(id, {
-    statutPaiement: finalStatus,
-    modeReglement,
-    datePaiement: finalStatus === 'Payé' ? paymentEntry.date : invoice.datePaiement,
-    paymentDetails,
-    paymentAttachment,
-    montantEncaisse: nextEncaisse,
-    soldeRestant: nextRemaining,
-    payments,
-  }, userId);
+  return updateInvoice(
+    id,
+    {
+      statutPaiement: finalStatus,
+      modeReglement,
+      datePaiement: finalStatus === 'Payé' ? paymentEntry.date : invoice.datePaiement,
+      paymentDetails,
+      paymentAttachment,
+      montantEncaisse: nextEncaisse,
+      soldeRestant: nextRemaining,
+      payments,
+    },
+    userId
+  );
 }
 
 /**
@@ -353,10 +369,10 @@ export function markInvoiceAsPaid(
  */
 export function deleteInvoice(id: string): boolean {
   const all = getAllInvoices();
-  const filtered = all.filter(inv => inv.id !== id);
-  
+  const filtered = all.filter((inv) => inv.id !== id);
+
   if (filtered.length === all.length) return false;
-  
+
   saveInvoices(filtered);
   return true;
 }
@@ -366,11 +382,13 @@ export function deleteInvoice(id: string): boolean {
  */
 export function getInvoiceStats(): InvoiceStats {
   const invoices = getAllInvoices();
-  
-  const payees = invoices.filter(inv => inv.statutPaiement === 'Payé');
-  const enAttente = invoices.filter(inv => inv.statutPaiement === 'En attente' || inv.statutPaiement === 'Partiellement payé');
-  const nonPayees = invoices.filter(inv => inv.statutPaiement === 'Non payé');
-  
+
+  const payees = invoices.filter((inv) => inv.statutPaiement === 'Payé');
+  const enAttente = invoices.filter(
+    (inv) => inv.statutPaiement === 'En attente' || inv.statutPaiement === 'Partiellement payé'
+  );
+  const nonPayees = invoices.filter((inv) => inv.statutPaiement === 'Non payé');
+
   return {
     totalFactures: invoices.length,
     totalMontantHT: invoices.reduce((sum, inv) => sum + inv.montantHT, 0),
@@ -395,23 +413,23 @@ export function generateInvoiceFromBSD(
   userId: string
 ): Invoice | null {
   const allBSD = getAllBSD();
-  const bsd = allBSD.find(b => b.id === bsdId);
-  
+  const bsd = allBSD.find((b) => b.id === bsdId);
+
   if (!bsd || !bsd.section9Complete) {
     console.error('BSD non trouvé ou section 9 non complète');
     return null;
   }
-  
+
   // Vérifier si une facture n'existe pas déjà pour ce BSD
-  const existing = getAllInvoices().find(inv => inv.bsdReference === bsd.numeroBSDS);
+  const existing = getAllInvoices().find((inv) => inv.bsdReference === bsd.numeroBSDS);
   if (existing) {
     console.warn('Une facture existe déjà pour ce BSD');
     return existing;
   }
-  
+
   // Créer la ligne de facturation
   const totalHT = bsd.quantite * prixUnitaireHT;
-  
+
   const invoiceData: NewInvoiceData = {
     clientId: bsd.client,
     clientNom: bsd.client,
@@ -426,11 +444,11 @@ export function generateInvoiceFromBSD(
         unite: bsd.unite,
         prixUnitaireHT,
         totalHT,
-      }
+      },
     ],
     notes: `Facture générée automatiquement suite à la validation du BSD ${bsd.numeroBSDS}`,
   };
-  
+
   return createInvoice(invoiceData, userId);
 }
 
@@ -506,7 +524,7 @@ export async function generateInvoicePDF(invoiceId: string): Promise<void> {
         'FAST'
       );
       if ((doc as any).setGState) {
-        doc.setGState(new ((doc as any).GState)({ opacity: 1 }));
+        doc.setGState(new (doc as any).GState({ opacity: 1 }));
       }
     } catch {
       doc.setFont('helvetica', 'bold');
@@ -554,13 +572,22 @@ export async function generateInvoicePDF(invoiceId: string): Promise<void> {
   doc.setFont('helvetica', 'normal');
   (doc as any).setTextColor(...(darkText as any[]));
   doc.text(invoice.numeroFacture, margin + 12, infoBoxTop + 18);
-  doc.text(`Date : ${new Date(invoice.date).toLocaleDateString('fr-FR')}`, margin + 12, infoBoxTop + 24);
+  doc.text(
+    `Date : ${new Date(invoice.date).toLocaleDateString('fr-FR')}`,
+    margin + 12,
+    infoBoxTop + 24
+  );
   doc.setFont('helvetica', 'bold');
   (doc as any).setTextColor(...(primary as [number, number, number]));
   doc.text('Échéance', pageWidth - margin, infoBoxTop + 12, { align: 'right' });
   doc.setFont('helvetica', 'normal');
   (doc as any).setTextColor(...(darkText as [number, number, number]));
-  doc.text(new Date(invoice.dateEcheance).toLocaleDateString('fr-FR'), pageWidth - margin, infoBoxTop + 18, { align: 'right' });
+  doc.text(
+    new Date(invoice.dateEcheance).toLocaleDateString('fr-FR'),
+    pageWidth - margin,
+    infoBoxTop + 18,
+    { align: 'right' }
+  );
   doc.text(invoiceReference, pageWidth - margin, infoBoxTop + 24, { align: 'right' });
 
   const clientTop = infoBoxTop + infoBoxHeight + 10;
@@ -608,7 +635,10 @@ export async function generateInvoicePDF(invoiceId: string): Promise<void> {
   const descriptionWidth = xQty - xDesignation - 6;
 
   invoice.lignes.forEach((ligne: InvoiceLine, index: number) => {
-    const descriptionLines = doc.splitTextToSize(String(ligne.description ?? '—'), descriptionWidth);
+    const descriptionLines = doc.splitTextToSize(
+      String(ligne.description ?? '—'),
+      descriptionWidth
+    );
     const rowHeight = Math.max(6, descriptionLines.length * 5.5);
     const pageInnerBottom = pageHeight - footerBandHeight - 10;
 
@@ -668,9 +698,14 @@ export async function generateInvoicePDF(invoiceId: string): Promise<void> {
   doc.setFont('helvetica', 'normal');
   doc.setFontSize(8);
   (doc as any).setTextColor(...(mutedText as [number, number, number]));
-  doc.text('Scannez ce QR code pour valider la facture sur IVOS.', leftCellX + 4, footerCellTop + qrSide + 24, {
-    maxWidth: leftCellWidth - 8,
-  });
+  doc.text(
+    'Scannez ce QR code pour valider la facture sur IVOS.',
+    leftCellX + 4,
+    footerCellTop + qrSide + 24,
+    {
+      maxWidth: leftCellWidth - 8,
+    }
+  );
 
   const totalsLabelX = rightCellX + 4;
   const totalsValueX = rightCellX + rightCellWidth - 4;
@@ -717,9 +752,14 @@ export async function generateInvoicePDF(invoiceId: string): Promise<void> {
   doc.setFont('helvetica', 'normal');
   doc.setFontSize(8.5);
   (doc as any).setTextColor(...(mutedText as [number, number, number]));
-  doc.text(`${amountInWords.charAt(0).toUpperCase() + amountInWords.slice(1)} (${purgerEtFormatFCFA(invoice.montantTTC)})`, rightCellX + 5, arrestBoxTop + 16, {
-    maxWidth: rightCellWidth - 14,
-  });
+  doc.text(
+    `${amountInWords.charAt(0).toUpperCase() + amountInWords.slice(1)} (${purgerEtFormatFCFA(invoice.montantTTC)})`,
+    rightCellX + 5,
+    arrestBoxTop + 16,
+    {
+      maxWidth: rightCellWidth - 14,
+    }
+  );
 
   function addFooter() {
     const footerTop = pageHeight - footerBandHeight;
@@ -728,7 +768,8 @@ export async function generateInvoicePDF(invoiceId: string): Promise<void> {
     doc.setFont('helvetica', 'normal');
     doc.setFontSize(7.5);
     doc.setTextColor(255, 255, 255);
-    const footerText = 'IVOS SARL — Capital Social: 10 000 000 FCFA — NINEA: 008765432 2G3 — RC: SN.DKR.2017.B.1234   Immeuble Horizon, Les Mamelles, Dakar, Sénégal — Contact: contact@ivos.sn';
+    const footerText =
+      'IVOS SARL — Capital Social: 10 000 000 FCFA — NINEA: 008765432 2G3 — RC: SN.DKR.2017.B.1234   Immeuble Horizon, Les Mamelles, Dakar, Sénégal — Contact: contact@ivos.sn';
     doc.text(footerText, pageWidth / 2, footerTop + 10, {
       align: 'center',
       maxWidth: contentWidth,

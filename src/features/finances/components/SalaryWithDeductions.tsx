@@ -1,4 +1,4 @@
-import React from "react";
+import React from 'react';
 import { formatCleanAmount } from '../../../utils/formatCleanAmount';
 
 interface SalaryDetail {
@@ -11,21 +11,21 @@ interface SalaryDetail {
 
 const salaries: SalaryDetail[] = [
   {
-    employee: "Alice Dupont",
+    employee: 'Alice Dupont',
     baseSalary: 2500_000,
     advance: 800_000,
     bonus: 300_000,
     loanMonthly: 100_000,
   },
   {
-    employee: "Jean Martin",
+    employee: 'Jean Martin',
     baseSalary: 2200_000,
     advance: 600_000,
     bonus: 150_000,
     loanMonthly: 75_000,
   },
   {
-    employee: "Sophie Bernard",
+    employee: 'Sophie Bernard',
     baseSalary: 2800_000,
     advance: 1000_000,
     bonus: 400_000,
@@ -35,16 +35,22 @@ const salaries: SalaryDetail[] = [
 
 const SalaryWithDeductions: React.FC = () => {
   return (
-    <div className="overflow-x-auto rounded-lg border border-slate-200 bg-white shadow-sm p-4">
+    <div className="overflow-x-auto rounded-lg border border-slate-200 bg-white p-4 shadow-sm">
       <table className="min-w-full divide-y divide-slate-200">
         <thead className="bg-slate-50">
           <tr>
             <th className="px-4 py-2 text-left text-xs font-semibold text-slate-600">Employé</th>
-            <th className="px-4 py-2 text-left text-xs font-semibold text-slate-600">Salaire de Base</th>
+            <th className="px-4 py-2 text-left text-xs font-semibold text-slate-600">
+              Salaire de Base
+            </th>
             <th className="px-4 py-2 text-left text-xs font-semibold text-slate-600">Acomptes</th>
             <th className="px-4 py-2 text-left text-xs font-semibold text-slate-600">Primes</th>
-            <th className="px-4 py-2 text-left text-xs font-semibold text-slate-600">Retenue sur prêt</th>
-            <th className="px-4 py-2 text-left text-xs font-semibold text-slate-600">Net à Payer</th>
+            <th className="px-4 py-2 text-left text-xs font-semibold text-slate-600">
+              Retenue sur prêt
+            </th>
+            <th className="px-4 py-2 text-left text-xs font-semibold text-slate-600">
+              Net à Payer
+            </th>
           </tr>
         </thead>
         <tbody className="divide-y divide-slate-100">
@@ -54,13 +60,25 @@ const SalaryWithDeductions: React.FC = () => {
             return (
               <tr key={idx} className="hover:bg-slate-50">
                 <td className="px-4 py-2 text-sm text-slate-700">{row.employee}</td>
-                <td className="px-4 py-2 text-sm text-slate-700">{formatCleanAmount(row.baseSalary, 'FCFA')}</td>
-                <td className="px-4 py-2 text-sm text-slate-700">{formatCleanAmount(row.advance, 'FCFA')}</td>
-                <td className="px-4 py-2 text-sm text-slate-700">{formatCleanAmount(row.bonus, 'FCFA')}</td>
-                <td className="px-4 py-2 text-sm text-amber-700 font-semibold">
-                  {loan > 0 ? `- ${formatCleanAmount(loan, 'FCFA')}` : <span className="text-slate-400">—</span>}
+                <td className="px-4 py-2 text-sm text-slate-700">
+                  {formatCleanAmount(row.baseSalary, 'FCFA')}
                 </td>
-                <td className="px-4 py-2 text-sm font-semibold text-emerald-700">{formatCleanAmount(netPay, 'FCFA')}</td>
+                <td className="px-4 py-2 text-sm text-slate-700">
+                  {formatCleanAmount(row.advance, 'FCFA')}
+                </td>
+                <td className="px-4 py-2 text-sm text-slate-700">
+                  {formatCleanAmount(row.bonus, 'FCFA')}
+                </td>
+                <td className="px-4 py-2 text-sm font-semibold text-amber-700">
+                  {loan > 0 ? (
+                    `- ${formatCleanAmount(loan, 'FCFA')}`
+                  ) : (
+                    <span className="text-slate-400">—</span>
+                  )}
+                </td>
+                <td className="px-4 py-2 text-sm font-semibold text-emerald-700">
+                  {formatCleanAmount(netPay, 'FCFA')}
+                </td>
               </tr>
             );
           })}

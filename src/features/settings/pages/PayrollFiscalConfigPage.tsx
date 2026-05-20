@@ -1,7 +1,21 @@
 import { useEffect, useMemo, useState } from 'react';
-import { ChevronDown, HelpCircle, Pencil, Save, SlidersHorizontal, Globe2, Percent, ToggleLeft } from 'lucide-react';
-import { payrollSettingsStore, type PayrollBracket, type PayrollCountrySettings, type PayrollSettings } from '../../finances/services/payrollSettingsStore';
-import { DEFAULT_COUNTRY_ALPHA2 } from '../../../shared/constants'
+import {
+  ChevronDown,
+  HelpCircle,
+  Pencil,
+  Save,
+  SlidersHorizontal,
+  Globe2,
+  Percent,
+  ToggleLeft,
+} from 'lucide-react';
+import {
+  payrollSettingsStore,
+  type PayrollBracket,
+  type PayrollCountrySettings,
+  type PayrollSettings,
+} from '../../finances/services/payrollSettingsStore';
+import { DEFAULT_COUNTRY_ALPHA2 } from '../../../shared/constants';
 
 type CountryCode = 'SN' | 'CI' | 'GN';
 
@@ -23,14 +37,49 @@ const RATE_ROWS: RateRow[] = [
   { key: 'ipresCadre', label: 'IPRES ou CNPS Cadre', category: 'Retenue salariale', unit: '%' },
   { key: 'ipm', label: 'IPM ou Santé', category: 'Retenue salariale', unit: '%' },
   { key: 'cfce', label: 'CFCE ou VRS', category: 'Retenue salariale', unit: '%' },
-  { key: 'ipresGeneralEmployer', label: 'Part patronale Général', category: 'Charge patronale', unit: '%' },
-  { key: 'ipresCadreEmployer', label: 'Part patronale Cadre', category: 'Charge patronale', unit: '%' },
+  {
+    key: 'ipresGeneralEmployer',
+    label: 'Part patronale Général',
+    category: 'Charge patronale',
+    unit: '%',
+  },
+  {
+    key: 'ipresCadreEmployer',
+    label: 'Part patronale Cadre',
+    category: 'Charge patronale',
+    unit: '%',
+  },
   { key: 'tfpEmployer', label: 'TFP (part patronale)', category: 'Charge patronale', unit: '%' },
-  { key: 'cssPrestationsFamiliales', label: 'Prestations familiales', category: 'Charge patronale', unit: '%' },
-  { key: 'cssAccidentTravail', label: 'Accidents du travail', category: 'Charge patronale', unit: '%' },
-  { key: 'transportExemptCap', label: 'Plafond transport exonéré', category: 'Plafond', unit: 'montant' },
-  { key: 'housingExemptCap', label: 'Plafond logement exonéré', category: 'Plafond', unit: 'montant' },
-  { key: 'ipresGeneralCap', label: 'Plafond cotisable général', category: 'Plafond', unit: 'montant' },
+  {
+    key: 'cssPrestationsFamiliales',
+    label: 'Prestations familiales',
+    category: 'Charge patronale',
+    unit: '%',
+  },
+  {
+    key: 'cssAccidentTravail',
+    label: 'Accidents du travail',
+    category: 'Charge patronale',
+    unit: '%',
+  },
+  {
+    key: 'transportExemptCap',
+    label: 'Plafond transport exonéré',
+    category: 'Plafond',
+    unit: 'montant',
+  },
+  {
+    key: 'housingExemptCap',
+    label: 'Plafond logement exonéré',
+    category: 'Plafond',
+    unit: 'montant',
+  },
+  {
+    key: 'ipresGeneralCap',
+    label: 'Plafond cotisable général',
+    category: 'Plafond',
+    unit: 'montant',
+  },
   { key: 'ipresCadreCap', label: 'Plafond cotisable cadre', category: 'Plafond', unit: 'montant' },
 ];
 
@@ -50,15 +99,21 @@ const RATE_HELPERS: Partial<Record<keyof PayrollCountrySettings, string>> = {
   ipresCadreCap: 'Salaire maximum pris en compte pour cotisation cadre.',
 };
 
-function getRateLabel(key: keyof PayrollCountrySettings, country: CountryCode, defaultLabel: string) {
+function getRateLabel(
+  key: keyof PayrollCountrySettings,
+  country: CountryCode,
+  defaultLabel: string
+) {
   if (country !== 'GN') return defaultLabel;
-  if (key === 'ipresGeneral' || key === 'ipresCadre') return defaultLabel.replace('IPRES ou CNPS', 'INPS');
+  if (key === 'ipresGeneral' || key === 'ipresCadre')
+    return defaultLabel.replace('IPRES ou CNPS', 'INPS');
   if (key === 'cfce') return 'RTS salarié (si applicable)';
   return defaultLabel;
 }
 
 const SWITCH_HELPERS = {
-  globalAutoFiscal: 'Active le calcul automatique des retenues et cotisations sur toutes les fiches.',
+  globalAutoFiscal:
+    'Active le calcul automatique des retenues et cotisations sur toutes les fiches.',
   useTransportExemptCap: 'Si actif, le montant transport exonéré est limité au plafond du pays.',
   useFiscalParts: 'Si actif, l’impôt tient compte des parts familiales (époux, enfants).',
 } as const;
@@ -99,8 +154,11 @@ export default function PayrollFiscalConfigPage() {
   };
 
   const saveRateEdit = (row: RateRow) => {
-    const value = row.unit === '%' ? parseAmount(draftRateValue) / 100 : parseAmount(draftRateValue);
-    payrollSettingsStore.updateCountry(country, { [row.key]: value } as Partial<PayrollCountrySettings>);
+    const value =
+      row.unit === '%' ? parseAmount(draftRateValue) / 100 : parseAmount(draftRateValue);
+    payrollSettingsStore.updateCountry(country, {
+      [row.key]: value,
+    } as Partial<PayrollCountrySettings>);
     setEditingRate(null);
     setDraftRateValue('');
   };
@@ -130,44 +188,56 @@ export default function PayrollFiscalConfigPage() {
 
   return (
     <div className="w-full space-y-6">
-      <div className="bg-gradient-to-r from-[#0f2942] via-[#1f3f6a] to-[#0f766e] rounded-2xl p-6 text-white shadow-lg">
+      <div className="rounded-2xl bg-gradient-to-r from-[#0f2942] via-[#1f3f6a] to-[#0f766e] p-6 text-white shadow-lg">
         <div className="flex items-center gap-3">
-          <div className="w-12 h-12 rounded-xl bg-white/15 flex items-center justify-center">
+          <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-white/15">
             <SlidersHorizontal className="h-6 w-6" />
           </div>
           <div>
             <h1 className="text-2xl font-bold tracking-tight">Configuration Paie et Fiscalité</h1>
-            <p className="text-cyan-100 text-sm mt-0.5">Paramétrage guidé pour utilisateurs non-comptables, pays par pays.</p>
+            <p className="mt-0.5 text-sm text-cyan-100">
+              Paramétrage guidé pour utilisateurs non-comptables, pays par pays.
+            </p>
           </div>
         </div>
       </div>
 
-      <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-5">
+      <div className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm">
         <div className="flex items-center justify-between gap-4">
           <div>
             <h2 className="text-lg font-bold text-gray-900">Sélecteur de Pays</h2>
-            <p className="text-sm text-gray-500 mt-1">Choisissez un pays pour mettre à jour instantanément les taux et tranches ci-dessous.</p>
+            <p className="mt-1 text-sm text-gray-500">
+              Choisissez un pays pour mettre à jour instantanément les taux et tranches ci-dessous.
+            </p>
           </div>
-                  <div className="relative w-full max-w-xs">
-                    {/* Sénégal-only selector: disable other country choices */}
-                    <select value={country} onChange={(event) => setCountry(event.target.value as CountryCode)} className="appearance-none w-full rounded-xl border border-gray-200 bg-gray-50 py-2.5 pl-10 pr-9 text-sm font-semibold text-gray-800">
-                      {([DEFAULT_COUNTRY_ALPHA2] as CountryCode[]).map((code) => (
-                        <option key={code} value={code}>{COUNTRY_LABELS[code]}</option>
-                      ))}
-                    </select>
-                    <Globe2 className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
-                    <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
-                  </div>
+          <div className="relative w-full max-w-xs">
+            {/* Sénégal-only selector: disable other country choices */}
+            <select
+              value={country}
+              onChange={(event) => setCountry(event.target.value as CountryCode)}
+              className="w-full appearance-none rounded-xl border border-gray-200 bg-gray-50 py-2.5 pl-10 pr-9 text-sm font-semibold text-gray-800"
+            >
+              {([DEFAULT_COUNTRY_ALPHA2] as CountryCode[]).map((code) => (
+                <option key={code} value={code}>
+                  {COUNTRY_LABELS[code]}
+                </option>
+              ))}
+            </select>
+            <Globe2 className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
+            <ChevronDown className="absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
+          </div>
         </div>
       </div>
 
-      <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
-        <div className="px-5 py-4 border-b border-gray-100 flex items-center justify-between">
+      <div className="overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm">
+        <div className="flex items-center justify-between border-b border-gray-100 px-5 py-4">
           <div>
             <h2 className="text-lg font-bold text-gray-900">Tableau des Taux Éditable</h2>
-            <p className="text-sm text-gray-500 mt-1">Utilisez Modifier sur chaque ligne pour éviter les erreurs de saisie.</p>
+            <p className="mt-1 text-sm text-gray-500">
+              Utilisez Modifier sur chaque ligne pour éviter les erreurs de saisie.
+            </p>
           </div>
-          <span className="inline-flex items-center gap-1 text-xs font-semibold text-indigo-700 bg-indigo-50 px-3 py-1 rounded-full">
+          <span className="inline-flex items-center gap-1 rounded-full bg-indigo-50 px-3 py-1 text-xs font-semibold text-indigo-700">
             <Percent className="h-3.5 w-3.5" /> {COUNTRY_LABELS[country]}
           </span>
         </div>
@@ -175,10 +245,18 @@ export default function PayrollFiscalConfigPage() {
           <table className="min-w-full text-sm">
             <thead className="bg-slate-50">
               <tr>
-                <th className="px-5 py-3 text-left text-[11px] uppercase tracking-wider text-slate-500 font-semibold">Paramètre</th>
-                <th className="px-5 py-3 text-left text-[11px] uppercase tracking-wider text-slate-500 font-semibold">Type</th>
-                <th className="px-5 py-3 text-right text-[11px] uppercase tracking-wider text-slate-500 font-semibold">Valeur</th>
-                <th className="px-5 py-3 text-right text-[11px] uppercase tracking-wider text-slate-500 font-semibold">Action</th>
+                <th className="px-5 py-3 text-left text-[11px] font-semibold uppercase tracking-wider text-slate-500">
+                  Paramètre
+                </th>
+                <th className="px-5 py-3 text-left text-[11px] font-semibold uppercase tracking-wider text-slate-500">
+                  Type
+                </th>
+                <th className="px-5 py-3 text-right text-[11px] font-semibold uppercase tracking-wider text-slate-500">
+                  Valeur
+                </th>
+                <th className="px-5 py-3 text-right text-[11px] font-semibold uppercase tracking-wider text-slate-500">
+                  Action
+                </th>
               </tr>
             </thead>
             <tbody>
@@ -190,33 +268,47 @@ export default function PayrollFiscalConfigPage() {
                     <td className="px-5 py-3">
                       <div className="flex items-start gap-2">
                         <div>
-                          <p className="font-semibold text-gray-900">{getRateLabel(row.key, country, row.label)}</p>
-                          <p className="text-xs text-gray-500 mt-0.5">{RATE_HELPERS[row.key]}</p>
+                          <p className="font-semibold text-gray-900">
+                            {getRateLabel(row.key, country, row.label)}
+                          </p>
+                          <p className="mt-0.5 text-xs text-gray-500">{RATE_HELPERS[row.key]}</p>
                         </div>
-                        <span title={RATE_HELPERS[row.key]} className="text-gray-400 mt-0.5">
+                        <span title={RATE_HELPERS[row.key]} className="mt-0.5 text-gray-400">
                           <HelpCircle className="h-3.5 w-3.5" />
                         </span>
                       </div>
                     </td>
                     <td className="px-5 py-3 text-gray-600">{row.category}</td>
-                    <td className="px-5 py-3 text-right text-gray-700 tabular-nums">
+                    <td className="px-5 py-3 text-right tabular-nums text-gray-700">
                       {isEditing ? (
                         <input
                           type="text"
                           inputMode="decimal"
                           value={draftRateValue}
                           onChange={(event) => setDraftRateValue(event.target.value)}
-                          className="w-36 px-3 py-1.5 rounded-lg border border-gray-200 text-right"
+                          className="w-36 rounded-lg border border-gray-200 px-3 py-1.5 text-right"
                         />
-                      ) : row.unit === '%' ? `${formatPercent(value)}%` : `${formatAmount(value)} FCFA`}
+                      ) : row.unit === '%' ? (
+                        `${formatPercent(value)}%`
+                      ) : (
+                        `${formatAmount(value)} FCFA`
+                      )}
                     </td>
                     <td className="px-5 py-3 text-right">
                       {isEditing ? (
-                        <button type="button" onClick={() => saveRateEdit(row)} className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-emerald-600 text-white text-xs font-semibold hover:bg-emerald-700">
+                        <button
+                          type="button"
+                          onClick={() => saveRateEdit(row)}
+                          className="inline-flex items-center gap-1 rounded-lg bg-emerald-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-emerald-700"
+                        >
                           <Save className="h-3.5 w-3.5" /> Enregistrer
                         </button>
                       ) : (
-                        <button type="button" onClick={() => startRateEdit(row)} className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-indigo-50 text-indigo-700 text-xs font-semibold hover:bg-indigo-100">
+                        <button
+                          type="button"
+                          onClick={() => startRateEdit(row)}
+                          className="inline-flex items-center gap-1 rounded-lg bg-indigo-50 px-3 py-1.5 text-xs font-semibold text-indigo-700 hover:bg-indigo-100"
+                        >
                           <Pencil className="h-3.5 w-3.5" /> Modifier
                         </button>
                       )}
@@ -229,28 +321,57 @@ export default function PayrollFiscalConfigPage() {
         </div>
 
         <div className="border-t border-gray-100 px-5 py-4">
-          <h3 className="text-sm font-bold text-gray-900 mb-3">Tranches d'impôts</h3>
+          <h3 className="mb-3 text-sm font-bold text-gray-900">Tranches d'impôts</h3>
           <div className="space-y-2">
             {countrySettings.irBrackets.map((bracket, index) => {
               const isEditing = editingBracketIndex === index;
               return (
-                <div key={`${country}-bracket-${index}`} className="grid grid-cols-[1fr_140px_auto] gap-2 items-center">
+                <div
+                  key={`${country}-bracket-${index}`}
+                  className="grid grid-cols-[1fr_140px_auto] items-center gap-2"
+                >
                   {isEditing ? (
-                    <input type="text" value={draftBracketLimit} onChange={(event) => setDraftBracketLimit(event.target.value)} placeholder="Plafond" className="px-3 py-2 rounded-lg border border-gray-200 text-right" />
+                    <input
+                      type="text"
+                      value={draftBracketLimit}
+                      onChange={(event) => setDraftBracketLimit(event.target.value)}
+                      placeholder="Plafond"
+                      className="rounded-lg border border-gray-200 px-3 py-2 text-right"
+                    />
                   ) : (
-                    <div className="px-3 py-2 rounded-lg bg-gray-50 text-sm text-right text-gray-700 tabular-nums">{Number.isFinite(bracket.upTo) ? `${formatAmount(bracket.upTo)} FCFA` : 'Sans plafond'}</div>
+                    <div className="rounded-lg bg-gray-50 px-3 py-2 text-right text-sm tabular-nums text-gray-700">
+                      {Number.isFinite(bracket.upTo)
+                        ? `${formatAmount(bracket.upTo)} FCFA`
+                        : 'Sans plafond'}
+                    </div>
                   )}
                   {isEditing ? (
-                    <input type="text" value={draftBracketRate} onChange={(event) => setDraftBracketRate(event.target.value)} placeholder="Taux %" className="px-3 py-2 rounded-lg border border-gray-200 text-right" />
+                    <input
+                      type="text"
+                      value={draftBracketRate}
+                      onChange={(event) => setDraftBracketRate(event.target.value)}
+                      placeholder="Taux %"
+                      className="rounded-lg border border-gray-200 px-3 py-2 text-right"
+                    />
                   ) : (
-                    <div className="px-3 py-2 rounded-lg bg-gray-50 text-sm text-right text-gray-700 tabular-nums">{formatPercent(bracket.rate)}%</div>
+                    <div className="rounded-lg bg-gray-50 px-3 py-2 text-right text-sm tabular-nums text-gray-700">
+                      {formatPercent(bracket.rate)}%
+                    </div>
                   )}
                   {isEditing ? (
-                    <button type="button" onClick={saveBracketEdit} className="inline-flex items-center justify-center gap-1 px-3 py-2 rounded-lg bg-emerald-600 text-white text-xs font-semibold hover:bg-emerald-700">
+                    <button
+                      type="button"
+                      onClick={saveBracketEdit}
+                      className="inline-flex items-center justify-center gap-1 rounded-lg bg-emerald-600 px-3 py-2 text-xs font-semibold text-white hover:bg-emerald-700"
+                    >
                       <Save className="h-3.5 w-3.5" /> Enregistrer
                     </button>
                   ) : (
-                    <button type="button" onClick={() => startBracketEdit(index, bracket)} className="inline-flex items-center justify-center gap-1 px-3 py-2 rounded-lg bg-indigo-50 text-indigo-700 text-xs font-semibold hover:bg-indigo-100">
+                    <button
+                      type="button"
+                      onClick={() => startBracketEdit(index, bracket)}
+                      className="inline-flex items-center justify-center gap-1 rounded-lg bg-indigo-50 px-3 py-2 text-xs font-semibold text-indigo-700 hover:bg-indigo-100"
+                    >
                       <Pencil className="h-3.5 w-3.5" /> Modifier
                     </button>
                   )}
@@ -261,12 +382,14 @@ export default function PayrollFiscalConfigPage() {
         </div>
       </div>
 
-      <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-5">
+      <div className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm">
         <div className="mb-4">
           <h2 className="text-lg font-bold text-gray-900">Zone de Contrôle</h2>
-          <p className="text-sm text-gray-500 mt-1">Interrupteurs maîtres pour piloter le comportement fiscal sur toute l'application.</p>
+          <p className="mt-1 text-sm text-gray-500">
+            Interrupteurs maîtres pour piloter le comportement fiscal sur toute l'application.
+          </p>
         </div>
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-3">
+        <div className="grid grid-cols-1 gap-3 lg:grid-cols-3">
           <ToggleCard
             title="Calcul auto fiscalité"
             description="Calcule automatiquement IR et cotisations selon les paramètres du pays."
@@ -294,13 +417,25 @@ export default function PayrollFiscalConfigPage() {
   );
 }
 
-function ToggleCard({ title, description, helper, active, onToggle }: { title: string; description: string; helper: string; active: boolean; onToggle: () => void }) {
+function ToggleCard({
+  title,
+  description,
+  helper,
+  active,
+  onToggle,
+}: {
+  title: string;
+  description: string;
+  helper: string;
+  active: boolean;
+  onToggle: () => void;
+}) {
   return (
     <div className="rounded-2xl border border-gray-200 bg-gray-50 px-4 py-4">
       <div className="flex items-start justify-between gap-3">
         <div>
           <p className="text-sm font-bold text-gray-900">{title}</p>
-          <p className="text-xs text-gray-500 mt-1 leading-relaxed">{description}</p>
+          <p className="mt-1 text-xs leading-relaxed text-gray-500">{description}</p>
         </div>
         <button
           type="button"
@@ -309,15 +444,19 @@ function ToggleCard({ title, description, helper, active, onToggle }: { title: s
           onClick={onToggle}
           className={`relative inline-flex h-7 w-12 items-center rounded-full transition-colors ${active ? 'bg-emerald-600' : 'bg-gray-300'}`}
         >
-          <span className={`inline-block h-5 w-5 transform rounded-full bg-white transition-transform ${active ? 'translate-x-6' : 'translate-x-1'}`} />
+          <span
+            className={`inline-block h-5 w-5 transform rounded-full bg-white transition-transform ${active ? 'translate-x-6' : 'translate-x-1'}`}
+          />
         </button>
       </div>
-      <div className="mt-2 rounded-lg bg-white/70 border border-gray-200 px-2.5 py-2 text-xs text-gray-600 leading-relaxed">
+      <div className="mt-2 rounded-lg border border-gray-200 bg-white/70 px-2.5 py-2 text-xs leading-relaxed text-gray-600">
         <span className="font-semibold text-gray-700">Aide:</span> {helper}
       </div>
       <div className="mt-3 flex items-center gap-2 text-[11px] font-semibold uppercase tracking-wider">
         <ToggleLeft className={`h-4 w-4 ${active ? 'text-emerald-600' : 'text-gray-400'}`} />
-        <span className={active ? 'text-emerald-700' : 'text-gray-500'}>{active ? 'Activé' : 'Désactivé'}</span>
+        <span className={active ? 'text-emerald-700' : 'text-gray-500'}>
+          {active ? 'Activé' : 'Désactivé'}
+        </span>
       </div>
     </div>
   );

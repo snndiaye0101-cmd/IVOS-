@@ -321,7 +321,7 @@ export function initMockLocalStorage() {
  * Nettoyer localStorage
  */
 export function clearMockLocalStorage() {
-  Object.keys(mockLocalStorageData).forEach(key => {
+  Object.keys(mockLocalStorageData).forEach((key) => {
     localStorage.removeItem(key);
   });
 }

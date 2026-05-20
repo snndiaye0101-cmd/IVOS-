@@ -7,15 +7,15 @@
 // Service de gestion des Bordereaux de Déchets
 // ============================================
 
-import { supabase } from '@shared/services/supabaseClient'
-import { withCircuitBreaker } from '@shared/services/circuitBreakerService'
+import { supabase } from '@shared/services/supabaseClient';
+import { withCircuitBreaker } from '@shared/services/circuitBreakerService';
 import type {
   WasteTrackingForm,
   CreateWasteTrackingFormInput,
   UpdateWasteTrackingFormInput,
   SignatureContext,
-} from '../types/wasteForm.types'
-import { AcceptanceStatus } from '@shared/types/enums'
+} from '../types/wasteForm.types';
+import { AcceptanceStatus } from '@shared/types/enums';
 // États BSD personnalisés
 export type BSDStatus =
   | 'EN_ROUTE'
@@ -26,7 +26,7 @@ export type BSDStatus =
 
 // Exemple de taxes par type de déchet (à adapter selon la vraie source)
 const TAXES_PAR_TYPE: Record<string, number> = {
-  'DASRI': 150, // €/tonne
+  DASRI: 150, // €/tonne
   'Boues pétrolières': 80,
   'Produits pharmaceutiques': 200,
   'Déchets industriels': 100,
@@ -41,11 +41,11 @@ export function updateBSDStatus({
   wasteType,
   poidsTonne,
 }: {
-  currentStatus: BSDStatus,
-  nextStatus: BSDStatus,
-  userRole: string,
-  wasteType: string,
-  poidsTonne: number,
+  currentStatus: BSDStatus;
+  nextStatus: BSDStatus;
+  userRole: string;
+  wasteType: string;
+  poidsTonne: number;
 }): { newStatus: BSDStatus; montantTotal?: number; error?: string } {
   // Contrôle du passage à FACTURE
   if (nextStatus === 'FACTURE') {
@@ -63,11 +63,11 @@ export function updateBSDStatus({
 
 // Récupérer tous les bordereaux (avec filtres)
 export const getWasteForms = async (filters?: {
-  subsidiaryId?: string
-  operationId?: string
-  status?: string
-  startDate?: string
-  endDate?: string
+  subsidiaryId?: string;
+  operationId?: string;
+  status?: string;
+  startDate?: string;
+  endDate?: string;
 }) => {
   let query = supabase
     .from('waste_tracking_forms')
@@ -79,31 +79,29 @@ export const getWasteForms = async (filters?: {
       destination:clients!destination_client_id(company_name)
     `
     )
-    .order('created_at', { ascending: false })
+    .order('created_at', { ascending: false });
 
   if (filters?.subsidiaryId) {
-    query = query.eq('subsidiary_id', filters.subsidiaryId)
+    query = query.eq('subsidiary_id', filters.subsidiaryId);
   }
 
   if (filters?.operationId) {
-    query = query.eq('mission_id', filters.operationId)
+    query = query.eq('mission_id', filters.operationId);
   }
 
   if (filters?.status) {
-    query = query.eq('status', filters.status)
+    query = query.eq('status', filters.status);
   }
 
   if (filters?.startDate && filters?.endDate) {
-    query = query
-      .gte('collection_date', filters.startDate)
-      .lte('collection_date', filters.endDate)
+    query = query.gte('collection_date', filters.startDate).lte('collection_date', filters.endDate);
   }
 
-  const { data, error } = await query
+  const { data, error } = await query;
 
-  if (error) throw error
-  return data as WasteTrackingForm[]
-}
+  if (error) throw error;
+  return data as WasteTrackingForm[];
+};
 
 // Récupérer un bordereau par ID
 export const getWasteFormById = async (id: string) => {
@@ -123,11 +121,11 @@ export const getWasteFormById = async (id: string) => {
     `
     )
     .eq('id', id)
-    .single()
+    .single();
 
-  if (error) throw error
-  return data as WasteTrackingForm
-}
+  if (error) throw error;
+  return data as WasteTrackingForm;
+};
 
 // Créer un nouveau bordereau
 export const createWasteForm = async (input: CreateWasteTrackingFormInput) => {
@@ -136,14 +134,14 @@ export const createWasteForm = async (input: CreateWasteTrackingFormInput) => {
     .from('subsidiaries')
     .select('country_code')
     .eq('id', input.subsidiary_id)
-    .single()
+    .single();
 
-  if (!subsidiary) throw new Error('Filiale introuvable')
+  if (!subsidiary) throw new Error('Filiale introuvable');
 
   // Générer le numéro de bordereau via la fonction SQL
   const { data: formNumber } = await supabase.rpc('generate_form_number', {
     subsidiary_code: subsidiary.country_code,
-  })
+  });
 
   const { data, error } = await supabase
     .from('waste_tracking_forms')
@@ -153,37 +151,34 @@ export const createWasteForm = async (input: CreateWasteTrackingFormInput) => {
       form_version: 1,
     })
     .select()
-    .single()
+    .single();
 
-  if (error) throw error
-  return data as WasteTrackingForm
-}
+  if (error) throw error;
+  return data as WasteTrackingForm;
+};
 
 // Mettre à jour un bordereau
-export const updateWasteForm = async (
-  id: string,
-  input: UpdateWasteTrackingFormInput
-) => {
+export const updateWasteForm = async (id: string, input: UpdateWasteTrackingFormInput) => {
   const { data, error } = await supabase
     .from('waste_tracking_forms')
     .update(input)
     .eq('id', id)
     .select()
-    .single()
+    .single();
 
-  if (error) throw error
-  return data as WasteTrackingForm
-}
+  if (error) throw error;
+  return data as WasteTrackingForm;
+};
 
 // Supprimer un bordereau (soft delete en changeant le statut)
 export const deleteWasteForm = async (id: string) => {
   const { error } = await supabase
     .from('waste_tracking_forms')
     .update({ status: 'cancelled' })
-    .eq('id', id)
+    .eq('id', id);
 
-  if (error) throw error
-}
+  if (error) throw error;
+};
 
 // Sauvegarder une signature
 export const saveSignature = async (
@@ -192,39 +187,37 @@ export const saveSignature = async (
   signatureDataUrl: string
 ) => {
   // 1. Upload de l'image de signature vers Supabase Storage
-  const fileName = `${formId}-${context.signatureType}-${Date.now()}.png`
-  const blob = await (await fetch(signatureDataUrl)).blob()
+  const fileName = `${formId}-${context.signatureType}-${Date.now()}.png`;
+  const blob = await (await fetch(signatureDataUrl)).blob();
 
-  const { error: uploadError } = await supabase.storage
-    .from('signatures')
-    .upload(fileName, blob, {
-      contentType: 'image/png',
-      cacheControl: '3600',
-    })
+  const { error: uploadError } = await supabase.storage.from('signatures').upload(fileName, blob, {
+    contentType: 'image/png',
+    cacheControl: '3600',
+  });
 
-  if (uploadError) throw uploadError
+  if (uploadError) throw uploadError;
 
   // 2. Obtenir l'URL publique
   const {
     data: { publicUrl },
-  } = supabase.storage.from('signatures').getPublicUrl(fileName)
+  } = supabase.storage.from('signatures').getPublicUrl(fileName);
 
   // 3. Mettre à jour le bordereau avec la signature
   const updateData: Partial<WasteTrackingForm> = {
     [`${context.signatureType}_signature_url`]: publicUrl,
     [`${context.signatureType}_signed_by`]: context.signedBy,
     [`${context.signatureType}_signed_at`]: new Date().toISOString(),
-  }
+  };
 
   // Si c'est la signature du transporteur, confirmer la collecte
   if (context.signatureType === 'transporter') {
-    updateData.collection_confirmed_at = new Date().toISOString()
+    updateData.collection_confirmed_at = new Date().toISOString();
   }
 
   // Si c'est la signature de destination, marquer comme accepté
   if (context.signatureType === 'destination') {
-    updateData.acceptance_date = new Date().toISOString()
-    updateData.acceptance_status = AcceptanceStatus.ACCEPTED
+    updateData.acceptance_date = new Date().toISOString();
+    updateData.acceptance_status = AcceptanceStatus.ACCEPTED;
   }
 
   const { data, error } = await supabase
@@ -232,9 +225,9 @@ export const saveSignature = async (
     .update(updateData)
     .eq('id', formId)
     .select()
-    .single()
+    .single();
 
-  if (error) throw error
+  if (error) throw error;
 
   // 4. Enregistrer dans l'historique des signatures
   await supabase.from('signature_logs').insert({
@@ -246,18 +239,18 @@ export const saveSignature = async (
     gps_location: context.gpsLocation
       ? `POINT(${context.gpsLocation.longitude} ${context.gpsLocation.latitude})`
       : null,
-  })
+  });
 
-  return data as WasteTrackingForm
-}
+  return data as WasteTrackingForm;
+};
 
 // Déclencher la génération du PDF via webhook avec circuit breaker
 export const triggerPDFGeneration = async (formId: string) => {
   // Récupérer les données complètes du bordereau
-  const form = await getWasteFormById(formId)
+  const form = await getWasteFormById(formId);
 
   // Appeler le webhook n8n avec circuit breaker protection
-  const webhookUrl = `${import.meta.env.VITE_N8N_WEBHOOK_BASE_URL}${import.meta.env.VITE_N8N_PDF_GENERATION_WEBHOOK}`
+  const webhookUrl = `${import.meta.env.VITE_N8N_WEBHOOK_BASE_URL}${import.meta.env.VITE_N8N_PDF_GENERATION_WEBHOOK}`;
 
   const result = await withCircuitBreaker(
     'pdf-generation-webhook',
@@ -272,13 +265,13 @@ export const triggerPDFGeneration = async (formId: string) => {
           formNumber: form.form_number,
           data: form,
         }),
-      })
+      });
 
       if (!response.ok) {
-        throw new Error(`Webhook returned ${response.status}: ${response.statusText}`)
+        throw new Error(`Webhook returned ${response.status}: ${response.statusText}`);
       }
 
-      return response.json()
+      return response.json();
     },
     {
       failureThreshold: 5,
@@ -287,7 +280,7 @@ export const triggerPDFGeneration = async (formId: string) => {
       retryDelay: 2000,
       maxRetries: 3,
     }
-  )
+  );
 
   // Mettre à jour le bordereau avec l'URL du PDF
   await supabase
@@ -297,7 +290,7 @@ export const triggerPDFGeneration = async (formId: string) => {
       pdf_generated_at: new Date().toISOString(),
       pdf_webhook_triggered: true,
     })
-    .eq('id', formId)
+    .eq('id', formId);
 
   // Logger le webhook
   await supabase.from('webhook_logs').insert({
@@ -309,19 +302,19 @@ export const triggerPDFGeneration = async (formId: string) => {
     response_status: 200,
     response_body: JSON.stringify(result),
     success: true,
-  })
+  });
 
-  return result
-}
+  return result;
+};
 
 // Obtenir les statistiques des bordereaux
 export const getWasteFormStats = async (subsidiaryId: string) => {
   const { data, error } = await supabase.rpc('get_waste_form_stats', {
     subsidiary_id: subsidiaryId,
-  })
+  });
 
-  if (error) throw error
-  return data
-}
+  if (error) throw error;
+  return data;
+};
 
 // Sécurisation : Vérification explicite des permissions sur chaque opération (CRUD), audit des accès, gestion fine des rôles.

@@ -29,7 +29,7 @@ export default function PieChart({ data, title, size = 300, showLegend = true }:
     const ctx = canvas.getContext('2d')!;
     const centerX = size / 2;
     const centerY = size / 2;
-    const radius = (size / 2) - 40;
+    const radius = size / 2 - 40;
 
     // Clear canvas
     ctx.clearRect(0, 0, size, size);
@@ -56,8 +56,8 @@ export default function PieChart({ data, title, size = 300, showLegend = true }:
       // Draw percentage label (if > 5%)
       if (item.percentage > 5) {
         const labelAngle = currentAngle + sliceAngle / 2;
-        const labelX = centerX + (radius * 0.7) * Math.cos(labelAngle);
-        const labelY = centerY + (radius * 0.7) * Math.sin(labelAngle);
+        const labelX = centerX + radius * 0.7 * Math.cos(labelAngle);
+        const labelY = centerY + radius * 0.7 * Math.sin(labelAngle);
 
         ctx.fillStyle = 'white';
         ctx.font = 'bold 16px system-ui, sans-serif';
@@ -82,10 +82,9 @@ export default function PieChart({ data, title, size = 300, showLegend = true }:
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
     ctx.fillText('Total', centerX, centerY - 12);
-    
+
     ctx.font = 'bold 32px system-ui, sans-serif';
     ctx.fillText(formatValue(total), centerX, centerY + 18);
-
   }, [data, size]);
 
   const formatValue = (value: number) => {
@@ -99,32 +98,25 @@ export default function PieChart({ data, title, size = 300, showLegend = true }:
   return (
     <>
       <div className="flex flex-col items-center">
-        {title && (
-          <h3 className="text-lg font-bold text-gray-900 mb-4">{title}</h3>
-        )}
+        {title && <h3 className="mb-4 text-lg font-bold text-gray-900">{title}</h3>}
 
-        <canvas
-          ref={canvasRef}
-          width={size}
-          height={size}
-          className="mb-4"
-        />
+        <canvas ref={canvasRef} width={size} height={size} className="mb-4" />
 
         {showLegend && (
           <div className="w-full space-y-2">
             {data.map((item, index) => (
               <div key={index} className="flex items-center gap-3">
                 <div
-                  className="w-4 h-4 rounded-sm flex-shrink-0"
+                  className="h-4 w-4 flex-shrink-0 rounded-sm"
                   style={{ backgroundColor: item.color }}
                 />
-                <div className="flex-1 flex items-center justify-between">
+                <div className="flex flex-1 items-center justify-between">
                   <span className="text-sm text-gray-700">{item.label}</span>
                   <div className="flex items-center gap-3">
                     <span className="text-sm font-medium text-gray-900">
                       {formatValue(item.value)}
                     </span>
-                    <span className="text-sm text-gray-500 w-12 text-right">
+                    <span className="w-12 text-right text-sm text-gray-500">
                       {Math.round(item.percentage)}%
                     </span>
                   </div>

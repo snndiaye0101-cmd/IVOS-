@@ -10,14 +10,14 @@ export function exportOperationsToPDF(operations: Operation[]) {
   doc.text('Liste des Opérations', 14, 14);
   autoTable(doc, {
     head: [['ID', 'Client', 'Type', 'Responsable', 'Statut', 'Début', 'Fin']],
-    body: filtered.map(m => [
+    body: filtered.map((m) => [
       m.id,
       m.client ?? '',
       m.type ?? '',
       m.responsable ?? '',
       m.status,
       m.heureDebut || '',
-      m.heureFin || ''
+      m.heureFin || '',
     ]),
   });
   doc.save('operations.pdf');

@@ -78,7 +78,7 @@ const FOLDERS: FolderDef[] = [
     bg: 'bg-purple-50',
     border: 'border-purple-200',
     iconBg: 'bg-purple-100',
-    icon: <Scale className="w-6 h-6 text-purple-600" />,
+    icon: <Scale className="h-6 w-6 text-purple-600" />,
     adminOnly: true,
     subFolders: ['RCCM', 'NINEA', 'Statuts', 'Actes'],
   },
@@ -90,7 +90,7 @@ const FOLDERS: FolderDef[] = [
     bg: 'bg-green-50',
     border: 'border-green-200',
     iconBg: 'bg-green-100',
-    icon: <BookOpen className="w-6 h-6 text-green-600" />,
+    icon: <BookOpen className="h-6 w-6 text-green-600" />,
     adminOnly: false,
     subFolders: ['Contrats', 'Fiches Operation', 'Attestations', 'Courriers'],
   },
@@ -102,7 +102,7 @@ const FOLDERS: FolderDef[] = [
     bg: 'bg-orange-50',
     border: 'border-orange-200',
     iconBg: 'bg-orange-100',
-    icon: <ShieldCheck className="w-6 h-6 text-orange-600" />,
+    icon: <ShieldCheck className="h-6 w-6 text-orange-600" />,
     adminOnly: true,
     subFolders: ['Quittances', 'Assurance Flotte', 'Declarations', 'Taxes'],
   },
@@ -114,7 +114,7 @@ const FOLDERS: FolderDef[] = [
     bg: 'bg-sky-50',
     border: 'border-sky-200',
     iconBg: 'bg-sky-100',
-    icon: <Users className="w-6 h-6 text-sky-600" />,
+    icon: <Users className="h-6 w-6 text-sky-600" />,
     adminOnly: true,
     sensitiveOnly: true,
     subFolders: EMPLOYEE_SECTIONS.map((s) => s.label),
@@ -127,7 +127,11 @@ function toDisplayName(agent: PersonnelAgent): string {
 
 function asHRRole(role: string, fonction: string): boolean {
   const scope = `${role} ${fonction}`.toLowerCase();
-  return scope.includes('rh') || scope.includes('ressources humaines') || scope.includes('human resources');
+  return (
+    scope.includes('rh') ||
+    scope.includes('ressources humaines') ||
+    scope.includes('human resources')
+  );
 }
 
 function normalizeText(value: string): string {
@@ -175,7 +179,7 @@ export default function DocumentsEntreprisePage() {
 
   const selectedEmployee = useMemo(
     () => employees.find((e) => e.id === selectedEmployeeId) || null,
-    [employees, selectedEmployeeId],
+    [employees, selectedEmployeeId]
   );
 
   const folderDocs = activeFolder ? docs.filter((d) => d.category === activeFolder) : [];
@@ -187,7 +191,7 @@ export default function DocumentsEntreprisePage() {
         (d) =>
           d.category === 'Dossiers Employés' &&
           d.employeeId === selectedEmployeeId &&
-          d.section === selectedSection,
+          d.section === selectedSection
       )
       .sort((a, b) => b.uploadedAt.localeCompare(a.uploadedAt));
   }, [docs, selectedEmployeeId, selectedSection]);
@@ -199,7 +203,9 @@ export default function DocumentsEntreprisePage() {
       .sort((a, b) => toDisplayName(a).localeCompare(toDisplayName(b), 'fr'));
     if (!q) return sorted;
     return sorted.filter((agent) => {
-      const target = normalizeText(`${toDisplayName(agent)} ${agent.matricule || ''} ${agent.role || ''}`);
+      const target = normalizeText(
+        `${toDisplayName(agent)} ${agent.matricule || ''} ${agent.role || ''}`
+      );
       return target.includes(q);
     });
   }, [employees, employeeSearch]);
@@ -208,7 +214,9 @@ export default function DocumentsEntreprisePage() {
     const q = normalizeText(documentSearch.trim());
     if (!q) return selectedEmployeeSectionDocs;
     return selectedEmployeeSectionDocs.filter((doc) => {
-      const target = normalizeText(`${doc.name} ${doc.description || ''} ${doc.employeeName || ''}`);
+      const target = normalizeText(
+        `${doc.name} ${doc.description || ''} ${doc.employeeName || ''}`
+      );
       return target.includes(q);
     });
   }, [selectedEmployeeSectionDocs, documentSearch]);
@@ -219,7 +227,8 @@ export default function DocumentsEntreprisePage() {
     return true;
   };
 
-  const canUploadInCurrentFolder = activeFolder === 'Dossiers Employés' ? hasSensitiveAccess : isManager;
+  const canUploadInCurrentFolder =
+    activeFolder === 'Dossiers Employés' ? hasSensitiveAccess : isManager;
 
   const handleUpload = async (file: File) => {
     if (!activeFolder) return;
@@ -321,20 +330,22 @@ export default function DocumentsEntreprisePage() {
 
   if (!activeFolder) {
     return (
-      <div className="w-full min-h-screen">
-        <div className="bg-gradient-to-r from-[#1a1a2e] via-[#16213e] to-[#0f3460] rounded-2xl p-6 mb-6 text-white">
+      <div className="min-h-screen w-full">
+        <div className="mb-6 rounded-2xl bg-gradient-to-r from-[#1a1a2e] via-[#16213e] to-[#0f3460] p-6 text-white">
           <div className="flex items-center gap-4">
-            <div className="w-12 h-12 bg-white/10 rounded-xl flex items-center justify-center">
-              <Building2 className="w-7 h-7" />
+            <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-white/10">
+              <Building2 className="h-7 w-7" />
             </div>
             <div>
               <h1 className="text-2xl font-bold tracking-tight">Documents Entreprise</h1>
-              <p className="text-sm text-gray-300">IVOS SARL - stockage securise des fichiers globaux</p>
+              <p className="text-sm text-gray-300">
+                IVOS SARL - stockage securise des fichiers globaux
+              </p>
             </div>
           </div>
         </div>
 
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+        <div className="mb-8 grid grid-cols-2 gap-4 lg:grid-cols-4">
           {FOLDERS.map((f) => {
             const accessible = canAccessFolder(f);
             const count = docs.filter((d) => d.category === f.id).length;
@@ -342,12 +353,20 @@ export default function DocumentsEntreprisePage() {
             return (
               <div key={f.id} className={`${f.bg} border ${f.border} rounded-2xl p-4`}>
                 <div className="flex items-center gap-2">
-                  <div className={`w-7 h-7 ${f.iconBg} rounded-lg flex items-center justify-center`}>{f.icon}</div>
+                  <div
+                    className={`h-7 w-7 ${f.iconBg} flex items-center justify-center rounded-lg`}
+                  >
+                    {f.icon}
+                  </div>
                   <span className={`text-xs font-semibold ${f.color}`}>{f.label}</span>
-                  {(f.adminOnly || f.sensitiveOnly) && <Lock className="w-3 h-3 text-amber-500 ml-auto" />}
+                  {(f.adminOnly || f.sensitiveOnly) && (
+                    <Lock className="ml-auto h-3 w-3 text-amber-500" />
+                  )}
                 </div>
-                <p className={`text-2xl font-bold mt-2 ${accessible ? f.color : 'text-gray-300'}`}>{accessible ? count : '-'}</p>
-                <p className="text-xs text-gray-500 mt-0.5">
+                <p className={`mt-2 text-2xl font-bold ${accessible ? f.color : 'text-gray-300'}`}>
+                  {accessible ? count : '-'}
+                </p>
+                <p className="mt-0.5 text-xs text-gray-500">
                   {f.id === 'Dossiers Employés'
                     ? `${employeeCount} employe${employeeCount > 1 ? 's' : ''}`
                     : `document${count !== 1 ? 's' : ''}`}
@@ -357,7 +376,7 @@ export default function DocumentsEntreprisePage() {
           })}
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-5">
+        <div className="grid grid-cols-1 gap-5 md:grid-cols-2 xl:grid-cols-4">
           {FOLDERS.map((f) => {
             const accessible = canAccessFolder(f);
             const count = docs.filter((d) => d.category === f.id).length;
@@ -366,30 +385,39 @@ export default function DocumentsEntreprisePage() {
                 key={f.id}
                 onClick={() => accessible && setActiveFolder(f.id)}
                 disabled={!accessible}
-                className={`text-left rounded-2xl border-2 p-6 transition-all group ${
+                className={`group rounded-2xl border-2 p-6 text-left transition-all ${
                   accessible
-                    ? `${f.bg} ${f.border} hover:shadow-lg hover:scale-[1.02] cursor-pointer`
-                    : 'bg-gray-50 border-gray-200 opacity-60 cursor-not-allowed'
+                    ? `${f.bg} ${f.border} cursor-pointer hover:scale-[1.02] hover:shadow-lg`
+                    : 'cursor-not-allowed border-gray-200 bg-gray-50 opacity-60'
                 }`}
               >
-                <div className="flex items-start justify-between mb-4">
-                  <div className={`w-14 h-14 ${accessible ? f.iconBg : 'bg-gray-100'} rounded-2xl flex items-center justify-center shadow-sm`}>
-                    {accessible ? f.icon : <Lock className="w-6 h-6 text-gray-400" />}
+                <div className="mb-4 flex items-start justify-between">
+                  <div
+                    className={`h-14 w-14 ${accessible ? f.iconBg : 'bg-gray-100'} flex items-center justify-center rounded-2xl shadow-sm`}
+                  >
+                    {accessible ? f.icon : <Lock className="h-6 w-6 text-gray-400" />}
                   </div>
                   {(f.adminOnly || f.sensitiveOnly) && (
-                    <span className="flex items-center gap-1 text-[10px] px-2 py-1 bg-amber-50 text-amber-700 rounded-full border border-amber-200 font-semibold">
-                      <Lock className="w-2.5 h-2.5" /> {f.sensitiveOnly ? 'Admin/RH' : 'Admin'}
+                    <span className="flex items-center gap-1 rounded-full border border-amber-200 bg-amber-50 px-2 py-1 text-[10px] font-semibold text-amber-700">
+                      <Lock className="h-2.5 w-2.5" /> {f.sensitiveOnly ? 'Admin/RH' : 'Admin'}
                     </span>
                   )}
                 </div>
 
-                <h3 className={`text-base font-bold mb-1 ${accessible ? f.color : 'text-gray-400'}`}>{f.label}</h3>
-                <p className="text-xs text-gray-500 mb-4 leading-relaxed">{f.description}</p>
+                <h3
+                  className={`mb-1 text-base font-bold ${accessible ? f.color : 'text-gray-400'}`}
+                >
+                  {f.label}
+                </h3>
+                <p className="mb-4 text-xs leading-relaxed text-gray-500">{f.description}</p>
 
                 {f.subFolders && accessible && (
-                  <div className="flex flex-wrap gap-1 mb-4">
+                  <div className="mb-4 flex flex-wrap gap-1">
                     {f.subFolders.map((sf) => (
-                      <span key={sf} className="text-[10px] px-2 py-0.5 bg-white/70 rounded-full text-gray-600 border border-gray-200">
+                      <span
+                        key={sf}
+                        className="rounded-full border border-gray-200 bg-white/70 px-2 py-0.5 text-[10px] text-gray-600"
+                      >
                         {sf}
                       </span>
                     ))}
@@ -398,8 +426,10 @@ export default function DocumentsEntreprisePage() {
 
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-1.5">
-                    <FolderOpen className={`w-4 h-4 ${accessible ? f.color : 'text-gray-400'}`} />
-                    <span className={`text-sm font-semibold ${accessible ? f.color : 'text-gray-400'}`}>
+                    <FolderOpen className={`h-4 w-4 ${accessible ? f.color : 'text-gray-400'}`} />
+                    <span
+                      className={`text-sm font-semibold ${accessible ? f.color : 'text-gray-400'}`}
+                    >
                       {accessible
                         ? f.id === 'Dossiers Employés'
                           ? `${employees.length} employe${employees.length > 1 ? 's' : ''} • ${count} fichier${count > 1 ? 's' : ''}`
@@ -407,7 +437,11 @@ export default function DocumentsEntreprisePage() {
                         : 'Acces restreint'}
                     </span>
                   </div>
-                  {accessible && <span className={`text-[11px] ${f.color} font-semibold group-hover:underline`}>Ouvrir →</span>}
+                  {accessible && (
+                    <span className={`text-[11px] ${f.color} font-semibold group-hover:underline`}>
+                      Ouvrir →
+                    </span>
+                  )}
                 </div>
               </button>
             );
@@ -420,19 +454,19 @@ export default function DocumentsEntreprisePage() {
   if (activeFolder === 'Dossiers Employés') {
     if (!hasSensitiveAccess) {
       return (
-        <div className="w-full min-h-screen">
-          <div className="flex flex-col items-center justify-center py-20 bg-red-50 rounded-2xl border border-red-100">
-            <Lock className="w-10 h-10 text-red-400 mb-2" />
+        <div className="min-h-screen w-full">
+          <div className="flex flex-col items-center justify-center rounded-2xl border border-red-100 bg-red-50 py-20">
+            <Lock className="mb-2 h-10 w-10 text-red-400" />
             <p className="text-base font-semibold text-red-700">Acces restreint</p>
-            <p className="text-sm text-red-500 mt-1">Reserve aux profils Administrateur ou RH</p>
+            <p className="mt-1 text-sm text-red-500">Reserve aux profils Administrateur ou RH</p>
           </div>
         </div>
       );
     }
 
     return (
-      <div className="w-full min-h-screen">
-        <div className="bg-sky-50 border border-sky-200 rounded-2xl p-5 mb-6 flex items-center justify-between">
+      <div className="min-h-screen w-full">
+        <div className="mb-6 flex items-center justify-between rounded-2xl border border-sky-200 bg-sky-50 p-5">
           <div className="flex items-center gap-4">
             <button
               onClick={() => {
@@ -441,32 +475,36 @@ export default function DocumentsEntreprisePage() {
                 setEmployeeSearch('');
                 setDocumentSearch('');
               }}
-              className="p-2 rounded-xl bg-white/80 hover:bg-white transition-colors"
+              className="rounded-xl bg-white/80 p-2 transition-colors hover:bg-white"
             >
-              <ArrowLeft className="w-5 h-5 text-gray-600" />
+              <ArrowLeft className="h-5 w-5 text-gray-600" />
             </button>
-            <div className="w-11 h-11 bg-sky-100 rounded-xl flex items-center justify-center">
-              <Users className="w-5 h-5 text-sky-600" />
+            <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-sky-100">
+              <Users className="h-5 w-5 text-sky-600" />
             </div>
             <div>
               <h1 className="text-xl font-bold text-sky-700">Dossiers Employes</h1>
-              <p className="text-xs text-gray-600">Structure obligatoire: Etat Civil, Administratif & RH, Paie, Discipline</p>
+              <p className="text-xs text-gray-600">
+                Structure obligatoire: Etat Civil, Administratif & RH, Paie, Discipline
+              </p>
             </div>
           </div>
           <button
             onClick={() => setShowUpload((v) => !v)}
-            className="flex items-center gap-2 px-4 py-2.5 bg-[#1a1a2e] text-white rounded-xl text-sm font-semibold hover:bg-[#16213e] transition-colors"
+            className="flex items-center gap-2 rounded-xl bg-[#1a1a2e] px-4 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-[#16213e]"
           >
-            {showUpload ? <X className="w-4 h-4" /> : <Plus className="w-4 h-4" />}
+            {showUpload ? <X className="h-4 w-4" /> : <Plus className="h-4 w-4" />}
             {showUpload ? 'Annuler' : 'Ajouter un document'}
           </button>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-[320px_1fr] gap-6">
-          <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-3">
-            <p className="text-xs uppercase tracking-wide text-gray-500 font-semibold px-2 pb-2">Employes</p>
+        <div className="grid grid-cols-1 gap-6 lg:grid-cols-[320px_1fr]">
+          <div className="rounded-2xl border border-gray-100 bg-white p-3 shadow-sm">
+            <p className="px-2 pb-2 text-xs font-semibold uppercase tracking-wide text-gray-500">
+              Employes
+            </p>
             <div className="relative px-1 pb-2">
-              <Search className="w-4 h-4 text-gray-400 absolute left-4 top-1/2 -translate-y-1/2" />
+              <Search className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
               <input
                 value={employeeSearch}
                 onChange={(e) => setEmployeeSearch(e.target.value)}
@@ -474,47 +512,53 @@ export default function DocumentsEntreprisePage() {
                 className="w-full rounded-xl border border-gray-200 bg-gray-50 py-2 pl-9 pr-3 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-sky-300"
               />
             </div>
-            <div className="space-y-1.5 max-h-[70vh] overflow-y-auto pr-1">
+            <div className="max-h-[70vh] space-y-1.5 overflow-y-auto pr-1">
               {filteredEmployees.map((agent) => {
-                  const active = selectedEmployeeId === agent.id;
-                  const count = docs.filter(
-                    (d) => d.category === 'Dossiers Employés' && d.employeeId === agent.id,
-                  ).length;
-                  return (
-                    <button
-                      key={agent.id}
-                      onClick={() => {
-                        setSelectedEmployeeId(agent.id);
-                        setShowUpload(false);
-                      }}
-                      className={`w-full text-left px-3 py-2.5 rounded-xl border transition-colors ${
-                        active
-                          ? 'bg-sky-50 border-sky-200 text-sky-700'
-                          : 'bg-white border-gray-200 text-gray-700 hover:bg-gray-50'
-                      }`}
-                    >
-                      <div className="flex items-center gap-2">
-                        <User className="w-4 h-4" />
-                        <span className="text-sm font-semibold truncate">{toDisplayName(agent)}</span>
-                      </div>
-                      <p className="text-[11px] text-gray-500 mt-1">{count} fichier{count > 1 ? 's' : ''}</p>
-                    </button>
-                  );
-                })}
+                const active = selectedEmployeeId === agent.id;
+                const count = docs.filter(
+                  (d) => d.category === 'Dossiers Employés' && d.employeeId === agent.id
+                ).length;
+                return (
+                  <button
+                    key={agent.id}
+                    onClick={() => {
+                      setSelectedEmployeeId(agent.id);
+                      setShowUpload(false);
+                    }}
+                    className={`w-full rounded-xl border px-3 py-2.5 text-left transition-colors ${
+                      active
+                        ? 'border-sky-200 bg-sky-50 text-sky-700'
+                        : 'border-gray-200 bg-white text-gray-700 hover:bg-gray-50'
+                    }`}
+                  >
+                    <div className="flex items-center gap-2">
+                      <User className="h-4 w-4" />
+                      <span className="truncate text-sm font-semibold">{toDisplayName(agent)}</span>
+                    </div>
+                    <p className="mt-1 text-[11px] text-gray-500">
+                      {count} fichier{count > 1 ? 's' : ''}
+                    </p>
+                  </button>
+                );
+              })}
               {filteredEmployees.length === 0 && (
-                <div className="px-3 py-6 text-center text-sm text-gray-400">Aucun employe trouve</div>
+                <div className="px-3 py-6 text-center text-sm text-gray-400">
+                  Aucun employe trouve
+                </div>
               )}
             </div>
           </div>
 
           <div className="space-y-4">
-            <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-4">
+            <div className="rounded-2xl border border-gray-100 bg-white p-4 shadow-sm">
               <h2 className="text-lg font-bold text-gray-900">
                 {selectedEmployee ? toDisplayName(selectedEmployee) : 'Aucun employe selectionne'}
               </h2>
-              <p className="text-xs text-gray-500 mt-1">Le dossier personnel est cree automatiquement et securise.</p>
+              <p className="mt-1 text-xs text-gray-500">
+                Le dossier personnel est cree automatiquement et securise.
+              </p>
 
-              <div className="flex flex-wrap gap-2 mt-4">
+              <div className="mt-4 flex flex-wrap gap-2">
                 {EMPLOYEE_SECTIONS.map((section) => {
                   const active = selectedSection === section.id;
                   const sectionCount = selectedEmployeeId
@@ -522,7 +566,7 @@ export default function DocumentsEntreprisePage() {
                         (d) =>
                           d.category === 'Dossiers Employés' &&
                           d.employeeId === selectedEmployeeId &&
-                          d.section === section.id,
+                          d.section === section.id
                       ).length
                     : 0;
                   return (
@@ -532,10 +576,10 @@ export default function DocumentsEntreprisePage() {
                         setSelectedSection(section.id);
                         setShowUpload(false);
                       }}
-                      className={`px-3 py-2 rounded-xl border text-sm transition-colors ${
+                      className={`rounded-xl border px-3 py-2 text-sm transition-colors ${
                         active
-                          ? 'bg-sky-50 border-sky-200 text-sky-700 font-semibold'
-                          : 'bg-white border-gray-200 text-gray-700 hover:bg-gray-50'
+                          ? 'border-sky-200 bg-sky-50 font-semibold text-sky-700'
+                          : 'border-gray-200 bg-white text-gray-700 hover:bg-gray-50'
                       }`}
                     >
                       <span>{section.label}</span>
@@ -545,12 +589,12 @@ export default function DocumentsEntreprisePage() {
                 })}
               </div>
 
-              <p className="text-xs text-gray-500 mt-3">
+              <p className="mt-3 text-xs text-gray-500">
                 {EMPLOYEE_SECTIONS.find((s) => s.id === selectedSection)?.description}
               </p>
 
               <div className="relative mt-3">
-                <Search className="w-4 h-4 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2" />
+                <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
                 <input
                   value={documentSearch}
                   onChange={(e) => setDocumentSearch(e.target.value)}
@@ -561,9 +605,9 @@ export default function DocumentsEntreprisePage() {
             </div>
 
             {showUpload && canUploadInCurrentFolder && selectedEmployee && (
-              <div className="bg-sky-50 border border-sky-100 rounded-2xl p-5">
-                <p className="text-sm font-semibold text-sky-700 mb-3 flex items-center gap-2">
-                  <Upload className="w-4 h-4" />
+              <div className="rounded-2xl border border-sky-100 bg-sky-50 p-5">
+                <p className="mb-3 flex items-center gap-2 text-sm font-semibold text-sky-700">
+                  <Upload className="h-4 w-4" />
                   Ajouter dans « {selectedSection} » pour {toDisplayName(selectedEmployee)}
                 </p>
                 <UploadZone onUpload={handleUpload} accept=".pdf,image/*" />
@@ -571,14 +615,14 @@ export default function DocumentsEntreprisePage() {
             )}
 
             {filteredSectionDocs.length > 0 ? (
-              <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
-                <div className="flex items-center gap-3 px-5 py-3 bg-gray-50 border-b border-gray-100 text-[10px] uppercase tracking-wide text-gray-400 font-semibold">
+              <div className="overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm">
+                <div className="flex items-center gap-3 border-b border-gray-100 bg-gray-50 px-5 py-3 text-[10px] font-semibold uppercase tracking-wide text-gray-400">
                   <div className="w-9 shrink-0" />
                   <div className="flex-1">Nom du fichier</div>
-                  <div className="hidden sm:block w-40 text-center">Date d'ajout</div>
+                  <div className="hidden w-40 text-center sm:block">Date d'ajout</div>
                   <div className="w-32 text-right">Action</div>
                 </div>
-                <div className="divide-y divide-gray-50 p-2 space-y-1">
+                <div className="space-y-1 divide-y divide-gray-50 p-2">
                   {filteredSectionDocs.map((doc) => (
                     <DocumentRow
                       key={doc.id}
@@ -591,20 +635,24 @@ export default function DocumentsEntreprisePage() {
                 </div>
               </div>
             ) : (
-              <div className="flex flex-col items-center justify-center py-14 bg-white rounded-2xl border border-dashed border-gray-200 shadow-sm">
-                <Folder className="w-12 h-12 text-gray-200 mb-3" />
+              <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-gray-200 bg-white py-14 shadow-sm">
+                <Folder className="mb-3 h-12 w-12 text-gray-200" />
                 <p className="text-base font-semibold text-gray-400">
-                  {documentSearch.trim() ? 'Aucun document ne correspond a la recherche' : 'Aucun document dans ce sous-dossier'}
+                  {documentSearch.trim()
+                    ? 'Aucun document ne correspond a la recherche'
+                    : 'Aucun document dans ce sous-dossier'}
                 </p>
-                <p className="text-sm text-gray-300 mt-1">
-                  {selectedEmployee ? `${selectedSection} - ${toDisplayName(selectedEmployee)}` : 'Selectionnez un employe'}
+                <p className="mt-1 text-sm text-gray-300">
+                  {selectedEmployee
+                    ? `${selectedSection} - ${toDisplayName(selectedEmployee)}`
+                    : 'Selectionnez un employe'}
                 </p>
                 {selectedEmployee && (
                   <button
                     onClick={() => setShowUpload(true)}
-                    className="mt-4 flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-xl text-sm font-semibold hover:bg-blue-700 transition-colors"
+                    className="mt-4 flex items-center gap-2 rounded-xl bg-blue-600 px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-blue-700"
                   >
-                    <Plus className="w-4 h-4" /> Ajouter un document
+                    <Plus className="h-4 w-4" /> Ajouter un document
                   </button>
                 )}
               </div>
@@ -616,19 +664,25 @@ export default function DocumentsEntreprisePage() {
   }
 
   return (
-    <div className="w-full min-h-screen">
-      <div className={`${folderDef?.bg} border ${folderDef?.border} rounded-2xl p-5 mb-6 flex items-center justify-between`}>
+    <div className="min-h-screen w-full">
+      <div
+        className={`${folderDef?.bg} border ${folderDef?.border} mb-6 flex items-center justify-between rounded-2xl p-5`}
+      >
         <div className="flex items-center gap-4">
           <button
             onClick={() => {
               setActiveFolder(null);
               setShowUpload(false);
             }}
-            className="p-2 rounded-xl bg-white/60 hover:bg-white transition-colors"
+            className="rounded-xl bg-white/60 p-2 transition-colors hover:bg-white"
           >
-            <ArrowLeft className="w-5 h-5 text-gray-600" />
+            <ArrowLeft className="h-5 w-5 text-gray-600" />
           </button>
-          <div className={`w-11 h-11 ${folderDef?.iconBg} rounded-xl flex items-center justify-center`}>{folderDef?.icon}</div>
+          <div
+            className={`h-11 w-11 ${folderDef?.iconBg} flex items-center justify-center rounded-xl`}
+          >
+            {folderDef?.icon}
+          </div>
           <div>
             <h1 className={`text-xl font-bold ${folderDef?.color}`}>{folderDef?.label}</h1>
             <p className="text-xs text-gray-500">{folderDef?.description}</p>
@@ -637,32 +691,32 @@ export default function DocumentsEntreprisePage() {
         {canUploadInCurrentFolder && (
           <button
             onClick={() => setShowUpload((v) => !v)}
-            className="flex items-center gap-2 px-4 py-2.5 bg-[#1a1a2e] text-white rounded-xl text-sm font-semibold hover:bg-[#16213e] transition-colors"
+            className="flex items-center gap-2 rounded-xl bg-[#1a1a2e] px-4 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-[#16213e]"
           >
-            {showUpload ? <X className="w-4 h-4" /> : <Plus className="w-4 h-4" />}
+            {showUpload ? <X className="h-4 w-4" /> : <Plus className="h-4 w-4" />}
             {showUpload ? 'Annuler' : 'Ajouter un document'}
           </button>
         )}
       </div>
 
       {showUpload && canUploadInCurrentFolder && (
-        <div className="bg-blue-50 border border-blue-100 rounded-2xl p-5 mb-5">
-          <p className="text-sm font-semibold text-blue-700 mb-3 flex items-center gap-2">
-            <Upload className="w-4 h-4" /> Ajouter dans « {activeFolder} »
+        <div className="mb-5 rounded-2xl border border-blue-100 bg-blue-50 p-5">
+          <p className="mb-3 flex items-center gap-2 text-sm font-semibold text-blue-700">
+            <Upload className="h-4 w-4" /> Ajouter dans « {activeFolder} »
           </p>
           <UploadZone onUpload={handleUpload} accept=".pdf,image/*" />
         </div>
       )}
 
       {folderDocs.length > 0 ? (
-        <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
-          <div className="flex items-center gap-3 px-5 py-3 bg-gray-50 border-b border-gray-100 text-[10px] uppercase tracking-wide text-gray-400 font-semibold">
+        <div className="overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm">
+          <div className="flex items-center gap-3 border-b border-gray-100 bg-gray-50 px-5 py-3 text-[10px] font-semibold uppercase tracking-wide text-gray-400">
             <div className="w-9 shrink-0" />
             <div className="flex-1">Nom du fichier</div>
-            <div className="hidden sm:block w-40 text-center">Date d'ajout</div>
+            <div className="hidden w-40 text-center sm:block">Date d'ajout</div>
             <div className="w-32 text-right">Action</div>
           </div>
-          <div className="divide-y divide-gray-50 p-2 space-y-1">
+          <div className="space-y-1 divide-y divide-gray-50 p-2">
             {folderDocs.map((doc) => (
               <DocumentRow
                 key={doc.id}
@@ -677,16 +731,16 @@ export default function DocumentsEntreprisePage() {
           </div>
         </div>
       ) : (
-        <div className="flex flex-col items-center justify-center py-16 bg-white rounded-2xl border border-dashed border-gray-200 shadow-sm">
-          <Folder className="w-14 h-14 text-gray-200 mb-3" />
+        <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-gray-200 bg-white py-16 shadow-sm">
+          <Folder className="mb-3 h-14 w-14 text-gray-200" />
           <p className="text-base font-semibold text-gray-400">Ce dossier est vide</p>
-          <p className="text-sm text-gray-300 mt-1">Aucun fichier dans « {activeFolder} »</p>
+          <p className="mt-1 text-sm text-gray-300">Aucun fichier dans « {activeFolder} »</p>
           {canUploadInCurrentFolder && (
             <button
               onClick={() => setShowUpload(true)}
-              className="mt-4 flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-xl text-sm font-semibold hover:bg-blue-700 transition-colors"
+              className="mt-4 flex items-center gap-2 rounded-xl bg-blue-600 px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-blue-700"
             >
-              <Plus className="w-4 h-4" /> Ajouter un document
+              <Plus className="h-4 w-4" /> Ajouter un document
             </button>
           )}
         </div>

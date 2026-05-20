@@ -20,7 +20,7 @@ export const countriesWestAfrica: CountryReference[] = [
     phonePrefix: '+221',
   },
   {
-    name: 'Côte d\'Ivoire',
+    name: "Côte d'Ivoire",
     iso2: 'CI',
     iso3: 'CIV',
     flag: '🇨🇮',

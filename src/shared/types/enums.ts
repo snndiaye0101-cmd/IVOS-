@@ -127,14 +127,14 @@ export const UserRoleLabels: Record<UserRole, string> = {
   [UserRole.DRIVER]: 'Chauffeur',
   [UserRole.CLIENT]: 'Client',
   [UserRole.SUPERVISOR]: 'Superviseur',
-}
+};
 
 export const VehicleStatusLabels: Record<VehicleStatus, string> = {
   [VehicleStatus.AVAILABLE]: 'Disponible',
   [VehicleStatus.IN_MISSION]: 'En Operation',
   [VehicleStatus.MAINTENANCE]: 'Maintenance',
   [VehicleStatus.OUT_OF_SERVICE]: 'Hors Service',
-}
+};
 
 export const OperationStatusLabels: Record<OperationStatus, string> = {
   [OperationStatus.DRAFT]: 'Brouillon',
@@ -143,7 +143,7 @@ export const OperationStatusLabels: Record<OperationStatus, string> = {
   [OperationStatus.COMPLETED]: 'Terminé',
   [OperationStatus.CLOSED]: 'Clôturé',
   [OperationStatus.CANCELLED]: 'Annulé',
-}
+};
 
 export const WasteStateLabels: Record<WasteState, string> = {
   [WasteState.GASEOUS]: 'Gazeux',
@@ -151,7 +151,7 @@ export const WasteStateLabels: Record<WasteState, string> = {
   [WasteState.SOLID]: 'Solide',
   [WasteState.SLUDGE]: 'Boues',
   [WasteState.MIXED]: 'Mixte',
-}
+};
 
 export const PackagingTypeLabels: Record<PackagingType, string> = {
   [PackagingType.SKIP]: 'Benne',
@@ -161,11 +161,11 @@ export const PackagingTypeLabels: Record<PackagingType, string> = {
   [PackagingType.BULK]: 'Vrac',
   [PackagingType.CONTAINER]: 'Conteneur',
   [PackagingType.OTHER]: 'Autre',
-}
+};
 
 export const AcceptanceStatusLabels: Record<AcceptanceStatus, string> = {
   [AcceptanceStatus.PENDING]: 'En Attente',
   [AcceptanceStatus.ACCEPTED]: 'Accepté',
   [AcceptanceStatus.REJECTED]: 'Refusé',
   [AcceptanceStatus.PARTIAL]: 'Partiel',
-}
+};

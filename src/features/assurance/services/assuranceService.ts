@@ -12,10 +12,7 @@ export interface Assurance {
 
 export async function getAssurances() {
   // Documents table, category = 'insurance'
-  const { data, error } = await supabase
-    .from('documents')
-    .select('*')
-    .eq('category', 'insurance');
+  const { data, error } = await supabase.from('documents').select('*').eq('category', 'insurance');
   if (error) throw error;
   return data;
 }
@@ -29,19 +26,13 @@ export async function addAssurance(assurance: Partial<Assurance>) {
 }
 
 export async function updateAssurance(id: string, updates: Partial<Assurance>) {
-  const { data, error } = await supabase
-    .from('documents')
-    .update(updates)
-    .eq('id', id);
+  const { data, error } = await supabase.from('documents').update(updates).eq('id', id);
   if (error) throw error;
   return data;
 }
 
 export async function deleteAssurance(id: string) {
-  const { data, error } = await supabase
-    .from('documents')
-    .delete()
-    .eq('id', id);
+  const { data, error } = await supabase.from('documents').delete().eq('id', id);
   if (error) throw error;
   return data;
 }

@@ -155,11 +155,14 @@ export interface EmailBackendOverview {
     failed: number;
     recent: EmailBackendTokenRefreshEvent[];
   };
-  providerConfig: Record<EmailProvider, {
-    oauthConfigured: boolean;
-    webhookSecretConfigured: boolean;
-    webhookSecretCount?: number;
-    clientStateConfigured?: boolean;
-  }>;
+  providerConfig: Record<
+    EmailProvider,
+    {
+      oauthConfigured: boolean;
+      webhookSecretConfigured: boolean;
+      webhookSecretCount?: number;
+      clientStateConfigured?: boolean;
+    }
+  >;
   recentWebhooks: EmailBackendWebhookEvent[];
 }

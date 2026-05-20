@@ -4,13 +4,20 @@ import 'leaflet/dist/leaflet.css';
 import { jsPDF } from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import {
-  Radio, Activity, Gauge, Fuel, Crosshair,
-  Navigation, FileDown, AlertTriangle, Clock,
+  Radio,
+  Activity,
+  Gauge,
+  Fuel,
+  Crosshair,
+  Navigation,
+  FileDown,
+  AlertTriangle,
+  Clock,
 } from 'lucide-react';
 import { toast } from 'sonner';
 
 // ─── Constants ────────────────────────────────────────────────────────────────
-const SITE_KEY  = 'ivos_site_config_v1';
+const SITE_KEY = 'ivos_site_config_v1';
 const DEFAULT_CENTER: [number, number] = [14.7167, -17.4677];
 const ALERT_THRESHOLD_MS = 60_000; // 60s immobile → alerte
 
@@ -25,8 +32,8 @@ interface Vehicle {
   fuel: number;
   pos: [number, number];
   status: VehicleStatus;
-  lastMove: number;   // timestamp of last actual movement
-  avgSpeed: number;   // running average for PDF
+  lastMove: number; // timestamp of last actual movement
+  avgSpeed: number; // running average for PDF
 }
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
@@ -42,7 +49,11 @@ function getSiteCenter(): [number, number] {
 }
 
 function now() {
-  return new Date().toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+  return new Date().toLocaleTimeString('fr-FR', {
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit',
+  });
 }
 
 function playAlertSound() {
@@ -63,19 +74,20 @@ function playAlertSound() {
 
 // ─── Icon factories ───────────────────────────────────────────────────────────
 const STATUS_COLOR: Record<VehicleStatus, string> = {
-  moving:  '#16a34a',
+  moving: '#16a34a',
   stopped: '#dc2626',
   working: '#2563eb',
-  alert:   '#f97316',
+  alert: '#f97316',
 };
 
 function makeVehicleIcon(v: Vehicle) {
   const color = STATUS_COLOR[v.status];
   const emoji = v.type === 'crane' ? '🏗️' : '🚛';
   const isAlert = v.status === 'alert';
-  const pulse = (v.status === 'moving' || isAlert)
-    ? `<div style="position:absolute;inset:-6px;border-radius:50%;border:2.5px solid ${color};opacity:0.5;animation:${isAlert ? 'ping 0.7s' : 'ping 1.8s'} infinite;"></div>`
-    : '';
+  const pulse =
+    v.status === 'moving' || isAlert
+      ? `<div style="position:absolute;inset:-6px;border-radius:50%;border:2.5px solid ${color};opacity:0.5;animation:${isAlert ? 'ping 0.7s' : 'ping 1.8s'} infinite;"></div>`
+      : '';
   return L.divIcon({
     html: `<div style="position:relative;width:42px;height:42px;">${pulse}<div style="position:relative;background:${color};border-radius:50%;width:42px;height:42px;display:flex;align-items:center;justify-content:center;font-size:21px;border:3px solid white;box-shadow:0 4px 14px rgba(0,0,0,0.35);">${emoji}</div></div>`,
     iconSize: [42, 42],
@@ -95,7 +107,14 @@ function makeSiteIcon() {
 
 function popupHtml(v: Vehicle) {
   const c = STATUS_COLOR[v.status];
-  const label = v.status === 'alert' ? '⚠️ ALERTE' : v.status === 'moving' ? '● En route' : v.status === 'working' ? '● En opération' : '● Arrêté';
+  const label =
+    v.status === 'alert'
+      ? '⚠️ ALERTE'
+      : v.status === 'moving'
+        ? '● En route'
+        : v.status === 'working'
+          ? '● En opération'
+          : '● Arrêté';
   return `<div style="font-family:system-ui,sans-serif;min-width:190px">
     <div style="font-weight:700;font-size:14px;margin-bottom:3px">${v.id} — ${v.name}</div>
     <div style="display:flex;align-items:center;gap:5px;margin-bottom:4px">
@@ -113,10 +132,50 @@ function popupHtml(v: Vehicle) {
 // ─── Initial fleet ────────────────────────────────────────────────────────────
 function buildFleet(center: [number, number]): Vehicle[] {
   return [
-    { id: 'TRK-01',  name: 'Convoi Ciment',  type: 'truck', speed: 45, fuel: 80, pos: [center[0] + 0.012, center[1] - 0.018], status: 'moving',  lastMove: Date.now(), avgSpeed: 45 },
-    { id: 'TRK-02',  name: 'Livraison Port', type: 'truck', speed: 0,  fuel: 35, pos: [center[0] - 0.008, center[1] + 0.014], status: 'stopped', lastMove: Date.now(), avgSpeed: 0  },
-    { id: 'GRUE-01', name: 'Levage Site A',  type: 'crane', speed: 0,  fuel: 95, pos: [center[0] + 0.021, center[1] + 0.009], status: 'working', lastMove: Date.now(), avgSpeed: 0  },
-    { id: 'TRK-03',  name: 'Transport GNL',  type: 'truck', speed: 38, fuel: 62, pos: [center[0] - 0.015, center[1] - 0.022], status: 'moving',  lastMove: Date.now(), avgSpeed: 38 },
+    {
+      id: 'TRK-01',
+      name: 'Convoi Ciment',
+      type: 'truck',
+      speed: 45,
+      fuel: 80,
+      pos: [center[0] + 0.012, center[1] - 0.018],
+      status: 'moving',
+      lastMove: Date.now(),
+      avgSpeed: 45,
+    },
+    {
+      id: 'TRK-02',
+      name: 'Livraison Port',
+      type: 'truck',
+      speed: 0,
+      fuel: 35,
+      pos: [center[0] - 0.008, center[1] + 0.014],
+      status: 'stopped',
+      lastMove: Date.now(),
+      avgSpeed: 0,
+    },
+    {
+      id: 'GRUE-01',
+      name: 'Levage Site A',
+      type: 'crane',
+      speed: 0,
+      fuel: 95,
+      pos: [center[0] + 0.021, center[1] + 0.009],
+      status: 'working',
+      lastMove: Date.now(),
+      avgSpeed: 0,
+    },
+    {
+      id: 'TRK-03',
+      name: 'Transport GNL',
+      type: 'truck',
+      speed: 38,
+      fuel: 62,
+      pos: [center[0] - 0.015, center[1] - 0.022],
+      status: 'moving',
+      lastMove: Date.now(),
+      avgSpeed: 38,
+    },
   ];
 }
 
@@ -139,11 +198,19 @@ function generatePDF(vehicles: Vehicle[]) {
   // Table
   autoTable(doc, {
     startY: 36,
-    head: [['ID Véhicule', 'Nom', 'Statut', 'Vitesse moy.', 'Carburant', 'Conso. est.', 'Position GPS']],
-    body: vehicles.map(v => [
+    head: [
+      ['ID Véhicule', 'Nom', 'Statut', 'Vitesse moy.', 'Carburant', 'Conso. est.', 'Position GPS'],
+    ],
+    body: vehicles.map((v) => [
       v.id,
       v.name,
-      v.status === 'alert' ? '⚠ ALERTE' : v.status === 'moving' ? 'En route' : v.status === 'working' ? 'En opération' : 'Arrêté',
+      v.status === 'alert'
+        ? '⚠ ALERTE'
+        : v.status === 'moving'
+          ? 'En route'
+          : v.status === 'working'
+            ? 'En opération'
+            : 'Arrêté',
       `${Math.round(v.avgSpeed)} km/h`,
       `${Math.round(v.fuel)} %`,
       `${(v.avgSpeed * 0.35).toFixed(1)} L/100km`,
@@ -164,7 +231,9 @@ function generatePDF(vehicles: Vehicle[]) {
   });
 
   // Footer
-  const pageCount = (doc as jsPDF & { internal: { getNumberOfPages: () => number } }).internal.getNumberOfPages();
+  const pageCount = (
+    doc as jsPDF & { internal: { getNumberOfPages: () => number } }
+  ).internal.getNumberOfPages();
   for (let i = 1; i <= pageCount; i++) {
     doc.setPage(i);
     doc.setFontSize(8);
@@ -182,9 +251,9 @@ export default function TrackingRealtime() {
   const [selected, setSelected] = useState<string | null>(null);
   const alertedIds = useRef<Set<string>>(new Set());
 
-  const mapRef      = useRef<HTMLDivElement>(null);
+  const mapRef = useRef<HTMLDivElement>(null);
   const mapInstance = useRef<L.Map | null>(null);
-  const markersRef  = useRef<Map<string, L.Marker>>(new Map());
+  const markersRef = useRef<Map<string, L.Marker>>(new Map());
 
   // ── Init map ──────────────────────────────────────────────────────────────
   useEffect(() => {
@@ -192,12 +261,18 @@ export default function TrackingRealtime() {
     const map = L.map(mapRef.current, { zoomControl: true }).setView(center, 12);
     mapInstance.current = map;
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      attribution: '© IVOS Fleet · © OpenStreetMap', maxZoom: 19,
+      attribution: '© IVOS Fleet · © OpenStreetMap',
+      maxZoom: 19,
     }).addTo(map);
-    L.marker(center, { icon: makeSiteIcon() }).addTo(map)
-      .bindPopup(`<b>🏢 Site IVOS</b><br/><small>${center[0].toFixed(5)}, ${center[1].toFixed(5)}</small>`);
-    vehicles.forEach(v => {
-      const m = L.marker(v.pos, { icon: makeVehicleIcon(v) }).addTo(map).bindPopup(popupHtml(v));
+    L.marker(center, { icon: makeSiteIcon() })
+      .addTo(map)
+      .bindPopup(
+        `<b>🏢 Site IVOS</b><br/><small>${center[0].toFixed(5)}, ${center[1].toFixed(5)}</small>`
+      );
+    vehicles.forEach((v) => {
+      const m = L.marker(v.pos, { icon: makeVehicleIcon(v) })
+        .addTo(map)
+        .bindPopup(popupHtml(v));
       markersRef.current.set(v.id, m);
     });
     return () => {
@@ -211,48 +286,50 @@ export default function TrackingRealtime() {
   useEffect(() => {
     const interval = setInterval(() => {
       const now_ts = Date.now();
-      setVehicles(prev => prev.map(v => {
-        // Only simulate movement for 'moving' status
-        if (v.status !== 'moving') {
-          // Alert watchdog: stopped/working vehicles that were previously moving
-          if ((v.status === 'stopped') && (now_ts - v.lastMove > ALERT_THRESHOLD_MS)) {
-            if (!alertedIds.current.has(v.id)) {
-              alertedIds.current.add(v.id);
-              playAlertSound();
-              toast.warning(`⚠️ Arrêt prolongé détecté pour ${v.id}`, {
-                description: `${v.name} est immobile depuis plus de 60 secondes.`,
-                duration: 8000,
-              });
-              return { ...v, status: 'alert' as VehicleStatus };
+      setVehicles((prev) =>
+        prev.map((v) => {
+          // Only simulate movement for 'moving' status
+          if (v.status !== 'moving') {
+            // Alert watchdog: stopped/working vehicles that were previously moving
+            if (v.status === 'stopped' && now_ts - v.lastMove > ALERT_THRESHOLD_MS) {
+              if (!alertedIds.current.has(v.id)) {
+                alertedIds.current.add(v.id);
+                playAlertSound();
+                toast.warning(`⚠️ Arrêt prolongé détecté pour ${v.id}`, {
+                  description: `${v.name} est immobile depuis plus de 60 secondes.`,
+                  duration: 8000,
+                });
+                return { ...v, status: 'alert' as VehicleStatus };
+              }
             }
+            // Drain fuel slightly
+            return { ...v, fuel: Math.max(0, v.fuel - 0.02) };
           }
-          // Drain fuel slightly
-          return { ...v, fuel: Math.max(0, v.fuel - 0.02) };
-        }
 
-        const step = 0.00012;
-        const dLat = (Math.random() - 0.42) * step * 2;
-        const dLng = (Math.random() - 0.42) * step * 2;
-        const newSpeed = Math.max(10, Math.min(90, v.speed + (Math.random() - 0.5) * 10));
-        const newFuel = Math.max(0, v.fuel - 0.05);
-        const newAvg = (v.avgSpeed * 0.9) + (newSpeed * 0.1);
+          const step = 0.00012;
+          const dLat = (Math.random() - 0.42) * step * 2;
+          const dLng = (Math.random() - 0.42) * step * 2;
+          const newSpeed = Math.max(10, Math.min(90, v.speed + (Math.random() - 0.5) * 10));
+          const newFuel = Math.max(0, v.fuel - 0.05);
+          const newAvg = v.avgSpeed * 0.9 + newSpeed * 0.1;
 
-        return {
-          ...v,
-          pos: [v.pos[0] + dLat, v.pos[1] + dLng],
-          speed: newSpeed,
-          fuel: newFuel,
-          avgSpeed: newAvg,
-          lastMove: now_ts,
-        };
-      }));
+          return {
+            ...v,
+            pos: [v.pos[0] + dLat, v.pos[1] + dLng],
+            speed: newSpeed,
+            fuel: newFuel,
+            avgSpeed: newAvg,
+            lastMove: now_ts,
+          };
+        })
+      );
     }, 2000);
     return () => clearInterval(interval);
   }, []);
 
   // ── Sync Leaflet markers with React state ─────────────────────────────────
   useEffect(() => {
-    vehicles.forEach(v => {
+    vehicles.forEach((v) => {
       const m = markersRef.current.get(v.id);
       if (!m) return;
       m.setLatLng(v.pos);
@@ -270,15 +347,22 @@ export default function TrackingRealtime() {
 
   // ── Stats ─────────────────────────────────────────────────────────────────
   const counts = {
-    moving:  vehicles.filter(v => v.status === 'moving').length,
-    stopped: vehicles.filter(v => v.status === 'stopped').length,
-    working: vehicles.filter(v => v.status === 'working').length,
-    alert:   vehicles.filter(v => v.status === 'alert').length,
+    moving: vehicles.filter((v) => v.status === 'moving').length,
+    stopped: vehicles.filter((v) => v.status === 'stopped').length,
+    working: vehicles.filter((v) => v.status === 'working').length,
+    alert: vehicles.filter((v) => v.status === 'alert').length,
   };
 
   return (
-    <div style={{ display: 'flex', height: 'calc(100vh - 80px)', width: '100%', fontFamily: 'system-ui,sans-serif', background: '#0f172a' }}>
-
+    <div
+      style={{
+        display: 'flex',
+        height: 'calc(100vh - 80px)',
+        width: '100%',
+        fontFamily: 'system-ui,sans-serif',
+        background: '#0f172a',
+      }}
+    >
       {/* ── MAP 70% ─────────────────────────────────────────────────────────── */}
       <div style={{ flex: '0 0 70%', position: 'relative' }}>
         <style>{`
@@ -289,41 +373,84 @@ export default function TrackingRealtime() {
       </div>
 
       {/* ── SIDEBAR 30% ─────────────────────────────────────────────────────── */}
-      <div style={{
-        flex: '0 0 30%', display: 'flex', flexDirection: 'column',
-        background: '#0f172a', color: 'white',
-        borderLeft: '1px solid #1e293b', overflowY: 'auto',
-      }}>
-
+      <div
+        style={{
+          flex: '0 0 30%',
+          display: 'flex',
+          flexDirection: 'column',
+          background: '#0f172a',
+          color: 'white',
+          borderLeft: '1px solid #1e293b',
+          overflowY: 'auto',
+        }}
+      >
         {/* ── Header ── */}
         <div style={{ padding: '16px 18px 12px', borderBottom: '1px solid #1e293b' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 12 }}>
-            <div style={{ background: '#1d4ed8', borderRadius: 10, width: 38, height: 38, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+            <div
+              style={{
+                background: '#1d4ed8',
+                borderRadius: 10,
+                width: 38,
+                height: 38,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                flexShrink: 0,
+              }}
+            >
               <Radio size={18} color="white" />
             </div>
             <div style={{ flex: 1 }}>
               <div style={{ fontWeight: 700, fontSize: 14 }}>Station de Contrôle</div>
               <div style={{ fontSize: 10, color: '#64748b' }}>IVOS Fleet · Simulation Live</div>
             </div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 5, background: '#064e3b', padding: '3px 9px', borderRadius: 20 }}>
-              <span style={{ width: 7, height: 7, borderRadius: '50%', background: '#4ade80', display: 'inline-block', animation: 'ping 1.5s infinite' }}></span>
+            <div
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: 5,
+                background: '#064e3b',
+                padding: '3px 9px',
+                borderRadius: 20,
+              }}
+            >
+              <span
+                style={{
+                  width: 7,
+                  height: 7,
+                  borderRadius: '50%',
+                  background: '#4ade80',
+                  display: 'inline-block',
+                  animation: 'ping 1.5s infinite',
+                }}
+              ></span>
               <span style={{ fontSize: 10, color: '#4ade80', fontWeight: 700 }}>LIVE</span>
             </div>
           </div>
 
           {/* KPI badges */}
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr 1fr', gap: 6 }}>
-            {([
-              { label: 'Route',   value: counts.moving,  color: '#16a34a', bg: '#052e16' },
-              { label: 'Stop',    value: counts.stopped, color: '#dc2626', bg: '#2d0a0a' },
-              { label: 'Travail', value: counts.working, color: '#2563eb', bg: '#0c1a4a' },
-              { label: 'Alerte',  value: counts.alert,   color: '#f97316', bg: '#3b1a00' },
-            ] as const).map(k => (
-              <div key={k.label} style={{
-                background: k.bg, borderRadius: 9, padding: '7px 6px', textAlign: 'center',
-                border: `1px solid ${k.color}44`,
-                animation: k.label === 'Alerte' && counts.alert > 0 ? 'blink 1s infinite' : undefined,
-              }}>
+            {(
+              [
+                { label: 'Route', value: counts.moving, color: '#16a34a', bg: '#052e16' },
+                { label: 'Stop', value: counts.stopped, color: '#dc2626', bg: '#2d0a0a' },
+                { label: 'Travail', value: counts.working, color: '#2563eb', bg: '#0c1a4a' },
+                { label: 'Alerte', value: counts.alert, color: '#f97316', bg: '#3b1a00' },
+              ] as const
+            ).map((k) => (
+              <div
+                key={k.label}
+                style={{
+                  background: k.bg,
+                  borderRadius: 9,
+                  padding: '7px 6px',
+                  textAlign: 'center',
+                  border: `1px solid ${k.color}44`,
+                  animation:
+                    k.label === 'Alerte' && counts.alert > 0 ? 'blink 1s infinite' : undefined,
+                }}
+              >
                 <div style={{ fontSize: 20, fontWeight: 800, color: k.color }}>{k.value}</div>
                 <div style={{ fontSize: 9, color: '#94a3b8' }}>{k.label}</div>
               </div>
@@ -336,10 +463,19 @@ export default function TrackingRealtime() {
           <button
             onClick={() => generatePDF(vehicles)}
             style={{
-              width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
+              width: '100%',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: 8,
               background: 'linear-gradient(135deg, #1d4ed8, #7c3aed)',
-              border: 'none', borderRadius: 10, padding: '10px 0', color: 'white',
-              fontWeight: 700, fontSize: 13, cursor: 'pointer',
+              border: 'none',
+              borderRadius: 10,
+              padding: '10px 0',
+              color: 'white',
+              fontWeight: 700,
+              fontSize: 13,
+              cursor: 'pointer',
               boxShadow: '0 2px 12px rgba(99,102,241,0.35)',
             }}
           >
@@ -351,7 +487,15 @@ export default function TrackingRealtime() {
         {/* ── Section label ── */}
         <div style={{ padding: '10px 18px 4px', display: 'flex', alignItems: 'center', gap: 6 }}>
           <Activity size={12} color="#64748b" />
-          <span style={{ fontSize: 10, fontWeight: 600, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.08em' }}>
+          <span
+            style={{
+              fontSize: 10,
+              fontWeight: 600,
+              color: '#64748b',
+              textTransform: 'uppercase',
+              letterSpacing: '0.08em',
+            }}
+          >
             Véhicules ({vehicles.length})
           </span>
           <span style={{ marginLeft: 'auto', fontSize: 10, color: '#334155' }}>↻ {now()}</span>
@@ -359,7 +503,7 @@ export default function TrackingRealtime() {
 
         {/* ── Vehicle cards ── */}
         <div style={{ padding: '0 10px 16px', display: 'flex', flexDirection: 'column', gap: 8 }}>
-          {vehicles.map(v => {
+          {vehicles.map((v) => {
             const isSelected = selected === v.id;
             const sc = STATUS_COLOR[v.status];
             const isAlert = v.status === 'alert';
@@ -372,69 +516,132 @@ export default function TrackingRealtime() {
                 style={{
                   background: isAlert ? '#1c0a00' : isSelected ? '#1e3a8a18' : '#1e293b',
                   border: `1.5px solid ${isAlert ? '#f97316' : isSelected ? '#3b82f6' : '#334155'}`,
-                  borderRadius: 12, padding: '11px 13px', cursor: 'pointer',
+                  borderRadius: 12,
+                  padding: '11px 13px',
+                  cursor: 'pointer',
                   animation: isAlert ? 'blink 1s infinite' : undefined,
                   transition: 'border 0.2s',
                 }}
               >
                 {/* Row 1: icon + id + status */}
                 <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 7 }}>
-                  <div style={{
-                    width: 36, height: 36, borderRadius: '50%', background: `${sc}22`,
-                    border: `2px solid ${sc}`, display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    fontSize: 18, flexShrink: 0,
-                  }}>
+                  <div
+                    style={{
+                      width: 36,
+                      height: 36,
+                      borderRadius: '50%',
+                      background: `${sc}22`,
+                      border: `2px solid ${sc}`,
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      fontSize: 18,
+                      flexShrink: 0,
+                    }}
+                  >
                     {v.type === 'crane' ? '🏗️' : '🚛'}
                   </div>
                   <div style={{ flex: 1, minWidth: 0 }}>
                     <div style={{ fontWeight: 700, fontSize: 13, color: '#f1f5f9' }}>{v.id}</div>
-                    <div style={{ fontSize: 10, color: '#94a3b8', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{v.name}</div>
+                    <div
+                      style={{
+                        fontSize: 10,
+                        color: '#94a3b8',
+                        whiteSpace: 'nowrap',
+                        overflow: 'hidden',
+                        textOverflow: 'ellipsis',
+                      }}
+                    >
+                      {v.name}
+                    </div>
                   </div>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 3 }}>
                     {isAlert && <AlertTriangle size={13} color="#f97316" />}
                     <span style={{ fontSize: 10, fontWeight: 700, color: sc }}>
-                      {v.status === 'alert' ? 'ALERTE' : v.status === 'moving' ? 'En route' : v.status === 'working' ? 'Travail' : 'Arrêté'}
+                      {v.status === 'alert'
+                        ? 'ALERTE'
+                        : v.status === 'moving'
+                          ? 'En route'
+                          : v.status === 'working'
+                            ? 'Travail'
+                            : 'Arrêté'}
                     </span>
                   </div>
                 </div>
 
                 {/* Row 2: speed + fuel gauge */}
                 <div style={{ marginBottom: 7 }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 4 }}>
+                  <div
+                    style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 4 }}
+                  >
                     <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
                       <Gauge size={12} color="#64748b" />
-                      <span style={{ fontSize: 12, fontWeight: 700, color: v.status === 'moving' ? '#4ade80' : '#94a3b8' }}>
+                      <span
+                        style={{
+                          fontSize: 12,
+                          fontWeight: 700,
+                          color: v.status === 'moving' ? '#4ade80' : '#94a3b8',
+                        }}
+                      >
                         {Math.round(v.speed)} km/h
                       </span>
                     </div>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
                       <Fuel size={12} color="#64748b" />
-                      <span style={{ fontSize: 12, fontWeight: 700, color: fuelColor }}>{Math.round(v.fuel)}%</span>
+                      <span style={{ fontSize: 12, fontWeight: 700, color: fuelColor }}>
+                        {Math.round(v.fuel)}%
+                      </span>
                     </div>
                   </div>
                   {/* Fuel bar */}
-                  <div style={{ height: 6, background: '#1e293b', borderRadius: 4, overflow: 'hidden', border: '1px solid #334155' }}>
-                    <div style={{
-                      width: `${v.fuel}%`, height: '100%', borderRadius: 4,
-                      background: `linear-gradient(90deg, ${fuelColor}, ${fuelColor}aa)`,
-                      transition: 'width 1s ease',
-                    }} />
+                  <div
+                    style={{
+                      height: 6,
+                      background: '#1e293b',
+                      borderRadius: 4,
+                      overflow: 'hidden',
+                      border: '1px solid #334155',
+                    }}
+                  >
+                    <div
+                      style={{
+                        width: `${v.fuel}%`,
+                        height: '100%',
+                        borderRadius: 4,
+                        background: `linear-gradient(90deg, ${fuelColor}, ${fuelColor}aa)`,
+                        transition: 'width 1s ease',
+                      }}
+                    />
                   </div>
                 </div>
 
                 {/* Row 3: coords + Focus button */}
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                <div
+                  style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}
+                >
                   <div style={{ display: 'flex', alignItems: 'center', gap: 3 }}>
                     <Clock size={10} color="#475569" />
-                    <span style={{ fontSize: 9, color: '#475569' }}>{v.pos[0].toFixed(4)}, {v.pos[1].toFixed(4)}</span>
+                    <span style={{ fontSize: 9, color: '#475569' }}>
+                      {v.pos[0].toFixed(4)}, {v.pos[1].toFixed(4)}
+                    </span>
                   </div>
                   <button
-                    onClick={e => { e.stopPropagation(); flyTo(v); }}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      flyTo(v);
+                    }}
                     style={{
-                      display: 'flex', alignItems: 'center', gap: 5,
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: 5,
                       background: isAlert ? '#9a3412' : isSelected ? '#1d4ed8' : '#1e3a8a',
-                      border: 'none', borderRadius: 7, padding: '5px 11px',
-                      color: 'white', fontSize: 11, fontWeight: 700, cursor: 'pointer',
+                      border: 'none',
+                      borderRadius: 7,
+                      padding: '5px 11px',
+                      color: 'white',
+                      fontSize: 11,
+                      fontWeight: 700,
+                      cursor: 'pointer',
                     }}
                   >
                     <Crosshair size={11} />
@@ -447,9 +654,20 @@ export default function TrackingRealtime() {
         </div>
 
         {/* ── Footer ── */}
-        <div style={{ marginTop: 'auto', padding: '10px 18px', borderTop: '1px solid #1e293b', display: 'flex', alignItems: 'center', gap: 6 }}>
+        <div
+          style={{
+            marginTop: 'auto',
+            padding: '10px 18px',
+            borderTop: '1px solid #1e293b',
+            display: 'flex',
+            alignItems: 'center',
+            gap: 6,
+          }}
+        >
           <Navigation size={11} color="#475569" />
-          <span style={{ fontSize: 9, color: '#475569' }}>Simulation · 2s · Alerte après 60s d'immobilité</span>
+          <span style={{ fontSize: 9, color: '#475569' }}>
+            Simulation · 2s · Alerte après 60s d'immobilité
+          </span>
         </div>
       </div>
     </div>

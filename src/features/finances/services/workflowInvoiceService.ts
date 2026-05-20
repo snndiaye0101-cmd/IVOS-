@@ -85,8 +85,11 @@ export interface InvoiceNotification {
 // ---- Storage helpers ----
 
 function loadInvoices(): WorkflowInvoice[] {
-  try { return JSON.parse(localStorage.getItem(INVOICES_KEY) || '[]'); }
-  catch { return []; }
+  try {
+    return JSON.parse(localStorage.getItem(INVOICES_KEY) || '[]');
+  } catch {
+    return [];
+  }
 }
 
 function saveInvoices(invoices: WorkflowInvoice[]) {
@@ -95,8 +98,11 @@ function saveInvoices(invoices: WorkflowInvoice[]) {
 }
 
 function loadNotifs(): InvoiceNotification[] {
-  try { return JSON.parse(localStorage.getItem(INVOICE_NOTIF_KEY) || '[]'); }
-  catch { return []; }
+  try {
+    return JSON.parse(localStorage.getItem(INVOICE_NOTIF_KEY) || '[]');
+  } catch {
+    return [];
+  }
 }
 
 function saveNotifs(notifs: InvoiceNotification[]) {
@@ -108,26 +114,41 @@ function saveNotifs(notifs: InvoiceNotification[]) {
 
 // Fallback tarif map (FCFA/kg) used when no UniteFacturation config matches
 const TARIF_FALLBACK: Record<string, number> = {
-  'DASRI': 2500,
+  DASRI: 2500,
   'Déchets Dangereux': 1800,
   'Boues pétrolières': 1200,
   'Produits pharmaceutiques': 2000,
 };
 
-function resolvePricing(operation: ExploitationOperation): { prixUnitaire: number; unite: string; quantite: number; categorieDechet: string } {
+function resolvePricing(operation: ExploitationOperation): {
+  prixUnitaire: number;
+  unite: string;
+  quantite: number;
+  categorieDechet: string;
+} {
   const realWeight = operation.weighingData?.poidsReel ?? 0;
 
   if (operation.documentType === 'BSD' && operation.bsdData) {
-    const cat = operation.bsdData.categorieDechet || operation.bsdData.descriptionDechet || 'Déchet';
+    const cat =
+      operation.bsdData.categorieDechet || operation.bsdData.descriptionDechet || 'Déchet';
     // Try unité de facturation config first
     const uf = findUniteFacturationByType(cat);
     if (uf) {
       // Convert weight to match unit (kg→tonne if needed)
-      const qty = uf.unit === 'Tonne' ? realWeight / 1000
-        : uf.unit === 'kg' ? realWeight
-        : uf.unit === 'm³' ? (operation.bsdData.volumeEstime || realWeight / 1000)
-        : realWeight;
-      return { prixUnitaire: uf.price, unite: uf.unit, quantite: Math.round(qty * 100) / 100, categorieDechet: cat };
+      const qty =
+        uf.unit === 'Tonne'
+          ? realWeight / 1000
+          : uf.unit === 'kg'
+            ? realWeight
+            : uf.unit === 'm³'
+              ? operation.bsdData.volumeEstime || realWeight / 1000
+              : realWeight;
+      return {
+        prixUnitaire: uf.price,
+        unite: uf.unit,
+        quantite: Math.round(qty * 100) / 100,
+        categorieDechet: cat,
+      };
     }
     // Fallback
     const tarif = TARIF_FALLBACK[cat] ?? 1500;
@@ -155,7 +176,7 @@ export function createInvoiceFromWorkflow(operation: ExploitationOperation): Wor
   const invoices = loadInvoices();
 
   // Éviter les doublons pour la même operation
-  const existing = invoices.find(i => i.operationId === operation.id);
+  const existing = invoices.find((i) => i.operationId === operation.id);
   if (existing) return existing;
 
   const { prixUnitaire, unite, quantite, categorieDechet } = resolvePricing(operation);
@@ -223,9 +244,13 @@ export function getWorkflowInvoices(): WorkflowInvoice[] {
 /**
  * Met à jour le statut d'une facture
  */
-export function updateInvoiceStatus(invoiceId: string, status: InvoiceStatus, validatedBy?: string): WorkflowInvoice | null {
+export function updateInvoiceStatus(
+  invoiceId: string,
+  status: InvoiceStatus,
+  validatedBy?: string
+): WorkflowInvoice | null {
   const invoices = loadInvoices();
-  const invoice = invoices.find(i => i.id === invoiceId);
+  const invoice = invoices.find((i) => i.id === invoiceId);
   if (!invoice) return null;
   invoice.status = status;
   invoice.updatedAt = new Date().toISOString();
@@ -244,12 +269,14 @@ export function getInvoiceStats() {
   const invoices = loadInvoices();
   return {
     total: invoices.length,
-    aValider: invoices.filter(i => i.status === 'a_valider').length,
-    validees: invoices.filter(i => i.status === 'validee').length,
-    envoyees: invoices.filter(i => i.status === 'envoyee').length,
-    payees: invoices.filter(i => i.status === 'payee').length,
+    aValider: invoices.filter((i) => i.status === 'a_valider').length,
+    validees: invoices.filter((i) => i.status === 'validee').length,
+    envoyees: invoices.filter((i) => i.status === 'envoyee').length,
+    payees: invoices.filter((i) => i.status === 'payee').length,
     montantTotal: invoices.reduce((s, i) => s + i.montantHT, 0),
-    montantAValider: invoices.filter(i => i.status === 'a_valider').reduce((s, i) => s + i.montantHT, 0),
+    montantAValider: invoices
+      .filter((i) => i.status === 'a_valider')
+      .reduce((s, i) => s + i.montantHT, 0),
   };
 }
 
@@ -273,17 +300,22 @@ export function getInvoiceNotifications(): InvoiceNotification[] {
 }
 
 export function getUnreadInvoiceCount(): number {
-  return loadNotifs().filter(n => !n.isRead).length;
+  return loadNotifs().filter((n) => !n.isRead).length;
 }
 
 export function markInvoiceNotifRead(notifId: string) {
   const notifs = loadNotifs();
-  const n = notifs.find(x => x.id === notifId);
-  if (n) { n.isRead = true; saveNotifs(notifs); }
+  const n = notifs.find((x) => x.id === notifId);
+  if (n) {
+    n.isRead = true;
+    saveNotifs(notifs);
+  }
 }
 
 export function markAllInvoiceNotifsRead() {
   const notifs = loadNotifs();
-  notifs.forEach(n => { n.isRead = true; });
+  notifs.forEach((n) => {
+    n.isRead = true;
+  });
   saveNotifs(notifs);
 }

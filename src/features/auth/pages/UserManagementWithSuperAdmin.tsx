@@ -7,30 +7,30 @@ export default function UserManagementWithSuperAdmin() {
   const [activeTab, setActiveTab] = useState<'users' | 'superadmin'>('users');
 
   return (
-    <div className="w-full min-h-screen">
+    <div className="min-h-screen w-full">
       {/* Tabs Navigation */}
-      <div className="bg-white border-b border-gray-200 mb-6 sticky top-0 z-10">
+      <div className="sticky top-0 z-10 mb-6 border-b border-gray-200 bg-white">
         <div className="flex gap-1 px-6">
           <button
             onClick={() => setActiveTab('users')}
-            className={`flex items-center gap-2 px-6 py-4 font-semibold text-sm transition-all relative ${
+            className={`relative flex items-center gap-2 px-6 py-4 text-sm font-semibold transition-all ${
               activeTab === 'users'
-                ? 'text-blue-600 border-b-2 border-blue-600'
+                ? 'border-b-2 border-blue-600 text-blue-600'
                 : 'text-gray-600 hover:text-gray-900'
             }`}
           >
-            <Users className="w-5 h-5" />
+            <Users className="h-5 w-5" />
             Gestion Utilisateurs
           </button>
           <button
             onClick={() => setActiveTab('superadmin')}
-            className={`flex items-center gap-2 px-6 py-4 font-semibold text-sm transition-all relative ${
+            className={`relative flex items-center gap-2 px-6 py-4 text-sm font-semibold transition-all ${
               activeTab === 'superadmin'
-                ? 'text-blue-600 border-b-2 border-blue-600'
+                ? 'border-b-2 border-blue-600 text-blue-600'
                 : 'text-gray-600 hover:text-gray-900'
             }`}
           >
-            <Shield className="w-5 h-5" />
+            <Shield className="h-5 w-5" />
             Contrôle Super Admin
           </button>
         </div>

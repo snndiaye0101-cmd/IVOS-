@@ -13,13 +13,13 @@ import {
   markCertificateAsSent,
   markCertificateAsVerified,
   type Certificate,
-  type CertificateGenerationParams
+  type CertificateGenerationParams,
 } from '../certificateService';
 
 // Mock localStorage
 const localStorageMock = (() => {
   let store: Record<string, string> = {};
-  
+
   return {
     getItem: (key: string) => store[key] || null,
     setItem: (key: string, value: string) => {
@@ -27,12 +27,12 @@ const localStorageMock = (() => {
     },
     clear: () => {
       store = {};
-    }
+    },
   };
 })();
 
 Object.defineProperty(window, 'localStorage', {
-  value: localStorageMock
+  value: localStorageMock,
 });
 
 window.dispatchEvent = jest.fn();
@@ -54,12 +54,12 @@ describe('certificateService', () => {
       collectionDate: '2026-04-15',
       disposalSite: 'Centre de Traitement Dakar',
       vehicleRegistration: 'AA-123-BB',
-      generatedBy: 'Admin'
+      generatedBy: 'Admin',
     };
 
     it('devrait générer un certificat valide', () => {
       const cert = generateCertificate(validParams);
-      
+
       expect(cert.id).toBeDefined();
       expect(cert.certificateNumber).toMatch(/^CERT-KIG-2026-\d{4}$/);
       expect(cert.verificationCode).toMatch(/^[A-Z0-9]{12}$/);
@@ -72,14 +72,14 @@ describe('certificateService', () => {
     it('devrait créer un code de vérification unique', () => {
       const cert1 = generateCertificate(validParams);
       const cert2 = generateCertificate({ ...validParams, operationId: 'OP-002' });
-      
+
       expect(cert1.verificationCode).not.toBe(cert2.verificationCode);
       expect(cert1.verificationCode).toHaveLength(12);
     });
 
     it('devrait stocker le certificat dans localStorage', () => {
       generateCertificate(validParams);
-      
+
       const certs = getCertificates();
       expect(certs).toHaveLength(1);
       expect(certs[0].clientName).toBe('Total Sénégal');
@@ -88,14 +88,14 @@ describe('certificateService', () => {
     it('devrait incrémenter le numéro de certificat', () => {
       const cert1 = generateCertificate(validParams);
       const cert2 = generateCertificate({ ...validParams, operationId: 'OP-002' });
-      
+
       expect(cert1.certificateNumber).toBe('CERT-KIG-2026-0001');
       expect(cert2.certificateNumber).toBe('CERT-KIG-2026-0002');
     });
 
     it('devrait générer une URL QR valide', () => {
       const cert = generateCertificate(validParams);
-      
+
       expect(cert.qrCodeData).toContain('/certificate/verify/');
       expect(cert.qrCodeData).toContain(cert.verificationCode);
     });
@@ -111,47 +111,47 @@ describe('certificateService', () => {
           status: 'cloturee',
           bsdData: {
             wasteQuantity: 1500,
-            validatedAt: '2026-04-15'
-          }
+            validatedAt: '2026-04-15',
+          },
         },
         {
           id: 'OP-002',
           code: 'BSD-002',
           status: 'en_cours',
           bsdData: {
-            wasteQuantity: 1000
-          }
+            wasteQuantity: 1000,
+          },
         },
         {
           id: 'OP-003',
           code: 'BSD-003',
           status: 'cloturee',
           bsdData: {
-            wasteQuantity: 0
-          }
-        }
+            wasteQuantity: 0,
+          },
+        },
       ];
-      
+
       localStorageMock.setItem('ivos_operations_v1', JSON.stringify(operations));
     });
 
     it('devrait autoriser la génération pour opération clôturée valide', () => {
       const result = canGenerateCertificate('OP-001');
-      
+
       expect(result.canGenerate).toBe(true);
       expect(result.reason).toBeUndefined();
     });
 
     it('devrait refuser si opération non clôturée', () => {
       const result = canGenerateCertificate('OP-002');
-      
+
       expect(result.canGenerate).toBe(false);
       expect(result.reason).toContain('clôturée');
     });
 
     it('devrait refuser si quantité zéro', () => {
       const result = canGenerateCertificate('OP-003');
-      
+
       expect(result.canGenerate).toBe(false);
       expect(result.reason).toContain('quantité');
     });
@@ -168,12 +168,12 @@ describe('certificateService', () => {
         collectionDate: '2026-04-15',
         disposalSite: 'Centre',
         vehicleRegistration: 'AA-123-BB',
-        generatedBy: 'Admin'
+        generatedBy: 'Admin',
       };
       generateCertificate(params);
-      
+
       const result = canGenerateCertificate('OP-001');
-      
+
       expect(result.canGenerate).toBe(false);
       expect(result.reason).toContain('déjà généré');
     });
@@ -193,14 +193,14 @@ describe('certificateService', () => {
         collectionDate: '2026-04-15',
         disposalSite: 'Centre Dakar',
         vehicleRegistration: 'AA-123-BB',
-        generatedBy: 'Admin'
+        generatedBy: 'Admin',
       };
       validCert = generateCertificate(params);
     });
 
     it('devrait vérifier un certificat valide', () => {
       const result = verifyCertificate(validCert.verificationCode);
-      
+
       expect(result.isValid).toBe(true);
       expect(result.certificate).toBeDefined();
       expect(result.certificate?.certificateNumber).toBe(validCert.certificateNumber);
@@ -209,7 +209,7 @@ describe('certificateService', () => {
 
     it('devrait rejeter un code invalide', () => {
       const result = verifyCertificate('INVALID123');
-      
+
       expect(result.isValid).toBe(false);
       expect(result.certificate).toBeUndefined();
       expect(result.message).toContain('invalide');
@@ -217,7 +217,7 @@ describe('certificateService', () => {
 
     it('devrait rejeter un code vide', () => {
       const result = verifyCertificate('');
-      
+
       expect(result.isValid).toBe(false);
       expect(result.message).toContain('code de vérification');
     });
@@ -235,12 +235,12 @@ describe('certificateService', () => {
         collectionDate: '2026-04-15',
         disposalSite: 'Centre',
         vehicleRegistration: 'AA-123-BB',
-        generatedBy: 'Admin'
+        generatedBy: 'Admin',
       };
       const cert = generateCertificate(params);
-      
+
       const found = getCertificateById(cert.id);
-      
+
       expect(found).toBeDefined();
       expect(found?.id).toBe(cert.id);
       expect(found?.clientName).toBe('Test Client');
@@ -264,14 +264,14 @@ describe('certificateService', () => {
         collectionDate: '2026-04-15',
         disposalSite: 'Centre',
         vehicleRegistration: 'AA-123-BB',
-        generatedBy: 'Admin'
+        generatedBy: 'Admin',
       };
       const cert = generateCertificate(params);
-      
+
       expect(cert.sentAt).toBeUndefined();
-      
+
       markCertificateAsSent(cert.id);
-      
+
       const updated = getCertificateById(cert.id);
       expect(updated?.sentAt).toBeDefined();
       expect(new Date(updated!.sentAt!).getTime()).toBeLessThanOrEqual(Date.now());
@@ -288,16 +288,16 @@ describe('certificateService', () => {
         collectionDate: '2026-04-15',
         disposalSite: 'Centre',
         vehicleRegistration: 'AA-123-BB',
-        generatedBy: 'Admin'
+        generatedBy: 'Admin',
       };
       const cert = generateCertificate(params);
-      
+
       jest.clearAllMocks();
       markCertificateAsSent(cert.id);
-      
+
       expect(window.dispatchEvent).toHaveBeenCalledWith(
         expect.objectContaining({
-          type: 'ivos_certificates_change'
+          type: 'ivos_certificates_change',
         })
       );
     });
@@ -315,14 +315,14 @@ describe('certificateService', () => {
         collectionDate: '2026-04-15',
         disposalSite: 'Centre',
         vehicleRegistration: 'AA-123-BB',
-        generatedBy: 'Admin'
+        generatedBy: 'Admin',
       };
       const cert = generateCertificate(params);
-      
+
       expect(cert.verifiedAt).toBeUndefined();
-      
+
       markCertificateAsVerified(cert.id);
-      
+
       const updated = getCertificateById(cert.id);
       expect(updated?.verifiedAt).toBeDefined();
     });
@@ -345,19 +345,19 @@ describe('certificateService', () => {
         collectionDate: '2026-04-15',
         disposalSite: 'Centre',
         vehicleRegistration: 'AA-123-BB',
-        generatedBy: 'Admin'
+        generatedBy: 'Admin',
       };
-      
+
       const params2: CertificateGenerationParams = {
         ...params1,
         operationId: 'OP-002',
         operationCode: 'BSD-002',
-        clientName: 'Client 2'
+        clientName: 'Client 2',
       };
-      
+
       generateCertificate(params1);
       generateCertificate(params2);
-      
+
       const certs = getCertificates();
       expect(certs).toHaveLength(2);
     });

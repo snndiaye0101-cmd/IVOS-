@@ -23,7 +23,11 @@ function getCurrencyByCountry(countryCode: string) {
 function getComptableAccounts(countryCode: string, label: string) {
   const normalized = label.toLowerCase();
 
-  if (normalized.includes('ipres') || normalized.includes('cnps retraite') || normalized.includes('inps')) {
+  if (
+    normalized.includes('ipres') ||
+    normalized.includes('cnps retraite') ||
+    normalized.includes('inps')
+  ) {
     return countryCode === 'CI'
       ? { charge: '641100', organisme: '431100' }
       : { charge: '641100', organisme: '431100' };
@@ -36,7 +40,12 @@ function getComptableAccounts(countryCode: string, label: string) {
   if (normalized.includes('ipm') || normalized.includes('sante')) {
     return { charge: '645300', organisme: '431300' };
   }
-  if (normalized.includes('its') || normalized.includes('irpp') || normalized === 'ir' || normalized.includes('rts')) {
+  if (
+    normalized.includes('its') ||
+    normalized.includes('irpp') ||
+    normalized === 'ir' ||
+    normalized.includes('rts')
+  ) {
     return { charge: '641410', organisme: '442100' };
   }
   if (normalized.includes('tfp')) {
@@ -55,10 +64,14 @@ export function exportFiscalRecapToExcel(recap: FiscalRecap) {
     }))
   );
 
-  XLSX.utils.sheet_add_aoa(ws, [
-    ['Pays', recap.countryCode, 'Mois', recap.month],
-    ['Fiches', recap.slipCount, 'Total dû', Math.round(recap.grandTotal)],
-  ], { origin: 'F1' });
+  XLSX.utils.sheet_add_aoa(
+    ws,
+    [
+      ['Pays', recap.countryCode, 'Mois', recap.month],
+      ['Fiches', recap.slipCount, 'Total dû', Math.round(recap.grandTotal)],
+    ],
+    { origin: 'F1' }
+  );
 
   const wb = XLSX.utils.book_new();
   XLSX.utils.book_append_sheet(wb, ws, 'Recap Fiscal');
@@ -74,7 +87,10 @@ export function exportFiscalRecapToExcel(recap: FiscalRecap) {
     }))
   );
   XLSX.utils.book_append_sheet(wb, detailSheet, 'Detail Organismes');
-  XLSX.writeFile(wb, `recap-fiscal-${recap.countryCode.toLowerCase()}-${safeMonth(recap.month)}.xlsx`);
+  XLSX.writeFile(
+    wb,
+    `recap-fiscal-${recap.countryCode.toLowerCase()}-${safeMonth(recap.month)}.xlsx`
+  );
 }
 
 export function exportFiscalRecapToComptableExcel(recap: FiscalRecap) {
@@ -140,14 +156,21 @@ export function exportFiscalRecapToComptableExcel(recap: FiscalRecap) {
   }
 
   const ws = XLSX.utils.json_to_sheet(rows);
-  XLSX.utils.sheet_add_aoa(ws, [
-    ['Pays', recap.countryCode, 'Mois', recap.month],
-    ['Total debit', Math.round(recap.grandTotal), 'Total credit', Math.round(recap.grandTotal)],
-  ], { origin: 'L1' });
+  XLSX.utils.sheet_add_aoa(
+    ws,
+    [
+      ['Pays', recap.countryCode, 'Mois', recap.month],
+      ['Total debit', Math.round(recap.grandTotal), 'Total credit', Math.round(recap.grandTotal)],
+    ],
+    { origin: 'L1' }
+  );
 
   const wb = XLSX.utils.book_new();
   XLSX.utils.book_append_sheet(wb, ws, 'Ecritures Comptables');
-  XLSX.writeFile(wb, `recap-fiscal-comptable-${recap.countryCode.toLowerCase()}-${safeMonth(recap.month)}.xlsx`);
+  XLSX.writeFile(
+    wb,
+    `recap-fiscal-comptable-${recap.countryCode.toLowerCase()}-${safeMonth(recap.month)}.xlsx`
+  );
 }
 
 export function exportFiscalRecapToPdf(recap: FiscalRecap) {
@@ -164,11 +187,17 @@ export function exportFiscalRecapToPdf(recap: FiscalRecap) {
   doc.setFont('helvetica', 'normal');
   doc.setFontSize(10);
   doc.setTextColor(90, 100, 115);
-  doc.text(`Pays: ${recap.countryCode}    Mois: ${recap.month}    Fiches: ${recap.slipCount}`, margin, 54);
+  doc.text(
+    `Pays: ${recap.countryCode}    Mois: ${recap.month}    Fiches: ${recap.slipCount}`,
+    margin,
+    54
+  );
   doc.text(`Total salarial: ${formatAmount(recap.salarialTotal, currency)}`, margin, 72);
   doc.text(`Total patronal: ${formatAmount(recap.patronalTotal, currency)}`, margin + 180, 72);
   doc.setFont('helvetica', 'bold');
-  doc.text(`Total dû: ${formatAmount(recap.grandTotal, currency)}`, pageWidth - margin, 72, { align: 'right' });
+  doc.text(`Total dû: ${formatAmount(recap.grandTotal, currency)}`, pageWidth - margin, 72, {
+    align: 'right',
+  });
 
   autoTable(doc, {
     startY: 92,
@@ -200,11 +229,14 @@ export function exportFiscalRecapToPdf(recap: FiscalRecap) {
     },
   });
 
-  const footerY = ((doc as unknown as { lastAutoTable?: { finalY: number } }).lastAutoTable?.finalY || 120) + 18;
+  const footerY =
+    ((doc as unknown as { lastAutoTable?: { finalY: number } }).lastAutoTable?.finalY || 120) + 18;
   autoTable(doc, {
     startY: footerY + 16,
     margin: { left: margin, right: margin },
-    head: [['Organisme', 'Base sal.', 'Taux sal.', 'Salarial', 'Base pat.', 'Taux pat.', 'Patronal']],
+    head: [
+      ['Organisme', 'Base sal.', 'Taux sal.', 'Salarial', 'Base pat.', 'Taux pat.', 'Patronal'],
+    ],
     body: recap.detailRows.map((row) => [
       row.label,
       formatAmount(row.baseSalarial, currency),
@@ -237,12 +269,16 @@ export function exportFiscalRecapToPdf(recap: FiscalRecap) {
     },
   });
 
-  const totalY = (((doc as unknown as { lastAutoTable?: { finalY: number } }).lastAutoTable?.finalY) || (footerY + 16)) + 18;
+  const totalY =
+    ((doc as unknown as { lastAutoTable?: { finalY: number } }).lastAutoTable?.finalY ||
+      footerY + 16) + 18;
   doc.setDrawColor(200, 210, 220);
   doc.line(margin, totalY, pageWidth - margin, totalY);
   doc.setFont('helvetica', 'bold');
   doc.text('Total global', margin, totalY + 18);
-  doc.text(formatAmount(recap.grandTotal, currency), pageWidth - margin, totalY + 18, { align: 'right' });
+  doc.text(formatAmount(recap.grandTotal, currency), pageWidth - margin, totalY + 18, {
+    align: 'right',
+  });
 
   doc.save(`recap-fiscal-${recap.countryCode.toLowerCase()}-${safeMonth(recap.month)}.pdf`);
 }
@@ -274,7 +310,9 @@ export function exportFiscalMonthlyStatementsByOrganism(recap: FiscalRecap) {
     doc.setTextColor(31, 41, 55);
     doc.text(`Salarial: ${formatCleanAmount(row.salarial, 'FCFA')}`, margin, 98);
     doc.text(`Patronal: ${formatCleanAmount(row.patronal, 'FCFA')}`, margin + 190, 98);
-    doc.text(`Total: ${formatCleanAmount(row.total, 'FCFA')}`, pageWidth - margin, 98, { align: 'right' });
+    doc.text(`Total: ${formatCleanAmount(row.total, 'FCFA')}`, pageWidth - margin, 98, {
+      align: 'right',
+    });
 
     const detailRows = recap.detailRows.filter((detail) => {
       const prefix = row.label.toLowerCase().split(' ')[0];
@@ -284,16 +322,23 @@ export function exportFiscalMonthlyStatementsByOrganism(recap: FiscalRecap) {
     autoTable(doc, {
       startY: 116,
       margin: { left: margin, right: margin },
-      head: [['Organisme', 'Base sal.', 'Taux sal.', 'Salarial', 'Base pat.', 'Taux pat.', 'Patronal']],
-      body: (detailRows.length > 0 ? detailRows : [{
-        label: row.label,
-        baseSalarial: 0,
-        tauxSalarial: null,
-        salarial: row.salarial,
-        basePatronal: 0,
-        tauxPatronal: null,
-        patronal: row.patronal,
-      }]).map((detail) => [
+      head: [
+        ['Organisme', 'Base sal.', 'Taux sal.', 'Salarial', 'Base pat.', 'Taux pat.', 'Patronal'],
+      ],
+      body: (detailRows.length > 0
+        ? detailRows
+        : [
+            {
+              label: row.label,
+              baseSalarial: 0,
+              tauxSalarial: null,
+              salarial: row.salarial,
+              basePatronal: 0,
+              tauxPatronal: null,
+              patronal: row.patronal,
+            },
+          ]
+      ).map((detail) => [
         detail.label,
         formatCleanAmount(detail.baseSalarial, 'FCFA'),
         formatRate(detail.tauxSalarial),
@@ -326,5 +371,7 @@ export function exportFiscalMonthlyStatementsByOrganism(recap: FiscalRecap) {
     });
   });
 
-  doc.save(`bordereaux-organismes-${recap.countryCode.toLowerCase()}-${safeMonth(recap.month)}.pdf`);
+  doc.save(
+    `bordereaux-organismes-${recap.countryCode.toLowerCase()}-${safeMonth(recap.month)}.pdf`
+  );
 }

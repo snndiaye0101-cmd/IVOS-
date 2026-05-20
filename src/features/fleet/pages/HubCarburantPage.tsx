@@ -1,3 +1,3 @@
-import CarburantPage from './CarburantPage'
+import CarburantPage from './CarburantPage';
 
-export default CarburantPage
+export default CarburantPage;

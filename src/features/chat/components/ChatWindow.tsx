@@ -4,14 +4,22 @@ import { ChatMessage } from '../types/chat.types';
 import { toast } from 'sonner';
 import { subscribeToRoomMessages } from '../services/realtimeService';
 
-export default function ChatWindow({ userId, userName, roomId = 'general', dmUserId }: { userId: string; userName: string; roomId?: string; dmUserId?: string }) {
+export default function ChatWindow({
+  userId,
+  userName,
+  roomId = 'general',
+  dmUserId,
+}: {
+  userId: string;
+  userName: string;
+  roomId?: string;
+  dmUserId?: string;
+}) {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [input, setInput] = useState('');
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
-  const chatKey = dmUserId
-    ? `dm:${[userId, dmUserId].sort().join('-')}`
-    : roomId;
+  const chatKey = dmUserId ? `dm:${[userId, dmUserId].sort().join('-')}` : roomId;
 
   useEffect(() => {
     let mounted = true;
@@ -60,29 +68,36 @@ export default function ChatWindow({ userId, userName, roomId = 'general', dmUse
   };
 
   return (
-    <div className="flex flex-col h-full bg-white rounded-xl shadow">
+    <div className="flex h-full flex-col rounded-xl bg-white shadow">
       <div className="flex-1 overflow-y-auto p-4">
         {messages.map((msg) => (
-          <div key={msg.id} className={`mb-2 ${msg.user_id === userId ? 'text-right' : 'text-left'}`}>
-            <span className="font-semibold text-blue-700 mr-2">{msg.user_name}</span>
-            <span className="inline-block bg-gray-100 px-3 py-1 rounded-lg text-gray-800 max-w-xs break-words">
+          <div
+            key={msg.id}
+            className={`mb-2 ${msg.user_id === userId ? 'text-right' : 'text-left'}`}
+          >
+            <span className="mr-2 font-semibold text-blue-700">{msg.user_name}</span>
+            <span className="inline-block max-w-xs break-words rounded-lg bg-gray-100 px-3 py-1 text-gray-800">
               {msg.content}
             </span>
-            <div className="text-xs text-gray-400 mt-0.5">{new Date(msg.created_at).toLocaleTimeString()}</div>
+            <div className="mt-0.5 text-xs text-gray-400">
+              {new Date(msg.created_at).toLocaleTimeString()}
+            </div>
           </div>
         ))}
         <div ref={messagesEndRef} />
       </div>
-      <div className="p-2 border-t flex gap-2">
+      <div className="flex gap-2 border-t p-2">
         <input
-          className="flex-1 border rounded px-3 py-2 text-sm"
+          className="flex-1 rounded border px-3 py-2 text-sm"
           value={input}
-          onChange={e => setInput(e.target.value)}
+          onChange={(e) => setInput(e.target.value)}
           placeholder="Ecrivez un message..."
-          onKeyDown={e => { if (e.key === 'Enter') handleSend(); }}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter') handleSend();
+          }}
         />
         <button
-          className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
+          className="rounded bg-blue-600 px-4 py-2 text-white hover:bg-blue-700"
           onClick={handleSend}
         >
           Envoyer

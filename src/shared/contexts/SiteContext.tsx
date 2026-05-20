@@ -3,156 +3,189 @@
 // Provides currency formatting + site isolation
 // ============================================
 
-import { createContext, useContext, useState, useEffect, useCallback, type ReactNode } from 'react'
-import { countryStore, type ICountry, type ISite } from '../services/countryStore'
-import { DEFAULT_COUNTRY_ALPHA3, DEFAULT_COUNTRY_ALPHA2 } from '../constants'
-import { useAuth } from './AuthContext'
-import { permissionStore } from '../services/permissionStore'
+import { createContext, useContext, useState, useEffect, useCallback, type ReactNode } from 'react';
+import { countryStore, type ICountry, type ISite } from '../services/countryStore';
+import { DEFAULT_COUNTRY_ALPHA3, DEFAULT_COUNTRY_ALPHA2 } from '../constants';
+import { useAuth } from './AuthContext';
+import { permissionStore } from '../services/permissionStore';
 
 interface SiteContextType {
   // Current user's assigned data
-  userCountry: ICountry | null
-  userSite: ISite | null
-  currencyCode: string
-  currencySymbol: string
+  userCountry: ICountry | null;
+  userSite: ISite | null;
+  currencyCode: string;
+  currencySymbol: string;
 
   // Super Admin overrides (view as another site)
-  viewCountry: ICountry | null
-  viewSite: ISite | null
-  setViewCountry: (country: ICountry | null) => void
-  setViewSite: (site: ISite | null) => void
-  isConsolidatedView: boolean
-  setConsolidatedView: (v: boolean) => void
+  viewCountry: ICountry | null;
+  viewSite: ISite | null;
+  setViewCountry: (country: ICountry | null) => void;
+  setViewSite: (site: ISite | null) => void;
+  isConsolidatedView: boolean;
+  setConsolidatedView: (v: boolean) => void;
 
   // Active = view override if super admin, else user's own
-  activeCountry: ICountry | null
-  activeSite: ISite | null
-  activeCurrencyCode: string
-  activeCurrencySymbol: string
+  activeCountry: ICountry | null;
+  activeSite: ISite | null;
+  activeCurrencyCode: string;
+  activeCurrencySymbol: string;
 
   // Data helpers
-  allCountries: ICountry[]
-  allSites: ISite[]
-  sitesForCountry: (countryId: string) => ISite[]
-  isSuperAdmin: boolean
-  referenceCurrency: string
+  allCountries: ICountry[];
+  allSites: ISite[];
+  sitesForCountry: (countryId: string) => ISite[];
+  isSuperAdmin: boolean;
+  referenceCurrency: string;
 
   // Refresh after CRUD
-  refresh: () => void
+  refresh: () => void;
 
   // Format currency with active site's currency
-  formatMoney: (amount: number) => string
-  formatMoneyRef: (amount: number) => string
+  formatMoney: (amount: number) => string;
+  formatMoneyRef: (amount: number) => string;
 }
 
-const SiteContext = createContext<SiteContextType | null>(null)
+const SiteContext = createContext<SiteContextType | null>(null);
 
 export function SiteProvider({ children }: { children: ReactNode }) {
-  const { user } = useAuth()
-  const isSuperAdmin = user ? permissionStore.isSuperAdmin(user.id) : false
+  const { user } = useAuth();
+  const isSuperAdmin = user ? permissionStore.isSuperAdmin(user.id) : false;
 
-  const [allCountries, setAllCountries] = useState<ICountry[]>([])
-  const [allSites, setAllSites] = useState<ISite[]>([])
+  const [allCountries, setAllCountries] = useState<ICountry[]>([]);
+  const [allSites, setAllSites] = useState<ISite[]>([]);
 
   // Super Admin view overrides
-  const [viewCountry, setViewCountry] = useState<ICountry | null>(null)
-  const [viewSite, setViewSite] = useState<ISite | null>(null)
-  const [isConsolidatedView, setConsolidatedView] = useState(false)
+  const [viewCountry, setViewCountry] = useState<ICountry | null>(null);
+  const [viewSite, setViewSite] = useState<ISite | null>(null);
+  const [isConsolidatedView, setConsolidatedView] = useState(false);
 
   const refresh = useCallback(() => {
-    countryStore.seedDefaults()
-    setAllCountries(countryStore.getCountries())
-    setAllSites(countryStore.getSites())
-  }, [])
+    countryStore.seedDefaults();
+    setAllCountries(countryStore.getCountries());
+    setAllSites(countryStore.getSites());
+  }, []);
 
-  useEffect(() => { refresh() }, [refresh])
+  useEffect(() => {
+    refresh();
+  }, [refresh]);
 
   // Determine a sensible default country (prefer Senegal), then user's assigned values
-  const defaultCountry = allCountries.find(c => c.codeIso === DEFAULT_COUNTRY_ALPHA3 || c.codeIso === DEFAULT_COUNTRY_ALPHA2 || /sénégal|senegal/i.test(c.name)) || allCountries[0] || null
+  const defaultCountry =
+    allCountries.find(
+      (c) =>
+        c.codeIso === DEFAULT_COUNTRY_ALPHA3 ||
+        c.codeIso === DEFAULT_COUNTRY_ALPHA2 ||
+        /sénégal|senegal/i.test(c.name)
+    ) ||
+    allCountries[0] ||
+    null;
 
   const userCountry = user?.countryId
-    ? allCountries.find(c => c.id === user.countryId) || defaultCountry
-    : defaultCountry
+    ? allCountries.find((c) => c.id === user.countryId) || defaultCountry
+    : defaultCountry;
 
   // Default site: prefer a site belonging to the default country (Senegal) when possible
-  const defaultSite = defaultCountry ? allSites.find(s => s.countryId === defaultCountry.id) || allSites[0] || null : allSites[0] || null
+  const defaultSite = defaultCountry
+    ? allSites.find((s) => s.countryId === defaultCountry.id) || allSites[0] || null
+    : allSites[0] || null;
 
   const userSite = user?.siteId
-    ? allSites.find(s => s.id === user.siteId) || defaultSite
-    : defaultSite
+    ? allSites.find((s) => s.id === user.siteId) || defaultSite
+    : defaultSite;
 
   // Active context (super admin override or user's own)
-  const activeCountry = isSuperAdmin && viewCountry ? viewCountry : userCountry
-  const activeSite = isSuperAdmin && viewSite ? viewSite : userSite
+  const activeCountry = isSuperAdmin && viewCountry ? viewCountry : userCountry;
+  const activeSite = isSuperAdmin && viewSite ? viewSite : userSite;
 
   // Currency from active site's country
   const activeCurrency = activeSite
     ? countryStore.getCurrencyForSite(activeSite.id)
     : activeCountry
       ? countryStore.getCurrencyForCountry(activeCountry.id)
-      : { code: 'XOF', symbol: 'F CFA' }
+      : { code: 'XOF', symbol: 'F CFA' };
 
   const userCurrency = userSite
     ? countryStore.getCurrencyForSite(userSite.id)
-    : { code: 'XOF', symbol: 'F CFA' }
+    : { code: 'XOF', symbol: 'F CFA' };
 
-  const referenceCurrency = countryStore.getReferenceCurrency()
+  const referenceCurrency = countryStore.getReferenceCurrency();
 
-  const sitesForCountry = useCallback((countryId: string) => {
-    return allSites.filter(s => s.countryId === countryId)
-  }, [allSites])
+  const sitesForCountry = useCallback(
+    (countryId: string) => {
+      return allSites.filter((s) => s.countryId === countryId);
+    },
+    [allSites]
+  );
 
   // Format money with the active site's currency
-  const formatMoney = useCallback((amount: number): string => {
-    return new Intl.NumberFormat('fr-FR', {
-      style: 'decimal',
-      minimumFractionDigits: 0,
-      maximumFractionDigits: 0,
-    }).format(amount) + ' ' + activeCurrency.symbol
-  }, [activeCurrency.symbol])
+  const formatMoney = useCallback(
+    (amount: number): string => {
+      return (
+        new Intl.NumberFormat('fr-FR', {
+          style: 'decimal',
+          minimumFractionDigits: 0,
+          maximumFractionDigits: 0,
+        }).format(amount) +
+        ' ' +
+        activeCurrency.symbol
+      );
+    },
+    [activeCurrency.symbol]
+  );
 
   // Format money in reference currency (for consolidated view)
-  const formatMoneyRef = useCallback((amount: number): string => {
-    const refSymbol = allCountries.find(c => c.currencyCode === referenceCurrency)?.currencySymbol || referenceCurrency
-    return new Intl.NumberFormat('fr-FR', {
-      style: 'decimal',
-      minimumFractionDigits: 0,
-      maximumFractionDigits: 0,
-    }).format(amount) + ' ' + refSymbol
-  }, [referenceCurrency, allCountries])
+  const formatMoneyRef = useCallback(
+    (amount: number): string => {
+      const refSymbol =
+        allCountries.find((c) => c.currencyCode === referenceCurrency)?.currencySymbol ||
+        referenceCurrency;
+      return (
+        new Intl.NumberFormat('fr-FR', {
+          style: 'decimal',
+          minimumFractionDigits: 0,
+          maximumFractionDigits: 0,
+        }).format(amount) +
+        ' ' +
+        refSymbol
+      );
+    },
+    [referenceCurrency, allCountries]
+  );
 
   return (
-    <SiteContext.Provider value={{
-      userCountry,
-      userSite,
-      currencyCode: userCurrency.code,
-      currencySymbol: userCurrency.symbol,
-      viewCountry,
-      viewSite,
-      setViewCountry,
-      setViewSite,
-      isConsolidatedView,
-      setConsolidatedView,
-      activeCountry,
-      activeSite,
-      activeCurrencyCode: activeCurrency.code,
-      activeCurrencySymbol: activeCurrency.symbol,
-      allCountries,
-      allSites,
-      sitesForCountry,
-      isSuperAdmin,
-      referenceCurrency,
-      refresh,
-      formatMoney,
-      formatMoneyRef,
-    }}>
+    <SiteContext.Provider
+      value={{
+        userCountry,
+        userSite,
+        currencyCode: userCurrency.code,
+        currencySymbol: userCurrency.symbol,
+        viewCountry,
+        viewSite,
+        setViewCountry,
+        setViewSite,
+        isConsolidatedView,
+        setConsolidatedView,
+        activeCountry,
+        activeSite,
+        activeCurrencyCode: activeCurrency.code,
+        activeCurrencySymbol: activeCurrency.symbol,
+        allCountries,
+        allSites,
+        sitesForCountry,
+        isSuperAdmin,
+        referenceCurrency,
+        refresh,
+        formatMoney,
+        formatMoneyRef,
+      }}
+    >
       {children}
     </SiteContext.Provider>
-  )
+  );
 }
 
 export function useSite() {
-  const ctx = useContext(SiteContext)
-  if (!ctx) throw new Error('useSite must be used within SiteProvider')
-  return ctx
+  const ctx = useContext(SiteContext);
+  if (!ctx) throw new Error('useSite must be used within SiteProvider');
+  return ctx;
 }

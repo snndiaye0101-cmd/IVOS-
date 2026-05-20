@@ -24,7 +24,9 @@ export default function BadgeDesigner({ agent, logoUrl }: BadgeDesignerProps) {
 
   const handleGenerate = async () => {
     if (!agent) return;
-    const url = await generateQRDataUrl(agent as unknown as Parameters<typeof generateQRDataUrl>[0]);
+    const url = await generateQRDataUrl(
+      agent as unknown as Parameters<typeof generateQRDataUrl>[0]
+    );
     setQrUrl(url);
   };
 
@@ -38,31 +40,53 @@ export default function BadgeDesigner({ agent, logoUrl }: BadgeDesignerProps) {
   };
 
   return (
-    <div className="w-full flex flex-col items-center gap-4">
+    <div className="flex w-full flex-col items-center gap-4">
       <div
         ref={badgeRef}
-        className="relative bg-white rounded-xl shadow-lg border border-gray-200"
-        style={{ width: BADGE_WIDTH, height: BADGE_HEIGHT, padding: 20, display: 'flex', flexDirection: 'column', justifyContent: 'space-between', background: 'linear-gradient(135deg, #1a1a2e 60%, #fff 100%)' }}
+        className="relative rounded-xl border border-gray-200 bg-white shadow-lg"
+        style={{
+          width: BADGE_WIDTH,
+          height: BADGE_HEIGHT,
+          padding: 20,
+          display: 'flex',
+          flexDirection: 'column',
+          justifyContent: 'space-between',
+          background: 'linear-gradient(135deg, #1a1a2e 60%, #fff 100%)',
+        }}
       >
         {/* Logo */}
-        <img src={logoUrl} alt="IVOS Logo" style={{ width: 60, position: 'absolute', top: 16, left: 16 }} />
+        <img
+          src={logoUrl}
+          alt="IVOS Logo"
+          style={{ width: 60, position: 'absolute', top: 16, left: 16 }}
+        />
         {/* Photo */}
         {agent?.photo ? (
-          <img src={agent.photo} alt="Photo" className="absolute right-6 top-6 w-16 h-16 rounded-full object-cover border-4 border-white shadow" />
+          <img
+            src={agent.photo}
+            alt="Photo"
+            className="absolute right-6 top-6 h-16 w-16 rounded-full border-4 border-white object-cover shadow"
+          />
         ) : (
-          <div className="absolute right-6 top-6 w-16 h-16 rounded-full bg-gray-300 flex items-center justify-center text-3xl font-bold text-white border-4 border-white shadow">
+          <div className="absolute right-6 top-6 flex h-16 w-16 items-center justify-center rounded-full border-4 border-white bg-gray-300 text-3xl font-bold text-white shadow">
             {agent ? `${agent.firstName[0]}${agent.lastName[0]}`.toUpperCase() : ''}
           </div>
         )}
         {/* Infos */}
-        <div className="absolute left-6 bottom-20 text-white">
-          <div className="text-lg font-bold">{agent?.firstName} {agent?.lastName}</div>
+        <div className="absolute bottom-20 left-6 text-white">
+          <div className="text-lg font-bold">
+            {agent?.firstName} {agent?.lastName}
+          </div>
           <div className="text-xs font-semibold opacity-80">{agent?.poste}</div>
-          <div className="text-xs font-mono opacity-70">{agent?.matricule}</div>
+          <div className="font-mono text-xs opacity-70">{agent?.matricule}</div>
         </div>
         {/* QR Code */}
         {qrUrl && (
-          <img src={qrUrl} alt="QR Code" className="absolute right-6 bottom-6 w-16 h-16 bg-white p-1 rounded" />
+          <img
+            src={qrUrl}
+            alt="QR Code"
+            className="absolute bottom-6 right-6 h-16 w-16 rounded bg-white p-1"
+          />
         )}
       </div>
       <div className="flex gap-3">

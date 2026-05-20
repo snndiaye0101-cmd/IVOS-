@@ -12,30 +12,30 @@ import type { ImpactMetrics } from './dataAnalyticsService';
 
 export interface WebExportContent {
   // Texte
-  headline: string;           // Titre accrocheur
-  summary: string;            // Résumé court (1-2 phrases)
-  fullDescription: string;    // Description complète
-  keyFigures: string[];       // Chiffres clés en bullet points
-  
+  headline: string; // Titre accrocheur
+  summary: string; // Résumé court (1-2 phrases)
+  fullDescription: string; // Description complète
+  keyFigures: string[]; // Chiffres clés en bullet points
+
   // Données pour infographie
   infographicData: {
-    mainNumber: string;       // Chiffre principal (ex: "1,275 tonnes")
-    mainLabel: string;        // Label (ex: "Déchets Collectés")
+    mainNumber: string; // Chiffre principal (ex: "1,275 tonnes")
+    mainLabel: string; // Label (ex: "Déchets Collectés")
     subStats: Array<{
       value: string;
       label: string;
     }>;
-    period: string;           // "Janvier 2026"
-    brandingText: string;     // "IVOS Sénégal"
+    period: string; // "Janvier 2026"
+    brandingText: string; // "IVOS Sénégal"
   };
-  
+
   // Export
-  htmlSnippet: string;        // Code HTML prêt à copier
-  textOnly: string;           // Texte brut pour réseaux sociaux
-  
+  htmlSnippet: string; // Code HTML prêt à copier
+  textOnly: string; // Texte brut pour réseaux sociaux
+
   // Méta
   generatedAt: string;
-  isAnonymized: boolean;      // Confirme que les clients sont anonymisés
+  isAnonymized: boolean; // Confirme que les clients sont anonymisés
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -50,11 +50,11 @@ const HEADLINE_TEMPLATES = [
 ];
 
 const SUMMARY_TEMPLATES = [
-  'Ce mois-ci, IVOS a sécurisé le traitement de {tonnage} de déchets industriels, évitant ainsi un impact environnemental majeur. Avec un taux de valorisation de {valorisation}%, l\'entreprise continue de placer l\'économie circulaire au cœur de ses activités.',
-  
-  'Durant {period}, IVOS a collecté et traité {tonnage} de déchets provenant de {sectors} secteurs d\'activité. Grâce à nos processus de traitement innovants, {valorisation}% de ces déchets ont pu être valorisés.',
-  
-  'Nouveau record pour IVOS : {tonnage} de déchets industriels sécurisés durant {period}. L\'engagement environnemental de l\'entreprise se traduit par un taux de valorisation de {valorisation}%, bien au-delà des standards de l\'industrie.',
+  "Ce mois-ci, IVOS a sécurisé le traitement de {tonnage} de déchets industriels, évitant ainsi un impact environnemental majeur. Avec un taux de valorisation de {valorisation}%, l'entreprise continue de placer l'économie circulaire au cœur de ses activités.",
+
+  "Durant {period}, IVOS a collecté et traité {tonnage} de déchets provenant de {sectors} secteurs d'activité. Grâce à nos processus de traitement innovants, {valorisation}% de ces déchets ont pu être valorisés.",
+
+  "Nouveau record pour IVOS : {tonnage} de déchets industriels sécurisés durant {period}. L'engagement environnemental de l'entreprise se traduit par un taux de valorisation de {valorisation}%, bien au-delà des standards de l'industrie.",
 ];
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -66,7 +66,7 @@ const SUMMARY_TEMPLATES = [
  */
 function formatTonnage(kg: number): string {
   const tonnes = kg / 1000;
-  
+
   if (tonnes >= 1000) {
     return `${(tonnes / 1000).toFixed(1)} kilotonnes`;
   } else if (tonnes >= 100) {
@@ -100,11 +100,11 @@ function selectRandomTemplate<T>(templates: T[]): T {
  */
 function fillTemplate(template: string, data: Record<string, string>): string {
   let result = template;
-  
+
   for (const [key, value] of Object.entries(data)) {
     result = result.replace(new RegExp(`\\{${key}\\}`, 'g'), value);
   }
-  
+
   return result;
 }
 
@@ -113,13 +113,16 @@ function fillTemplate(template: string, data: Record<string, string>): string {
  */
 function getSectorsList(metrics: ImpactMetrics, maxCount: number = 3): string {
   const topSectors = metrics.sectorBreakdown.slice(0, maxCount);
-  
+
   if (topSectors.length === 0) return 'plusieurs';
   if (topSectors.length === 1) return `le ${topSectors[0].sector}`;
   if (topSectors.length === 2) return `les ${topSectors[0].sector} et ${topSectors[1].sector}`;
-  
+
   const lastSector = topSectors[topSectors.length - 1].sector;
-  const otherSectors = topSectors.slice(0, -1).map(s => s.sector).join(', ');
+  const otherSectors = topSectors
+    .slice(0, -1)
+    .map((s) => s.sector)
+    .join(', ');
   return `les ${otherSectors} et ${lastSector}`;
 }
 
@@ -131,7 +134,7 @@ export function generateWebExportContent(metrics: ImpactMetrics): WebExportConte
   const valorisationFormatted = Math.round(metrics.valorisationRate);
   const sectorsCount = metrics.sectorBreakdown.length;
   const sectorsList = getSectorsList(metrics);
-  
+
   // Données pour remplacement
   const data = {
     tonnage: tonnageFormatted,
@@ -140,13 +143,13 @@ export function generateWebExportContent(metrics: ImpactMetrics): WebExportConte
     sectors: String(sectorsCount),
     sectorsList,
   };
-  
+
   // 1. Headline
   const headline = fillTemplate(selectRandomTemplate(HEADLINE_TEMPLATES), data);
-  
+
   // 2. Summary
   const summary = fillTemplate(selectRandomTemplate(SUMMARY_TEMPLATES), data);
-  
+
   // 3. Description complète
   const fullDescription = `
 Durant ${metrics.period.label}, IVOS - Sénégal Oilfield Services a renforcé son engagement en faveur de l'environnement en collectant et traitant ${tonnageFormatted} de déchets industriels provenant de ${sectorsCount} secteurs d'activité différents.
@@ -157,7 +160,7 @@ Grâce à nos installations certifiées et nos processus innovants, nous avons a
 
 Cette performance s'inscrit dans notre objectif de protéger l'environnement tout en accompagnant les acteurs économiques dans leur transition écologique.
   `.trim();
-  
+
   // 4. Chiffres clés
   const keyFigures = [
     `✅ ${tonnageFormatted} de déchets collectés et traités`,
@@ -165,14 +168,16 @@ Cette performance s'inscrit dans notre objectif de protéger l'environnement tou
     `📋 ${metrics.totalOperations} opérations sécurisées`,
     `🏭 ${sectorsCount} secteurs d'activité accompagnés`,
   ];
-  
+
   // Top 3 catégories
   metrics.wasteBreakdown.slice(0, 3).forEach((wb, i) => {
     if (i < 3) {
-      keyFigures.push(`${i === 0 ? '🥇' : i === 1 ? '🥈' : '🥉'} ${wb.categoryLabel} : ${formatTonnage(wb.tonnage)}`);
+      keyFigures.push(
+        `${i === 0 ? '🥇' : i === 1 ? '🥈' : '🥉'} ${wb.categoryLabel} : ${formatTonnage(wb.tonnage)}`
+      );
     }
   });
-  
+
   // 5. Données infographie
   const infographicData = {
     mainNumber: tonnageFormatted.toUpperCase(),
@@ -194,7 +199,7 @@ Cette performance s'inscrit dans notre objectif de protéger l'environnement tou
     period: metrics.period.label.toUpperCase(),
     brandingText: 'IVOS — Sénégal Oilfield Services',
   };
-  
+
   // 6. HTML Snippet
   const htmlSnippet = `
 <div class="ivos-impact-report" style="background: linear-gradient(135deg, #1a5f3e 0%, #2d8659 100%); color: white; padding: 40px; border-radius: 16px; max-width: 800px; margin: 0 auto; font-family: system-ui, -apple-system, sans-serif;">
@@ -221,7 +226,7 @@ Cette performance s'inscrit dans notre objectif de protéger l'environnement tou
   </p>
 </div>
   `.trim();
-  
+
   // 7. Texte pour réseaux sociaux
   const textOnly = `
 🌍 ${headline}
@@ -233,7 +238,7 @@ ${keyFigures.join('\n')}
 
 #IVOS #Environnement #DéchetsIndustriels #Sénégal #ÉconomieCirculaire #RSE
   `.trim();
-  
+
   return {
     headline,
     summary,
@@ -261,69 +266,69 @@ export function generateInfographicImage(
     canvas.width = width;
     canvas.height = height;
     const ctx = canvas.getContext('2d')!;
-    
+
     // Fond gradient
     const gradient = ctx.createLinearGradient(0, 0, width, height);
     gradient.addColorStop(0, '#1a5f3e');
     gradient.addColorStop(1, '#2d8659');
     ctx.fillStyle = gradient;
     ctx.fillRect(0, 0, width, height);
-    
+
     // Titre
     ctx.fillStyle = 'white';
     ctx.font = 'bold 64px system-ui, sans-serif';
     ctx.textAlign = 'center';
     ctx.fillText('IMPACT ENVIRONNEMENTAL', width / 2, 100);
-    
+
     // Période
     ctx.font = '32px system-ui, sans-serif';
     ctx.fillText(metrics.period.label.toUpperCase(), width / 2, 150);
-    
+
     // Chiffre principal
     ctx.font = 'bold 120px system-ui, sans-serif';
     const tonnageText = formatTonnage(metrics.totalTonnage).toUpperCase();
     ctx.fillText(tonnageText, width / 2, 300);
-    
+
     ctx.font = '36px system-ui, sans-serif';
     ctx.fillText('DÉCHETS COLLECTÉS ET TRAITÉS', width / 2, 360);
-    
+
     // Stats secondaires
     const stats = [
       { value: `${Math.round(metrics.valorisationRate)}%`, label: 'Valorisation' },
       { value: String(metrics.totalOperations), label: 'Opérations BSD' },
       { value: String(metrics.sectorBreakdown.length), label: 'Secteurs' },
     ];
-    
+
     const boxWidth = 300;
     const boxHeight = 120;
     const spacing = 50;
     const startX = (width - (stats.length * boxWidth + (stats.length - 1) * spacing)) / 2;
     const startY = 420;
-    
+
     stats.forEach((stat, i) => {
       const x = startX + i * (boxWidth + spacing);
-      
+
       // Box
       ctx.fillStyle = 'rgba(255, 255, 255, 0.15)';
       ctx.fillRect(x, startY, boxWidth, boxHeight);
-      
+
       // Value
       ctx.fillStyle = 'white';
       ctx.font = 'bold 48px system-ui, sans-serif';
       ctx.textAlign = 'center';
       ctx.fillText(stat.value, x + boxWidth / 2, startY + 55);
-      
+
       // Label
       ctx.font = '20px system-ui, sans-serif';
       ctx.fillText(stat.label, x + boxWidth / 2, startY + 90);
     });
-    
+
     // Branding
     ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
     ctx.font = '24px system-ui, sans-serif';
     ctx.textAlign = 'center';
     ctx.fillText('IVOS — Sénégal Oilfield Services', width / 2, height - 40);
-    
+
     // Export
     resolve(canvas.toDataURL('image/png'));
   });
@@ -334,7 +339,7 @@ export function generateInfographicImage(
  */
 export async function downloadInfographic(metrics: ImpactMetrics): Promise<void> {
   const dataUrl = await generateInfographicImage(metrics);
-  
+
   const link = document.createElement('a');
   link.href = dataUrl;
   link.download = `IVOS-Impact-${metrics.period.label.replace(/\s/g, '-')}.png`;

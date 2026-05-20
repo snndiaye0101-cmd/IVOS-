@@ -31,26 +31,37 @@ export const ContextProvider = ({ children }: { children: ReactNode }) => {
   const seededCountry = (() => {
     const cs = countryStore.getCountries();
     if (!cs || cs.length === 0) return null;
-    const found = cs.find(c => c.codeIso === DEFAULT_COUNTRY_ALPHA3 || c.codeIso === DEFAULT_COUNTRY_ALPHA2 || /sénégal|senegal/i.test(c.name)) || cs[0];
+    const found =
+      cs.find(
+        (c) =>
+          c.codeIso === DEFAULT_COUNTRY_ALPHA3 ||
+          c.codeIso === DEFAULT_COUNTRY_ALPHA2 ||
+          /sénégal|senegal/i.test(c.name)
+      ) || cs[0];
     if (!found) return null;
-    const sites = countryStore.getSitesByCountry(found.id).map(s => ({ code: s.code, name: s.name }));
+    const sites = countryStore
+      .getSitesByCountry(found.id)
+      .map((s) => ({ code: s.code, name: s.name }));
     return { code: found.codeIso, name: found.name, flag: found.flagEmoji, sites } as Country;
   })();
 
   const [countryState, setCountryState] = useState<Country | null>(seededCountry);
-  const [siteState, setSiteState] = useState<Site | null>(seededCountry && seededCountry.sites.length > 0 ? seededCountry.sites[0] : null);
+  const [siteState, setSiteState] = useState<Site | null>(
+    seededCountry && seededCountry.sites.length > 0 ? seededCountry.sites[0] : null
+  );
 
   // Keep country fixed (no UI country selection in Senegal-only mode)
   const setCountry = (_country: Country) => {
     // no-op intentionally — country is fixed to Sénégal
-    // eslint-disable-next-line no-console
     console.warn('Country selection is disabled in Sénégal-only mode');
   };
   const setSite = (s: Site | null) => setSiteState(s);
   const [year, setYear] = useState<number>(new Date().getFullYear());
 
   return (
-    <Context.Provider value={{ country: countryState, site: siteState, year, setCountry, setSite, setYear }}>
+    <Context.Provider
+      value={{ country: countryState, site: siteState, year, setCountry, setSite, setYear }}
+    >
       {children}
     </Context.Provider>
   );

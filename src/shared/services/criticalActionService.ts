@@ -9,7 +9,13 @@ export interface CriticalActionRequest {
   requestedBy: string;
   requestedByName: string;
   requestedAt: string;
-  actionType: 'salary_change' | 'data_deletion' | 'permission_change' | 'role_change' | 'bulk_delete' | 'config_change';
+  actionType:
+    | 'salary_change'
+    | 'data_deletion'
+    | 'permission_change'
+    | 'role_change'
+    | 'bulk_delete'
+    | 'config_change';
   module: string;
   description: string;
   payload: Record<string, unknown>;
@@ -23,7 +29,11 @@ export interface CriticalActionRequest {
 const CRITICAL_KEY = 'ivos_critical_actions_v1';
 
 function loadRequests(): CriticalActionRequest[] {
-  try { return JSON.parse(localStorage.getItem(CRITICAL_KEY) || '[]'); } catch { return []; }
+  try {
+    return JSON.parse(localStorage.getItem(CRITICAL_KEY) || '[]');
+  } catch {
+    return [];
+  }
 }
 
 function saveRequests(requests: CriticalActionRequest[]) {
@@ -46,7 +56,9 @@ export const CRITICAL_ACTION_TYPES: Record<CriticalActionRequest['actionType'], 
 
 export const criticalActionService = {
   /** Submit a critical action for Super Admin approval */
-  submit(request: Omit<CriticalActionRequest, 'id' | 'requestedAt' | 'status'>): CriticalActionRequest {
+  submit(
+    request: Omit<CriticalActionRequest, 'id' | 'requestedAt' | 'status'>
+  ): CriticalActionRequest {
     const full: CriticalActionRequest = {
       ...request,
       id: generateId(),
@@ -63,7 +75,7 @@ export const criticalActionService = {
   /** Approve a critical action (Super Admin only) */
   approve(requestId: string, reviewerId: string, reviewerName: string, note?: string): boolean {
     const all = loadRequests();
-    const req = all.find(r => r.id === requestId);
+    const req = all.find((r) => r.id === requestId);
     if (!req || req.status !== 'pending') return false;
     req.status = 'approved';
     req.reviewedBy = reviewerId;
@@ -78,7 +90,7 @@ export const criticalActionService = {
   /** Reject a critical action (Super Admin only) */
   reject(requestId: string, reviewerId: string, reviewerName: string, note?: string): boolean {
     const all = loadRequests();
-    const req = all.find(r => r.id === requestId);
+    const req = all.find((r) => r.id === requestId);
     if (!req || req.status !== 'pending') return false;
     req.status = 'rejected';
     req.reviewedBy = reviewerId;
@@ -92,7 +104,7 @@ export const criticalActionService = {
 
   /** Get all pending requests */
   getPending(): CriticalActionRequest[] {
-    return loadRequests().filter(r => r.status === 'pending');
+    return loadRequests().filter((r) => r.status === 'pending');
   },
 
   /** Get all requests */
@@ -107,12 +119,14 @@ export const criticalActionService = {
 
   /** Check if there's a pending request for a specific action */
   hasPending(actionType: CriticalActionRequest['actionType'], module: string): boolean {
-    return loadRequests().some(r => r.status === 'pending' && r.actionType === actionType && r.module === module);
+    return loadRequests().some(
+      (r) => r.status === 'pending' && r.actionType === actionType && r.module === module
+    );
   },
 
   /** Check if a specific action was approved */
   isApproved(requestId: string): boolean {
-    const req = loadRequests().find(r => r.id === requestId);
+    const req = loadRequests().find((r) => r.id === requestId);
     return req?.status === 'approved';
   },
 

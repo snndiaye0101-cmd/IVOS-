@@ -1,14 +1,14 @@
 // ============= MESSAGE INPUT COMPONENT =============
 // Input avec support des fichiers, emojis, et mentions
 
-import React, { useState, useRef, useEffect } from "react";
-import { Send, Paperclip, Smile, X } from "lucide-react";
-import { motion } from "framer-motion";
+import React, { useState, useRef, useEffect } from 'react';
+import { Send, Paperclip, Smile, X } from 'lucide-react';
+import { motion } from 'framer-motion';
 
 interface MessageInputProps {
   onSend: (message: {
     content: string;
-    type?: "text" | "image" | "file" | "location";
+    type?: 'text' | 'image' | 'file' | 'location';
     fileUrl?: string;
     fileName?: string;
   }) => void;
@@ -21,7 +21,7 @@ export default function MessageInput({
   isLoading = false,
   disabled = false,
 }: MessageInputProps) {
-  const [input, setInput] = useState("");
+  const [input, setInput] = useState('');
   const [file, setFile] = useState<File | null>(null);
   const [filePreview, setFilePreview] = useState<string | null>(null);
   const [showEmoji, setShowEmoji] = useState(false);
@@ -32,7 +32,7 @@ export default function MessageInput({
   // Auto-expand textarea
   useEffect(() => {
     if (textareaRef.current) {
-      textareaRef.current.style.height = "auto";
+      textareaRef.current.style.height = 'auto';
       const newHeight = Math.min(Math.max(textareaRef.current.scrollHeight, 44), 200);
       textareaRef.current.style.height = `${newHeight}px`;
     }
@@ -41,17 +41,14 @@ export default function MessageInput({
   // Close emoji picker on click outside
   useEffect(() => {
     function handleClickOutside(e: MouseEvent) {
-      if (
-        emojiPickerRef.current &&
-        !emojiPickerRef.current.contains(e.target as Node)
-      ) {
+      if (emojiPickerRef.current && !emojiPickerRef.current.contains(e.target as Node)) {
         setShowEmoji(false);
       }
     }
     if (showEmoji) {
-      document.addEventListener("mousedown", handleClickOutside);
+      document.addEventListener('mousedown', handleClickOutside);
     }
-    return () => document.removeEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
   }, [showEmoji]);
 
   // Handle file selection
@@ -59,7 +56,7 @@ export default function MessageInput({
     const selectedFile = e.target.files?.[0];
     if (selectedFile) {
       setFile(selectedFile);
-      if (selectedFile.type.startsWith("image/")) {
+      if (selectedFile.type.startsWith('image/')) {
         const reader = new FileReader();
         reader.onload = (event) => {
           setFilePreview(event.target?.result as string);
@@ -77,11 +74,11 @@ export default function MessageInput({
 
     const messageData: any = {
       content: input,
-      type: "text",
+      type: 'text',
     };
 
     if (file && filePreview) {
-      messageData.type = file.type.startsWith("image/") ? "image" : "file";
+      messageData.type = file.type.startsWith('image/') ? 'image' : 'file';
       messageData.fileUrl = filePreview;
       messageData.fileName = file.name;
     }
@@ -89,18 +86,18 @@ export default function MessageInput({
     await onSend(messageData);
 
     // Reset
-    setInput("");
+    setInput('');
     setFile(null);
     setFilePreview(null);
     if (fileInputRef.current) {
-      fileInputRef.current.value = "";
+      fileInputRef.current.value = '';
     }
     textareaRef.current?.focus();
   };
 
   // Handle textarea keydown
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
-    if (e.key === "Enter" && !e.shiftKey) {
+    if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
       handleSend();
     }
@@ -125,23 +122,10 @@ export default function MessageInput({
     }, 0);
   };
 
-  const emojis = [
-    "😀",
-    "😂",
-    "😍",
-    "😎",
-    "👍",
-    "🙏",
-    "🎉",
-    "🚗",
-    "🔥",
-    "💡",
-    "❤️",
-    "⭐",
-  ];
+  const emojis = ['😀', '😂', '😍', '😎', '👍', '🙏', '🎉', '🚗', '🔥', '💡', '❤️', '⭐'];
 
   return (
-    <div className="border-t border-slate-700 bg-slate-800/50 backdrop-blur-xl p-4">
+    <div className="border-t border-slate-700 bg-slate-800/50 p-4 backdrop-blur-xl">
       {/* File Preview */}
       {filePreview && (
         <motion.div
@@ -152,14 +136,14 @@ export default function MessageInput({
           <img
             src={filePreview}
             alt="aperçu"
-            className="w-16 h-16 object-cover rounded-lg border border-indigo-500 shadow-lg"
+            className="h-16 w-16 rounded-lg border border-indigo-500 object-cover shadow-lg"
           />
           <button
             onClick={() => {
               setFile(null);
               setFilePreview(null);
             }}
-            className="p-1 rounded-lg bg-red-600/50 hover:bg-red-600 text-red-200 transition-all"
+            className="rounded-lg bg-red-600/50 p-1 text-red-200 transition-all hover:bg-red-600"
           >
             <X size={16} />
           </button>
@@ -172,7 +156,7 @@ export default function MessageInput({
         <button
           onClick={() => fileInputRef.current?.click()}
           disabled={disabled || isLoading}
-          className="p-2.5 rounded-lg bg-slate-700/50 hover:bg-slate-700 text-slate-300 hover:text-white transition-all disabled:opacity-50 flex-shrink-0"
+          className="flex-shrink-0 rounded-lg bg-slate-700/50 p-2.5 text-slate-300 transition-all hover:bg-slate-700 hover:text-white disabled:opacity-50"
           title="Joindre un fichier"
         >
           <Paperclip size={20} />
@@ -188,13 +172,13 @@ export default function MessageInput({
         {/* Textarea */}
         <textarea
           ref={textareaRef}
-          className="flex-1 bg-slate-700/50 border border-slate-600 rounded-lg px-4 py-2 text-white text-sm placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 resize-none transition-all disabled:opacity-50"
+          className="flex-1 resize-none rounded-lg border border-slate-600 bg-slate-700/50 px-4 py-2 text-sm text-white placeholder-slate-400 transition-all focus:outline-none focus:ring-2 focus:ring-indigo-500 disabled:opacity-50"
           placeholder="Écrire un message... (Shift+Entrée pour nouvelle ligne)"
           value={input}
           onChange={(e) => setInput(e.target.value)}
           onKeyDown={handleKeyDown}
           disabled={disabled || isLoading}
-          style={{ minHeight: "44px", maxHeight: "200px" }}
+          style={{ minHeight: '44px', maxHeight: '200px' }}
         />
 
         {/* Emoji Button */}
@@ -202,7 +186,7 @@ export default function MessageInput({
           <button
             onClick={() => setShowEmoji(!showEmoji)}
             disabled={disabled || isLoading}
-            className="p-2.5 rounded-lg bg-slate-700/50 hover:bg-slate-700 text-slate-300 hover:text-white transition-all flex-shrink-0 disabled:opacity-50"
+            className="flex-shrink-0 rounded-lg bg-slate-700/50 p-2.5 text-slate-300 transition-all hover:bg-slate-700 hover:text-white disabled:opacity-50"
             title="Ajouter un emoji"
           >
             <Smile size={20} />
@@ -212,14 +196,14 @@ export default function MessageInput({
           {showEmoji && (
             <div
               ref={emojiPickerRef}
-              className="absolute bottom-14 right-0 z-50 bg-slate-800 border border-slate-700 rounded-lg shadow-2xl p-3 w-72"
+              className="absolute bottom-14 right-0 z-50 w-72 rounded-lg border border-slate-700 bg-slate-800 p-3 shadow-2xl"
             >
               <div className="grid grid-cols-6 gap-2">
                 {emojis.map((emoji) => (
                   <button
                     key={emoji}
                     onClick={() => insertEmoji(emoji)}
-                    className="text-2xl hover:scale-125 transition-transform"
+                    className="text-2xl transition-transform hover:scale-125"
                   >
                     {emoji}
                   </button>
@@ -233,7 +217,7 @@ export default function MessageInput({
         <button
           onClick={handleSend}
           disabled={(!input.trim() && !file) || isLoading || disabled}
-          className="p-2.5 rounded-lg bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed text-white transition-all flex-shrink-0"
+          className="flex-shrink-0 rounded-lg bg-indigo-600 p-2.5 text-white transition-all hover:bg-indigo-700 disabled:cursor-not-allowed disabled:opacity-50"
           title="Envoyer"
         >
           <Send size={20} />

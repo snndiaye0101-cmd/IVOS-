@@ -7,7 +7,7 @@ import { toast } from 'sonner';
 export function useClaims() {
   const [parcClaims, setParcClaims] = useState<Claim[]>(() => {
     const stored = claimsStore.load();
-    return stored.map((c: any) => ({ ...c, source: 'parc' } as Claim));
+    return stored.map((c: any) => ({ ...c, source: 'parc' }) as Claim);
   });
 
   const [personnelClaims, setPersonnelClaims] = useState<Claim[]>([]);
@@ -49,13 +49,16 @@ export function useClaims() {
   useEffect(() => {
     const handleParcUpdate = () => {
       const stored = claimsStore.load();
-      setParcClaims(stored.map((c: any) => ({ ...c, source: 'parc' } as Claim)));
+      setParcClaims(stored.map((c: any) => ({ ...c, source: 'parc' }) as Claim));
     };
     window.addEventListener('claims:updated', handleParcUpdate);
     return () => window.removeEventListener('claims:updated', handleParcUpdate);
   }, []);
 
-  const allClaims = useMemo(() => [...parcClaims, ...personnelClaims], [parcClaims, personnelClaims]);
+  const allClaims = useMemo(
+    () => [...parcClaims, ...personnelClaims],
+    [parcClaims, personnelClaims]
+  );
 
   const generateReportNumber = useCallback(() => {
     const year = new Date().getFullYear();
@@ -63,34 +66,51 @@ export function useClaims() {
     return `SIN-${year}-${count.toString().padStart(4, '0')}`;
   }, [allClaims.length]);
 
-  const createClaim = useCallback((newClaimData: Omit<Claim, 'id'>) => {
-    const newClaim: Claim = {
-      id: Date.now().toString(),
-      ...newClaimData,
-    };
-    if (newClaim.source === 'parc') {
-      const updated = [...parcClaims, newClaim];
+  const createClaim = useCallback(
+    (newClaimData: Omit<Claim, 'id'>) => {
+      const newClaim: Claim = {
+        id: Date.now().toString(),
+        ...newClaimData,
+      };
+      if (newClaim.source === 'parc') {
+        const updated = [...parcClaims, newClaim];
+        setParcClaims(updated);
+        claimsStore.save(updated);
+        toast.success('Sinistre déclaré avec succès');
+      }
+    },
+    [parcClaims]
+  );
+
+  const updateClaim = useCallback(
+    (id: string, updatedData: Claim) => {
+      if (updatedData.source === 'parc') {
+        const updated = parcClaims.map((c) => (c.id === id ? updatedData : c));
+        setParcClaims(updated);
+        claimsStore.save(updated);
+        toast.success('Sinistre modifié');
+      }
+    },
+    [parcClaims]
+  );
+
+  const deleteClaim = useCallback(
+    (id: string) => {
+      const updated = parcClaims.filter((c) => c.id !== id);
       setParcClaims(updated);
       claimsStore.save(updated);
-      toast.success('Sinistre déclaré avec succès');
-    }
-  }, [parcClaims]);
+      toast.success('Sinistre supprimé');
+    },
+    [parcClaims]
+  );
 
-  const updateClaim = useCallback((id: string, updatedData: Claim) => {
-    if (updatedData.source === 'parc') {
-      const updated = parcClaims.map(c => (c.id === id ? updatedData : c));
-      setParcClaims(updated);
-      claimsStore.save(updated);
-      toast.success('Sinistre modifié');
-    }
-  }, [parcClaims]);
-
-  const deleteClaim = useCallback((id: string) => {
-    const updated = parcClaims.filter(c => c.id !== id);
-    setParcClaims(updated);
-    claimsStore.save(updated);
-    toast.success('Sinistre supprimé');
-  }, [parcClaims]);
-
-  return { parcClaims, personnelClaims, allClaims, createClaim, updateClaim, deleteClaim, generateReportNumber };
+  return {
+    parcClaims,
+    personnelClaims,
+    allClaims,
+    createClaim,
+    updateClaim,
+    deleteClaim,
+    generateReportNumber,
+  };
 }

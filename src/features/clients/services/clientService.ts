@@ -7,7 +7,6 @@ import type { Client } from './clientsStore';
 const clients: Client[] = [];
 
 export class ClientService {
-
   /**
    * Récupère tous les clients
    */
@@ -19,7 +18,7 @@ export class ClientService {
    * Récupère un client par son ID
    */
   getClient(id: string): Client | null {
-    return clients.find(c => c.id === Number(id)) || null;
+    return clients.find((c) => c.id === Number(id)) || null;
   }
 
   /**
@@ -35,7 +34,7 @@ export class ClientService {
    * Met à jour un client
    */
   updateClient(id: string, client: Partial<Client>): Client | null {
-    const idx = clients.findIndex(c => c.id === Number(id));
+    const idx = clients.findIndex((c) => c.id === Number(id));
     if (idx === -1) return null;
     clients[idx] = { ...clients[idx], ...client };
     return clients[idx];
@@ -45,7 +44,7 @@ export class ClientService {
    * Supprime un client
    */
   deleteClient(id: string): void {
-    const idx = clients.findIndex(c => c.id === Number(id));
+    const idx = clients.findIndex((c) => c.id === Number(id));
     if (idx !== -1) clients.splice(idx, 1);
   }
 }

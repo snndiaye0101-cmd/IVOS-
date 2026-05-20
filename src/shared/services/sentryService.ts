@@ -5,13 +5,18 @@
 
 import * as Sentry from '@sentry/react';
 import { useEffect } from 'react';
-import { useLocation, useNavigationType, createRoutesFromChildren, matchRoutes } from 'react-router-dom';
+import {
+  useLocation,
+  useNavigationType,
+  createRoutesFromChildren,
+  matchRoutes,
+} from 'react-router-dom';
 
 /**
  * Initialiser Sentry avec les configurations recommandées
- * 
+ *
  * À appeler au démarrage de l'application (main.tsx)
- * 
+ *
  * @example
  * import { initSentry } from './shared/services/sentryService';
  * initSentry();
@@ -26,16 +31,16 @@ export function initSentry() {
   Sentry.init({
     // DSN à configurer dans les variables d'environnement
     dsn: import.meta.env.VITE_SENTRY_DSN || '',
-    
+
     // Environnement
     environment: import.meta.env.VITE_APP_ENV || 'production',
-    
+
     // Version de l'application
     release: import.meta.env.VITE_APP_VERSION || '1.0.0',
-    
+
     // Performance Monitoring (simple pour v10)
     tracesSampleRate: 0.1, // 10% des transactions
-    
+
     // Intégrations de base
     integrations: [
       // Intégrations par défaut de Sentry v10
@@ -47,13 +52,13 @@ export function initSentry() {
       if (event.exception?.values?.[0]?.type === 'NetworkError') {
         return null;
       }
-      
+
       // Ignorer les erreurs localStorage quota exceeded
       if (event.exception?.values?.[0]?.value?.includes('QuotaExceededError')) {
         console.warn('⚠️ LocalStorage quota dépassé');
         return null;
       }
-      
+
       return event;
     },
 
@@ -71,7 +76,7 @@ export function initSentry() {
 
 /**
  * Logger une erreur métier personnalisée
- * 
+ *
  * @param {string} message - Message d'erreur
  * @param {object} context - Contexte additionnel
  * @param {'error' | 'warning' | 'info'} level - Niveau de sévérité
@@ -101,7 +106,7 @@ export function logError(
 
 /**
  * Logger une exception
- * 
+ *
  * @param {Error} error - Erreur capturée
  * @param {object} context - Contexte additionnel
  * @example
@@ -126,7 +131,7 @@ export function logException(error: Error, context?: Record<string, any>) {
 
 /**
  * Définir le contexte utilisateur pour Sentry
- * 
+ *
  * @param {object} user - Informations utilisateur
  * @example
  * setUserContext({
@@ -136,12 +141,7 @@ export function logException(error: Error, context?: Record<string, any>) {
  *   site: 'KIGNABOUR'
  * });
  */
-export function setUserContext(user: {
-  id: string;
-  email?: string;
-  role?: string;
-  site?: string;
-}) {
+export function setUserContext(user: { id: string; email?: string; role?: string; site?: string }) {
   if (import.meta.env.DEV) return;
 
   Sentry.setUser({
@@ -156,7 +156,7 @@ export function setUserContext(user: {
 
 /**
  * Tracer une transaction de performance
- * 
+ *
  * @param {string} name - Nom de la transaction
  * @param {string} op - Type d'opération
  * @param {Function} callback - Fonction à tracer
@@ -203,7 +203,7 @@ export async function traceTransaction<T>(
 
 /**
  * Breadcrumb personnalisé pour le tracking d'actions
- * 
+ *
  * @param {string} message - Message du breadcrumb
  * @param {object} data - Données additionnelles
  * @example

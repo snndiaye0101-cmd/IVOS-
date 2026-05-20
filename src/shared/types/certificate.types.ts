@@ -9,7 +9,7 @@ export interface Certificate {
   certificateNumber: string; // Numéro unique
   bsdReference: string; // Référence du BSD
   operationId: string; // ID de l'opération
-  
+
   // Détails techniques
   collectionDate: string; // Date de collecte
   treatmentDate: string; // Date de traitement (Section 9)
@@ -17,11 +17,11 @@ export interface Certificate {
   finalTonnage: number; // Tonnage final reçu (kg)
   treatmentMethod: string; // Méthode de traitement
   treatmentLocation: string; // Lieu de traitement
-  
+
   // Client
   clientName: string;
   clientEmail?: string;
-  
+
   // Métadonnées
   generatedAt: string;
   generatedBy: string;
@@ -29,7 +29,7 @@ export interface Certificate {
   sentAt?: string;
   verifiedAt?: string;
   verificationCode: string; // Code unique pour QR Code
-  
+
   // Documents
   pdfUrl?: string; // URL du PDF stocké
   qrCodeData?: string; // Data du QR Code

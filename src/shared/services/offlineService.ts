@@ -148,7 +148,6 @@ class OfflineService {
           action.synced = true;
           // @ts-ignore - IndexedDB type issue with put
           await this.db.put('pending-actions', action);
-
         } catch (error) {
           console.error('Erreur sync action:', action.id, error);
           // On continue avec les autres actions
@@ -172,10 +171,11 @@ class OfflineService {
       }
 
       // Événement de synchronisation réussie
-      window.dispatchEvent(new CustomEvent('ivos_sync_complete', {
-        detail: { syncedCount: pendingActions.length }
-      }));
-
+      window.dispatchEvent(
+        new CustomEvent('ivos_sync_complete', {
+          detail: { syncedCount: pendingActions.length },
+        })
+      );
     } finally {
       this.syncInProgress = false;
     }

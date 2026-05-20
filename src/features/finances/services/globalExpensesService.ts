@@ -54,13 +54,19 @@ function _loadRaw(): Expense[] {
       const parsed = JSON.parse(raw);
       if (Array.isArray(parsed) && parsed.length > 0) return parsed;
     }
-  } catch { /* ignore */ }
+  } catch {
+    /* ignore */
+  }
   return [];
 }
 
 function _save(list: Expense[]): void {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(list));
-  try { window.dispatchEvent(new CustomEvent(CHANGE_EVENT)); } catch { /* ignore */ }
+  try {
+    window.dispatchEvent(new CustomEvent(CHANGE_EVENT));
+  } catch {
+    /* ignore */
+  }
 }
 
 function _buildLabel(plein: PleinSyncData): string {
@@ -85,7 +91,7 @@ export function saveExpenses(list: Expense[]): void {
 export function syncExpenseFromPlein(plein: PleinSyncData): void {
   const all = _loadRaw();
   // Ne pas créer en doublon si un plein avec cet id existe déjà
-  const existing = all.find(e => e.fuelPleinId === plein.id);
+  const existing = all.find((e) => e.fuelPleinId === plein.id);
   if (existing) return;
 
   const newExp: Expense = {
@@ -111,7 +117,7 @@ export function syncExpenseFromPlein(plein: PleinSyncData): void {
 export function updateExpenseFromPlein(pleinId: number, updates: Partial<PleinSyncData>): void {
   const all = _loadRaw();
   let changed = false;
-  const updated = all.map(e => {
+  const updated = all.map((e) => {
     if (e.fuelPleinId !== pleinId) return e;
     changed = true;
     return {
@@ -119,7 +125,16 @@ export function updateExpenseFromPlein(pleinId: number, updates: Partial<PleinSy
       ...(updates.montant !== undefined ? { amount: updates.montant } : {}),
       ...(updates.date !== undefined ? { date: updates.date } : {}),
       ...(updates.vehicule !== undefined || updates.chauffeur !== undefined
-        ? { label: _buildLabel({ ...e, id: pleinId, vehicule: updates.vehicule ?? e.affectationName, chauffeur: updates.chauffeur ?? '', montant: updates.montant ?? e.amount, date: updates.date ?? e.date }) }
+        ? {
+            label: _buildLabel({
+              ...e,
+              id: pleinId,
+              vehicule: updates.vehicule ?? e.affectationName,
+              chauffeur: updates.chauffeur ?? '',
+              montant: updates.montant ?? e.amount,
+              date: updates.date ?? e.date,
+            }),
+          }
         : {}),
     };
   });
@@ -132,6 +147,6 @@ export function updateExpenseFromPlein(pleinId: number, updates: Partial<PleinSy
  */
 export function removeExpenseByPleinId(pleinId: number): void {
   const all = _loadRaw();
-  const filtered = all.filter(e => e.fuelPleinId !== pleinId);
+  const filtered = all.filter((e) => e.fuelPleinId !== pleinId);
   if (filtered.length !== all.length) _save(filtered);
 }

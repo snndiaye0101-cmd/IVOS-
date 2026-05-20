@@ -89,7 +89,15 @@ function buildEmptyForm(): ProjectFormState {
     budgetTotal: 0,
     dateDebut: '',
     dateLivraison: '',
-    acomptesPrevus: [{ id: `draft-${Date.now()}`, libelle: '', montant: 0, datePrevisionnelle: '', decaisse: false }],
+    acomptesPrevus: [
+      {
+        id: `draft-${Date.now()}`,
+        libelle: '',
+        montant: 0,
+        datePrevisionnelle: '',
+        decaisse: false,
+      },
+    ],
   };
 }
 
@@ -100,18 +108,26 @@ function mapProjectToForm(project: InvestmentProject): ProjectFormState {
     budgetTotal: project.budgetTotal,
     dateDebut: project.dateDebut,
     dateLivraison: project.dateLivraison,
-    acomptesPrevus: project.acomptesPrevus.length > 0
-      ? project.acomptesPrevus.map(line => ({
-          id: line.id,
-          libelle: line.libelle,
-          montant: line.montant,
-          datePrevisionnelle: line.datePrevisionnelle,
-          decaisse: line.decaisse ?? false,
-        }))
-      : [{ id: `draft-${Date.now()}`, libelle: '', montant: 0, datePrevisionnelle: '', decaisse: false }],
+    acomptesPrevus:
+      project.acomptesPrevus.length > 0
+        ? project.acomptesPrevus.map((line) => ({
+            id: line.id,
+            libelle: line.libelle,
+            montant: line.montant,
+            datePrevisionnelle: line.datePrevisionnelle,
+            decaisse: line.decaisse ?? false,
+          }))
+        : [
+            {
+              id: `draft-${Date.now()}`,
+              libelle: '',
+              montant: 0,
+              datePrevisionnelle: '',
+              decaisse: false,
+            },
+          ],
   };
 }
-
 
 export default function InvestmentsPage() {
   const { user } = useAuth();
@@ -131,7 +147,11 @@ export default function InvestmentsPage() {
   const [modalSection, setModalSection] = useState<'A' | 'B' | 'C'>('A');
   const [pendingDocs, setPendingDocs] = useState<PendingDoc[]>([]);
   const [pendingDocType, setPendingDocType] = useState<InvestmentDocumentType>('Contrat signé');
-  const [documentPreview, setDocumentPreview] = useState<{ title: string; url: string; isPdf: boolean } | null>(null);
+  const [documentPreview, setDocumentPreview] = useState<{
+    title: string;
+    url: string;
+    isPdf: boolean;
+  } | null>(null);
 
   const [projectForm, setProjectForm] = useState<ProjectFormState>(buildEmptyForm());
 
@@ -142,11 +162,11 @@ export default function InvestmentsPage() {
   const [description, setDescription] = useState('');
 
   const activeProject = useMemo(
-    () => projects.find(p => p.id === activeProjectId) || null,
+    () => projects.find((p) => p.id === activeProjectId) || null,
     [projects, activeProjectId]
   );
   const previewProject = useMemo(
-    () => projects.find(p => p.id === previewProjectId) || null,
+    () => projects.find((p) => p.id === previewProjectId) || null,
     [projects, previewProjectId]
   );
 
@@ -158,8 +178,11 @@ export default function InvestmentsPage() {
   }, []);
 
   useEffect(() => {
-    if (projects.length === 0) { setActiveProjectId(''); return; }
-    if (!activeProjectId || !projects.some(p => p.id === activeProjectId)) {
+    if (projects.length === 0) {
+      setActiveProjectId('');
+      return;
+    }
+    if (!activeProjectId || !projects.some((p) => p.id === activeProjectId)) {
       setActiveProjectId(projects[0].id);
     }
   }, [projects, activeProjectId]);
@@ -175,30 +198,28 @@ export default function InvestmentsPage() {
   }
 
   function getProjectExpenses(projectId: string) {
-    return allExpenses.filter(e => e.projectId === projectId);
+    return allExpenses.filter((e) => e.projectId === projectId);
   }
 
   function getProjectDocuments(projectId: string) {
-    return allDocuments.filter(d => d.projectId === projectId);
+    return allDocuments.filter((d) => d.projectId === projectId);
   }
 
   function getValidatedAmount(projectId: string) {
     return getProjectExpenses(projectId)
-      .filter(e => e.superAdminValide || e.statutPaiement === 'Paye')
+      .filter((e) => e.superAdminValide || e.statutPaiement === 'Paye')
       .reduce((sum, e) => sum + e.montant, 0);
   }
 
   function getPaidAmount(projectId: string) {
     return getProjectExpenses(projectId)
-      .filter(e => e.statutPaiement === 'Paye')
+      .filter((e) => e.statutPaiement === 'Paye')
       .reduce((sum, e) => sum + e.montant, 0);
   }
 
   /** Décaissé réel = sum of installments marked as decaisse */
   function getDecaisseReel(project: InvestmentProject) {
-    return project.acomptesPrevus
-      .filter(a => a.decaisse)
-      .reduce((sum, a) => sum + a.montant, 0);
+    return project.acomptesPrevus.filter((a) => a.decaisse).reduce((sum, a) => sum + a.montant, 0);
   }
 
   function getRemainingToPay(project: InvestmentProject) {
@@ -225,7 +246,7 @@ export default function InvestmentsPage() {
     [activeProject, allDocuments]
   );
   const activePhotoDocuments = useMemo(
-    () => activeProjectDocuments.filter(d => d.type === 'Photo site'),
+    () => activeProjectDocuments.filter((d) => d.type === 'Photo site'),
     [activeProjectDocuments]
   );
 
@@ -244,23 +265,29 @@ export default function InvestmentsPage() {
 
   const activeInstallmentMap = useMemo(() => {
     const map = new Map<string, InvestmentInstallment>();
-    activeProject?.acomptesPrevus.forEach(line => map.set(line.id, line));
+    activeProject?.acomptesPrevus.forEach((line) => map.set(line.id, line));
     return map;
   }, [activeProject]);
 
   const previewInstallmentMap = useMemo(() => {
     const map = new Map<string, InvestmentInstallment>();
-    previewProject?.acomptesPrevus.forEach(line => map.set(line.id, line));
+    previewProject?.acomptesPrevus.forEach((line) => map.set(line.id, line));
     return map;
   }, [previewProject]);
 
-  function buildBillingRows(project: InvestmentProject | null, expenses: InvestmentExpense[]): BillingRow[] {
+  function buildBillingRows(
+    project: InvestmentProject | null,
+    expenses: InvestmentExpense[]
+  ): BillingRow[] {
     if (!project) return [];
     const byInstallment = new Map<string, InvestmentExpense>();
     const extraRows: BillingRow[] = [];
 
-    expenses.forEach(expense => {
-      if (expense.acompteId) { byInstallment.set(expense.acompteId, expense); return; }
+    expenses.forEach((expense) => {
+      if (expense.acompteId) {
+        byInstallment.set(expense.acompteId, expense);
+        return;
+      }
       extraRows.push({
         key: `extra-${expense.id}`,
         libelle: expense.description || expense.factureFournisseur,
@@ -272,7 +299,7 @@ export default function InvestmentsPage() {
       });
     });
 
-    const plannedRows = project.acomptesPrevus.map(line => {
+    const plannedRows = project.acomptesPrevus.map((line) => {
       const linkedExpense = byInstallment.get(line.id);
       if (!linkedExpense) {
         return {
@@ -291,7 +318,8 @@ export default function InvestmentsPage() {
         datePrevisionnelle: line.datePrevisionnelle,
         facture: linkedExpense,
         couleur: linkedExpense.statutPaiement === 'Paye' ? 'green' : 'orange',
-        statutLabel: linkedExpense.statutPaiement === 'Paye' ? 'Paye' : 'Facture recue / En attente',
+        statutLabel:
+          linkedExpense.statutPaiement === 'Paye' ? 'Paye' : 'Facture recue / En attente',
       } as BillingRow;
     });
 
@@ -338,53 +366,88 @@ export default function InvestmentsPage() {
     setModalSection('A');
   }
 
-  function updateProjectFormField(field: keyof Omit<ProjectFormState, 'acomptesPrevus'>, value: string | number) {
-    setProjectForm(prev => ({ ...prev, [field]: value }));
+  function updateProjectFormField(
+    field: keyof Omit<ProjectFormState, 'acomptesPrevus'>,
+    value: string | number
+  ) {
+    setProjectForm((prev) => ({ ...prev, [field]: value }));
   }
 
   function addInstallmentLine() {
-    setProjectForm(prev => ({
+    setProjectForm((prev) => ({
       ...prev,
       acomptesPrevus: [
         ...prev.acomptesPrevus,
-        { id: `draft-${Date.now()}-${Math.random().toString(36).slice(2, 5)}`, libelle: '', montant: 0, datePrevisionnelle: '', decaisse: false },
+        {
+          id: `draft-${Date.now()}-${Math.random().toString(36).slice(2, 5)}`,
+          libelle: '',
+          montant: 0,
+          datePrevisionnelle: '',
+          decaisse: false,
+        },
       ],
     }));
   }
 
   function removeInstallmentLine(lineId: string) {
-    setProjectForm(prev => ({
+    setProjectForm((prev) => ({
       ...prev,
-      acomptesPrevus: prev.acomptesPrevus.length === 1
-        ? [{ id: prev.acomptesPrevus[0].id, libelle: '', montant: 0, datePrevisionnelle: '', decaisse: false }]
-        : prev.acomptesPrevus.filter(l => l.id !== lineId),
+      acomptesPrevus:
+        prev.acomptesPrevus.length === 1
+          ? [
+              {
+                id: prev.acomptesPrevus[0].id,
+                libelle: '',
+                montant: 0,
+                datePrevisionnelle: '',
+                decaisse: false,
+              },
+            ]
+          : prev.acomptesPrevus.filter((l) => l.id !== lineId),
     }));
   }
 
-  function updateInstallmentLine(lineId: string, field: 'libelle' | 'montant' | 'datePrevisionnelle' | 'decaisse', value: string | number | boolean) {
-    setProjectForm(prev => ({
+  function updateInstallmentLine(
+    lineId: string,
+    field: 'libelle' | 'montant' | 'datePrevisionnelle' | 'decaisse',
+    value: string | number | boolean
+  ) {
+    setProjectForm((prev) => ({
       ...prev,
-      acomptesPrevus: prev.acomptesPrevus.map(l => l.id === lineId ? { ...l, [field]: value } : l),
+      acomptesPrevus: prev.acomptesPrevus.map((l) =>
+        l.id === lineId ? { ...l, [field]: value } : l
+      ),
     }));
   }
 
   /** Computed live values for Section B summary */
   const draftDecaisseTotal = useMemo(
-    () => projectForm.acomptesPrevus.filter(l => l.decaisse).reduce((s, l) => s + (l.montant || 0), 0),
+    () =>
+      projectForm.acomptesPrevus
+        .filter((l) => l.decaisse)
+        .reduce((s, l) => s + (l.montant || 0), 0),
     [projectForm.acomptesPrevus]
   );
   const draftResteAPayer = Math.max(0, (projectForm.budgetTotal || 0) - draftDecaisseTotal);
 
   function buildProjectPayload(): NewInvestmentProjectData | null {
-    const validLines = projectForm.acomptesPrevus.filter(l => l.libelle.trim() && l.montant > 0 && l.datePrevisionnelle);
+    const validLines = projectForm.acomptesPrevus.filter(
+      (l) => l.libelle.trim() && l.montant > 0 && l.datePrevisionnelle
+    );
 
-    if (!projectForm.nomProjet.trim() || !projectForm.prestataire.trim() || projectForm.budgetTotal <= 0 || !projectForm.dateDebut || !projectForm.dateLivraison) {
+    if (
+      !projectForm.nomProjet.trim() ||
+      !projectForm.prestataire.trim() ||
+      projectForm.budgetTotal <= 0 ||
+      !projectForm.dateDebut ||
+      !projectForm.dateLivraison
+    ) {
       alert('Renseignez tous les champs obligatoires (Section A).');
       setModalSection('A');
       return null;
     }
     if (validLines.length === 0) {
-      alert('Ajoutez au moins une ligne d\'acompte avec montant et date (Section B).');
+      alert("Ajoutez au moins une ligne d'acompte avec montant et date (Section B).");
       setModalSection('B');
       return null;
     }
@@ -395,7 +458,7 @@ export default function InvestmentsPage() {
       budgetTotal: projectForm.budgetTotal,
       dateDebut: projectForm.dateDebut,
       dateLivraison: projectForm.dateLivraison,
-      acomptesPrevus: validLines.map(l => ({
+      acomptesPrevus: validLines.map((l) => ({
         libelle: l.libelle.trim(),
         montant: l.montant,
         datePrevisionnelle: l.datePrevisionnelle,
@@ -418,7 +481,10 @@ export default function InvestmentsPage() {
       savedProject = createInvestmentProject(payload, user.id);
     }
 
-    if (!savedProject) { alert('Erreur lors de l\'enregistrement du projet.'); return; }
+    if (!savedProject) {
+      alert("Erreur lors de l'enregistrement du projet.");
+      return;
+    }
 
     /* Upload pending documents (Section C) */
     for (const pending of pendingDocs) {
@@ -446,13 +512,18 @@ export default function InvestmentsPage() {
     const newDocs: PendingDoc[] = [];
     for (const file of Array.from(files)) {
       const previewDataUrl = file.type.startsWith('image/') ? await fileToDataUrl(file) : '';
-      newDocs.push({ id: `pending-${Date.now()}-${Math.random().toString(36).slice(2, 5)}`, type: pendingDocType, file, previewDataUrl });
+      newDocs.push({
+        id: `pending-${Date.now()}-${Math.random().toString(36).slice(2, 5)}`,
+        type: pendingDocType,
+        file,
+        previewDataUrl,
+      });
     }
-    setPendingDocs(prev => [...prev, ...newDocs]);
+    setPendingDocs((prev) => [...prev, ...newDocs]);
   }
 
   function removePendingDoc(id: string) {
-    setPendingDocs(prev => prev.filter(d => d.id !== id));
+    setPendingDocs((prev) => prev.filter((d) => d.id !== id));
   }
 
   function downloadPendingDoc(doc: PendingDoc) {
@@ -465,9 +536,15 @@ export default function InvestmentsPage() {
 
   function hasPreviewSupport(fileName: string, url?: string) {
     const lower = fileName.toLowerCase();
-    const isKnownImage = lower.endsWith('.png') || lower.endsWith('.jpg') || lower.endsWith('.jpeg') || lower.endsWith('.webp');
+    const isKnownImage =
+      lower.endsWith('.png') ||
+      lower.endsWith('.jpg') ||
+      lower.endsWith('.jpeg') ||
+      lower.endsWith('.webp');
     const isPdf = lower.endsWith('.pdf');
-    const isPreviewDataUrl = Boolean(url && (url.startsWith('data:image/') || url.startsWith('data:application/pdf')));
+    const isPreviewDataUrl = Boolean(
+      url && (url.startsWith('data:image/') || url.startsWith('data:application/pdf'))
+    );
     return isKnownImage || isPdf || isPreviewDataUrl;
   }
 
@@ -515,10 +592,15 @@ export default function InvestmentsPage() {
   }
 
   function deleteProject(project: InvestmentProject) {
-    const confirmed = window.confirm(`Supprimer définitivement le projet ${project.nomProjet} et son historique financier ?`);
+    const confirmed = window.confirm(
+      `Supprimer définitivement le projet ${project.nomProjet} et son historique financier ?`
+    );
     if (!confirmed) return;
     const removed = deleteInvestmentProject(project.id);
-    if (!removed) { alert('Suppression impossible.'); return; }
+    if (!removed) {
+      alert('Suppression impossible.');
+      return;
+    }
     if (activeProjectId === project.id) setActiveProjectId('');
     if (previewProjectId === project.id) setPreviewProjectId(null);
   }
@@ -555,44 +637,50 @@ export default function InvestmentsPage() {
     if (!result) alert('Ajout de la preuve visuelle impossible.');
   }
 
-  const docItemClass = 'flex items-center gap-3 rounded-xl border border-slate-200 bg-slate-50 px-3 py-2.5 transition-colors hover:bg-slate-100/80';
+  const docItemClass =
+    'flex items-center gap-3 rounded-xl border border-slate-200 bg-slate-50 px-3 py-2.5 transition-colors hover:bg-slate-100/80';
   const docActionBtnClass = 'rounded-lg p-2 text-slate-600 hover:bg-slate-200';
   const docDeleteBtnClass = 'rounded-lg p-2 text-rose-600 hover:bg-rose-100';
 
-
   return (
     <>
-      <div className="w-full min-h-screen bg-gradient-to-br from-slate-50 via-cyan-50 to-blue-50 p-4 md:p-6">
+      <div className="min-h-screen w-full bg-gradient-to-br from-slate-50 via-cyan-50 to-blue-50 p-4 md:p-6">
         <div className="w-full space-y-6">
-
           {/* ── Header + KPIs ── */}
           <section className="w-full rounded-3xl bg-gradient-to-r from-slate-900 via-blue-900 to-cyan-800 p-6 text-white shadow-xl">
-            <div className="flex items-start justify-between gap-4 flex-wrap">
+            <div className="flex flex-wrap items-start justify-between gap-4">
               <div>
-                <h1 className="text-3xl font-bold tracking-tight">Gestion des Immobilisations & Infrastructures</h1>
+                <h1 className="text-3xl font-bold tracking-tight">
+                  Gestion des Immobilisations & Infrastructures
+                </h1>
                 <p className="mt-2 text-sm text-cyan-100">
-                  Gestion par liste référencée, suivi CAPEX et validation Bon à Payer par projet interne.
+                  Gestion par liste référencée, suivi CAPEX et validation Bon à Payer par projet
+                  interne.
                 </p>
               </div>
-              <button type="button" onClick={openCreateModal} className="inline-flex items-center gap-2 rounded-2xl bg-white px-4 py-3 text-sm font-semibold text-slate-900 shadow-lg">
+              <button
+                type="button"
+                onClick={openCreateModal}
+                className="inline-flex items-center gap-2 rounded-2xl bg-white px-4 py-3 text-sm font-semibold text-slate-900 shadow-lg"
+              >
                 <Plus className="h-4 w-4" />
                 Nouveau Projet d'Investissement
               </button>
             </div>
-            <div className="mt-5 grid grid-cols-1 md:grid-cols-4 gap-3">
-              <div className="rounded-2xl bg-white/10 p-4 border border-white/10">
+            <div className="mt-5 grid grid-cols-1 gap-3 md:grid-cols-4">
+              <div className="rounded-2xl border border-white/10 bg-white/10 p-4">
                 <p className="text-xs uppercase tracking-wide text-cyan-100">Budget engagé</p>
                 <p className="mt-1 text-2xl font-bold">{formatMoney(budgetEngage)}</p>
               </div>
-              <div className="rounded-2xl bg-white/10 p-4 border border-white/10">
+              <div className="rounded-2xl border border-white/10 bg-white/10 p-4">
                 <p className="text-xs uppercase tracking-wide text-cyan-100">Décaissé réel</p>
                 <p className="mt-1 text-2xl font-bold">{formatMoney(decaisseReelTotal)}</p>
               </div>
-              <div className="rounded-2xl bg-white/10 p-4 border border-white/10">
+              <div className="rounded-2xl border border-white/10 bg-white/10 p-4">
                 <p className="text-xs uppercase tracking-wide text-cyan-100">Reste à payer</p>
                 <p className="mt-1 text-2xl font-bold">{formatMoney(resteAPayerTotal)}</p>
               </div>
-              <div className="rounded-2xl bg-white/10 p-4 border border-white/10">
+              <div className="rounded-2xl border border-white/10 bg-white/10 p-4">
                 <p className="text-xs uppercase tracking-wide text-cyan-100">Projets actifs</p>
                 <p className="mt-1 text-2xl font-bold">{projects.length}</p>
               </div>
@@ -601,9 +689,11 @@ export default function InvestmentsPage() {
 
           {/* ── Project list table ── */}
           <section className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm">
-            <div className="flex items-center gap-2 mb-4">
+            <div className="mb-4 flex items-center gap-2">
               <Table className="h-5 w-5 text-cyan-700" />
-              <h2 className="text-lg font-semibold text-slate-900">Liste des projets d'investissement</h2>
+              <h2 className="text-lg font-semibold text-slate-900">
+                Liste des projets d'investissement
+              </h2>
             </div>
             <div className="overflow-x-auto">
               <table className="min-w-full text-sm">
@@ -626,34 +716,70 @@ export default function InvestmentsPage() {
                       </td>
                     </tr>
                   ) : (
-                    projects.map(project => {
+                    projects.map((project) => {
                       const decaisse = getDecaisseReel(project);
                       const reste = getRemainingToPay(project);
                       return (
                         <tr
                           key={project.id}
-                          className={`border-b border-slate-100 transition hover:bg-slate-50 cursor-pointer ${activeProjectId === project.id ? 'bg-cyan-50/70' : ''}`}
+                          className={`cursor-pointer border-b border-slate-100 transition hover:bg-slate-50 ${activeProjectId === project.id ? 'bg-cyan-50/70' : ''}`}
                           onClick={() => setActiveProjectId(project.id)}
                         >
-                          <td className="px-4 py-4 font-medium text-slate-700">{project.codeProjet}</td>
-                          <td className="px-4 py-4 text-slate-900 font-semibold">{project.nomProjet}</td>
+                          <td className="px-4 py-4 font-medium text-slate-700">
+                            {project.codeProjet}
+                          </td>
+                          <td className="px-4 py-4 font-semibold text-slate-900">
+                            {project.nomProjet}
+                          </td>
                           <td className="px-4 py-4 text-slate-700">{project.prestataire}</td>
-                          <td className="px-4 py-4 text-slate-700">{formatMoney(project.budgetTotal)}</td>
-                          <td className="px-4 py-4">
-                            <span className="font-semibold text-emerald-700">{formatMoney(decaisse)}</span>
+                          <td className="px-4 py-4 text-slate-700">
+                            {formatMoney(project.budgetTotal)}
                           </td>
                           <td className="px-4 py-4">
-                            <span className={`font-semibold ${reste > 0 ? 'text-orange-700' : 'text-slate-500'}`}>{formatMoney(reste)}</span>
+                            <span className="font-semibold text-emerald-700">
+                              {formatMoney(decaisse)}
+                            </span>
+                          </td>
+                          <td className="px-4 py-4">
+                            <span
+                              className={`font-semibold ${reste > 0 ? 'text-orange-700' : 'text-slate-500'}`}
+                            >
+                              {formatMoney(reste)}
+                            </span>
                           </td>
                           <td className="px-4 py-4">
                             <div className="flex items-center gap-2">
-                              <button type="button" onClick={e => { e.stopPropagation(); setPreviewProjectId(project.id); }} className="rounded-xl border border-slate-200 p-2 text-slate-600 hover:bg-slate-100" title="Aperçu">
+                              <button
+                                type="button"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setPreviewProjectId(project.id);
+                                }}
+                                className="rounded-xl border border-slate-200 p-2 text-slate-600 hover:bg-slate-100"
+                                title="Aperçu"
+                              >
                                 <Eye className="h-4 w-4" />
                               </button>
-                              <button type="button" onClick={e => { e.stopPropagation(); openEditModal(project); }} className="rounded-xl border border-slate-200 p-2 text-slate-600 hover:bg-slate-100" title="Modifier">
+                              <button
+                                type="button"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  openEditModal(project);
+                                }}
+                                className="rounded-xl border border-slate-200 p-2 text-slate-600 hover:bg-slate-100"
+                                title="Modifier"
+                              >
                                 <PenLine className="h-4 w-4" />
                               </button>
-                              <button type="button" onClick={e => { e.stopPropagation(); deleteProject(project); }} className="rounded-xl border border-rose-200 p-2 text-rose-600 hover:bg-rose-50" title="Supprimer">
+                              <button
+                                type="button"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  deleteProject(project);
+                                }}
+                                className="rounded-xl border border-rose-200 p-2 text-rose-600 hover:bg-rose-50"
+                                title="Supprimer"
+                              >
                                 <Trash2 className="h-4 w-4" />
                               </button>
                             </div>
@@ -669,68 +795,111 @@ export default function InvestmentsPage() {
 
           {/* ── Active project panel ── */}
           {activeProject && (
-            <section className="grid grid-cols-1 xl:grid-cols-[0.9fr_1.1fr] gap-6">
+            <section className="grid grid-cols-1 gap-6 xl:grid-cols-[0.9fr_1.1fr]">
               <div className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm">
-                <div className="flex items-center gap-2 mb-4">
+                <div className="mb-4 flex items-center gap-2">
                   <Building2 className="h-5 w-5 text-cyan-700" />
                   <h2 className="text-lg font-semibold text-slate-900">Projet actif</h2>
                 </div>
-                <div className="rounded-2xl bg-slate-50 p-4 border border-slate-200">
-                  <h3 className="text-lg font-semibold text-slate-900">{activeProject.nomProjet}</h3>
-                  <p className="mt-1 text-sm text-slate-600">{activeProject.codeProjet} • {activeProject.prestataire}</p>
-                  <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
-                    <div className="rounded-xl bg-white border border-slate-200 p-3">
+                <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
+                  <h3 className="text-lg font-semibold text-slate-900">
+                    {activeProject.nomProjet}
+                  </h3>
+                  <p className="mt-1 text-sm text-slate-600">
+                    {activeProject.codeProjet} • {activeProject.prestataire}
+                  </p>
+                  <div className="mt-4 grid grid-cols-1 gap-3 text-sm sm:grid-cols-2">
+                    <div className="rounded-xl border border-slate-200 bg-white p-3">
                       <p className="text-slate-500">Budget total</p>
-                      <p className="mt-1 font-semibold text-slate-900">{formatMoney(activeProject.budgetTotal)}</p>
+                      <p className="mt-1 font-semibold text-slate-900">
+                        {formatMoney(activeProject.budgetTotal)}
+                      </p>
                     </div>
-                    <div className="rounded-xl bg-white border border-slate-200 p-3">
+                    <div className="rounded-xl border border-slate-200 bg-white p-3">
                       <p className="text-slate-500">Reste à payer</p>
-                      <p className="mt-1 font-semibold text-slate-900">{formatMoney(getRemainingToPay(activeProject))}</p>
+                      <p className="mt-1 font-semibold text-slate-900">
+                        {formatMoney(getRemainingToPay(activeProject))}
+                      </p>
                     </div>
-                    <div className="rounded-xl bg-white border border-slate-200 p-3">
+                    <div className="rounded-xl border border-slate-200 bg-white p-3">
                       <p className="text-slate-500">Signature contrat</p>
-                      <p className="mt-1 font-semibold text-slate-900">{new Date(activeProject.dateDebut).toLocaleDateString('fr-FR')}</p>
+                      <p className="mt-1 font-semibold text-slate-900">
+                        {new Date(activeProject.dateDebut).toLocaleDateString('fr-FR')}
+                      </p>
                     </div>
-                    <div className="rounded-xl bg-white border border-slate-200 p-3">
+                    <div className="rounded-xl border border-slate-200 bg-white p-3">
                       <p className="text-slate-500">Livraison prévue</p>
-                      <p className="mt-1 font-semibold text-slate-900">{new Date(activeProject.dateLivraison).toLocaleDateString('fr-FR')}</p>
+                      <p className="mt-1 font-semibold text-slate-900">
+                        {new Date(activeProject.dateLivraison).toLocaleDateString('fr-FR')}
+                      </p>
                     </div>
                   </div>
                 </div>
 
                 <div className="mt-5">
-                  <div className="flex items-center gap-2 mb-3">
+                  <div className="mb-3 flex items-center gap-2">
                     <Wallet className="h-5 w-5 text-cyan-700" />
                     <h3 className="text-lg font-semibold text-slate-900">Factures prestataire</h3>
                   </div>
-                  <form onSubmit={createExpense} className="grid grid-cols-1 md:grid-cols-5 gap-3">
-                    <select value={selectedAcompteId} onChange={e => setSelectedAcompteId(e.target.value)} className="rounded-xl border border-slate-200 px-3 py-2 text-sm">
+                  <form onSubmit={createExpense} className="grid grid-cols-1 gap-3 md:grid-cols-5">
+                    <select
+                      value={selectedAcompteId}
+                      onChange={(e) => setSelectedAcompteId(e.target.value)}
+                      className="rounded-xl border border-slate-200 px-3 py-2 text-sm"
+                    >
                       <option value="">Acompte associé (optionnel)</option>
-                      {activeProject.acomptesPrevus.map(line => (
+                      {activeProject.acomptesPrevus.map((line) => (
                         <option key={line.id} value={line.id}>
-                          {line.libelle} — {formatMoney(line.montant)}{line.decaisse ? ' ✓' : ''}
+                          {line.libelle} — {formatMoney(line.montant)}
+                          {line.decaisse ? ' ✓' : ''}
                         </option>
                       ))}
                     </select>
-                    <input value={factureFournisseur} onChange={e => setFactureFournisseur(e.target.value)} className="rounded-xl border border-slate-200 px-3 py-2 text-sm" placeholder="N° facture fournisseur" />
-                    <input type="number" value={montant || ''} onChange={e => setMontant(parseFloat(e.target.value) || 0)} className="rounded-xl border border-slate-200 px-3 py-2 text-sm" placeholder="Montant" />
-                    <input type="date" value={dateFacture} onChange={e => setDateFacture(e.target.value)} className="rounded-xl border border-slate-200 px-3 py-2 text-sm" />
-                    <button type="submit" className="inline-flex items-center justify-center gap-2 rounded-xl bg-cyan-700 px-4 py-2 text-sm font-semibold text-white">
+                    <input
+                      value={factureFournisseur}
+                      onChange={(e) => setFactureFournisseur(e.target.value)}
+                      className="rounded-xl border border-slate-200 px-3 py-2 text-sm"
+                      placeholder="N° facture fournisseur"
+                    />
+                    <input
+                      type="number"
+                      value={montant || ''}
+                      onChange={(e) => setMontant(parseFloat(e.target.value) || 0)}
+                      className="rounded-xl border border-slate-200 px-3 py-2 text-sm"
+                      placeholder="Montant"
+                    />
+                    <input
+                      type="date"
+                      value={dateFacture}
+                      onChange={(e) => setDateFacture(e.target.value)}
+                      className="rounded-xl border border-slate-200 px-3 py-2 text-sm"
+                    />
+                    <button
+                      type="submit"
+                      className="inline-flex items-center justify-center gap-2 rounded-xl bg-cyan-700 px-4 py-2 text-sm font-semibold text-white"
+                    >
                       <FilePlus2 className="h-4 w-4" />
                       Enregistrer
                     </button>
-                    <input value={description} onChange={e => setDescription(e.target.value)} className="md:col-span-5 rounded-xl border border-slate-200 px-3 py-2 text-sm" placeholder="Description / lot facture" />
+                    <input
+                      value={description}
+                      onChange={(e) => setDescription(e.target.value)}
+                      className="rounded-xl border border-slate-200 px-3 py-2 text-sm md:col-span-5"
+                      placeholder="Description / lot facture"
+                    />
                   </form>
                 </div>
               </div>
 
               <div className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm">
-                <div className="flex items-center gap-2 mb-4">
+                <div className="mb-4 flex items-center gap-2">
                   <Table className="h-5 w-5 text-cyan-700" />
-                  <h2 className="text-lg font-semibold text-slate-900">Suivi prévisionnel / réel</h2>
+                  <h2 className="text-lg font-semibold text-slate-900">
+                    Suivi prévisionnel / réel
+                  </h2>
                 </div>
                 <div className="overflow-x-auto">
-                  <table className="min-w-full text-sm border-separate border-spacing-y-2">
+                  <table className="min-w-full border-separate border-spacing-y-2 text-sm">
                     <thead>
                       <tr className="text-left text-slate-500">
                         <th className="px-3 py-2">Statut</th>
@@ -743,21 +912,45 @@ export default function InvestmentsPage() {
                     </thead>
                     <tbody>
                       {activeBillingRows.length === 0 ? (
-                        <tr><td colSpan={6} className="px-3 py-6 text-center text-slate-500">Aucun acompte ou facture enregistré.</td></tr>
+                        <tr>
+                          <td colSpan={6} className="px-3 py-6 text-center text-slate-500">
+                            Aucun acompte ou facture enregistré.
+                          </td>
+                        </tr>
                       ) : (
-                        activeBillingRows.map(row => (
+                        activeBillingRows.map((row) => (
                           <tr key={row.key} className="bg-slate-50">
                             <td className="px-3 py-3">
-                              <span className={`inline-flex rounded-full border px-2.5 py-1 text-xs font-semibold ${badgeClass(row.couleur)}`}>{row.statutLabel}</span>
+                              <span
+                                className={`inline-flex rounded-full border px-2.5 py-1 text-xs font-semibold ${badgeClass(row.couleur)}`}
+                              >
+                                {row.statutLabel}
+                              </span>
                             </td>
                             <td className="px-3 py-3 font-medium text-slate-900">
                               {row.libelle}
-                              {row.facture && <p className="mt-1 text-xs font-normal text-slate-500">{row.facture.factureFournisseur}</p>}
+                              {row.facture && (
+                                <p className="mt-1 text-xs font-normal text-slate-500">
+                                  {row.facture.factureFournisseur}
+                                </p>
+                              )}
                             </td>
-                            <td className="px-3 py-3 text-slate-700">{formatMoney(row.montantPrevu)}</td>
-                            <td className="px-3 py-3 text-slate-700">{formatMoney(row.facture?.montant || 0)}</td>
-                            <td className="px-3 py-3 text-slate-700">{row.datePrevisionnelle === '-' ? '-' : new Date(row.datePrevisionnelle).toLocaleDateString('fr-FR')}</td>
-                            <td className="px-3 py-3 text-slate-700">{row.facture?.dateFacture ? new Date(row.facture.dateFacture).toLocaleDateString('fr-FR') : '-'}</td>
+                            <td className="px-3 py-3 text-slate-700">
+                              {formatMoney(row.montantPrevu)}
+                            </td>
+                            <td className="px-3 py-3 text-slate-700">
+                              {formatMoney(row.facture?.montant || 0)}
+                            </td>
+                            <td className="px-3 py-3 text-slate-700">
+                              {row.datePrevisionnelle === '-'
+                                ? '-'
+                                : new Date(row.datePrevisionnelle).toLocaleDateString('fr-FR')}
+                            </td>
+                            <td className="px-3 py-3 text-slate-700">
+                              {row.facture?.dateFacture
+                                ? new Date(row.facture.dateFacture).toLocaleDateString('fr-FR')
+                                : '-'}
+                            </td>
                           </tr>
                         ))
                       )}
@@ -766,29 +959,56 @@ export default function InvestmentsPage() {
                 </div>
 
                 <div className="mt-5 space-y-3">
-                  {activeProjectExpenses.map(expense => (
-                    <div key={expense.id} className="rounded-2xl border border-slate-200 bg-white p-4">
-                      <div className="flex items-center justify-between gap-3 flex-wrap">
+                  {activeProjectExpenses.map((expense) => (
+                    <div
+                      key={expense.id}
+                      className="rounded-2xl border border-slate-200 bg-white p-4"
+                    >
+                      <div className="flex flex-wrap items-center justify-between gap-3">
                         <div>
-                          <p className="font-semibold text-slate-900">{expense.factureFournisseur}</p>
-                          <p className="text-xs text-slate-500">{formatMoney(expense.montant)} • {new Date(expense.dateFacture).toLocaleDateString('fr-FR')}</p>
+                          <p className="font-semibold text-slate-900">
+                            {expense.factureFournisseur}
+                          </p>
+                          <p className="text-xs text-slate-500">
+                            {formatMoney(expense.montant)} •{' '}
+                            {new Date(expense.dateFacture).toLocaleDateString('fr-FR')}
+                          </p>
                           {expense.acompteId && activeInstallmentMap.get(expense.acompteId) && (
-                            <p className="mt-1 text-xs text-cyan-700">Acompte: {activeInstallmentMap.get(expense.acompteId)?.libelle}</p>
+                            <p className="mt-1 text-xs text-cyan-700">
+                              Acompte: {activeInstallmentMap.get(expense.acompteId)?.libelle}
+                            </p>
                           )}
                         </div>
-                        <span className={`inline-flex rounded-full border px-2.5 py-1 text-xs font-semibold ${expense.statutPaiement === 'Paye' ? badgeClass('green') : badgeClass('orange')}`}>
+                        <span
+                          className={`inline-flex rounded-full border px-2.5 py-1 text-xs font-semibold ${expense.statutPaiement === 'Paye' ? badgeClass('green') : badgeClass('orange')}`}
+                        >
                           {expense.statutPaiement}
                         </span>
                       </div>
-                      <div className="mt-3 grid grid-cols-1 md:grid-cols-3 gap-2 text-sm">
-                        <label className={`flex items-center gap-2 rounded-xl border px-3 py-2 cursor-pointer ${expense.preuveVisuelleDocumentId ? 'border-emerald-200 bg-emerald-50' : 'border-slate-200 bg-white'}`}>
+                      <div className="mt-3 grid grid-cols-1 gap-2 text-sm md:grid-cols-3">
+                        <label
+                          className={`flex cursor-pointer items-center gap-2 rounded-xl border px-3 py-2 ${expense.preuveVisuelleDocumentId ? 'border-emerald-200 bg-emerald-50' : 'border-slate-200 bg-white'}`}
+                        >
                           <Camera className="h-4 w-4" />
                           <span className="text-xs font-semibold">Preuve visuelle</span>
-                          <input type="file" accept="image/*" className="hidden" onChange={e => updateProof(expense.id, e.target.files?.[0])} />
-                          <span className="ml-auto text-[11px] underline">{expense.preuveVisuelleDocumentId ? 'Remplacer' : 'Ajouter'}</span>
+                          <input
+                            type="file"
+                            accept="image/*"
+                            className="hidden"
+                            onChange={(e) => updateProof(expense.id, e.target.files?.[0])}
+                          />
+                          <span className="ml-auto text-[11px] underline">
+                            {expense.preuveVisuelleDocumentId ? 'Remplacer' : 'Ajouter'}
+                          </span>
                         </label>
-                        <label className={`flex cursor-pointer items-center gap-2 rounded-xl border px-3 py-2 ${expense.qhseConforme ? 'border-emerald-200 bg-emerald-50' : 'border-slate-200 bg-white'}`}>
-                          <input type="checkbox" checked={expense.qhseConforme} onChange={e => setExpenseQHSEConform(expense.id, e.target.checked)} />
+                        <label
+                          className={`flex cursor-pointer items-center gap-2 rounded-xl border px-3 py-2 ${expense.qhseConforme ? 'border-emerald-200 bg-emerald-50' : 'border-slate-200 bg-white'}`}
+                        >
+                          <input
+                            type="checkbox"
+                            checked={expense.qhseConforme}
+                            onChange={(e) => setExpenseQHSEConform(expense.id, e.target.checked)}
+                          />
                           <ShieldCheck className="h-4 w-4" />
                           <span className="text-xs font-semibold">Validation QHSE</span>
                         </label>
@@ -797,8 +1017,15 @@ export default function InvestmentsPage() {
                           disabled={!isSuperAdmin}
                           onClick={() => {
                             if (!user) return;
-                            const signed = signExpenseAsSuperAdmin(expense.id, user.id, isSuperAdmin);
-                            if (!signed) alert('Validation impossible: preuve visuelle + conformité QHSE requises.');
+                            const signed = signExpenseAsSuperAdmin(
+                              expense.id,
+                              user.id,
+                              isSuperAdmin
+                            );
+                            if (!signed)
+                              alert(
+                                'Validation impossible: preuve visuelle + conformité QHSE requises.'
+                              );
                           }}
                           className={`inline-flex items-center gap-2 rounded-xl border px-3 py-2 text-xs font-semibold ${expense.superAdminValide ? 'border-emerald-200 bg-emerald-50 text-emerald-700' : 'border-slate-200 bg-white text-slate-700 disabled:opacity-40'}`}
                         >
@@ -810,7 +1037,11 @@ export default function InvestmentsPage() {
                         <button
                           type="button"
                           disabled={expense.statutPaiement !== 'Bon a payer'}
-                          onClick={() => { const paid = markInvestmentExpensePaid(expense.id); if (!paid) alert('Paiement impossible sans validation finale Super Admin.'); }}
+                          onClick={() => {
+                            const paid = markInvestmentExpensePaid(expense.id);
+                            if (!paid)
+                              alert('Paiement impossible sans validation finale Super Admin.');
+                          }}
                           className="rounded-xl bg-slate-900 px-3 py-1.5 text-xs font-semibold text-white disabled:bg-slate-300"
                         >
                           Déclencher paiement
@@ -825,14 +1056,25 @@ export default function InvestmentsPage() {
                   )}
                   {activePhotoDocuments.length > 0 && (
                     <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
-                      <h3 className="text-sm font-semibold text-slate-900">Dernières photos chantier</h3>
-                      <div className="mt-3 grid grid-cols-2 md:grid-cols-3 gap-3">
-                        {activePhotoDocuments.slice(0, 3).map(doc => (
-                          <div key={doc.id} className="overflow-hidden rounded-2xl border border-slate-200 bg-white">
+                      <h3 className="text-sm font-semibold text-slate-900">
+                        Dernières photos chantier
+                      </h3>
+                      <div className="mt-3 grid grid-cols-2 gap-3 md:grid-cols-3">
+                        {activePhotoDocuments.slice(0, 3).map((doc) => (
+                          <div
+                            key={doc.id}
+                            className="overflow-hidden rounded-2xl border border-slate-200 bg-white"
+                          >
                             {doc.previewDataUrl ? (
-                              <img src={doc.previewDataUrl} alt={doc.fileName} className="h-32 w-full object-cover" />
+                              <img
+                                src={doc.previewDataUrl}
+                                alt={doc.fileName}
+                                className="h-32 w-full object-cover"
+                              />
                             ) : (
-                              <div className="flex h-32 items-center justify-center bg-slate-100 text-xs text-slate-500">Aperçu indisponible</div>
+                              <div className="flex h-32 items-center justify-center bg-slate-100 text-xs text-slate-500">
+                                Aperçu indisponible
+                              </div>
                             )}
                             <div className="p-3 text-xs text-slate-600">{doc.fileName}</div>
                           </div>
@@ -844,7 +1086,6 @@ export default function InvestmentsPage() {
               </div>
             </section>
           )}
-
         </div>
       </div>
 
@@ -854,11 +1095,15 @@ export default function InvestmentsPage() {
       <Modal
         isOpen={isProjectModalOpen}
         onClose={closeProjectModal}
-        title={editingProjectId ? 'Modifier le projet d\'investissement' : 'Nouveau projet d\'investissement'}
+        title={
+          editingProjectId
+            ? "Modifier le projet d'investissement"
+            : "Nouveau projet d'investissement"
+        }
         size="full"
       >
         {/* Tab navigator */}
-        <div className="flex items-center gap-1 border-b border-slate-200 px-6 pb-0 -mt-2">
+        <div className="-mt-2 flex items-center gap-1 border-b border-slate-200 px-6 pb-0">
           {(['A', 'B', 'C'] as const).map((s, idx) => {
             const labels = ['A — Identité', 'B — Décaissement', 'C — Pièces Jointes'];
             return (
@@ -866,7 +1111,7 @@ export default function InvestmentsPage() {
                 key={s}
                 type="button"
                 onClick={() => setModalSection(s)}
-                className={`px-4 py-3 text-sm font-semibold border-b-2 transition-colors ${modalSection === s ? 'border-cyan-600 text-cyan-700' : 'border-transparent text-slate-500 hover:text-slate-700'}`}
+                className={`border-b-2 px-4 py-3 text-sm font-semibold transition-colors ${modalSection === s ? 'border-cyan-600 text-cyan-700' : 'border-transparent text-slate-500 hover:text-slate-700'}`}
               >
                 {labels[idx]}
               </button>
@@ -875,59 +1120,72 @@ export default function InvestmentsPage() {
         </div>
 
         <form onSubmit={submitProjectForm}>
-          <div className="p-6 overflow-y-auto max-h-[60vh] space-y-5">
-
+          <div className="max-h-[60vh] space-y-5 overflow-y-auto p-6">
             {/* ── Section A: Identité ── */}
             {modalSection === 'A' && (
               <div className="space-y-4">
-                <h3 className="text-sm font-bold uppercase tracking-wider text-slate-500">Informations du projet</h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                <h3 className="text-sm font-bold uppercase tracking-wider text-slate-500">
+                  Informations du projet
+                </h3>
+                <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
                   <div className="md:col-span-2">
-                    <label className="block text-xs font-semibold text-slate-600 mb-1">Nom du projet *</label>
+                    <label className="mb-1 block text-xs font-semibold text-slate-600">
+                      Nom du projet *
+                    </label>
                     <input
                       value={projectForm.nomProjet}
-                      onChange={e => updateProjectFormField('nomProjet', e.target.value)}
+                      onChange={(e) => updateProjectFormField('nomProjet', e.target.value)}
                       className="w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm focus:border-cyan-500 focus:outline-none"
                       placeholder="Ex: Construction Siège Social Phase 2"
                     />
                   </div>
                   <div className="md:col-span-2">
-                    <label className="block text-xs font-semibold text-slate-600 mb-1">Prestataire / Constructeur *</label>
+                    <label className="mb-1 block text-xs font-semibold text-slate-600">
+                      Prestataire / Constructeur *
+                    </label>
                     <input
                       value={projectForm.prestataire}
-                      onChange={e => updateProjectFormField('prestataire', e.target.value)}
+                      onChange={(e) => updateProjectFormField('prestataire', e.target.value)}
                       className="w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm focus:border-cyan-500 focus:outline-none"
                       placeholder="Nom de l'entreprise ou du constructeur"
                     />
                   </div>
                   <div>
-                    <label className="block text-xs font-semibold text-slate-600 mb-1">Budget total estimé (FCFA) *</label>
+                    <label className="mb-1 block text-xs font-semibold text-slate-600">
+                      Budget total estimé (FCFA) *
+                    </label>
                     <input
                       type="number"
                       min="0"
                       step="1"
                       value={projectForm.budgetTotal || ''}
-                      onChange={e => updateProjectFormField('budgetTotal', parseFloat(e.target.value) || 0)}
+                      onChange={(e) =>
+                        updateProjectFormField('budgetTotal', parseFloat(e.target.value) || 0)
+                      }
                       className="w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm focus:border-cyan-500 focus:outline-none"
                       placeholder="0"
                     />
                   </div>
                   <div />
                   <div>
-                    <label className="block text-xs font-semibold text-slate-600 mb-1">Date de signature du contrat *</label>
+                    <label className="mb-1 block text-xs font-semibold text-slate-600">
+                      Date de signature du contrat *
+                    </label>
                     <input
                       type="date"
                       value={projectForm.dateDebut}
-                      onChange={e => updateProjectFormField('dateDebut', e.target.value)}
+                      onChange={(e) => updateProjectFormField('dateDebut', e.target.value)}
                       className="w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm focus:border-cyan-500 focus:outline-none"
                     />
                   </div>
                   <div>
-                    <label className="block text-xs font-semibold text-slate-600 mb-1">Date de livraison estimée *</label>
+                    <label className="mb-1 block text-xs font-semibold text-slate-600">
+                      Date de livraison estimée *
+                    </label>
                     <input
                       type="date"
                       value={projectForm.dateLivraison}
-                      onChange={e => updateProjectFormField('dateLivraison', e.target.value)}
+                      onChange={(e) => updateProjectFormField('dateLivraison', e.target.value)}
                       className="w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm focus:border-cyan-500 focus:outline-none"
                     />
                   </div>
@@ -939,15 +1197,21 @@ export default function InvestmentsPage() {
             {modalSection === 'B' && (
               <div className="space-y-4">
                 <div className="flex items-center justify-between">
-                  <h3 className="text-sm font-bold uppercase tracking-wider text-slate-500">Plan de décaissement</h3>
-                  <button type="button" onClick={addInstallmentLine} className="inline-flex items-center gap-1.5 rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-50">
+                  <h3 className="text-sm font-bold uppercase tracking-wider text-slate-500">
+                    Plan de décaissement
+                  </h3>
+                  <button
+                    type="button"
+                    onClick={addInstallmentLine}
+                    className="inline-flex items-center gap-1.5 rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-50"
+                  >
                     <Plus className="h-3.5 w-3.5" />
                     Ajouter une ligne
                   </button>
                 </div>
 
                 {/* Column headers */}
-                <div className="hidden md:grid md:grid-cols-12 gap-2 px-2 text-xs font-semibold text-slate-500 uppercase tracking-wide">
+                <div className="hidden gap-2 px-2 text-xs font-semibold uppercase tracking-wide text-slate-500 md:grid md:grid-cols-12">
                   <div className="col-span-4">Échéance</div>
                   <div className="col-span-3">Montant (FCFA)</div>
                   <div className="col-span-3">Date prévue</div>
@@ -956,12 +1220,15 @@ export default function InvestmentsPage() {
                 </div>
 
                 <div className="space-y-2">
-                  {projectForm.acomptesPrevus.map(line => (
-                    <div key={line.id} className={`grid grid-cols-1 md:grid-cols-12 gap-2 rounded-xl border p-2 transition-colors ${line.decaisse ? 'border-emerald-200 bg-emerald-50/40' : 'border-slate-200 bg-white'}`}>
+                  {projectForm.acomptesPrevus.map((line) => (
+                    <div
+                      key={line.id}
+                      className={`grid grid-cols-1 gap-2 rounded-xl border p-2 transition-colors md:grid-cols-12 ${line.decaisse ? 'border-emerald-200 bg-emerald-50/40' : 'border-slate-200 bg-white'}`}
+                    >
                       <input
                         value={line.libelle}
-                        onChange={e => updateInstallmentLine(line.id, 'libelle', e.target.value)}
-                        className="md:col-span-4 rounded-lg border border-slate-200 bg-white px-2.5 py-2 text-sm focus:border-cyan-500 focus:outline-none"
+                        onChange={(e) => updateInstallmentLine(line.id, 'libelle', e.target.value)}
+                        className="rounded-lg border border-slate-200 bg-white px-2.5 py-2 text-sm focus:border-cyan-500 focus:outline-none md:col-span-4"
                         placeholder="Ex: Acompte 1 — Fondations"
                       />
                       <input
@@ -969,21 +1236,30 @@ export default function InvestmentsPage() {
                         min="0"
                         step="1"
                         value={line.montant || ''}
-                        onChange={e => updateInstallmentLine(line.id, 'montant', parseFloat(e.target.value) || 0)}
-                        className="md:col-span-3 rounded-lg border border-slate-200 bg-white px-2.5 py-2 text-sm focus:border-cyan-500 focus:outline-none"
+                        onChange={(e) =>
+                          updateInstallmentLine(line.id, 'montant', parseFloat(e.target.value) || 0)
+                        }
+                        className="rounded-lg border border-slate-200 bg-white px-2.5 py-2 text-sm focus:border-cyan-500 focus:outline-none md:col-span-3"
                         placeholder="Montant"
                       />
                       <input
                         type="date"
                         value={line.datePrevisionnelle}
-                        onChange={e => updateInstallmentLine(line.id, 'datePrevisionnelle', e.target.value)}
-                        className="md:col-span-3 rounded-lg border border-slate-200 bg-white px-2.5 py-2 text-sm focus:border-cyan-500 focus:outline-none"
+                        onChange={(e) =>
+                          updateInstallmentLine(line.id, 'datePrevisionnelle', e.target.value)
+                        }
+                        className="rounded-lg border border-slate-200 bg-white px-2.5 py-2 text-sm focus:border-cyan-500 focus:outline-none md:col-span-3"
                       />
-                      <label className="md:col-span-1 flex items-center justify-center gap-1.5 cursor-pointer" title="Marquer comme décaissé">
+                      <label
+                        className="flex cursor-pointer items-center justify-center gap-1.5 md:col-span-1"
+                        title="Marquer comme décaissé"
+                      >
                         <input
                           type="checkbox"
                           checked={line.decaisse}
-                          onChange={e => updateInstallmentLine(line.id, 'decaisse', e.target.checked)}
+                          onChange={(e) =>
+                            updateInstallmentLine(line.id, 'decaisse', e.target.checked)
+                          }
                           className="h-4 w-4 accent-emerald-600"
                         />
                         {line.decaisse && <CheckCircle2 className="h-4 w-4 text-emerald-600" />}
@@ -991,7 +1267,7 @@ export default function InvestmentsPage() {
                       <button
                         type="button"
                         onClick={() => removeInstallmentLine(line.id)}
-                        className="md:col-span-1 flex items-center justify-center rounded-lg border border-rose-200 bg-rose-50 text-rose-600 hover:bg-rose-100 py-2"
+                        className="flex items-center justify-center rounded-lg border border-rose-200 bg-rose-50 py-2 text-rose-600 hover:bg-rose-100 md:col-span-1"
                       >
                         <X className="h-3.5 w-3.5" />
                       </button>
@@ -1000,10 +1276,12 @@ export default function InvestmentsPage() {
                 </div>
 
                 {/* Live summary */}
-                <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4 grid grid-cols-1 md:grid-cols-3 gap-3 text-sm">
+                <div className="grid grid-cols-1 gap-3 rounded-2xl border border-slate-200 bg-slate-50 p-4 text-sm md:grid-cols-3">
                   <div>
                     <p className="text-xs text-slate-500">Budget total</p>
-                    <p className="font-bold text-slate-900">{formatMoney(projectForm.budgetTotal || 0)}</p>
+                    <p className="font-bold text-slate-900">
+                      {formatMoney(projectForm.budgetTotal || 0)}
+                    </p>
                   </div>
                   <div>
                     <p className="text-xs text-slate-500">Décaissé (✓ cochés)</p>
@@ -1011,11 +1289,16 @@ export default function InvestmentsPage() {
                   </div>
                   <div>
                     <p className="text-xs text-slate-500">Reste à payer</p>
-                    <p className={`font-bold ${draftResteAPayer > 0 ? 'text-orange-700' : 'text-slate-500'}`}>{formatMoney(draftResteAPayer)}</p>
+                    <p
+                      className={`font-bold ${draftResteAPayer > 0 ? 'text-orange-700' : 'text-slate-500'}`}
+                    >
+                      {formatMoney(draftResteAPayer)}
+                    </p>
                   </div>
                 </div>
                 <p className="text-xs text-slate-400">
-                  ✓ Chaque acompte coché comme "Décaissé" sera automatiquement intégré dans le Dashboard Finance (CAPEX).
+                  ✓ Chaque acompte coché comme "Décaissé" sera automatiquement intégré dans le
+                  Dashboard Finance (CAPEX).
                 </p>
               </div>
             )}
@@ -1023,13 +1306,15 @@ export default function InvestmentsPage() {
             {/* ── Section C: Pièces Jointes ── */}
             {modalSection === 'C' && (
               <div className="space-y-4">
-                <h3 className="text-sm font-bold uppercase tracking-wider text-slate-500">Pièces jointes</h3>
+                <h3 className="text-sm font-bold uppercase tracking-wider text-slate-500">
+                  Pièces jointes
+                </h3>
 
                 {/* Upload zone */}
-                <div className="flex items-center gap-3 flex-wrap">
+                <div className="flex flex-wrap items-center gap-3">
                   <select
                     value={pendingDocType}
-                    onChange={e => setPendingDocType(e.target.value as InvestmentDocumentType)}
+                    onChange={(e) => setPendingDocType(e.target.value as InvestmentDocumentType)}
                     className="rounded-xl border border-slate-200 px-3 py-2 text-sm"
                   >
                     <option value="Contrat signé">Contrat signé</option>
@@ -1052,7 +1337,7 @@ export default function InvestmentsPage() {
                     multiple
                     accept="image/*,.pdf,.doc,.docx,.xls,.xlsx"
                     className="hidden"
-                    onChange={e => handleFilesPicked(e.target.files)}
+                    onChange={(e) => handleFilesPicked(e.target.files)}
                   />
                 </div>
 
@@ -1060,25 +1345,48 @@ export default function InvestmentsPage() {
                 <div className="space-y-3">
                   {editingProjectId && (
                     <div className="rounded-2xl border border-slate-200 bg-white p-4">
-                      <p className="text-xs font-semibold uppercase tracking-wide text-slate-500 mb-3">Documents déjà archivés</p>
+                      <p className="mb-3 text-xs font-semibold uppercase tracking-wide text-slate-500">
+                        Documents déjà archivés
+                      </p>
                       {editingProjectDocuments.length === 0 ? (
-                        <p className="text-sm text-slate-500">Aucun document enregistré sur ce projet.</p>
+                        <p className="text-sm text-slate-500">
+                          Aucun document enregistré sur ce projet.
+                        </p>
                       ) : (
                         <div className="space-y-2">
-                          {editingProjectDocuments.map(doc => (
+                          {editingProjectDocuments.map((doc) => (
                             <div key={doc.id} className={docItemClass}>
                               <FileText className="h-4 w-4 text-slate-500" />
-                              <button type="button" onClick={() => previewExistingDocument(doc)} className="min-w-0 flex-1 truncate text-left text-sm font-medium text-cyan-700 hover:underline">
+                              <button
+                                type="button"
+                                onClick={() => previewExistingDocument(doc)}
+                                className="min-w-0 flex-1 truncate text-left text-sm font-medium text-cyan-700 hover:underline"
+                              >
                                 {doc.fileName}
                               </button>
                               <div className="flex items-center gap-1">
-                                <button type="button" onClick={() => previewExistingDocument(doc)} className={docActionBtnClass} title="Aperçu">
+                                <button
+                                  type="button"
+                                  onClick={() => previewExistingDocument(doc)}
+                                  className={docActionBtnClass}
+                                  title="Aperçu"
+                                >
                                   <Eye className="h-4 w-4" />
                                 </button>
-                                <button type="button" onClick={() => downloadExistingDocument(doc)} className={docActionBtnClass} title="Télécharger">
+                                <button
+                                  type="button"
+                                  onClick={() => downloadExistingDocument(doc)}
+                                  className={docActionBtnClass}
+                                  title="Télécharger"
+                                >
                                   <Download className="h-4 w-4" />
                                 </button>
-                                <button type="button" onClick={() => removeExistingDocument(doc)} className={docDeleteBtnClass} title="Supprimer">
+                                <button
+                                  type="button"
+                                  onClick={() => removeExistingDocument(doc)}
+                                  className={docDeleteBtnClass}
+                                  title="Supprimer"
+                                >
                                   <Trash2 className="h-4 w-4" />
                                 </button>
                               </div>
@@ -1090,28 +1398,51 @@ export default function InvestmentsPage() {
                   )}
 
                   <div className="rounded-2xl border border-slate-200 bg-white p-4">
-                    <p className="text-xs font-semibold uppercase tracking-wide text-slate-500 mb-3">Fichiers en attente d'enregistrement</p>
+                    <p className="mb-3 text-xs font-semibold uppercase tracking-wide text-slate-500">
+                      Fichiers en attente d'enregistrement
+                    </p>
                     {pendingDocs.length === 0 ? (
                       <div className="rounded-xl border border-dashed border-slate-200 p-6 text-center text-sm text-slate-500">
                         Aucun fichier sélectionné.
                       </div>
                     ) : (
                       <div className="space-y-2">
-                        {pendingDocs.map(doc => (
+                        {pendingDocs.map((doc) => (
                           <div key={doc.id} className={docItemClass}>
                             <FileText className="h-4 w-4 text-slate-500" />
-                            <button type="button" onClick={() => previewPendingDocument(doc)} className="min-w-0 flex-1 truncate text-left text-sm font-medium text-cyan-700 hover:underline">
+                            <button
+                              type="button"
+                              onClick={() => previewPendingDocument(doc)}
+                              className="min-w-0 flex-1 truncate text-left text-sm font-medium text-cyan-700 hover:underline"
+                            >
                               {doc.file.name}
                             </button>
-                            <span className="hidden md:inline text-xs text-slate-500">{doc.type} · {(doc.file.size / 1024).toFixed(0)} Ko</span>
+                            <span className="hidden text-xs text-slate-500 md:inline">
+                              {doc.type} · {(doc.file.size / 1024).toFixed(0)} Ko
+                            </span>
                             <div className="flex items-center gap-1">
-                              <button type="button" onClick={() => previewPendingDocument(doc)} className={docActionBtnClass} title="Aperçu">
+                              <button
+                                type="button"
+                                onClick={() => previewPendingDocument(doc)}
+                                className={docActionBtnClass}
+                                title="Aperçu"
+                              >
                                 <Eye className="h-4 w-4" />
                               </button>
-                              <button type="button" onClick={() => downloadPendingDoc(doc)} className={docActionBtnClass} title="Télécharger">
+                              <button
+                                type="button"
+                                onClick={() => downloadPendingDoc(doc)}
+                                className={docActionBtnClass}
+                                title="Télécharger"
+                              >
                                 <Download className="h-4 w-4" />
                               </button>
-                              <button type="button" onClick={() => removePendingDoc(doc.id)} className={docDeleteBtnClass} title="Supprimer">
+                              <button
+                                type="button"
+                                onClick={() => removePendingDoc(doc.id)}
+                                className={docDeleteBtnClass}
+                                title="Supprimer"
+                              >
                                 <Trash2 className="h-4 w-4" />
                               </button>
                             </div>
@@ -1122,7 +1453,8 @@ export default function InvestmentsPage() {
                   </div>
                 </div>
                 <p className="text-xs text-slate-400">
-                  Formats acceptés : images (JPG, PNG…), PDF, Word, Excel. Les fichiers sont stockés localement.
+                  Formats acceptés : images (JPG, PNG…), PDF, Word, Excel. Les fichiers sont stockés
+                  localement.
                 </p>
               </div>
             )}
@@ -1134,7 +1466,7 @@ export default function InvestmentsPage() {
               {modalSection !== 'A' && (
                 <button
                   type="button"
-                  onClick={() => setModalSection(prev => prev === 'C' ? 'B' : 'A')}
+                  onClick={() => setModalSection((prev) => (prev === 'C' ? 'B' : 'A'))}
                   className="inline-flex items-center gap-1.5 rounded-xl border border-slate-200 px-3 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50"
                 >
                   <ChevronLeft className="h-4 w-4" />
@@ -1144,7 +1476,7 @@ export default function InvestmentsPage() {
               {modalSection !== 'C' && (
                 <button
                   type="button"
-                  onClick={() => setModalSection(prev => prev === 'A' ? 'B' : 'C')}
+                  onClick={() => setModalSection((prev) => (prev === 'A' ? 'B' : 'C'))}
                   className="inline-flex items-center gap-1.5 rounded-xl border border-slate-200 px-3 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50"
                 >
                   Suivant
@@ -1153,10 +1485,17 @@ export default function InvestmentsPage() {
               )}
             </div>
             <div className="flex items-center gap-3">
-              <button type="button" onClick={closeProjectModal} className="rounded-xl border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-700">
+              <button
+                type="button"
+                onClick={closeProjectModal}
+                className="rounded-xl border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-700"
+              >
                 Annuler
               </button>
-              <button type="submit" className="rounded-xl bg-slate-900 px-4 py-2 text-sm font-semibold text-white">
+              <button
+                type="submit"
+                className="rounded-xl bg-slate-900 px-4 py-2 text-sm font-semibold text-white"
+              >
                 {editingProjectId ? 'Enregistrer les modifications' : 'Créer le projet'}
               </button>
             </div>
@@ -1173,22 +1512,30 @@ export default function InvestmentsPage() {
       >
         {previewProject && (
           <div className="space-y-5">
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
+            <div className="grid grid-cols-1 gap-3 md:grid-cols-4">
               <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
                 <p className="text-xs uppercase tracking-wide text-slate-500">Budget total</p>
-                <p className="mt-1 text-lg font-semibold text-slate-900">{formatMoney(previewProject.budgetTotal)}</p>
+                <p className="mt-1 text-lg font-semibold text-slate-900">
+                  {formatMoney(previewProject.budgetTotal)}
+                </p>
               </div>
               <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
                 <p className="text-xs uppercase tracking-wide text-slate-500">Validé</p>
-                <p className="mt-1 text-lg font-semibold text-slate-900">{formatMoney(getValidatedAmount(previewProject.id))}</p>
+                <p className="mt-1 text-lg font-semibold text-slate-900">
+                  {formatMoney(getValidatedAmount(previewProject.id))}
+                </p>
               </div>
               <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
                 <p className="text-xs uppercase tracking-wide text-slate-500">Décaissé réel</p>
-                <p className="mt-1 text-lg font-semibold text-emerald-700">{formatMoney(getDecaisseReel(previewProject))}</p>
+                <p className="mt-1 text-lg font-semibold text-emerald-700">
+                  {formatMoney(getDecaisseReel(previewProject))}
+                </p>
               </div>
               <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
                 <p className="text-xs uppercase tracking-wide text-slate-500">Reste à payer</p>
-                <p className="mt-1 text-lg font-semibold text-slate-900">{formatMoney(getRemainingToPay(previewProject))}</p>
+                <p className="mt-1 text-lg font-semibold text-slate-900">
+                  {formatMoney(getRemainingToPay(previewProject))}
+                </p>
               </div>
             </div>
 
@@ -1205,13 +1552,17 @@ export default function InvestmentsPage() {
                     </tr>
                   </thead>
                   <tbody>
-                    {previewProject.acomptesPrevus.map(line => (
+                    {previewProject.acomptesPrevus.map((line) => (
                       <tr key={line.id} className="border-b border-slate-100">
-                        <td className="px-3 py-3 text-slate-900 font-medium">{line.libelle}</td>
+                        <td className="px-3 py-3 font-medium text-slate-900">{line.libelle}</td>
                         <td className="px-3 py-3 text-slate-700">{formatMoney(line.montant)}</td>
-                        <td className="px-3 py-3 text-slate-700">{new Date(line.datePrevisionnelle).toLocaleDateString('fr-FR')}</td>
+                        <td className="px-3 py-3 text-slate-700">
+                          {new Date(line.datePrevisionnelle).toLocaleDateString('fr-FR')}
+                        </td>
                         <td className="px-3 py-3">
-                          <span className={`inline-flex rounded-full border px-2.5 py-1 text-xs font-semibold ${line.decaisse ? 'bg-emerald-100 text-emerald-700 border-emerald-200' : 'bg-blue-100 text-blue-700 border-blue-200'}`}>
+                          <span
+                            className={`inline-flex rounded-full border px-2.5 py-1 text-xs font-semibold ${line.decaisse ? 'border-emerald-200 bg-emerald-100 text-emerald-700' : 'border-blue-200 bg-blue-100 text-blue-700'}`}
+                          >
                             {line.decaisse ? 'Décaissé ✓' : 'Prévu'}
                           </span>
                         </td>
@@ -1237,16 +1588,32 @@ export default function InvestmentsPage() {
                   </thead>
                   <tbody>
                     {previewProjectExpenses.length === 0 ? (
-                      <tr><td colSpan={5} className="px-3 py-6 text-center text-slate-500">Aucune facture sur ce projet.</td></tr>
+                      <tr>
+                        <td colSpan={5} className="px-3 py-6 text-center text-slate-500">
+                          Aucune facture sur ce projet.
+                        </td>
+                      </tr>
                     ) : (
-                      previewProjectExpenses.map(expense => (
+                      previewProjectExpenses.map((expense) => (
                         <tr key={expense.id} className="border-b border-slate-100">
-                          <td className="px-3 py-3 text-slate-900 font-medium">{expense.factureFournisseur}</td>
-                          <td className="px-3 py-3 text-slate-700">{expense.acompteId ? previewInstallmentMap.get(expense.acompteId)?.libelle || '-' : '-'}</td>
-                          <td className="px-3 py-3 text-slate-700">{formatMoney(expense.montant)}</td>
-                          <td className="px-3 py-3 text-slate-700">{new Date(expense.dateFacture).toLocaleDateString('fr-FR')}</td>
+                          <td className="px-3 py-3 font-medium text-slate-900">
+                            {expense.factureFournisseur}
+                          </td>
+                          <td className="px-3 py-3 text-slate-700">
+                            {expense.acompteId
+                              ? previewInstallmentMap.get(expense.acompteId)?.libelle || '-'
+                              : '-'}
+                          </td>
+                          <td className="px-3 py-3 text-slate-700">
+                            {formatMoney(expense.montant)}
+                          </td>
+                          <td className="px-3 py-3 text-slate-700">
+                            {new Date(expense.dateFacture).toLocaleDateString('fr-FR')}
+                          </td>
                           <td className="px-3 py-3">
-                            <span className={`inline-flex rounded-full border px-2.5 py-1 text-xs font-semibold ${expense.statutPaiement === 'Paye' ? badgeClass('green') : expense.statutPaiement === 'Bon a payer' ? badgeClass('blue') : badgeClass('orange')}`}>
+                            <span
+                              className={`inline-flex rounded-full border px-2.5 py-1 text-xs font-semibold ${expense.statutPaiement === 'Paye' ? badgeClass('green') : expense.statutPaiement === 'Bon a payer' ? badgeClass('blue') : badgeClass('orange')}`}
+                            >
                               {expense.statutPaiement}
                             </span>
                           </td>
@@ -1266,20 +1633,39 @@ export default function InvestmentsPage() {
                 </div>
               ) : (
                 <div className="mt-3 space-y-2">
-                  {previewProjectDocuments.map(doc => (
+                  {previewProjectDocuments.map((doc) => (
                     <div key={doc.id} className={docItemClass}>
                       <FileText className="h-4 w-4 text-slate-500" />
-                      <button type="button" onClick={() => previewExistingDocument(doc)} className="min-w-0 flex-1 truncate text-left text-sm font-medium text-cyan-700 hover:underline">
+                      <button
+                        type="button"
+                        onClick={() => previewExistingDocument(doc)}
+                        className="min-w-0 flex-1 truncate text-left text-sm font-medium text-cyan-700 hover:underline"
+                      >
                         {doc.fileName}
                       </button>
                       <div className="flex items-center gap-1">
-                        <button type="button" onClick={() => previewExistingDocument(doc)} className={docActionBtnClass} title="Aperçu">
+                        <button
+                          type="button"
+                          onClick={() => previewExistingDocument(doc)}
+                          className={docActionBtnClass}
+                          title="Aperçu"
+                        >
                           <Eye className="h-4 w-4" />
                         </button>
-                        <button type="button" onClick={() => downloadExistingDocument(doc)} className={docActionBtnClass} title="Télécharger">
+                        <button
+                          type="button"
+                          onClick={() => downloadExistingDocument(doc)}
+                          className={docActionBtnClass}
+                          title="Télécharger"
+                        >
                           <Download className="h-4 w-4" />
                         </button>
-                        <button type="button" onClick={() => removeExistingDocument(doc)} className={docDeleteBtnClass} title="Supprimer">
+                        <button
+                          type="button"
+                          onClick={() => removeExistingDocument(doc)}
+                          className={docDeleteBtnClass}
+                          title="Supprimer"
+                        >
                           <Trash2 className="h-4 w-4" />
                         </button>
                       </div>
@@ -1299,12 +1685,20 @@ export default function InvestmentsPage() {
         size="full"
       >
         {documentPreview && (
-          <div className="h-[80vh] w-full rounded-xl border border-slate-200 bg-white overflow-hidden">
+          <div className="h-[80vh] w-full overflow-hidden rounded-xl border border-slate-200 bg-white">
             {documentPreview.isPdf ? (
-              <iframe src={documentPreview.url} title={documentPreview.title} className="h-full w-full" />
+              <iframe
+                src={documentPreview.url}
+                title={documentPreview.title}
+                className="h-full w-full"
+              />
             ) : (
               <div className="flex h-full w-full items-center justify-center bg-slate-50 p-4">
-                <img src={documentPreview.url} alt={documentPreview.title} className="max-h-full max-w-full object-contain" />
+                <img
+                  src={documentPreview.url}
+                  alt={documentPreview.title}
+                  className="max-h-full max-w-full object-contain"
+                />
               </div>
             )}
           </div>

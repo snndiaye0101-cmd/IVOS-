@@ -21,7 +21,7 @@ export class WebRTCService {
     this.peerConnection = new RTCPeerConnection();
     this.onRemoteStream = onRemoteStream;
     if (this.localStream) {
-      this.localStream.getTracks().forEach(track => {
+      this.localStream.getTracks().forEach((track) => {
         this.peerConnection!.addTrack(track, this.localStream!);
       });
     }
@@ -30,7 +30,7 @@ export class WebRTCService {
         this.remoteStream = new MediaStream();
         this.onRemoteStream?.(this.remoteStream);
       }
-      event.streams[0].getTracks().forEach(track => {
+      event.streams[0].getTracks().forEach((track) => {
         this.remoteStream!.addTrack(track);
       });
     };
@@ -45,7 +45,7 @@ export class WebRTCService {
   }
   close() {
     this.peerConnection?.close();
-    this.localStream?.getTracks().forEach(t => t.stop());
+    this.localStream?.getTracks().forEach((t) => t.stop());
     this.remoteStream = null;
     this.peerConnection = null;
     this.localStream = null;

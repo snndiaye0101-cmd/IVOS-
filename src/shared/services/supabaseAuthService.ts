@@ -4,7 +4,7 @@
  * ============================================
  * Modern, secure authentication using Supabase Auth
  * Replaces the legacy localStorage-based authStore
- * 
+ *
  * Features:
  * - Supabase Auth (built-in PostgreSQL auth)
  * - Session persistence
@@ -13,37 +13,37 @@
  * - Audit trail for all auth events
  */
 
-import { supabase } from './supabaseClient'
-import type { User as SupabaseUser, Session } from '@supabase/supabase-js'
+import { supabase } from './supabaseClient';
+import type { User as SupabaseUser, Session } from '@supabase/supabase-js';
 
 export interface AuthUser {
-  id: string
-  email: string
-  fullName: string
-  role: 'super_admin' | 'country_manager' | 'dispatcher' | 'driver' | 'client' | 'supervisor'
-  subsidiaryId: string
-  status: 'approved' | 'pending' | 'rejected'
-  siteAccessBlocked: boolean
-  systemAccessBlocked: boolean
-  createdAt: string
-  lastLogin?: string
+  id: string;
+  email: string;
+  fullName: string;
+  role: 'super_admin' | 'country_manager' | 'dispatcher' | 'driver' | 'client' | 'supervisor';
+  subsidiaryId: string;
+  status: 'approved' | 'pending' | 'rejected';
+  siteAccessBlocked: boolean;
+  systemAccessBlocked: boolean;
+  createdAt: string;
+  lastLogin?: string;
 }
 
 export interface AuthError {
-  code: string
-  message: string
+  code: string;
+  message: string;
 }
 
 export interface AuthResponse<T> {
-  data?: T
-  error?: AuthError
+  data?: T;
+  error?: AuthError;
 }
 
 /**
  * Sign up a new user with email and password
- * 
+ *
  * ⚠️ Password is hashed server-side by Supabase
- * 
+ *
  * @param email User email
  * @param password Minimum 6 characters
  * @param fullName User full name
@@ -66,16 +66,16 @@ export async function signUp(
           subsidiary_id: subsidiaryId,
         },
       },
-    })
+    });
 
     if (error) {
-      console.error('Signup error:', error)
+      console.error('Signup error:', error);
       return {
         error: {
           code: error.status?.toString() || 'unknown',
           message: error.message,
         },
-      }
+      };
     }
 
     if (!data.user) {
@@ -84,7 +84,7 @@ export async function signUp(
           code: 'unknown_error',
           message: 'User creation failed',
         },
-      }
+      };
     }
 
     // Create profile in app_users table (with RLS)
@@ -100,16 +100,16 @@ export async function signUp(
         system_access_blocked: false,
         created_at: new Date().toISOString(),
       },
-    ])
+    ]);
 
     if (profileError) {
-      console.error('Profile creation error:', profileError)
+      console.error('Profile creation error:', profileError);
       return {
         error: {
           code: profileError.code || 'profile_error',
           message: profileError.message,
         },
-      }
+      };
     }
 
     return {
@@ -124,21 +124,21 @@ export async function signUp(
         systemAccessBlocked: false,
         createdAt: new Date().toISOString(),
       },
-    }
+    };
   } catch (error) {
-    console.error('Signup exception:', error)
+    console.error('Signup exception:', error);
     return {
       error: {
         code: 'exception',
         message: error instanceof Error ? error.message : 'Unknown error',
       },
-    }
+    };
   }
 }
 
 /**
  * Sign in with email and password
- * 
+ *
  * @param email User email
  * @param password User password
  * @returns Session data
@@ -151,16 +151,16 @@ export async function signIn(
     const { data, error } = await supabase.auth.signInWithPassword({
       email,
       password,
-    })
+    });
 
     if (error) {
-      console.error('Sign in error:', error)
+      console.error('Sign in error:', error);
       return {
         error: {
           code: error.status?.toString() || 'invalid_credentials',
           message: error.message || 'Invalid email or password',
         },
-      }
+      };
     }
 
     if (!data.user || !data.session) {
@@ -169,7 +169,7 @@ export async function signIn(
           code: 'session_error',
           message: 'Failed to create session',
         },
-      }
+      };
     }
 
     // Fetch user profile from app_users table
@@ -177,23 +177,23 @@ export async function signIn(
       .from('app_users')
       .select('*')
       .eq('id', data.user.id)
-      .single()
+      .single();
 
     if (profileError) {
-      console.error('Profile fetch error:', profileError)
+      console.error('Profile fetch error:', profileError);
       return {
         error: {
           code: 'profile_error',
           message: 'Failed to load user profile',
         },
-      }
+      };
     }
 
     // Log authentication event
-    await logAuthEvent('login', data.user.id, email)
+    await logAuthEvent('login', data.user.id, email);
 
     // Remove legacy auth snapshot once Supabase Auth is working
-    clearLegacyAuth()
+    clearLegacyAuth();
 
     return {
       data: {
@@ -211,15 +211,15 @@ export async function signIn(
         },
         session: data.session,
       },
-    }
+    };
   } catch (error) {
-    console.error('Sign in exception:', error)
+    console.error('Sign in exception:', error);
     return {
       error: {
         code: 'exception',
         message: error instanceof Error ? error.message : 'Unknown error',
       },
-    }
+    };
   }
 }
 
@@ -229,40 +229,40 @@ export async function signIn(
  */
 export async function signOut(): Promise<AuthResponse<null>> {
   try {
-    const currentUser = await getCurrentUser()
-    const { error } = await supabase.auth.signOut()
+    const currentUser = await getCurrentUser();
+    const { error } = await supabase.auth.signOut();
 
     if (error) {
-      console.error('Sign out error:', error)
+      console.error('Sign out error:', error);
       return {
         error: {
           code: error.status?.toString() || 'unknown',
           message: error.message,
         },
-      }
+      };
     }
 
     // Log logout event after the session is ended
     if (currentUser) {
-      await logAuthEvent('logout', currentUser.id, currentUser.email)
+      await logAuthEvent('logout', currentUser.id, currentUser.email);
     }
 
-    clearLegacyAuth()
-    return { data: null }
+    clearLegacyAuth();
+    return { data: null };
   } catch (error) {
-    console.error('Sign out exception:', error)
+    console.error('Sign out exception:', error);
     return {
       error: {
         code: 'exception',
         message: error instanceof Error ? error.message : 'Unknown error',
       },
-    }
+    };
   }
 }
 
 /**
  * Reset password via email link
- * 
+ *
  * @param email User email
  * @returns Success response
  */
@@ -270,36 +270,36 @@ export async function resetPassword(email: string): Promise<AuthResponse<null>> 
   try {
     const { error } = await supabase.auth.resetPasswordForEmail(email, {
       redirectTo: `${window.location.origin}/auth/reset-password`,
-    })
+    });
 
     if (error) {
-      console.error('Password reset error:', error)
+      console.error('Password reset error:', error);
       return {
         error: {
           code: error.status?.toString() || 'unknown',
           message: error.message,
         },
-      }
+      };
     }
 
     // Log auth event
-    await logAuthEvent('password_reset_requested', 'system', email)
+    await logAuthEvent('password_reset_requested', 'system', email);
 
-    return { data: null }
+    return { data: null };
   } catch (error) {
-    console.error('Password reset exception:', error)
+    console.error('Password reset exception:', error);
     return {
       error: {
         code: 'exception',
         message: error instanceof Error ? error.message : 'Unknown error',
       },
-    }
+    };
   }
 }
 
 /**
  * Update password for authenticated user
- * 
+ *
  * @param newPassword New password (min 6 characters)
  * @returns Success response
  */
@@ -307,33 +307,33 @@ export async function updatePassword(newPassword: string): Promise<AuthResponse<
   try {
     const { error } = await supabase.auth.updateUser({
       password: newPassword,
-    })
+    });
 
     if (error) {
-      console.error('Update password error:', error)
+      console.error('Update password error:', error);
       return {
         error: {
           code: error.status?.toString() || 'unknown',
           message: error.message,
         },
-      }
+      };
     }
 
     // Log auth event
-    const user = await getCurrentUser()
+    const user = await getCurrentUser();
     if (user) {
-      await logAuthEvent('password_updated', user.id, user.email)
+      await logAuthEvent('password_updated', user.id, user.email);
     }
 
-    return { data: null }
+    return { data: null };
   } catch (error) {
-    console.error('Update password exception:', error)
+    console.error('Update password exception:', error);
     return {
       error: {
         code: 'exception',
         message: error instanceof Error ? error.message : 'Unknown error',
       },
-    }
+    };
   }
 }
 
@@ -346,10 +346,10 @@ export async function getCurrentUser(): Promise<AuthUser | null> {
     const {
       data: { user },
       error,
-    } = await supabase.auth.getUser()
+    } = await supabase.auth.getUser();
 
     if (error || !user) {
-      return null
+      return null;
     }
 
     // Fetch user profile from app_users table
@@ -357,10 +357,10 @@ export async function getCurrentUser(): Promise<AuthUser | null> {
       .from('app_users')
       .select('*')
       .eq('id', user.id)
-      .single()
+      .single();
 
     if (!profile) {
-      return null
+      return null;
     }
 
     return {
@@ -374,10 +374,10 @@ export async function getCurrentUser(): Promise<AuthUser | null> {
       systemAccessBlocked: profile.system_access_blocked,
       createdAt: profile.created_at,
       lastLogin: user.last_sign_in_at,
-    }
+    };
   } catch (error) {
-    console.error('Get current user error:', error)
-    return null
+    console.error('Get current user error:', error);
+    return null;
   }
 }
 
@@ -388,17 +388,17 @@ export async function getSession(): Promise<Session | null> {
   try {
     const {
       data: { session },
-    } = await supabase.auth.getSession()
-    return session
+    } = await supabase.auth.getSession();
+    return session;
   } catch (error) {
-    console.error('Get session error:', error)
-    return null
+    console.error('Get session error:', error);
+    return null;
   }
 }
 
 /**
  * Listen for auth state changes
- * 
+ *
  * @param callback Function to call on auth state change
  * @returns Unsubscribe function
  */
@@ -407,21 +407,21 @@ export function onAuthStateChange(callback: (user: AuthUser | null) => void) {
     data: { subscription },
   } = supabase.auth.onAuthStateChange(async (event, session) => {
     if (session?.user) {
-      const user = await getCurrentUser()
-      callback(user)
+      const user = await getCurrentUser();
+      callback(user);
     } else {
-      callback(null)
+      callback(null);
     }
-  })
+  });
 
   return () => {
-    subscription?.unsubscribe()
-  }
+    subscription?.unsubscribe();
+  };
 }
 
 /**
  * Log authentication event for audit trail
- * 
+ *
  * @private
  */
 async function logAuthEvent(
@@ -439,10 +439,10 @@ async function logAuthEvent(
         user_agent: navigator.userAgent,
         created_at: new Date().toISOString(),
       },
-    ])
+    ]);
   } catch (error) {
     // Silent fail - don't break auth flow on audit failure
-    console.warn('Failed to log auth event:', error)
+    console.warn('Failed to log auth event:', error);
   }
 }
 
@@ -452,10 +452,10 @@ async function logAuthEvent(
  */
 export function isLegacyAuthUser(): boolean {
   try {
-    const legacyAuth = localStorage.getItem('ivos_auth_snapshot_v1')
-    return !!legacyAuth
+    const legacyAuth = localStorage.getItem('ivos_auth_snapshot_v1');
+    return !!legacyAuth;
   } catch {
-    return false
+    return false;
   }
 }
 
@@ -465,9 +465,9 @@ export function isLegacyAuthUser(): boolean {
  */
 export function clearLegacyAuth() {
   try {
-    localStorage.removeItem('ivos_auth_snapshot_v1')
-    console.log('Legacy auth data cleared')
+    localStorage.removeItem('ivos_auth_snapshot_v1');
+    console.log('Legacy auth data cleared');
   } catch (error) {
-    console.warn('Failed to clear legacy auth:', error)
+    console.warn('Failed to clear legacy auth:', error);
   }
 }

@@ -12,17 +12,17 @@ Le module **InvoicesPage** est une page de gestion complète des factures intég
 
 Le tableau affiche toutes les factures avec les colonnes suivantes :
 
-| Colonne | Type | Description |
-|---------|------|-------------|
-| **N° Facture** | String | Format: FAC-2026-XXXX (auto-généré) |
-| **Référence BSD** | String (cliquable) | Numéro du BSD lié (BSD-YYYYMM-XXXX) |
-| **Date** | Date | Date d'émission de la facture |
-| **Client** | String | Nom du client + SIRET optionnel |
-| **Montant HT** | Number | Montant Hors Taxe |
-| **Montant TTC** | Number | Montant Toutes Taxes Comprises |
-| **Statut de Paiement** | Badge | Non payé / Payé / En attente / Partiellement payé |
-| **Mode de Règlement** | String | Virement / Chèque / Espèces / Carte / Prélèvement |
-| **Actions** | Boutons | Télécharger PDF, Marquer payé, Supprimer |
+| Colonne                | Type               | Description                                       |
+| ---------------------- | ------------------ | ------------------------------------------------- |
+| **N° Facture**         | String             | Format: FAC-2026-XXXX (auto-généré)               |
+| **Référence BSD**      | String (cliquable) | Numéro du BSD lié (BSD-YYYYMM-XXXX)               |
+| **Date**               | Date               | Date d'émission de la facture                     |
+| **Client**             | String             | Nom du client + SIRET optionnel                   |
+| **Montant HT**         | Number             | Montant Hors Taxe                                 |
+| **Montant TTC**        | Number             | Montant Toutes Taxes Comprises                    |
+| **Statut de Paiement** | Badge              | Non payé / Payé / En attente / Partiellement payé |
+| **Mode de Règlement**  | String             | Virement / Chèque / Espèces / Carte / Prélèvement |
+| **Actions**            | Boutons            | Télécharger PDF, Marquer payé, Supprimer          |
 
 ---
 
@@ -51,11 +51,13 @@ const invoice = generateInvoiceFromBSD(
 ### 3. 🔍 Filtrage & Recherche
 
 #### Barre de Recherche Globale
+
 - Recherche par **numéro de facture** (FAC-2026-XXXX)
 - Recherche par **numéro de BSD** (BSD-202604-XXXX)
 - Recherche par **nom du client**
 
 #### Filtres Avancés
+
 - **Statut de paiement** : Payé / Non payé / En attente / Partiellement payé
 - **Mode de règlement** : Virement / Chèque / Espèces / Carte / Prélèvement / Autre
 - **Plage de dates** : Date début - Date fin
@@ -67,12 +69,12 @@ const invoice = generateInvoiceFromBSD(
 
 Affichage de 4 cartes de synthèse :
 
-| Carte | Métrique | Détails |
-|-------|----------|---------|
-| **Total Factures** | Nombre + Montant TTC | Toutes les factures émises |
-| **Payées** | Nombre + Montant TTC | Factures avec statut "Payé" |
-| **En Attente** | Nombre + Montant TTC | Factures en cours de validation |
-| **Non Payées** | Nombre + Montant TTC | Factures impayées |
+| Carte              | Métrique             | Détails                         |
+| ------------------ | -------------------- | ------------------------------- |
+| **Total Factures** | Nombre + Montant TTC | Toutes les factures émises      |
+| **Payées**         | Nombre + Montant TTC | Factures avec statut "Payé"     |
+| **En Attente**     | Nombre + Montant TTC | Factures en cours de validation |
+| **Non Payées**     | Nombre + Montant TTC | Factures impayées               |
 
 ---
 
@@ -102,11 +104,11 @@ generateInvoicePDF(invoiceId);
 
 Barre fixée en bas d'écran affichant en temps réel :
 
-| Métrique | Description |
-|----------|-------------|
-| **Total TTC** | Somme de toutes les factures |
-| **En Attente** | Montant en attente de validation |
-| **Payées** | Montant total des factures payées |
+| Métrique       | Description                       |
+| -------------- | --------------------------------- |
+| **Total TTC**  | Somme de toutes les factures      |
+| **En Attente** | Montant en attente de validation  |
+| **Payées**     | Montant total des factures payées |
 
 **Design** : Dégradé indigo-blue avec texte blanc, toujours visible lors du défilement
 
@@ -136,24 +138,24 @@ src/features/finances/
 
 #### Fonctions de Gestion
 
-| Fonction | Description | Paramètres |
-|----------|-------------|------------|
-| `getAllInvoices()` | Récupère toutes les factures | - |
-| `getInvoiceById(id)` | Récupère une facture par ID | `id: string` |
-| `searchInvoices(filters)` | Recherche avec filtres | `filters: InvoiceFilters` |
-| `createInvoice(data, userId)` | Crée une nouvelle facture | `data: NewInvoiceData, userId: string` |
-| `updateInvoice(id, updates, userId)` | Met à jour une facture | `id: string, updates: Partial<Invoice>, userId: string` |
-| `markInvoiceAsPaid(id, mode, userId)` | Marque comme payée | `id: string, mode: PaymentMethod, userId: string` |
-| `deleteInvoice(id)` | Supprime une facture | `id: string` |
-| `getInvoiceStats()` | Calcule les statistiques | - |
+| Fonction                              | Description                  | Paramètres                                              |
+| ------------------------------------- | ---------------------------- | ------------------------------------------------------- |
+| `getAllInvoices()`                    | Récupère toutes les factures | -                                                       |
+| `getInvoiceById(id)`                  | Récupère une facture par ID  | `id: string`                                            |
+| `searchInvoices(filters)`             | Recherche avec filtres       | `filters: InvoiceFilters`                               |
+| `createInvoice(data, userId)`         | Crée une nouvelle facture    | `data: NewInvoiceData, userId: string`                  |
+| `updateInvoice(id, updates, userId)`  | Met à jour une facture       | `id: string, updates: Partial<Invoice>, userId: string` |
+| `markInvoiceAsPaid(id, mode, userId)` | Marque comme payée           | `id: string, mode: PaymentMethod, userId: string`       |
+| `deleteInvoice(id)`                   | Supprime une facture         | `id: string`                                            |
+| `getInvoiceStats()`                   | Calcule les statistiques     | -                                                       |
 
 #### Fonctions Automatisation
 
-| Fonction | Description | Usage |
-|----------|-------------|-------|
+| Fonction                                                       | Description                                       | Usage                       |
+| -------------------------------------------------------------- | ------------------------------------------------- | --------------------------- |
 | `generateInvoiceFromBSD(bsdId, prixUnitaire, tauxTVA, userId)` | Génère auto une facture depuis un BSD (Section 9) | Appelé après validation BSD |
-| `generateInvoicePDF(invoiceId)` | Génère et télécharge le PDF de facture | Bouton "Télécharger PDF" |
-| `generateInvoiceNumber()` | Génère numéro unique FAC-2026-XXXX | Auto (interne) |
+| `generateInvoicePDF(invoiceId)`                                | Génère et télécharge le PDF de facture            | Bouton "Télécharger PDF"    |
+| `generateInvoiceNumber()`                                      | Génère numéro unique FAC-2026-XXXX                | Auto (interne)              |
 
 ---
 
@@ -165,16 +167,19 @@ src/features/finances/
 // Dans la console navigateur ou via l'interface BSD
 import { createBSD } from '@/features/exploitation/services/bsdService';
 
-const bsd = createBSD({
-  operationId: 'OP-2026-0001',
-  client: 'Société ABC',
-  typeDechet: 'Déchets dangereux',
-  codeDechet: '13 05 02*',
-  quantite: 5.5,
-  unite: 'tonne',
-  vehicule: 'VH-001',
-  chauffeur: 'Jean Dupont'
-}, 'user-id-123');
+const bsd = createBSD(
+  {
+    operationId: 'OP-2026-0001',
+    client: 'Société ABC',
+    typeDechet: 'Déchets dangereux',
+    codeDechet: '13 05 02*',
+    quantite: 5.5,
+    unite: 'tonne',
+    vehicule: 'VH-001',
+    chauffeur: 'Jean Dupont',
+  },
+  'user-id-123'
+);
 
 // Marquer Section 9 comme complète
 bsd.section9Complete = true;
@@ -250,13 +255,13 @@ const sampleInvoices = [
         quantite: 5.5,
         unite: 'tonne',
         prixUnitaireHT: 50000,
-        totalHT: 275000
-      }
+        totalHT: 275000,
+      },
     ],
     notes: 'Facture générée automatiquement suite à la validation du BSD BSD-202604-0001',
     createdAt: '2026-04-15T10:00:00Z',
     updatedAt: '2026-04-15T10:00:00Z',
-    createdBy: 'user-123'
+    createdBy: 'user-123',
   },
   {
     id: 'inv-002',
@@ -282,14 +287,14 @@ const sampleInvoices = [
         quantite: 3,
         unite: 'tonne',
         prixUnitaireHT: 60000,
-        totalHT: 180000
-      }
+        totalHT: 180000,
+      },
     ],
     notes: 'Paiement reçu le 20/04/2026',
     createdAt: '2026-04-18T14:30:00Z',
     updatedAt: '2026-04-20T09:00:00Z',
-    createdBy: 'user-123'
-  }
+    createdBy: 'user-123',
+  },
 ];
 
 localStorage.setItem('ivos_invoices_v1', JSON.stringify(sampleInvoices));
@@ -301,10 +306,12 @@ console.log('✅ Données de test chargées !');
 ## 🎨 Design & UX
 
 ### Fragments React
+
 - Utilisation de `<>...</>` pour éviter les `<div>` inutiles
 - Optimisation du rendu DOM
 
 ### Palette de Couleurs
+
 - **Indigo** : Boutons principaux, en-têtes
 - **Vert** : Factures payées, montants positifs
 - **Rouge** : Factures non payées, alertes
@@ -312,6 +319,7 @@ console.log('✅ Données de test chargées !');
 - **Bleu** : Liens BSD cliquables
 
 ### Responsive
+
 - Tableau full-width avec scroll horizontal sur mobile
 - Cartes statistiques en grille responsive (1 col mobile → 4 cols desktop)
 - Barre de synthèse fixe adaptée mobile
@@ -320,17 +328,18 @@ console.log('✅ Données de test chargées !');
 
 ## 🔗 Routes
 
-| Route | Composant | Description |
-|-------|-----------|-------------|
-| `/billing` | `InvoicesPage` | Page de gestion des factures ✨ NOUVEAU |
-| `/finances` | `FinancePage` | Dashboard Finance (vue d'ensemble) |
-| `/unite-facturation` | `UniteFacturation` | Configuration unités de facturation |
+| Route                | Composant          | Description                             |
+| -------------------- | ------------------ | --------------------------------------- |
+| `/billing`           | `InvoicesPage`     | Page de gestion des factures ✨ NOUVEAU |
+| `/finances`          | `FinancePage`      | Dashboard Finance (vue d'ensemble)      |
+| `/unite-facturation` | `UniteFacturation` | Configuration unités de facturation     |
 
 ---
 
 ## 🚀 Prochaines Étapes
 
 ### Phase 1 (Actuel) ✅
+
 - [x] Créer types avec référence BSD
 - [x] Créer service avec génération auto
 - [x] Créer page InvoicesPage avec tableau
@@ -338,6 +347,7 @@ console.log('✅ Données de test chargées !');
 - [x] Mettre à jour route /billing
 
 ### Phase 2 (À venir)
+
 - [ ] Formulaire de création manuelle de factures
 - [ ] Export Excel des factures
 - [ ] Envoi email automatique des factures PDF
@@ -346,6 +356,7 @@ console.log('✅ Données de test chargées !');
 - [ ] Historique des modifications
 
 ### Phase 3 (Avancé)
+
 - [ ] Factures récurrentes
 - [ ] Devis avant facturation
 - [ ] Multi-devises
@@ -356,6 +367,7 @@ console.log('✅ Données de test chargées !');
 ## 📞 Support
 
 Pour toute question ou problème :
+
 1. Vérifier les logs console (`F12` → Console)
 2. Vérifier localStorage : `localStorage.getItem('ivos_invoices_v1')`
 3. Vérifier que les BSD existent : `localStorage.getItem('ivos_bsd_v1')`

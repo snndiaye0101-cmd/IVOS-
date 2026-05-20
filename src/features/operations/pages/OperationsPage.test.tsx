@@ -13,7 +13,7 @@ describe('OperationsPage', () => {
     testFixtures.clearLocalStorage();
   });
 
-  it('affiche la page des ordres d\'opération', () => {
+  it("affiche la page des ordres d'opération", () => {
     render(<OperationsPage />);
     expect(screen.getByText(/Ordres d'Opération/i)).toBeInTheDocument();
     expect(screen.getByPlaceholderText(/Rechercher une opération/i)).toBeInTheDocument();

@@ -6,7 +6,12 @@
 
 import { createContext, useContext, useMemo, type ReactNode } from 'react';
 import { useAuth } from './AuthContext';
-import { permissionStore, type AppModule, type PermissionLevel, type UserRole } from '../services/permissionStore';
+import {
+  permissionStore,
+  type AppModule,
+  type PermissionLevel,
+  type UserRole,
+} from '../services/permissionStore';
 
 interface ViewAsContextType {
   /** The effective user (real user or impersonated) */
@@ -30,11 +35,17 @@ interface ViewAsContextType {
 
 const ViewAsContext = createContext<ViewAsContextType | null>(null);
 
-function getViewAs(): { originalUserId: string; viewAsUserId: string; viewAsUserName: string } | null {
+function getViewAs(): {
+  originalUserId: string;
+  viewAsUserId: string;
+  viewAsUserName: string;
+} | null {
   try {
     const raw = sessionStorage.getItem('ivos_view_as');
     return raw ? JSON.parse(raw) : null;
-  } catch { return null; }
+  } catch {
+    return null;
+  }
 }
 
 export function ViewAsProvider({ children }: { children: ReactNode }) {
@@ -52,7 +63,7 @@ export function ViewAsProvider({ children }: { children: ReactNode }) {
         canAccess: () => false,
         canAccessRoute: () => false,
         canAccessSection: () => false,
-        getPermissions: () => ({} as Record<AppModule, PermissionLevel>),
+        getPermissions: () => ({}) as Record<AppModule, PermissionLevel>,
         isSuperAdmin: false,
         deactivate: () => {},
       };
@@ -62,7 +73,7 @@ export function ViewAsProvider({ children }: { children: ReactNode }) {
 
     // If impersonating and the real user is SA
     if (viewAs && realIsSA && viewAs.originalUserId === user.id) {
-      const targetUser = allUsers.find(u => u.id === viewAs.viewAsUserId);
+      const targetUser = allUsers.find((u) => u.id === viewAs.viewAsUserId);
       const effectiveId = viewAs.viewAsUserId;
       return {
         effectiveUserId: effectiveId,
@@ -75,7 +86,10 @@ export function ViewAsProvider({ children }: { children: ReactNode }) {
         canAccessSection: (name) => permissionStore.canAccessSection(effectiveId, name),
         getPermissions: () => permissionStore.getPermissions(effectiveId),
         isSuperAdmin: realIsSA,
-        deactivate: () => { sessionStorage.removeItem('ivos_view_as'); window.location.reload(); },
+        deactivate: () => {
+          sessionStorage.removeItem('ivos_view_as');
+          window.location.reload();
+        },
       };
     }
 

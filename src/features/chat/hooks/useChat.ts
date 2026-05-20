@@ -1,14 +1,14 @@
 // ============= CUSTOM HOOK: useChat =============
 // Simplifie la gestion du chat dans les composants React
 
-import { useState, useEffect, useCallback, useRef } from "react";
+import { useState, useEffect, useCallback, useRef } from 'react';
 import {
   Channel,
   ChatMessage,
   ChatUser,
   CreateChannelInput,
   SendMessageInput,
-} from "../types/chat.types";
+} from '../types/chat.types';
 import {
   channelsService,
   messagesService,
@@ -16,7 +16,7 @@ import {
   realtimeSubscriptions,
   directMessagesService,
   notificationsService,
-} from "../services/chatSupabaseService";
+} from '../services/chatSupabaseService';
 
 interface UseChatOptions {
   userId: string;
@@ -54,7 +54,7 @@ export function useChat({ userId, userName }: UseChatOptions) {
         }
 
         // Update user presence
-        await presenceService.updateUserPresence(userId, "online");
+        await presenceService.updateUserPresence(userId, 'online');
 
         // Fetch unread counts
         const counts = await notificationsService.getUnreadCount(userId);
@@ -63,7 +63,7 @@ export function useChat({ userId, userName }: UseChatOptions) {
         const message =
           err instanceof Error ? err.message : "Erreur lors de l'initialisation du chat";
         setError(message);
-        console.error("Chat initialization error:", err);
+        console.error('Chat initialization error:', err);
       } finally {
         setLoading(false);
       }
@@ -81,22 +81,15 @@ export function useChat({ userId, userName }: UseChatOptions) {
         setLoading(true);
 
         // Load messages
-        const channelMessages = await messagesService.getChannelMessages(
-          currentChannel.id,
-          100
-        );
+        const channelMessages = await messagesService.getChannelMessages(currentChannel.id, 100);
         setMessages(channelMessages);
 
         // Load members
-        const channelMembers = await channelsService.getChannelMembers(
-          currentChannel.id
-        );
+        const channelMembers = await channelsService.getChannelMembers(currentChannel.id);
         setMembers(channelMembers);
 
         // Load online users
-        const online = await presenceService.getOnlineChannelUsers(
-          currentChannel.id
-        );
+        const online = await presenceService.getOnlineChannelUsers(currentChannel.id);
         setOnlineUsers(online);
 
         // Mark as read
@@ -108,12 +101,9 @@ export function useChat({ userId, userName }: UseChatOptions) {
           [currentChannel.id]: 0,
         }));
       } catch (err) {
-        const message =
-          err instanceof Error
-            ? err.message
-            : "Erreur lors du chargement du canal";
+        const message = err instanceof Error ? err.message : 'Erreur lors du chargement du canal';
         setError(message);
-        console.error("Channel data loading error:", err);
+        console.error('Channel data loading error:', err);
       } finally {
         setLoading(false);
       }
@@ -143,14 +133,13 @@ export function useChat({ userId, userName }: UseChatOptions) {
     );
 
     // Subscribe to member changes
-    unsubscribeMembersRef.current =
-      realtimeSubscriptions.subscribeToChannelMembers(currentChannel.id, () => {
+    unsubscribeMembersRef.current = realtimeSubscriptions.subscribeToChannelMembers(
+      currentChannel.id,
+      () => {
         // Refetch members when changes occur
-        channelsService
-          .getChannelMembers(currentChannel.id)
-          .then(setMembers)
-          .catch(console.error);
-      });
+        channelsService.getChannelMembers(currentChannel.id).then(setMembers).catch(console.error);
+      }
+    );
 
     // Cleanup
     return () => {
@@ -164,9 +153,7 @@ export function useChat({ userId, userName }: UseChatOptions) {
   useEffect(() => {
     return () => {
       // Mark user as offline
-      presenceService
-        .updateUserPresence(userId, "offline")
-        .catch(console.error);
+      presenceService.updateUserPresence(userId, 'offline').catch(console.error);
 
       // Unsubscribe from all
       unsubscribeMessagesRef.current?.();
@@ -183,8 +170,7 @@ export function useChat({ userId, userName }: UseChatOptions) {
       const userChannels = await channelsService.getUserChannels(userId);
       setChannels(userChannels);
     } catch (err) {
-      const message =
-        err instanceof Error ? err.message : "Erreur lors du chargement des canaux";
+      const message = err instanceof Error ? err.message : 'Erreur lors du chargement des canaux';
       setError(message);
     } finally {
       setLoading(false);
@@ -200,10 +186,7 @@ export function useChat({ userId, userName }: UseChatOptions) {
         setCurrentChannel(newChannel);
         return newChannel;
       } catch (err) {
-        const message =
-          err instanceof Error
-            ? err.message
-            : "Erreur lors de la création du canal";
+        const message = err instanceof Error ? err.message : 'Erreur lors de la création du canal';
         setError(message);
         throw err;
       } finally {
@@ -217,16 +200,13 @@ export function useChat({ userId, userName }: UseChatOptions) {
     async (channelId: string, updates: any) => {
       try {
         const updated = await channelsService.updateChannel(channelId, updates);
-        setChannels((prev) =>
-          prev.map((c) => (c.id === channelId ? updated : c))
-        );
+        setChannels((prev) => prev.map((c) => (c.id === channelId ? updated : c)));
         if (currentChannel?.id === channelId) {
           setCurrentChannel(updated);
         }
         return updated;
       } catch (err) {
-        const message =
-          err instanceof Error ? err.message : "Erreur lors de la mise à jour";
+        const message = err instanceof Error ? err.message : 'Erreur lors de la mise à jour';
         setError(message);
         throw err;
       }
@@ -234,36 +214,31 @@ export function useChat({ userId, userName }: UseChatOptions) {
     [currentChannel?.id]
   );
 
-  const deleteChannel = useCallback(async (channelId: string) => {
-    try {
-      await channelsService.deleteChannel(channelId);
-      setChannels((prev) => prev.filter((c) => c.id !== channelId));
-      if (currentChannel?.id === channelId) {
-        setCurrentChannel(null);
+  const deleteChannel = useCallback(
+    async (channelId: string) => {
+      try {
+        await channelsService.deleteChannel(channelId);
+        setChannels((prev) => prev.filter((c) => c.id !== channelId));
+        if (currentChannel?.id === channelId) {
+          setCurrentChannel(null);
+        }
+      } catch (err) {
+        const message = err instanceof Error ? err.message : 'Erreur lors de la suppression';
+        setError(message);
+        throw err;
       }
-    } catch (err) {
-      const message =
-        err instanceof Error ? err.message : "Erreur lors de la suppression";
-      setError(message);
-      throw err;
-    }
-  }, [currentChannel?.id]);
+    },
+    [currentChannel?.id]
+  );
 
   const sendMessage = useCallback(
     async (input: SendMessageInput) => {
       try {
-        const newMessage = await messagesService.sendMessage(
-          input,
-          userId,
-          userName
-        );
+        const newMessage = await messagesService.sendMessage(input, userId, userName);
         setMessages((prev) => [...prev, newMessage]);
         return newMessage;
       } catch (err) {
-        const message =
-          err instanceof Error
-            ? err.message
-            : "Erreur lors de l'envoi du message";
+        const message = err instanceof Error ? err.message : "Erreur lors de l'envoi du message";
         setError(message);
         throw err;
       }
@@ -274,18 +249,11 @@ export function useChat({ userId, userName }: UseChatOptions) {
   const editMessage = useCallback(
     async (messageId: string, content: string) => {
       try {
-        const updated = await messagesService.editMessage(
-          messageId,
-          content,
-          userId
-        );
-        setMessages((prev) =>
-          prev.map((m) => (m.id === messageId ? updated : m))
-        );
+        const updated = await messagesService.editMessage(messageId, content, userId);
+        setMessages((prev) => prev.map((m) => (m.id === messageId ? updated : m)));
         return updated;
       } catch (err) {
-        const message =
-          err instanceof Error ? err.message : "Erreur lors de la modification";
+        const message = err instanceof Error ? err.message : 'Erreur lors de la modification';
         setError(message);
         throw err;
       }
@@ -296,62 +264,43 @@ export function useChat({ userId, userName }: UseChatOptions) {
   const deleteMessage = useCallback(async (messageId: string) => {
     try {
       await messagesService.deleteMessage(messageId);
-      setMessages((prev) =>
-        prev.map((m) =>
-          m.id === messageId ? { ...m, is_deleted: true } : m
-        )
-      );
+      setMessages((prev) => prev.map((m) => (m.id === messageId ? { ...m, is_deleted: true } : m)));
     } catch (err) {
-      const message =
-        err instanceof Error ? err.message : "Erreur lors de la suppression";
+      const message = err instanceof Error ? err.message : 'Erreur lors de la suppression';
       setError(message);
       throw err;
     }
   }, []);
 
-  const addMember = useCallback(
-    async (channelId: string, memberId: string) => {
-      try {
-        await channelsService.addMemberToChannel(channelId, memberId);
-        // Refetch members
-        const updated = await channelsService.getChannelMembers(channelId);
-        setMembers(updated);
-      } catch (err) {
-        const message =
-          err instanceof Error
-            ? err.message
-            : "Erreur lors de l'ajout du membre";
-        setError(message);
-        throw err;
-      }
-    },
-    []
-  );
+  const addMember = useCallback(async (channelId: string, memberId: string) => {
+    try {
+      await channelsService.addMemberToChannel(channelId, memberId);
+      // Refetch members
+      const updated = await channelsService.getChannelMembers(channelId);
+      setMembers(updated);
+    } catch (err) {
+      const message = err instanceof Error ? err.message : "Erreur lors de l'ajout du membre";
+      setError(message);
+      throw err;
+    }
+  }, []);
 
-  const removeMember = useCallback(
-    async (channelId: string, memberId: string) => {
-      try {
-        await channelsService.removeMemberFromChannel(channelId, memberId);
-        setMembers((prev) => prev.filter((m) => m.id !== memberId));
-      } catch (err) {
-        const message =
-          err instanceof Error
-            ? err.message
-            : "Erreur lors de la suppression du membre";
-        setError(message);
-        throw err;
-      }
-    },
-    []
-  );
+  const removeMember = useCallback(async (channelId: string, memberId: string) => {
+    try {
+      await channelsService.removeMemberFromChannel(channelId, memberId);
+      setMembers((prev) => prev.filter((m) => m.id !== memberId));
+    } catch (err) {
+      const message =
+        err instanceof Error ? err.message : 'Erreur lors de la suppression du membre';
+      setError(message);
+      throw err;
+    }
+  }, []);
 
   const openDirectMessage = useCallback(
     async (otherUserId: string) => {
       try {
-        const dmChannel = await directMessagesService.getOrCreateDMChannel(
-          userId,
-          otherUserId
-        );
+        const dmChannel = await directMessagesService.getOrCreateDMChannel(userId, otherUserId);
         setCurrentChannel(dmChannel);
 
         // Add to channels list if not there
@@ -363,9 +312,7 @@ export function useChat({ userId, userName }: UseChatOptions) {
         return dmChannel;
       } catch (err) {
         const message =
-          err instanceof Error
-            ? err.message
-            : "Erreur lors de l'ouverture du message direct";
+          err instanceof Error ? err.message : "Erreur lors de l'ouverture du message direct";
         setError(message);
         throw err;
       }
@@ -374,11 +321,11 @@ export function useChat({ userId, userName }: UseChatOptions) {
   );
 
   const setUserPresence = useCallback(
-    async (status: "online" | "away" | "offline" | "do_not_disturb") => {
+    async (status: 'online' | 'away' | 'offline' | 'do_not_disturb') => {
       try {
         await presenceService.updateUserPresence(userId, status);
       } catch (err) {
-        console.error("Error updating presence:", err);
+        console.error('Error updating presence:', err);
       }
     },
     [userId]

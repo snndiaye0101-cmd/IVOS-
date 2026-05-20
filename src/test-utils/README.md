@@ -6,8 +6,10 @@ Ce fichier regroupe les utilitaires de test partagés pour l’ensemble du proje
 - **jest-globals.d.ts** : Types globaux pour Jest.
 
 ## Conventions
+
 - Documenter chaque fonction utilitaire (JSDoc/commentaire).
 - Respecter la structure et les conventions du projet (voir `/docs/CONVENTIONS_CODE.md`).
 
 ## Contact
+
 Pour toute question ou amélioration, contacter l’équipe technique IVOS.

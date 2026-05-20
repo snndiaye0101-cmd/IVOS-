@@ -7,15 +7,21 @@ interface MessageReactionsProps {
 
 export default function MessageReactions({ reactions, onReact }: MessageReactionsProps) {
   return (
-    <div className="flex gap-1 ml-2">
-      <button onClick={() => onReact('check')} className="hover:scale-110 transition"><Check size={16} className="text-green-500" /></button>
-      <button onClick={() => onReact('warning')} className="hover:scale-110 transition"><AlertTriangle size={16} className="text-yellow-500" /></button>
-      <button onClick={() => onReact('bravo')} className="hover:scale-110 transition"><Sparkles size={16} className="text-blue-500" /></button>
-      {reactions.map(r => (
-        <span key={r.type} className="ml-1 text-xs font-bold align-middle">
-          {r.type === 'check' && <Check size={12} className="inline text-green-500" />} 
-          {r.type === 'warning' && <AlertTriangle size={12} className="inline text-yellow-500" />} 
-          {r.type === 'bravo' && <Sparkles size={12} className="inline text-blue-500" />} 
+    <div className="ml-2 flex gap-1">
+      <button onClick={() => onReact('check')} className="transition hover:scale-110">
+        <Check size={16} className="text-green-500" />
+      </button>
+      <button onClick={() => onReact('warning')} className="transition hover:scale-110">
+        <AlertTriangle size={16} className="text-yellow-500" />
+      </button>
+      <button onClick={() => onReact('bravo')} className="transition hover:scale-110">
+        <Sparkles size={16} className="text-blue-500" />
+      </button>
+      {reactions.map((r) => (
+        <span key={r.type} className="ml-1 align-middle text-xs font-bold">
+          {r.type === 'check' && <Check size={12} className="inline text-green-500" />}
+          {r.type === 'warning' && <AlertTriangle size={12} className="inline text-yellow-500" />}
+          {r.type === 'bravo' && <Sparkles size={12} className="inline text-blue-500" />}
           {r.count}
         </span>
       ))}

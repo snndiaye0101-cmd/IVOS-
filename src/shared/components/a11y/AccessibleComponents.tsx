@@ -12,7 +12,7 @@ import React from 'react';
 export const SkipToContent = () => (
   <a
     href="#main-content"
-    className="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-50 focus:bg-blue-600 focus:text-white focus:px-4 focus:py-2 focus:rounded"
+    className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-50 focus:rounded focus:bg-blue-600 focus:px-4 focus:py-2 focus:text-white"
     aria-label="Passer au contenu principal"
   >
     Passer au contenu
@@ -41,7 +41,7 @@ export const useFocusTrap = (isOpen: boolean) => {
     const focusableElements = container.querySelectorAll(
       'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
     );
-    
+
     const firstElement = focusableElements[0] as HTMLElement;
     const lastElement = focusableElements[focusableElements.length - 1] as HTMLElement;
 
@@ -125,10 +125,7 @@ export const AccessibleInput: React.FC<AccessibleInputProps> = ({
 
   return (
     <div className="space-y-1">
-      <label
-        htmlFor={inputId}
-        className="block text-sm font-medium text-gray-700"
-      >
+      <label htmlFor={inputId} className="block text-sm font-medium text-gray-700">
         {label}
         {required && <span aria-label="requis"> *</span>}
       </label>
@@ -139,7 +136,7 @@ export const AccessibleInput: React.FC<AccessibleInputProps> = ({
         aria-required={required}
         aria-invalid={!!error}
         aria-describedby={error ? errorId : helpText ? helpId : undefined}
-        className={`w-full px-3 py-2 border rounded ${
+        className={`w-full rounded border px-3 py-2 ${
           error ? 'border-red-500 focus:ring-red-500' : 'border-gray-300 focus:ring-blue-500'
         } focus:outline-none focus:ring-2`}
       />
@@ -196,7 +193,7 @@ export const AccessibleModal: React.FC<AccessibleModalProps> = ({
       role="dialog"
       aria-modal="true"
     >
-      <div className="flex items-center justify-center min-h-screen px-4">
+      <div className="flex min-h-screen items-center justify-center px-4">
         {/* Backdrop */}
         <div
           className="fixed inset-0 bg-black bg-opacity-50 transition-opacity"
@@ -205,11 +202,8 @@ export const AccessibleModal: React.FC<AccessibleModalProps> = ({
         />
 
         {/* Modal */}
-        <div
-          ref={modalRef}
-          className="relative bg-white rounded-lg shadow-xl max-w-lg w-full p-6"
-        >
-          <div className="flex items-center justify-between mb-4">
+        <div ref={modalRef} className="relative w-full max-w-lg rounded-lg bg-white p-6 shadow-xl">
+          <div className="mb-4 flex items-center justify-between">
             <h2 id="modal-title" className="text-xl font-semibold">
               {title}
             </h2>
@@ -218,8 +212,13 @@ export const AccessibleModal: React.FC<AccessibleModalProps> = ({
               className="text-gray-400 hover:text-gray-600"
               aria-label="Fermer la fenêtre"
             >
-              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M6 18L18 6M6 6l12 12"
+                />
               </svg>
             </button>
           </div>
@@ -241,31 +240,28 @@ export const handleEnterKey = (callback: () => void) => (e: React.KeyboardEvent)
   }
 };
 
-export const handleArrowKeys = (
-  onUp?: () => void,
-  onDown?: () => void,
-  onLeft?: () => void,
-  onRight?: () => void
-) => (e: React.KeyboardEvent) => {
-  switch (e.key) {
-    case 'ArrowUp':
-      e.preventDefault();
-      onUp?.();
-      break;
-    case 'ArrowDown':
-      e.preventDefault();
-      onDown?.();
-      break;
-    case 'ArrowLeft':
-      e.preventDefault();
-      onLeft?.();
-      break;
-    case 'ArrowRight':
-      e.preventDefault();
-      onRight?.();
-      break;
-  }
-};
+export const handleArrowKeys =
+  (onUp?: () => void, onDown?: () => void, onLeft?: () => void, onRight?: () => void) =>
+  (e: React.KeyboardEvent) => {
+    switch (e.key) {
+      case 'ArrowUp':
+        e.preventDefault();
+        onUp?.();
+        break;
+      case 'ArrowDown':
+        e.preventDefault();
+        onDown?.();
+        break;
+      case 'ArrowLeft':
+        e.preventDefault();
+        onLeft?.();
+        break;
+      case 'ArrowRight':
+        e.preventDefault();
+        onRight?.();
+        break;
+    }
+  };
 
 // ============================================
 // Live Region pour annonces screen reader
@@ -275,12 +271,7 @@ export const LiveRegion: React.FC<{
   message: string;
   politeness?: 'polite' | 'assertive' | 'off';
 }> = ({ message, politeness = 'polite' }) => (
-  <div
-    role="status"
-    aria-live={politeness}
-    aria-atomic="true"
-    className="sr-only"
-  >
+  <div role="status" aria-live={politeness} aria-atomic="true" className="sr-only">
     {message}
   </div>
 );
@@ -292,20 +283,13 @@ export const LiveRegion: React.FC<{
 export const AccessibleSpinner: React.FC<{ label?: string }> = ({ label = 'Chargement' }) => (
   <div className="flex items-center justify-center" role="status" aria-live="polite">
     <svg
-      className="animate-spin h-8 w-8 text-blue-600"
+      className="h-8 w-8 animate-spin text-blue-600"
       xmlns="http://www.w3.org/2000/svg"
       fill="none"
       viewBox="0 0 24 24"
       aria-hidden="true"
     >
-      <circle
-        className="opacity-25"
-        cx="12"
-        cy="12"
-        r="10"
-        stroke="currentColor"
-        strokeWidth="4"
-      />
+      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
       <path
         className="opacity-75"
         fill="currentColor"

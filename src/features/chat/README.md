@@ -51,6 +51,7 @@ supabase migration add chat_schema
 ```
 
 Or manually run the SQL in Supabase dashboard:
+
 - Go to SQL Editor
 - Create new query
 - Copy contents of `database/migrations/chat_schema.sql`
@@ -63,7 +64,7 @@ import { useChat } from '@/features/chat/services';
 
 function MyComponent() {
   const { userId, userName } = useAuth();
-  
+
   const {
     channels,
     currentChannel,
@@ -141,10 +142,13 @@ import { channelsService } from '@/features/chat/services';
 await channelsService.getUserChannels(userId);
 
 // Create channel
-await channelsService.createChannel({ 
-  name: 'General',
-  type: 'public'
-}, userId);
+await channelsService.createChannel(
+  {
+    name: 'General',
+    type: 'public',
+  },
+  userId
+);
 
 // Update channel
 await channelsService.updateChannel(channelId, { name: 'New Name' });
@@ -167,11 +171,7 @@ import { messagesService } from '@/features/chat/services';
 await messagesService.getChannelMessages(channelId, limit, offset);
 
 // Send message
-await messagesService.sendMessage(
-  { channel_id: 'ch123', content: 'Hello!' },
-  userId,
-  userName
-);
+await messagesService.sendMessage({ channel_id: 'ch123', content: 'Hello!' }, userId, userName);
 
 // Edit message
 await messagesService.editMessage(messageId, 'Updated text', userId);
@@ -216,12 +216,9 @@ await directMessagesService.deleteDMChannel(dmId);
 import { realtimeSubscriptions } from '@/features/chat/services';
 
 // Subscribe to new messages
-const unsubscribe = realtimeSubscriptions.subscribeToChannelMessages(
-  channelId,
-  (message) => {
-    console.log('New message:', message);
-  }
-);
+const unsubscribe = realtimeSubscriptions.subscribeToChannelMessages(channelId, (message) => {
+  console.log('New message:', message);
+});
 
 // Subscribe to channel updates
 realtimeSubscriptions.subscribeToChannelUpdates(channelId, (channel) => {
@@ -268,10 +265,7 @@ The `useChat` hook automatically manages subscriptions:
 
 ```typescript
 useEffect(() => {
-  const unsubscribe = realtimeSubscriptions.subscribeToChannelMessages(
-    channelId,
-    handleNewMessage
-  );
+  const unsubscribe = realtimeSubscriptions.subscribeToChannelMessages(channelId, handleNewMessage);
   return () => unsubscribe();
 }, [channelId]);
 ```
@@ -281,6 +275,7 @@ useEffect(() => {
 ## 💾 Database Schema
 
 ### chat_channels
+
 - `id`: UUID (primary key)
 - `name`: Channel name
 - `type`: 'public' | 'private' | 'direct'
@@ -289,6 +284,7 @@ useEffect(() => {
 - `is_active`: Boolean
 
 ### chat_messages
+
 - `id`: UUID (primary key)
 - `channel_id`: FK to channels
 - `user_id`: FK to users
@@ -298,6 +294,7 @@ useEffect(() => {
 - `is_deleted`: Soft delete flag
 
 ### chat_channel_members
+
 - `channel_id`: FK
 - `user_id`: FK
 - `joined_at`: Timestamp
@@ -306,6 +303,7 @@ useEffect(() => {
 - `is_moderator`: Boolean
 
 ### user_presence
+
 - `user_id`: FK (primary key)
 - `status`: 'online' | 'away' | 'offline' | 'do_not_disturb'
 - `last_seen_at`: Timestamp
@@ -342,10 +340,7 @@ VITE_SUPABASE_ANON_KEY=your_anon_key
 import { channelsService } from '@/features/chat/services';
 
 test('should create channel', async () => {
-  const channel = await channelsService.createChannel(
-    { name: 'Test', type: 'public' },
-    'user123'
-  );
+  const channel = await channelsService.createChannel({ name: 'Test', type: 'public' }, 'user123');
   expect(channel.name).toBe('Test');
 });
 ```
@@ -355,16 +350,19 @@ test('should create channel', async () => {
 ## 🐛 Troubleshooting
 
 ### Messages not updating in real-time?
+
 - Check Realtime is enabled in Supabase dashboard
 - Verify RLS policies allow access
 - Check browser console for errors
 
 ### Can't add members?
+
 - Verify user exists in system
 - Check RLS policies for channel_members table
 - Ensure channel is not deleted
 
 ### Presence not updating?
+
 - Ensure `setUserPresence` is called appropriately
 - Check user_presence table for records
 - Verify RLS policies on user_presence table
@@ -380,16 +378,9 @@ import { useAuth } from '@/shared/contexts/AuthContext';
 
 export function ChatImplementation() {
   const { user } = useAuth();
-  const {
-    channels,
-    currentChannel,
-    messages,
-    loading,
-    sendMessage,
-    createChannel,
-  } = useChat({ 
-    userId: user?.id || '', 
-    userName: user?.name || 'Anonymous' 
+  const { channels, currentChannel, messages, loading, sendMessage, createChannel } = useChat({
+    userId: user?.id || '',
+    userName: user?.name || 'Anonymous',
   });
 
   const handleCreateChannel = async () => {
@@ -405,11 +396,7 @@ export function ChatImplementation() {
     });
   };
 
-  return (
-    <div>
-      {/* Your UI here */}
-    </div>
-  );
+  return <div>{/* Your UI here */}</div>;
 }
 ```
 
@@ -429,8 +416,8 @@ export function ChatImplementation() {
 ## 📞 Support
 
 For issues or questions:
+
 1. Check this documentation
 2. Review example code in `Chat.tsx`
 3. Check Supabase logs in dashboard
 4. Review browser console for errors
-

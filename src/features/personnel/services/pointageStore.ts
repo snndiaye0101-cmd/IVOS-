@@ -197,7 +197,12 @@ async function syncOfflineAction(action: OfflinePointageAction): Promise<boolean
     }
 
     if (action.type === 'checkout') {
-      const payload = action.payload as { pointageId: number; lat: number; lng: number; portal?: string | { id?: string; name?: string } };
+      const payload = action.payload as {
+        pointageId: number;
+        lat: number;
+        lng: number;
+        portal?: string | { id?: string; name?: string };
+      };
       const pointage = loadPointages().find((p) => p.id === payload.pointageId);
       if (!pointage) return false;
 
@@ -519,7 +524,8 @@ function checkIn(
     isWeekend,
     portal: typeof options?.portal === 'string' ? options?.portal : options?.portal?.name,
     portalId:
-      options?.portalId || (typeof options?.portal === 'string' ? mapPortalToId(options?.portal) : options?.portal?.id),
+      options?.portalId ||
+      (typeof options?.portal === 'string' ? mapPortalToId(options?.portal) : options?.portal?.id),
     terminalId: options?.terminalConfig?.terminalId,
     terminalName: options?.terminalConfig?.terminalName,
     withVehicle: Boolean(options?.vehicle),
@@ -543,7 +549,11 @@ function checkOut(
   pointageId: number,
   lat: number,
   lng: number,
-  options?: { portal?: string | { id?: string; name?: string }; portalId?: string; terminalConfig?: TerminalConfig }
+  options?: {
+    portal?: string | { id?: string; name?: string };
+    portalId?: string;
+    terminalConfig?: TerminalConfig;
+  }
 ): void {
   const all = loadPointages();
   const i = all.findIndex((p) => p.id === pointageId);
@@ -553,8 +563,12 @@ function checkOut(
     all[i].latDepart = lat;
     all[i].lngDepart = lng;
     if (options?.portal || options?.portalId) {
-      all[i].portal = typeof options.portal === 'string' ? options.portal : options.portal?.name || all[i].portal;
-      all[i].portalId = options.portalId || (typeof options.portal === 'string' ? mapPortalToId(options.portal) : options.portal?.id) || all[i].portalId;
+      all[i].portal =
+        typeof options.portal === 'string' ? options.portal : options.portal?.name || all[i].portal;
+      all[i].portalId =
+        options.portalId ||
+        (typeof options.portal === 'string' ? mapPortalToId(options.portal) : options.portal?.id) ||
+        all[i].portalId;
     }
     all[i].terminalId = options?.terminalConfig?.terminalId;
     all[i].terminalName = options?.terminalConfig?.terminalName;

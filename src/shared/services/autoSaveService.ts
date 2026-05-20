@@ -30,11 +30,13 @@ class AutoSaveService {
    */
   private notify(key: string, state: AutoSaveState): void {
     this.listeners.get(key)?.(state);
-    
+
     // Event global pour composants externes
-    window.dispatchEvent(new CustomEvent('ivos_autosave_status', {
-      detail: { key, state }
-    }));
+    window.dispatchEvent(
+      new CustomEvent('ivos_autosave_status', {
+        detail: { key, state },
+      })
+    );
   }
 
   /**
@@ -60,23 +62,22 @@ class AutoSaveService {
     const timer = setTimeout(async () => {
       try {
         this.notify(key, { status: 'saving' });
-        
+
         await saveFn(data);
-        
+
         this.notify(key, {
           status: 'saved',
-          lastSaved: new Date().toISOString()
+          lastSaved: new Date().toISOString(),
         });
 
         // Retour à idle après 2s
         setTimeout(() => {
           this.notify(key, { status: 'idle' });
         }, 2000);
-
       } catch (error) {
         this.notify(key, {
           status: 'error',
-          error: error instanceof Error ? error.message : 'Erreur de sauvegarde'
+          error: error instanceof Error ? error.message : 'Erreur de sauvegarde',
         });
       } finally {
         this.saveTimers.delete(key);
@@ -105,17 +106,16 @@ class AutoSaveService {
       await saveFn(data);
       this.notify(key, {
         status: 'saved',
-        lastSaved: new Date().toISOString()
+        lastSaved: new Date().toISOString(),
       });
 
       setTimeout(() => {
         this.notify(key, { status: 'idle' });
       }, 2000);
-
     } catch (error) {
       this.notify(key, {
         status: 'error',
-        error: error instanceof Error ? error.message : 'Erreur de sauvegarde'
+        error: error instanceof Error ? error.message : 'Erreur de sauvegarde',
       });
       throw error;
     }
@@ -125,7 +125,7 @@ class AutoSaveService {
    * Annule toutes les sauvegardes en attente
    */
   cancelAll(): void {
-    this.saveTimers.forEach(timer => clearTimeout(timer));
+    this.saveTimers.forEach((timer) => clearTimeout(timer));
     this.saveTimers.clear();
   }
 }

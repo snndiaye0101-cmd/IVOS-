@@ -12,5 +12,5 @@ export function subscribeToRoomMessages(cb: Callback) {
 }
 
 export function notifyRoomMessage(roomId: string) {
-  listeners.forEach(cb => cb(roomId));
+  listeners.forEach((cb) => cb(roomId));
 }

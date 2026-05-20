@@ -19,20 +19,28 @@ interface PermissionGuardProps {
   fallback?: ReactNode;
 }
 
-export function PermissionGuard({ module, level = 'view', children, showFallback = false, fallback }: PermissionGuardProps) {
+export function PermissionGuard({
+  module,
+  level = 'view',
+  children,
+  showFallback = false,
+  fallback,
+}: PermissionGuardProps) {
   const { canAccess } = useViewAs();
 
   if (!canAccess(module, level)) {
     if (fallback) return <>{fallback}</>;
     if (showFallback) {
       return (
-        <div className="flex items-center justify-center min-h-[40vh]">
-          <div className="text-center space-y-3">
-            <div className="w-14 h-14 mx-auto bg-gray-100 rounded-full flex items-center justify-center">
-              <Lock className="w-7 h-7 text-gray-400" />
+        <div className="flex min-h-[40vh] items-center justify-center">
+          <div className="space-y-3 text-center">
+            <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-gray-100">
+              <Lock className="h-7 w-7 text-gray-400" />
             </div>
             <h3 className="text-lg font-semibold text-gray-700">Accès restreint</h3>
-            <p className="text-sm text-gray-400">Vous n'avez pas les permissions nécessaires pour accéder à ce module.</p>
+            <p className="text-sm text-gray-400">
+              Vous n'avez pas les permissions nécessaires pour accéder à ce module.
+            </p>
           </div>
         </div>
       );

@@ -82,7 +82,12 @@ function isCadre(agent: PersonnelAgent | undefined) {
   if (!agent) return false;
   if (agent.fiscalStatus) return agent.fiscalStatus === 'Cadre';
   const lowerRole = agent.role.toLowerCase();
-  return lowerRole.includes('responsable') || lowerRole.includes('administratif') || lowerRole.includes('directeur') || lowerRole.includes('comptable');
+  return (
+    lowerRole.includes('responsable') ||
+    lowerRole.includes('administratif') ||
+    lowerRole.includes('directeur') ||
+    lowerRole.includes('comptable')
+  );
 }
 
 function resolveParts(agent: PersonnelAgent | undefined) {
@@ -103,91 +108,99 @@ export function computeFiscalRecap(params: {
     useFiscalParts?: boolean;
   };
 }): FiscalRecap {
-  const scopedSlips = params.slips.filter((slip) => slip.month === params.month && slip.countryCode === params.countryCode);
+  const scopedSlips = params.slips.filter(
+    (slip) => slip.month === params.month && slip.countryCode === params.countryCode
+  );
   const labels = getOrganismLabels(params.countryCode);
   const detailMap = new Map<string, FiscalRecapDetailRow>();
 
-  const totals = scopedSlips.reduce((acc, slip) => {
-    const agent = params.agents.find((item) => item.id === slip.employeeId);
-    const computation = computePayroll({
-      baseSalary: slip.baseSalary,
-      surSalary: slip.surSalary,
-      primeTransport: slip.primeTransport,
-      primePanier: slip.primePanier,
-      primeAnciennete: slip.primeAnciennete,
-      manualRetenues: Math.max(0, slip.retenues - slip.loanDeduction),
-      loanDeduction: slip.loanDeduction,
-      cadre: isCadre(agent),
-      irParts: params.automation?.useFiscalParts === false ? 1 : resolveParts(agent),
-      autoFiscal: slip.automaticTaxEnabled ?? true,
-      useTransportExemptCap: params.automation?.useTransportExemptCap ?? true,
-      calculationDate: `${slip.month}-01`,
-    }, params.rule);
+  const totals = scopedSlips.reduce(
+    (acc, slip) => {
+      const agent = params.agents.find((item) => item.id === slip.employeeId);
+      const computation = computePayroll(
+        {
+          baseSalary: slip.baseSalary,
+          surSalary: slip.surSalary,
+          primeTransport: slip.primeTransport,
+          primePanier: slip.primePanier,
+          primeAnciennete: slip.primeAnciennete,
+          manualRetenues: Math.max(0, slip.retenues - slip.loanDeduction),
+          loanDeduction: slip.loanDeduction,
+          cadre: isCadre(agent),
+          irParts: params.automation?.useFiscalParts === false ? 1 : resolveParts(agent),
+          autoFiscal: slip.automaticTaxEnabled ?? true,
+          useTransportExemptCap: params.automation?.useTransportExemptCap ?? true,
+          calculationDate: `${slip.month}-01`,
+        },
+        params.rule
+      );
 
-    const detailLabels: Record<string, string> = {
-      'IPRES - Régime Général': `${labels.retirement} Général`,
-      'IPRES - Régime Cadre': `${labels.retirement} Cadre`,
-      'CNPS - Régime Général': `${labels.retirement} Général`,
-      'CNPS - Régime Cadre': `${labels.retirement} Cadre`,
-      'INPS - Régime Général': `${labels.retirement} Général`,
-      'INPS - Régime Cadre': `${labels.retirement} Cadre`,
-      'IPM - Assurance Maladie': labels.health,
-      'CSS - Prestations Familiales': `${labels.socialBenefits} Prestations`,
-      'CSS - Accidents du Travail': `${labels.socialBenefits} Accidents`,
-      'INPS - Prestations Familiales': `${labels.socialBenefits} Prestations`,
-      'INPS - Accidents du Travail': `${labels.socialBenefits} Accidents`,
-      'Impôt sur le Revenu (IR)': labels.incomeTax,
-      'Impot sur le Revenu (IR)': labels.incomeTax,
-      'Impot sur le Traitement et Salaires (ITS)': labels.incomeTax,
-      'Retenue à la Source (RTS)': labels.incomeTax,
-      'Retenue a la Source (RTS)': labels.incomeTax,
-      CFCE: labels.cfce,
-      CN: labels.cfce,
-      TFP: labels.cfce,
-    };
-
-    for (const line of computation.lines) {
-      const detailLabel = detailLabels[line.rubrique];
-      if (!detailLabel) continue;
-
-      const current = detailMap.get(detailLabel) || {
-        label: detailLabel,
-        baseSalarial: 0,
-        tauxSalarial: line.tauxSalarial > 0 ? line.tauxSalarial : null,
-        salarial: 0,
-        basePatronal: 0,
-        tauxPatronal: line.tauxPatronal > 0 ? line.tauxPatronal : null,
-        patronal: 0,
+      const detailLabels: Record<string, string> = {
+        'IPRES - Régime Général': `${labels.retirement} Général`,
+        'IPRES - Régime Cadre': `${labels.retirement} Cadre`,
+        'CNPS - Régime Général': `${labels.retirement} Général`,
+        'CNPS - Régime Cadre': `${labels.retirement} Cadre`,
+        'INPS - Régime Général': `${labels.retirement} Général`,
+        'INPS - Régime Cadre': `${labels.retirement} Cadre`,
+        'IPM - Assurance Maladie': labels.health,
+        'CSS - Prestations Familiales': `${labels.socialBenefits} Prestations`,
+        'CSS - Accidents du Travail': `${labels.socialBenefits} Accidents`,
+        'INPS - Prestations Familiales': `${labels.socialBenefits} Prestations`,
+        'INPS - Accidents du Travail': `${labels.socialBenefits} Accidents`,
+        'Impôt sur le Revenu (IR)': labels.incomeTax,
+        'Impot sur le Revenu (IR)': labels.incomeTax,
+        'Impot sur le Traitement et Salaires (ITS)': labels.incomeTax,
+        'Retenue à la Source (RTS)': labels.incomeTax,
+        'Retenue a la Source (RTS)': labels.incomeTax,
+        CFCE: labels.cfce,
+        CN: labels.cfce,
+        TFP: labels.cfce,
       };
 
-      detailMap.set(detailLabel, {
-        label: detailLabel,
-        baseSalarial: current.baseSalarial + (line.montantSalarial !== 0 ? line.base : 0),
-        tauxSalarial: current.tauxSalarial ?? (line.tauxSalarial > 0 ? line.tauxSalarial : null),
-        salarial: current.salarial + Math.abs(line.montantSalarial),
-        basePatronal: current.basePatronal + (line.cotPatronales !== 0 ? line.base : 0),
-        tauxPatronal: current.tauxPatronal ?? (line.tauxPatronal > 0 ? line.tauxPatronal : null),
-        patronal: current.patronal + line.cotPatronales,
-      });
-    }
+      for (const line of computation.lines) {
+        const detailLabel = detailLabels[line.rubrique];
+        if (!detailLabel) continue;
 
-    acc.ipresSalarial += computation.ipresGeneral + computation.ipresCadre;
-    acc.ipresPatronal += computation.ipresGeneralEmployer + computation.ipresCadreEmployer;
-    acc.cssPatronal += computation.cssPrestationsFamiliales + computation.cssAccidentTravail;
-    acc.ipmSalarial += computation.ipm;
-    acc.irSalarial += computation.ir;
-    acc.cfceSalarial += computation.cfce;
-    acc.tfpPatronal += computation.tfpEmployer;
-    return acc;
-  }, {
-    ipresSalarial: 0,
-    ipresPatronal: 0,
-    cssPatronal: 0,
-    ipmSalarial: 0,
-    irSalarial: 0,
-    cfceSalarial: 0,
-    tfpPatronal: 0,
-  });
+        const current = detailMap.get(detailLabel) || {
+          label: detailLabel,
+          baseSalarial: 0,
+          tauxSalarial: line.tauxSalarial > 0 ? line.tauxSalarial : null,
+          salarial: 0,
+          basePatronal: 0,
+          tauxPatronal: line.tauxPatronal > 0 ? line.tauxPatronal : null,
+          patronal: 0,
+        };
+
+        detailMap.set(detailLabel, {
+          label: detailLabel,
+          baseSalarial: current.baseSalarial + (line.montantSalarial !== 0 ? line.base : 0),
+          tauxSalarial: current.tauxSalarial ?? (line.tauxSalarial > 0 ? line.tauxSalarial : null),
+          salarial: current.salarial + Math.abs(line.montantSalarial),
+          basePatronal: current.basePatronal + (line.cotPatronales !== 0 ? line.base : 0),
+          tauxPatronal: current.tauxPatronal ?? (line.tauxPatronal > 0 ? line.tauxPatronal : null),
+          patronal: current.patronal + line.cotPatronales,
+        });
+      }
+
+      acc.ipresSalarial += computation.ipresGeneral + computation.ipresCadre;
+      acc.ipresPatronal += computation.ipresGeneralEmployer + computation.ipresCadreEmployer;
+      acc.cssPatronal += computation.cssPrestationsFamiliales + computation.cssAccidentTravail;
+      acc.ipmSalarial += computation.ipm;
+      acc.irSalarial += computation.ir;
+      acc.cfceSalarial += computation.cfce;
+      acc.tfpPatronal += computation.tfpEmployer;
+      return acc;
+    },
+    {
+      ipresSalarial: 0,
+      ipresPatronal: 0,
+      cssPatronal: 0,
+      ipmSalarial: 0,
+      irSalarial: 0,
+      cfceSalarial: 0,
+      tfpPatronal: 0,
+    }
+  );
 
   const rows: FiscalRecapRow[] = [
     {

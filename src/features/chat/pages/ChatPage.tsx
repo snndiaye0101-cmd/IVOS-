@@ -1,4 +1,3 @@
-
 import Chat from './Chat';
 
 export default function ChatPage() {

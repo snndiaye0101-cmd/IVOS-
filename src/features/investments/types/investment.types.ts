@@ -1,4 +1,9 @@
-export type InvestmentDocumentType = 'Contrat signé' | 'Plan technique' | 'Photo site' | 'Facture' | 'Autre';
+export type InvestmentDocumentType =
+  | 'Contrat signé'
+  | 'Plan technique'
+  | 'Photo site'
+  | 'Facture'
+  | 'Autre';
 
 export interface InvestmentInstallment {
   id: string;

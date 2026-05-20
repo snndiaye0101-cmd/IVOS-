@@ -4,11 +4,11 @@ export function trackEvent(event: string, data?: Record<string, unknown>) {
   // window.gtag?.('event', event, data)
   // window._paq?.push(['trackEvent', event, data])
   // Pour l’instant, log en console
-  console.log('[Analytics]', event, data)
+  console.log('[Analytics]', event, data);
 }
 
 export function exportData(format: 'pdf' | 'excel' | 'csv', data: unknown) {
   // TODO: Implémenter l’export (utiliser jsPDF, SheetJS, etc.)
   // Placeholder
-  console.log(`[Export ${format}]`, data)
+  console.log(`[Export ${format}]`, data);
 }

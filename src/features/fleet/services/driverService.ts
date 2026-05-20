@@ -36,11 +36,7 @@ export const driverService = {
    * Récupère un chauffeur par son ID
    */
   async getDriverById(id: string): Promise<Driver | null> {
-    const { data, error } = await supabase
-      .from('drivers')
-      .select('*')
-      .eq('id', id)
-      .single();
+    const { data, error } = await supabase.from('drivers').select('*').eq('id', id).single();
     if (error) throw error;
     return data;
   },
@@ -57,8 +53,16 @@ export const driverService = {
   /**
    * Met à jour un chauffeur
    */
-  async updateDriver(id:string, driverData: Partial<Omit<Driver, 'id' | 'created_at'>>): Promise<Driver> {
-    const { data, error } = await supabase.from('drivers').update(driverData).eq('id', id).select().single();
+  async updateDriver(
+    id: string,
+    driverData: Partial<Omit<Driver, 'id' | 'created_at'>>
+  ): Promise<Driver> {
+    const { data, error } = await supabase
+      .from('drivers')
+      .update(driverData)
+      .eq('id', id)
+      .select()
+      .single();
     if (error) throw error;
     return data;
   },

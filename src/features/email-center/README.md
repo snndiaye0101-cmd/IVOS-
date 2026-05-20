@@ -1,6 +1,7 @@
 # Email Center - IVOS
 
 Module complet de messagerie professionnelle avec:
+
 - Connexion OAuth2 Gmail API et Microsoft Graph (Outlook)
 - Sync en arriere-plan des dossiers (Inbox, Sent, Drafts, Trash, Starred)
 - Synchronisation paginee des emails (chargement progressif)
@@ -133,6 +134,7 @@ Reponse JSON attendue:
 Migration incluse: `database/migrations/email_center_schema.sql`
 
 Tables:
+
 - `email_accounts`
 - `email_links`
 - `email_sync_logs`

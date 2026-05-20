@@ -21,19 +21,20 @@ export const ExpandableCountryRow: React.FC<ExpandableCountryRowProps> = ({
   return (
     <>
       <tr
-        className={`hover:bg-gray-50/50 transition-colors cursor-pointer group ${expanded ? 'bg-indigo-50/40' : ''}`}
+        className={`group cursor-pointer transition-colors hover:bg-gray-50/50 ${expanded ? 'bg-indigo-50/40' : ''}`}
         onClick={onExpand}
         tabIndex={0}
         aria-expanded={expanded}
       >
         <td className="px-5 py-3.5 font-medium text-gray-900">
-          <span className="mr-2">{country.flagEmoji}</span>{country.name}
+          <span className="mr-2">{country.flagEmoji}</span>
+          {country.name}
         </td>
-        <td className="px-5 py-3.5 text-gray-600 font-mono">{country.codeIso}</td>
-        <td className="px-5 py-3.5 text-gray-600 font-mono">{country.currencyCode}</td>
+        <td className="px-5 py-3.5 font-mono text-gray-600">{country.codeIso}</td>
+        <td className="px-5 py-3.5 font-mono text-gray-600">{country.currencyCode}</td>
         <td className="px-5 py-3.5 text-gray-600">{country.currencySymbol}</td>
         <td className="px-5 py-3.5">
-          <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-blue-50 text-blue-700 text-xs font-semibold">
+          <span className="inline-flex items-center gap-1 rounded-lg bg-blue-50 px-2.5 py-1 text-xs font-semibold text-blue-700">
             {siteCount}
           </span>
         </td>
@@ -41,7 +42,7 @@ export const ExpandableCountryRow: React.FC<ExpandableCountryRowProps> = ({
           <div className="flex items-center justify-end gap-1">
             {/* Actions (Edit/Delete) injected by parent */}
             <ChevronDown
-              className={`ml-2 h-5 w-5 text-gray-400 group-hover:text-indigo-600 transition-transform duration-200 ${expanded ? 'rotate-180' : ''}`}
+              className={`ml-2 h-5 w-5 text-gray-400 transition-transform duration-200 group-hover:text-indigo-600 ${expanded ? 'rotate-180' : ''}`}
               aria-label="Afficher les détails"
             />
           </div>
@@ -50,7 +51,7 @@ export const ExpandableCountryRow: React.FC<ExpandableCountryRowProps> = ({
       <AnimatePresence initial={false}>
         {expanded && (
           <tr>
-            <td colSpan={6} className="p-0 bg-indigo-50/30">
+            <td colSpan={6} className="bg-indigo-50/30 p-0">
               <motion.div
                 initial={{ height: 0, opacity: 0 }}
                 animate={{ height: 'auto', opacity: 1 }}

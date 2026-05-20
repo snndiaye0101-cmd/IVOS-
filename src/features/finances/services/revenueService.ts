@@ -66,7 +66,10 @@ function toModeLabel(mode?: PaymentMethod): string {
   return mode;
 }
 
-function buildInvoiceRevenueLine(invoice: Invoice, payment: NonNullable<Invoice['payments']>[number]): RevenueEntry {
+function buildInvoiceRevenueLine(
+  invoice: Invoice,
+  payment: NonNullable<Invoice['payments']>[number]
+): RevenueEntry {
   const isAcompte = payment.label === 'Acompte';
   const lineLabel = isAcompte
     ? `Facture N°${invoice.numeroFacture} - Acompte`
@@ -150,8 +153,11 @@ export function createManualRevenue(data: ManualRevenueInput): RevenueEntry {
     ...(data.metadata && Object.keys(data.metadata).length > 0 ? { metadata: data.metadata } : {}),
   };
 
-  const updated = [entry, ...synced.filter((line) => line.source === 'Saisie manuelle'), ...synced.filter((line) => line.source === 'Facture')]
-    .sort((a, b) => b.date.localeCompare(a.date));
+  const updated = [
+    entry,
+    ...synced.filter((line) => line.source === 'Saisie manuelle'),
+    ...synced.filter((line) => line.source === 'Facture'),
+  ].sort((a, b) => b.date.localeCompare(a.date));
 
   saveRevenues(updated);
   return entry;
@@ -163,7 +169,9 @@ export function createManualRevenue(data: ManualRevenueInput): RevenueEntry {
  */
 export function updateRevenueEntry(
   id: string,
-  patch: Partial<Pick<RevenueEntry, 'status' | 'date' | 'mode' | 'metadata' | 'client' | 'libelle' | 'montant'>>,
+  patch: Partial<
+    Pick<RevenueEntry, 'status' | 'date' | 'mode' | 'metadata' | 'client' | 'libelle' | 'montant'>
+  >
 ): RevenueEntry | null {
   const entries = loadRevenuesRaw();
   const idx = entries.findIndex((e) => e.id === id);

@@ -105,7 +105,7 @@ export function createPayment(
  */
 export function validatePayment(paymentId: string, validatorName: string): Payment | null {
   const payments = loadPayments();
-  const payment = payments.find(p => p.id === paymentId);
+  const payment = payments.find((p) => p.id === paymentId);
 
   if (!payment) return null;
 
@@ -126,7 +126,7 @@ export function validatePayment(paymentId: string, validatorName: string): Payme
  */
 export function markPaymentAsEncaisse(paymentId: string): Payment | null {
   const payments = loadPayments();
-  const payment = payments.find(p => p.id === paymentId);
+  const payment = payments.find((p) => p.id === paymentId);
 
   if (!payment) return null;
 
@@ -143,7 +143,7 @@ export function markPaymentAsEncaisse(paymentId: string): Payment | null {
  */
 export function rejectPayment(paymentId: string, reason?: string): Payment | null {
   const payments = loadPayments();
-  const payment = payments.find(p => p.id === paymentId);
+  const payment = payments.find((p) => p.id === paymentId);
 
   if (!payment) return null;
 
@@ -160,7 +160,7 @@ export function rejectPayment(paymentId: string, reason?: string): Payment | nul
  */
 export function getPaymentsByInvoice(invoiceId: string): Payment[] {
   const payments = loadPayments();
-  return payments.filter(p => p.invoiceId === invoiceId);
+  return payments.filter((p) => p.invoiceId === invoiceId);
 }
 
 /**
@@ -175,19 +175,19 @@ export function getPayments(filters?: {
   let payments = loadPayments();
 
   if (filters?.status) {
-    payments = payments.filter(p => p.status === filters.status);
+    payments = payments.filter((p) => p.status === filters.status);
   }
 
   if (filters?.method) {
-    payments = payments.filter(p => p.method === filters.method);
+    payments = payments.filter((p) => p.method === filters.method);
   }
 
   if (filters?.dateDebut) {
-    payments = payments.filter(p => p.dateCreation >= filters.dateDebut!);
+    payments = payments.filter((p) => p.dateCreation >= filters.dateDebut!);
   }
 
   if (filters?.dateFin) {
-    payments = payments.filter(p => p.dateCreation <= filters.dateFin!);
+    payments = payments.filter((p) => p.dateCreation <= filters.dateFin!);
   }
 
   return payments;
@@ -209,20 +209,24 @@ export function getPaymentStats() {
 
   return {
     total: payments.length,
-    enAttente: payments.filter(p => p.status === 'en_attente').length,
-    valides: payments.filter(p => p.status === 'valide').length,
-    encaisses: payments.filter(p => p.status === 'encaisse').length,
-    rejetes: payments.filter(p => p.status === 'rejete').length,
-    
+    enAttente: payments.filter((p) => p.status === 'en_attente').length,
+    valides: payments.filter((p) => p.status === 'valide').length,
+    encaisses: payments.filter((p) => p.status === 'encaisse').length,
+    rejetes: payments.filter((p) => p.status === 'rejete').length,
+
     montantTotal: payments.reduce((s, p) => s + p.montant, 0),
-    montantEncaisse: payments.filter(p => p.status === 'encaisse').reduce((s, p) => s + p.montant, 0),
-    montantEnAttente: payments.filter(p => p.status === 'en_attente').reduce((s, p) => s + p.montant, 0),
+    montantEncaisse: payments
+      .filter((p) => p.status === 'encaisse')
+      .reduce((s, p) => s + p.montant, 0),
+    montantEnAttente: payments
+      .filter((p) => p.status === 'en_attente')
+      .reduce((s, p) => s + p.montant, 0),
 
     parMode: {
-      virement: payments.filter(p => p.method === 'virement').length,
-      cheque: payments.filter(p => p.method === 'cheque').length,
-      especes: payments.filter(p => p.method === 'especes').length,
-      autre: payments.filter(p => p.method === 'autre').length,
+      virement: payments.filter((p) => p.method === 'virement').length,
+      cheque: payments.filter((p) => p.method === 'cheque').length,
+      especes: payments.filter((p) => p.method === 'especes').length,
+      autre: payments.filter((p) => p.method === 'autre').length,
     },
   };
 }
@@ -247,16 +251,16 @@ export function formatPaymentDetails(payment: Payment): string {
   switch (payment.method) {
     case 'virement':
       return `Réf: ${payment.details.referenceBancaire} - ${payment.details.banqueEmettrice}`;
-    
+
     case 'cheque':
       return `Chèque N°${payment.details.numeroCheque} - ${payment.details.banqueCheque}`;
-    
+
     case 'especes':
       return `Remis par: ${payment.details.nomRemettant}`;
-    
+
     case 'autre':
       return payment.details.autreDetails || '—';
-    
+
     default:
       return '—';
   }
@@ -273,9 +277,11 @@ function updateInvoicePaymentStatus(invoiceId: string, newStatus: 'payee'): void
       updatedAt?: string;
     }
 
-    const invoices = JSON.parse(localStorage.getItem('ivos_workflow_invoices_v1') || '[]') as StoredInvoiceStatus[];
+    const invoices = JSON.parse(
+      localStorage.getItem('ivos_workflow_invoices_v1') || '[]'
+    ) as StoredInvoiceStatus[];
     const invoice = invoices.find((item) => item.id === invoiceId);
-    
+
     if (invoice) {
       invoice.status = newStatus;
       invoice.updatedAt = new Date().toISOString();

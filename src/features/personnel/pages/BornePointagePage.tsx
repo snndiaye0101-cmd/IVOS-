@@ -206,8 +206,6 @@ export default function BornePointagePage() {
     };
   }, [reload]);
 
-  
-
   useEffect(() => {
     setTerminalConfig(pointageStore.loadTerminalConfig());
     setPendingActions(pointageStore.loadOfflineQueue());
@@ -297,18 +295,21 @@ export default function BornePointagePage() {
     if (!selectedPortal && portals && portals.length > 0) setSelectedPortal(portals[0] as Portal);
   }, [portals]);
 
-  const handleTerminalChange = useCallback((portalId: string) => {
-    const selected = (portals || []).find((p) => p.id === portalId) as Portal | undefined;
-    if (!selected) return;
-    const nextConfig: TerminalConfig = {
-      terminalId: (selected as any).terminal_id || (selected as any).terminalId,
-      terminalName: (selected as any).name,
-      updatedAt: new Date().toISOString(),
-    };
-    setTerminalConfig(nextConfig);
-    pointageStore.saveTerminalConfig(nextConfig);
-    setSelectedPortal(selected as any);
-  }, [portals]);
+  const handleTerminalChange = useCallback(
+    (portalId: string) => {
+      const selected = (portals || []).find((p) => p.id === portalId) as Portal | undefined;
+      if (!selected) return;
+      const nextConfig: TerminalConfig = {
+        terminalId: (selected as any).terminal_id || (selected as any).terminalId,
+        terminalName: (selected as any).name,
+        updatedAt: new Date().toISOString(),
+      };
+      setTerminalConfig(nextConfig);
+      pointageStore.saveTerminalConfig(nextConfig);
+      setSelectedPortal(selected as any);
+    },
+    [portals]
+  );
 
   // NOUVEAU : Liste de présence dynamique pour les portails (clé = portal.id)
   const activePortals = useMemo(() => {
@@ -318,9 +319,11 @@ export default function BornePointagePage() {
     for (const portal of availablePortals) {
       const portalCheckins = allTodayPointages
         .filter(
-            (pt) =>
+          (pt) =>
             (pt.portalId && pt.portalId === portal.id) ||
-            (pt.terminalId && (pt.terminalId === (portal as any).terminal_id || pt.terminalId === (portal as any).terminalId)) ||
+            (pt.terminalId &&
+              (pt.terminalId === (portal as any).terminal_id ||
+                pt.terminalId === (portal as any).terminalId)) ||
             (pt.portal && pt.portal === portal.name)
         )
         .filter((p) => p.heureArrivee && !p.heureDepart)
@@ -593,7 +596,9 @@ export default function BornePointagePage() {
           availablePortals.find(
             (p) =>
               p.id === todayPointage?.portalId ||
-              (todayPointage?.terminalId && ((p as any).terminal_id === todayPointage.terminalId || (p as any).terminalId === todayPointage.terminalId)) ||
+              (todayPointage?.terminalId &&
+                ((p as any).terminal_id === todayPointage.terminalId ||
+                  (p as any).terminalId === todayPointage.terminalId)) ||
               p.name === todayPointage?.portal
           ) || null;
         setSelectedPortal(match);
@@ -647,7 +652,12 @@ export default function BornePointagePage() {
         agent.shiftNuit,
         false,
         false,
-        { portal: selectedPortal, portalId: selectedPortal?.id, vehicle: vehicle || undefined, terminalConfig }
+        {
+          portal: selectedPortal,
+          portalId: selectedPortal?.id,
+          vehicle: vehicle || undefined,
+          terminalConfig,
+        }
       );
       toast.success(`✅ ENTRÉE — ${agent.firstName} ${agent.lastName}`);
       playBeep(true);
@@ -703,7 +713,9 @@ export default function BornePointagePage() {
           availablePortals.find(
             (p) =>
               p.id === todayPointage?.portalId ||
-              (todayPointage?.terminalId && ((p as any).terminal_id === todayPointage.terminalId || (p as any).terminalId === todayPointage.terminalId)) ||
+              (todayPointage?.terminalId &&
+                ((p as any).terminal_id === todayPointage.terminalId ||
+                  (p as any).terminalId === todayPointage.terminalId)) ||
               p.name === todayPointage?.portal
           ) || null;
         setSelectedPortal(match);

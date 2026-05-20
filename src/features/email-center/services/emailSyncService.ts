@@ -36,7 +36,7 @@ function normalizeFolders(accountId: string): EmailFolder[] {
     { name: 'Favoris', type: 'starred' },
   ];
 
-  return base.map(folder => ({
+  return base.map((folder) => ({
     id: `${accountId}-${folder.type}`,
     accountId,
     providerFolderId: folder.type,
@@ -71,7 +71,8 @@ function fallbackMessages(accountId: string, folderId: string): EmailMessage[] {
       cc: [],
       subject: 'Urgent - DK-1234-AB mission de nuit',
       snippet: 'Merci de confirmer la disponibilite du vehicule DK-1234-AB pour la mission...',
-      htmlBody: '<p>Bonjour equipe IVOS,</p><p>Merci de confirmer la disponibilite du vehicule <strong>DK-1234-AB</strong> pour la mission de cette nuit.</p><p>Cordialement,<br/>Client Logistique</p>',
+      htmlBody:
+        '<p>Bonjour equipe IVOS,</p><p>Merci de confirmer la disponibilite du vehicule <strong>DK-1234-AB</strong> pour la mission de cette nuit.</p><p>Cordialement,<br/>Client Logistique</p>',
       textBody: 'Bonjour equipe IVOS, merci de confirmer la disponibilite du vehicule DK-1234-AB.',
       receivedAt: new Date(now - 1000 * 60 * 22).toISOString(),
       isRead: false,
@@ -89,7 +90,8 @@ function fallbackMessages(accountId: string, folderId: string): EmailMessage[] {
       cc: ['facturation@ivos.sn'],
       subject: 'Suivi facture Avril 2026',
       snippet: 'Pouvez-vous nous partager le statut de paiement pour la facture AV-2026-14 ?',
-      htmlBody: '<p>Bonjour,</p><p>Pouvez-vous nous partager le statut de paiement pour la facture AV-2026-14 ?</p>',
+      htmlBody:
+        '<p>Bonjour,</p><p>Pouvez-vous nous partager le statut de paiement pour la facture AV-2026-14 ?</p>',
       textBody: 'Suivi facture Avril 2026',
       receivedAt: new Date(now - 1000 * 60 * 160).toISOString(),
       isRead: true,
@@ -111,10 +113,13 @@ function saveAccounts(accounts: LinkedEmailAccount[]) {
   localStorage.setItem(ACCOUNTS_KEY, JSON.stringify(accounts));
 }
 
-function replaceStoredAccount(accountId: string, updater: (account: LinkedEmailAccount) => LinkedEmailAccount) {
-  const next = loadAccounts().map(account => (
+function replaceStoredAccount(
+  accountId: string,
+  updater: (account: LinkedEmailAccount) => LinkedEmailAccount
+) {
+  const next = loadAccounts().map((account) =>
     account.id === accountId ? updater(account) : account
-  ));
+  );
   saveAccounts(next);
 }
 
@@ -132,31 +137,33 @@ function persistCursors() {
 
 function updateAccountSyncDate(accountId: string) {
   const all = loadAccounts();
-  const next = all.map(account => (
-    account.id === accountId
-      ? { ...account, lastSyncAt: new Date().toISOString() }
-      : account
-  ));
+  const next = all.map((account) =>
+    account.id === accountId ? { ...account, lastSyncAt: new Date().toISOString() } : account
+  );
   saveAccounts(next);
 }
 
 function notifyEmailSyncChanged(userId?: string) {
-  window.dispatchEvent(new CustomEvent(EMAIL_CENTER_SYNC_EVENT, {
-    detail: {
-      at: new Date().toISOString(),
-      userId: userId || '',
-    },
-  }));
+  window.dispatchEvent(
+    new CustomEvent(EMAIL_CENTER_SYNC_EVENT, {
+      detail: {
+        at: new Date().toISOString(),
+        userId: userId || '',
+      },
+    })
+  );
 }
 
 function notifyUnreadChanged(userId?: string, unread = 0) {
-  window.dispatchEvent(new CustomEvent(EMAIL_CENTER_UNREAD_EVENT, {
-    detail: {
-      at: new Date().toISOString(),
-      userId: userId || '',
-      unread,
-    },
-  }));
+  window.dispatchEvent(
+    new CustomEvent(EMAIL_CENTER_UNREAD_EVENT, {
+      detail: {
+        at: new Date().toISOString(),
+        userId: userId || '',
+        unread,
+      },
+    })
+  );
 }
 
 function hasRemoteApi(account: LinkedEmailAccount): boolean {
@@ -168,7 +175,7 @@ function shouldRetryStatus(status: number): boolean {
 }
 
 async function wait(ms: number) {
-  await new Promise(resolve => window.setTimeout(resolve, ms));
+  await new Promise((resolve) => window.setTimeout(resolve, ms));
 }
 
 async function fetchWithRetry(input: string, init?: RequestInit, retries = 2): Promise<Response> {
@@ -203,7 +210,11 @@ async function fetchJson<T>(input: string, init?: RequestInit): Promise<T> {
   return response.json() as Promise<T>;
 }
 
-async function fetchRemoteJsonForAccount<T>(account: LinkedEmailAccount, input: string, init?: RequestInit): Promise<T> {
+async function fetchRemoteJsonForAccount<T>(
+  account: LinkedEmailAccount,
+  input: string,
+  init?: RequestInit
+): Promise<T> {
   const response = await fetchWithRetry(input, {
     ...init,
     headers: {
@@ -217,9 +228,11 @@ async function fetchRemoteJsonForAccount<T>(account: LinkedEmailAccount, input: 
 
   const refreshedAccessToken = response.headers.get('X-Email-Center-Access-Token');
   if (response.ok && refreshedAccessToken) {
-    const refreshedRefreshToken = response.headers.get('X-Email-Center-Refresh-Token') || account.refreshToken;
-    const refreshedExpiresAt = response.headers.get('X-Email-Center-Expires-At') || account.expiresAt;
-    replaceStoredAccount(account.id, current => ({
+    const refreshedRefreshToken =
+      response.headers.get('X-Email-Center-Refresh-Token') || account.refreshToken;
+    const refreshedExpiresAt =
+      response.headers.get('X-Email-Center-Expires-At') || account.expiresAt;
+    replaceStoredAccount(account.id, (current) => ({
       ...current,
       accessToken: refreshedAccessToken,
       refreshToken: refreshedRefreshToken || undefined,
@@ -236,7 +249,10 @@ async function fetchRemoteJsonForAccount<T>(account: LinkedEmailAccount, input: 
   return response.json() as Promise<T>;
 }
 
-function mapFolder(accountId: string, folder: EmailFoldersResponse['folders'][number]): EmailFolder {
+function mapFolder(
+  accountId: string,
+  folder: EmailFoldersResponse['folders'][number]
+): EmailFolder {
   return {
     id: `${accountId}-${folder.providerFolderId || folder.id}`,
     accountId,
@@ -247,7 +263,11 @@ function mapFolder(accountId: string, folder: EmailFoldersResponse['folders'][nu
   };
 }
 
-function mapMessage(accountId: string, folderId: string, message: PagedMessagesResponse['messages'][number]): EmailMessage {
+function mapMessage(
+  accountId: string,
+  folderId: string,
+  message: PagedMessagesResponse['messages'][number]
+): EmailMessage {
   return {
     id: message.id,
     accountId,
@@ -269,21 +289,32 @@ function mapMessage(accountId: string, folderId: string, message: PagedMessagesR
 }
 
 async function fetchRemoteFolders(account: LinkedEmailAccount): Promise<EmailFolder[]> {
-  const data = await fetchRemoteJsonForAccount<EmailFoldersResponse>(account, `${EMAIL_BACKEND_URL}/providers/${account.provider}/folders`);
+  const data = await fetchRemoteJsonForAccount<EmailFoldersResponse>(
+    account,
+    `${EMAIL_BACKEND_URL}/providers/${account.provider}/folders`
+  );
 
-  return (data.folders || []).map(folder => mapFolder(account.id, folder));
+  return (data.folders || []).map((folder) => mapFolder(account.id, folder));
 }
 
-async function fetchRemoteMessagesPage(account: LinkedEmailAccount, folder: EmailFolder, cursor: string | null, pageSize = 20): Promise<{ messages: EmailMessage[]; nextCursor: string | null }> {
+async function fetchRemoteMessagesPage(
+  account: LinkedEmailAccount,
+  folder: EmailFolder,
+  cursor: string | null,
+  pageSize = 20
+): Promise<{ messages: EmailMessage[]; nextCursor: string | null }> {
   const qs = new URLSearchParams();
   qs.set('folderId', folder.providerFolderId || folder.type);
   qs.set('pageSize', String(pageSize));
   if (cursor) qs.set('cursor', cursor);
 
-  const data = await fetchRemoteJsonForAccount<PagedMessagesResponse>(account, `${EMAIL_BACKEND_URL}/providers/${account.provider}/messages?${qs.toString()}`);
+  const data = await fetchRemoteJsonForAccount<PagedMessagesResponse>(
+    account,
+    `${EMAIL_BACKEND_URL}/providers/${account.provider}/messages?${qs.toString()}`
+  );
 
   return {
-    messages: (data.messages || []).map(message => mapMessage(account.id, folder.id, message)),
+    messages: (data.messages || []).map((message) => mapMessage(account.id, folder.id, message)),
     nextCursor: data.nextCursor || null,
   };
 }
@@ -292,12 +323,12 @@ loadCursors();
 
 export const emailSyncService = {
   loadLinkedAccounts(userId: string): LinkedEmailAccount[] {
-    return loadAccounts().filter(account => account.userId === userId);
+    return loadAccounts().filter((account) => account.userId === userId);
   },
 
   upsertLinkedAccount(account: LinkedEmailAccount) {
     const all = loadAccounts();
-    const index = all.findIndex(a => a.id === account.id);
+    const index = all.findIndex((a) => a.id === account.id);
     if (index >= 0) {
       all[index] = account;
     } else {
@@ -308,12 +339,14 @@ export const emailSyncService = {
   },
 
   removeAccount(accountId: string) {
-    const previous = loadAccounts().find(a => a.id === accountId);
-    saveAccounts(loadAccounts().filter(a => a.id !== accountId));
+    const previous = loadAccounts().find((a) => a.id === accountId);
+    saveAccounts(loadAccounts().filter((a) => a.id !== accountId));
     notifyEmailSyncChanged(previous?.userId);
   },
 
-  async syncAccount(account: LinkedEmailAccount): Promise<{ folders: EmailFolder[]; messagesByFolder: Record<string, EmailMessage[]> }> {
+  async syncAccount(
+    account: LinkedEmailAccount
+  ): Promise<{ folders: EmailFolder[]; messagesByFolder: Record<string, EmailMessage[]> }> {
     let folders: EmailFolder[];
     if (hasRemoteApi(account)) {
       try {
@@ -404,12 +437,15 @@ export const emailSyncService = {
     }
 
     const folders = this.getFolders(account.id);
-    const folder = folders.find(item => item.id === folderId);
+    const folder = folders.find((item) => item.id === folderId);
     if (!folder) return this.getMessages(folderId);
 
     const page = await fetchRemoteMessagesPage(account, folder, cursor, 20);
     const current = this.getMessages(folderId);
-    const merged = [...current, ...page.messages.filter(msg => !current.some(existing => existing.id === msg.id))];
+    const merged = [
+      ...current,
+      ...page.messages.filter((msg) => !current.some((existing) => existing.id === msg.id)),
+    ];
     writeFolderMessages(folderId, merged);
     messageCursors[folderId] = page.nextCursor;
     persistCursors();
@@ -418,16 +454,20 @@ export const emailSyncService = {
 
   async sendEmail(payload: ComposePayload): Promise<EmailMessage> {
     const all = loadAccounts();
-    const account = all.find(item => item.id === payload.accountId);
+    const account = all.find((item) => item.id === payload.accountId);
 
     if (account && hasRemoteApi(account)) {
-      await fetchRemoteJsonForAccount(account, `${EMAIL_BACKEND_URL}/providers/${account.provider}/send`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(payload),
-      });
+      await fetchRemoteJsonForAccount(
+        account,
+        `${EMAIL_BACKEND_URL}/providers/${account.provider}/send`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(payload),
+        }
+      );
     }
 
     const folderId = `${payload.accountId}-sent`;
@@ -457,21 +497,19 @@ export const emailSyncService = {
 
   async markAsRead(message: EmailMessage, isRead: boolean): Promise<void> {
     const current = this.getMessages(message.folderId);
-    const next = current.map(item => (
-      item.id === message.id ? { ...item, isRead } : item
-    ));
+    const next = current.map((item) => (item.id === message.id ? { ...item, isRead } : item));
     writeFolderMessages(message.folderId, next);
 
     const all = loadAccounts();
-    const account = all.find(item => item.id === message.accountId);
+    const account = all.find((item) => item.id === message.accountId);
     if (account) {
       const accountFolders = this.getFolders(account.id);
-      const folder = accountFolders.find(item => item.id === message.folderId);
+      const folder = accountFolders.find((item) => item.id === message.folderId);
       if (folder) {
-        const unread = next.filter(item => !item.isRead).length;
-        const nextFolders = accountFolders.map(item => (
+        const unread = next.filter((item) => !item.isRead).length;
+        const nextFolders = accountFolders.map((item) =>
           item.id === folder.id ? { ...item, unreadCount: unread } : item
-        ));
+        );
         writeAccountFolders(account.id, nextFolders);
       }
       notifyUnreadChanged(account.userId, this.getTotalUnreadCount(account.userId));
@@ -532,7 +570,7 @@ export const emailSyncService = {
     let total = 0;
     for (const account of accounts) {
       const folders = this.getFolders(account.id);
-      const inbox = folders.find(folder => folder.type === 'inbox');
+      const inbox = folders.find((folder) => folder.type === 'inbox');
       total += Number(inbox?.unreadCount || 0);
     }
     return total;
