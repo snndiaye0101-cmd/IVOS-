@@ -14,11 +14,7 @@ export type CompanyDocCategory =
   | 'Assurances & Taxes'
   | 'Dossiers Employés';
 
-export type EmployeeDossierSection =
-  | 'État Civil'
-  | 'Administratif & RH'
-  | 'Paie'
-  | 'Discipline';
+export type EmployeeDossierSection = 'État Civil' | 'Administratif & RH' | 'Paie' | 'Discipline';
 
 export interface HRDocument {
   id: string;
@@ -80,11 +76,11 @@ export const employeeDocStore = {
   },
 
   getByEmployee(employeeId: string): HRDocument[] {
-    return this.getAll().filter(d => d.employeeId === employeeId);
+    return this.getAll().filter((d) => d.employeeId === employeeId);
   },
 
   getByCategory(employeeId: string, category: DocumentCategory): HRDocument[] {
-    return this.getByEmployee(employeeId).filter(d => d.category === category);
+    return this.getByEmployee(employeeId).filter((d) => d.category === category);
   },
 
   add(doc: Omit<HRDocument, 'id' | 'uploadedAt'>): HRDocument {
@@ -100,12 +96,12 @@ export const employeeDocStore = {
   },
 
   remove(docId: string): void {
-    const all = this.getAll().filter(d => d.id !== docId);
+    const all = this.getAll().filter((d) => d.id !== docId);
     writeToStorage(EMPLOYEE_DOCS_KEY, all);
   },
 
   update(docId: string, updates: Partial<Pick<HRDocument, 'name' | 'description'>>): void {
-    const all = this.getAll().map(d => d.id === docId ? { ...d, ...updates } : d);
+    const all = this.getAll().map((d) => (d.id === docId ? { ...d, ...updates } : d));
     writeToStorage(EMPLOYEE_DOCS_KEY, all);
   },
 };
@@ -117,18 +113,19 @@ export const companyDocStore = {
   },
 
   getByCategory(category: CompanyDocCategory): CompanyDocument[] {
-    return this.getAll().filter(d => d.category === category);
+    return this.getAll().filter((d) => d.category === category);
   },
 
   getEmployeeDocs(employeeId: string): CompanyDocument[] {
     return this.getAll().filter(
-      d => d.category === 'Dossiers Employés' && d.employeeId === employeeId,
+      (d) => d.category === 'Dossiers Employés' && d.employeeId === employeeId
     );
   },
 
   getEmployeeDocsBySection(employeeId: string, section: EmployeeDossierSection): CompanyDocument[] {
     return this.getAll().filter(
-      d => d.category === 'Dossiers Employés' && d.employeeId === employeeId && d.section === section,
+      (d) =>
+        d.category === 'Dossiers Employés' && d.employeeId === employeeId && d.section === section
     );
   },
 
@@ -145,7 +142,7 @@ export const companyDocStore = {
   },
 
   remove(docId: string): void {
-    const all = this.getAll().filter(d => d.id !== docId);
+    const all = this.getAll().filter((d) => d.id !== docId);
     writeToStorage(COMPANY_DOCS_KEY, all);
   },
 };

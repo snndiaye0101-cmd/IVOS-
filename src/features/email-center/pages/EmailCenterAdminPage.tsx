@@ -1,5 +1,16 @@
 import { useEffect, useMemo, useState } from 'react';
-import { Activity, AlertTriangle, CheckCircle2, Clock3, KeyRound, Mail, RefreshCcw, ShieldCheck, ShieldX, Webhook } from 'lucide-react';
+import {
+  Activity,
+  AlertTriangle,
+  CheckCircle2,
+  Clock3,
+  KeyRound,
+  Mail,
+  RefreshCcw,
+  ShieldCheck,
+  ShieldX,
+  Webhook,
+} from 'lucide-react';
 import { useAuth } from '@shared/contexts/AuthContext';
 import { permissionStore } from '@shared/services/permissionStore';
 import { emailSyncService } from '../services/emailSyncService';
@@ -99,7 +110,9 @@ export default function EmailCenterAdminPage() {
       <div className="p-8 text-center">
         <ShieldX className="mx-auto mb-4 h-16 w-16 text-red-500" />
         <h1 className="text-2xl font-bold text-gray-900">Acces refuse</h1>
-        <p className="mt-2 text-sm text-gray-500">Ce tableau de supervision est reserve au Super Admin.</p>
+        <p className="mt-2 text-sm text-gray-500">
+          Ce tableau de supervision est reserve au Super Admin.
+        </p>
       </div>
     );
   }
@@ -109,10 +122,15 @@ export default function EmailCenterAdminPage() {
       <div className="rounded-3xl bg-gradient-to-r from-[#111827] via-[#0f3d5e] to-[#0e7490] p-6 text-white shadow-xl">
         <div className="flex flex-wrap items-center justify-between gap-4">
           <div>
-            <p className="text-xs font-bold uppercase tracking-[0.28em] text-cyan-100">Supervision Email Center</p>
-            <h1 className="mt-2 text-3xl font-extrabold">Securite OAuth, webhooks et synchronisation</h1>
+            <p className="text-xs font-bold uppercase tracking-[0.28em] text-cyan-100">
+              Supervision Email Center
+            </p>
+            <h1 className="mt-2 text-3xl font-extrabold">
+              Securite OAuth, webhooks et synchronisation
+            </h1>
             <p className="mt-2 max-w-3xl text-sm text-cyan-50/90">
-              Controle en temps reel de l'API Email Center: etat OAuth, rafraichissement des tokens, verification des webhooks et disponibilite globale.
+              Controle en temps reel de l'API Email Center: etat OAuth, rafraichissement des tokens,
+              verification des webhooks et disponibilite globale.
             </p>
           </div>
           <button
@@ -140,10 +158,34 @@ export default function EmailCenterAdminPage() {
       {overview && (
         <>
           <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
-            <StatCard icon={<Activity className="h-5 w-5" />} label="Disponibilite" value={overview.ok ? 'OK' : 'Degrade'} tone={overview.ok ? 'emerald' : 'red'} subtext={`Uptime ${formatDuration(overview.uptimeSeconds)}`} />
-            <StatCard icon={<Webhook className="h-5 w-5" />} label="Webhooks" value={overview.webhookStats.total} tone="blue" subtext={`${overview.webhookStats.accepted} acceptes / ${overview.webhookStats.rejected} rejetes`} />
-            <StatCard icon={<KeyRound className="h-5 w-5" />} label="Refresh tokens" value={overview.tokenRefreshStats.total} tone={overview.tokenRefreshStats.failed > 0 ? 'amber' : 'emerald'} subtext={`${overview.tokenRefreshStats.success} succes / ${overview.tokenRefreshStats.failed} echec`} />
-            <StatCard icon={<Clock3 className="h-5 w-5" />} label="Etats OAuth" value={overview.oauthStatesPending} tone={overview.oauthStatesPending > 0 ? 'amber' : 'blue'} subtext={`Snapshot ${formatDateTime(overview.generatedAt)}`} />
+            <StatCard
+              icon={<Activity className="h-5 w-5" />}
+              label="Disponibilite"
+              value={overview.ok ? 'OK' : 'Degrade'}
+              tone={overview.ok ? 'emerald' : 'red'}
+              subtext={`Uptime ${formatDuration(overview.uptimeSeconds)}`}
+            />
+            <StatCard
+              icon={<Webhook className="h-5 w-5" />}
+              label="Webhooks"
+              value={overview.webhookStats.total}
+              tone="blue"
+              subtext={`${overview.webhookStats.accepted} acceptes / ${overview.webhookStats.rejected} rejetes`}
+            />
+            <StatCard
+              icon={<KeyRound className="h-5 w-5" />}
+              label="Refresh tokens"
+              value={overview.tokenRefreshStats.total}
+              tone={overview.tokenRefreshStats.failed > 0 ? 'amber' : 'emerald'}
+              subtext={`${overview.tokenRefreshStats.success} succes / ${overview.tokenRefreshStats.failed} echec`}
+            />
+            <StatCard
+              icon={<Clock3 className="h-5 w-5" />}
+              label="Etats OAuth"
+              value={overview.oauthStatesPending}
+              tone={overview.oauthStatesPending > 0 ? 'amber' : 'blue'}
+              subtext={`Snapshot ${formatDateTime(overview.generatedAt)}`}
+            />
           </div>
 
           <div className="grid grid-cols-1 gap-6 xl:grid-cols-[1.1fr_0.9fr]">
@@ -153,30 +195,54 @@ export default function EmailCenterAdminPage() {
                 <h2 className="text-lg font-bold text-gray-900">Configuration providers</h2>
               </div>
               <div className="mt-4 grid gap-4 md:grid-cols-2">
-                {(['gmail', 'outlook'] as const).map(provider => {
+                {(['gmail', 'outlook'] as const).map((provider) => {
                   const config = overview.providerConfig[provider];
                   return (
-                    <div key={provider} className="rounded-2xl border border-gray-200 bg-gray-50 p-4">
+                    <div
+                      key={provider}
+                      className="rounded-2xl border border-gray-200 bg-gray-50 p-4"
+                    >
                       <div className="flex items-center gap-2 text-sm font-bold uppercase tracking-wide text-gray-700">
-                        <Mail className="h-4 w-4" /> {provider === 'gmail' ? 'Gmail API' : 'Microsoft Graph'}
+                        <Mail className="h-4 w-4" />{' '}
+                        {provider === 'gmail' ? 'Gmail API' : 'Microsoft Graph'}
                       </div>
                       <div className="mt-4 space-y-3 text-sm text-gray-700">
                         <div className="flex items-center justify-between rounded-xl bg-white px-3 py-2">
                           <span>OAuth configure</span>
-                          <span className={config.oauthConfigured ? 'font-semibold text-emerald-700' : 'font-semibold text-red-600'}>
+                          <span
+                            className={
+                              config.oauthConfigured
+                                ? 'font-semibold text-emerald-700'
+                                : 'font-semibold text-red-600'
+                            }
+                          >
                             {config.oauthConfigured ? 'Oui' : 'Non'}
                           </span>
                         </div>
                         <div className="flex items-center justify-between rounded-xl bg-white px-3 py-2">
                           <span>Secret webhook</span>
-                          <span className={config.webhookSecretConfigured ? 'font-semibold text-emerald-700' : 'font-semibold text-red-600'}>
-                            {config.webhookSecretConfigured ? `Oui (${config.webhookSecretCount || 1})` : 'Non'}
+                          <span
+                            className={
+                              config.webhookSecretConfigured
+                                ? 'font-semibold text-emerald-700'
+                                : 'font-semibold text-red-600'
+                            }
+                          >
+                            {config.webhookSecretConfigured
+                              ? `Oui (${config.webhookSecretCount || 1})`
+                              : 'Non'}
                           </span>
                         </div>
                         {provider === 'outlook' && (
                           <div className="flex items-center justify-between rounded-xl bg-white px-3 py-2">
                             <span>Client state</span>
-                            <span className={config.clientStateConfigured ? 'font-semibold text-emerald-700' : 'font-semibold text-amber-600'}>
+                            <span
+                              className={
+                                config.clientStateConfigured
+                                  ? 'font-semibold text-emerald-700'
+                                  : 'font-semibold text-amber-600'
+                              }
+                            >
                               {config.clientStateConfigured ? 'Oui' : 'Non'}
                             </span>
                           </div>
@@ -197,7 +263,13 @@ export default function EmailCenterAdminPage() {
                 <div className="rounded-2xl border border-gray-200 bg-slate-50 p-4 text-sm text-slate-700">
                   <div className="flex items-center justify-between gap-3">
                     <span>Protection endpoint admin</span>
-                    <span className={overview.adminAuthConfigured ? 'font-semibold text-emerald-700' : 'font-semibold text-amber-600'}>
+                    <span
+                      className={
+                        overview.adminAuthConfigured
+                          ? 'font-semibold text-emerald-700'
+                          : 'font-semibold text-amber-600'
+                      }
+                    >
                       {overview.adminAuthConfigured ? 'Activee' : 'Non configuree'}
                     </span>
                   </div>
@@ -208,7 +280,12 @@ export default function EmailCenterAdminPage() {
                     <span>{overview.webhookStats.byProvider.gmail} webhooks</span>
                   </div>
                   <div className="mt-3 h-3 overflow-hidden rounded-full bg-gray-100">
-                    <div className="h-full rounded-full bg-blue-500" style={{ width: `${overview.webhookStats.total ? (overview.webhookStats.byProvider.gmail / overview.webhookStats.total) * 100 : 0}%` }} />
+                    <div
+                      className="h-full rounded-full bg-blue-500"
+                      style={{
+                        width: `${overview.webhookStats.total ? (overview.webhookStats.byProvider.gmail / overview.webhookStats.total) * 100 : 0}%`,
+                      }}
+                    />
                   </div>
                 </div>
                 <div className="rounded-2xl border border-gray-200 p-4">
@@ -217,7 +294,12 @@ export default function EmailCenterAdminPage() {
                     <span>{overview.webhookStats.byProvider.outlook} webhooks</span>
                   </div>
                   <div className="mt-3 h-3 overflow-hidden rounded-full bg-gray-100">
-                    <div className="h-full rounded-full bg-cyan-500" style={{ width: `${overview.webhookStats.total ? (overview.webhookStats.byProvider.outlook / overview.webhookStats.total) * 100 : 0}%` }} />
+                    <div
+                      className="h-full rounded-full bg-cyan-500"
+                      style={{
+                        width: `${overview.webhookStats.total ? (overview.webhookStats.byProvider.outlook / overview.webhookStats.total) * 100 : 0}%`,
+                      }}
+                    />
                   </div>
                 </div>
               </div>
@@ -243,20 +325,33 @@ export default function EmailCenterAdminPage() {
                   <tbody>
                     {overview.recentWebhooks.length === 0 ? (
                       <tr>
-                        <td colSpan={4} className="px-4 py-8 text-center text-gray-500">Aucun webhook recu pour le moment.</td>
-                      </tr>
-                    ) : overview.recentWebhooks.map(event => (
-                      <tr key={`${event.provider}-${event.at}-${event.status}`} className="border-t border-gray-100">
-                        <td className="px-4 py-3 font-semibold text-gray-900">{event.provider}</td>
-                        <td className="px-4 py-3">
-                          <span className={`inline-flex rounded-full px-2.5 py-1 text-xs font-semibold ${event.status === 'accepted' ? 'bg-emerald-100 text-emerald-700' : 'bg-red-100 text-red-700'}`}>
-                            {event.status === 'accepted' ? 'Accepte' : 'Rejete'}
-                          </span>
+                        <td colSpan={4} className="px-4 py-8 text-center text-gray-500">
+                          Aucun webhook recu pour le moment.
                         </td>
-                        <td className="px-4 py-3 text-gray-600">{event.reason || event.clientState || 'OK'}</td>
-                        <td className="px-4 py-3 text-gray-500">{formatDateTime(event.at)}</td>
                       </tr>
-                    ))}
+                    ) : (
+                      overview.recentWebhooks.map((event) => (
+                        <tr
+                          key={`${event.provider}-${event.at}-${event.status}`}
+                          className="border-t border-gray-100"
+                        >
+                          <td className="px-4 py-3 font-semibold text-gray-900">
+                            {event.provider}
+                          </td>
+                          <td className="px-4 py-3">
+                            <span
+                              className={`inline-flex rounded-full px-2.5 py-1 text-xs font-semibold ${event.status === 'accepted' ? 'bg-emerald-100 text-emerald-700' : 'bg-red-100 text-red-700'}`}
+                            >
+                              {event.status === 'accepted' ? 'Accepte' : 'Rejete'}
+                            </span>
+                          </td>
+                          <td className="px-4 py-3 text-gray-600">
+                            {event.reason || event.clientState || 'OK'}
+                          </td>
+                          <td className="px-4 py-3 text-gray-500">{formatDateTime(event.at)}</td>
+                        </tr>
+                      ))
+                    )}
                   </tbody>
                 </table>
               </div>
@@ -269,19 +364,33 @@ export default function EmailCenterAdminPage() {
               </div>
               <div className="mt-4 space-y-3">
                 {overview.tokenRefreshStats.recent.length === 0 && (
-                  <div className="rounded-xl border border-gray-200 bg-gray-50 p-4 text-sm text-gray-500">Aucun refresh token enregistre.</div>
+                  <div className="rounded-xl border border-gray-200 bg-gray-50 p-4 text-sm text-gray-500">
+                    Aucun refresh token enregistre.
+                  </div>
                 )}
-                {overview.tokenRefreshStats.recent.map(event => (
-                  <div key={`${event.provider}-${event.at}-${event.status}`} className="rounded-2xl border border-gray-200 p-4">
+                {overview.tokenRefreshStats.recent.map((event) => (
+                  <div
+                    key={`${event.provider}-${event.at}-${event.status}`}
+                    className="rounded-2xl border border-gray-200 p-4"
+                  >
                     <div className="flex items-start justify-between gap-4">
                       <div>
                         <div className="flex items-center gap-2">
-                          {event.status === 'success' ? <CheckCircle2 className="h-4 w-4 text-emerald-600" /> : <AlertTriangle className="h-4 w-4 text-red-500" />}
-                          <p className="text-sm font-semibold text-gray-900">{event.provider} • {event.status === 'success' ? 'Refresh reussi' : 'Refresh en echec'}</p>
+                          {event.status === 'success' ? (
+                            <CheckCircle2 className="h-4 w-4 text-emerald-600" />
+                          ) : (
+                            <AlertTriangle className="h-4 w-4 text-red-500" />
+                          )}
+                          <p className="text-sm font-semibold text-gray-900">
+                            {event.provider} •{' '}
+                            {event.status === 'success' ? 'Refresh reussi' : 'Refresh en echec'}
+                          </p>
                         </div>
                         <p className="mt-1 text-xs text-gray-500">{formatDateTime(event.at)}</p>
                       </div>
-                      <span className={`rounded-full px-2.5 py-1 text-xs font-semibold ${event.status === 'success' ? 'bg-emerald-100 text-emerald-700' : 'bg-red-100 text-red-700'}`}>
+                      <span
+                        className={`rounded-full px-2.5 py-1 text-xs font-semibold ${event.status === 'success' ? 'bg-emerald-100 text-emerald-700' : 'bg-red-100 text-red-700'}`}
+                      >
                         {event.status}
                       </span>
                     </div>

@@ -1,6 +1,6 @@
 /**
  * Service d'Analytics et Tracking d'Usage
- * 
+ *
  * Collecte anonymisée des métriques d'usage et performance
  */
 
@@ -26,7 +26,7 @@ const MAX_EVENTS = 100;
 
 /**
  * Récupérer tous les événements enregistrés
- * 
+ *
  * @returns {AnalyticsEvent[]} Liste des événements
  */
 export function getAnalyticsEvents(): AnalyticsEvent[] {
@@ -40,7 +40,7 @@ export function getAnalyticsEvents(): AnalyticsEvent[] {
 
 /**
  * Enregistrer un événement analytics
- * 
+ *
  * @param {string} name - Nom de l'événement
  * @param {string} category - Catégorie de l'événement
  * @param {object} properties - Propriétés additionnelles
@@ -75,7 +75,7 @@ export function trackEvent(
   const events = getAnalyticsEvents();
   events.unshift(event);
   const trimmed = events.slice(0, MAX_EVENTS);
-  
+
   try {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(trimmed));
   } catch (error) {
@@ -88,7 +88,7 @@ export function trackEvent(
 
 /**
  * Envoyer l'événement à un service externe (à implémenter)
- * 
+ *
  * @param {AnalyticsEvent} event - Événement à envoyer
  */
 function sendToExternalService(event: AnalyticsEvent): void {
@@ -106,7 +106,7 @@ function sendToExternalService(event: AnalyticsEvent): void {
 
 /**
  * Tracker une page vue
- * 
+ *
  * @param {string} pageName - Nom de la page
  * @param {string} path - Chemin de la page
  * @example
@@ -122,7 +122,7 @@ export function trackPageView(pageName: string, path: string): void {
 
 /**
  * Tracker une action utilisateur
- * 
+ *
  * @param {string} actionName - Nom de l'action
  * @param {object} metadata - Métadonnées de l'action
  * @example
@@ -137,7 +137,7 @@ export function trackAction(actionName: string, metadata?: Record<string, any>):
 
 /**
  * Tracker une erreur
- * 
+ *
  * @param {string} errorName - Nom de l'erreur
  * @param {object} errorDetails - Détails de l'erreur
  * @example
@@ -152,7 +152,7 @@ export function trackError(errorName: string, errorDetails?: Record<string, any>
 
 /**
  * Mesurer une métrique de performance
- * 
+ *
  * @param {string} metricName - Nom de la métrique
  * @param {number} value - Valeur de la métrique
  * @param {string} unit - Unité de mesure (ms, bytes, count)
@@ -176,7 +176,7 @@ export function trackPerformance(
 
 /**
  * Obtenir les statistiques d'usage
- * 
+ *
  * @param {number} days - Nombre de jours à analyser
  * @returns {object} Statistiques d'usage
  * @example
@@ -193,9 +193,7 @@ export function getUsageStats(days: number = 7): {
   const cutoffDate = new Date();
   cutoffDate.setDate(cutoffDate.getDate() - days);
 
-  const recentEvents = events.filter(
-    (e) => new Date(e.timestamp) >= cutoffDate
-  );
+  const recentEvents = events.filter((e) => new Date(e.timestamp) >= cutoffDate);
 
   // Événements par catégorie
   const eventsByCategory: Record<string, number> = {};
@@ -224,7 +222,7 @@ export function getUsageStats(days: number = 7): {
 
 /**
  * Exporter les données analytics au format CSV
- * 
+ *
  * @returns {string} Données CSV
  * @example
  * const csv = exportAnalyticsCSV();
@@ -232,20 +230,22 @@ export function getUsageStats(days: number = 7): {
  */
 export function exportAnalyticsCSV(): string {
   const events = getAnalyticsEvents();
-  
+
   const headers = 'Timestamp,Name,Category,User ID,Session ID,Properties\n';
-  
-  const rows = events.map((e) => {
-    const props = e.properties ? JSON.stringify(e.properties) : '';
-    return `"${e.timestamp}","${e.name}","${e.category}","${e.userId || ''}","${e.sessionId}","${props}"`;
-  }).join('\n');
+
+  const rows = events
+    .map((e) => {
+      const props = e.properties ? JSON.stringify(e.properties) : '';
+      return `"${e.timestamp}","${e.name}","${e.category}","${e.userId || ''}","${e.sessionId}","${props}"`;
+    })
+    .join('\n');
 
   return headers + rows;
 }
 
 /**
  * Nettoyer les anciennes données analytics (plus de 30 jours)
- * 
+ *
  * @returns {number} Nombre d'événements supprimés
  * @example
  * const deleted = cleanOldAnalytics();
@@ -256,9 +256,7 @@ export function cleanOldAnalytics(): number {
   const cutoffDate = new Date();
   cutoffDate.setDate(cutoffDate.getDate() - 30);
 
-  const recentEvents = events.filter(
-    (e) => new Date(e.timestamp) >= cutoffDate
-  );
+  const recentEvents = events.filter((e) => new Date(e.timestamp) >= cutoffDate);
 
   const deletedCount = events.length - recentEvents.length;
 
@@ -272,11 +270,11 @@ export function cleanOldAnalytics(): number {
 
 /**
  * Hook React pour tracker automatiquement les pages vues
- * 
+ *
  * @example
  * // Dans un composant de page
  * import { useEffect } from 'react';
- * 
+ *
  * function MyPage() {
  *   useEffect(() => {
  *     trackPageView('Dashboard', '/dashboard');
@@ -291,7 +289,7 @@ export function cleanOldAnalytics(): number {
 if (typeof window !== 'undefined') {
   const lastCleanup = localStorage.getItem('ivos_analytics_last_cleanup');
   const now = Date.now();
-  
+
   if (!lastCleanup || now - parseInt(lastCleanup) > 7 * 24 * 60 * 60 * 1000) {
     cleanOldAnalytics();
     localStorage.setItem('ivos_analytics_last_cleanup', now.toString());

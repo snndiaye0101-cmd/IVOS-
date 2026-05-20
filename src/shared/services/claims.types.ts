@@ -1,4 +1,10 @@
-export type ClaimNature = 'Collision' | 'Vol' | 'Incendie' | 'Bris de glace' | 'Vandalisme' | 'Autre';
+export type ClaimNature =
+  | 'Collision'
+  | 'Vol'
+  | 'Incendie'
+  | 'Bris de glace'
+  | 'Vandalisme'
+  | 'Autre';
 export type ClaimSeverity = 'Mineur' | 'Majeur' | 'Critique';
 export type ClaimStatus = 'Ouvert' | 'En cours' | 'Clôturé';
 

@@ -5,13 +5,13 @@
 @layer base {
   :root {
     /* ═══ IVOS Design System v2 — Neumorphism + Material 3 ═══ */
-    --background: 222 20% 97%;         /* #F4F7FC — fond gris-bleu très clair */
+    --background: 222 20% 97%; /* #F4F7FC — fond gris-bleu très clair */
     --foreground: 222.2 84% 4.9%;
-    --card: 0 0% 100%;                 /* #FFFFFF — cartes blanches pures */
+    --card: 0 0% 100%; /* #FFFFFF — cartes blanches pures */
     --card-foreground: 222.2 84% 4.9%;
     --popover: 0 0% 100%;
     --popover-foreground: 222.2 84% 4.9%;
-    --primary: 221.2 83.2% 53.3%;      /* Bleu IVOS */
+    --primary: 221.2 83.2% 53.3%; /* Bleu IVOS */
     --primary-foreground: 210 40% 98%;
     --secondary: 220 16% 93%;
     --secondary-foreground: 222.2 47.4% 11.2%;
@@ -24,13 +24,13 @@
     --border: 220 16% 90%;
     --input: 220 16% 90%;
     --ring: 221.2 83.2% 53.3%;
-    --radius: 0.75rem;                  /* 12px default radius */
+    --radius: 0.75rem; /* 12px default radius */
 
     /* Ombres Neumorphism */
-    --shadow-card: 0 2px 12px rgba(0,0,0,0.04), 0 1px 4px rgba(0,0,0,0.02);
-    --shadow-card-hover: 0 8px 30px rgba(0,0,0,0.08), 0 2px 8px rgba(0,0,0,0.04);
-    --shadow-elevated: 0 12px 40px rgba(0,0,0,0.1), 0 4px 12px rgba(0,0,0,0.05);
-    --shadow-soft: 0 1px 6px rgba(0,0,0,0.03);
+    --shadow-card: 0 2px 12px rgba(0, 0, 0, 0.04), 0 1px 4px rgba(0, 0, 0, 0.02);
+    --shadow-card-hover: 0 8px 30px rgba(0, 0, 0, 0.08), 0 2px 8px rgba(0, 0, 0, 0.04);
+    --shadow-elevated: 0 12px 40px rgba(0, 0, 0, 0.1), 0 4px 12px rgba(0, 0, 0, 0.05);
+    --shadow-soft: 0 1px 6px rgba(0, 0, 0, 0.03);
   }
 
   .dark {
@@ -80,10 +80,16 @@
   }
 
   body {
-    font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    font-family:
+      'Inter',
+      system-ui,
+      -apple-system,
+      BlinkMacSystemFont,
+      'Segoe UI',
+      sans-serif;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
-    background: #F4F7FC;
+    background: #f4f7fc;
   }
 }
 
@@ -91,9 +97,11 @@
 @layer components {
   /* Card Neumorphism */
   .ivos-card {
-    @apply bg-white rounded-2xl;
+    @apply rounded-2xl bg-white;
     box-shadow: var(--shadow-card);
-    transition: box-shadow 0.3s ease, transform 0.3s ease;
+    transition:
+      box-shadow 0.3s ease,
+      transform 0.3s ease;
   }
   .ivos-card:hover {
     box-shadow: var(--shadow-card-hover);
@@ -101,50 +109,50 @@
 
   /* Elevated card (modals, floating panels) */
   .ivos-card-elevated {
-    @apply bg-white rounded-2xl;
+    @apply rounded-2xl bg-white;
     box-shadow: var(--shadow-elevated);
   }
 
   /* Soft input style — Material 3 feel */
   .ivos-input {
-    @apply w-full px-4 py-3 bg-gray-50/80 border-0 rounded-xl text-sm text-gray-900
-           placeholder:text-gray-400
-           focus:bg-white focus:ring-2 focus:ring-blue-500/20 focus:shadow-sm
-           outline-none transition-all duration-200;
+    @apply w-full rounded-xl border-0 bg-gray-50/80 px-4 py-3 text-sm text-gray-900
+           outline-none
+           transition-all duration-200 placeholder:text-gray-400 focus:bg-white
+           focus:shadow-sm focus:ring-2 focus:ring-blue-500/20;
   }
 
   /* Primary button — IVOS blue, rounded, smooth hover */
   .ivos-btn-primary {
-    @apply inline-flex items-center justify-center gap-2 px-6 py-3 
-           bg-blue-600 hover:bg-blue-700 active:bg-blue-800
-           text-white font-semibold text-sm rounded-xl
-           shadow-md shadow-blue-600/20 hover:shadow-lg hover:shadow-blue-600/30
-           transition-all duration-200 ease-out;
+    @apply inline-flex items-center justify-center gap-2 rounded-xl bg-blue-600 
+           px-6 py-3 text-sm
+           font-semibold text-white shadow-md shadow-blue-600/20
+           transition-all duration-200 ease-out hover:bg-blue-700
+           hover:shadow-lg hover:shadow-blue-600/30 active:bg-blue-800;
   }
 
   /* Secondary button */
   .ivos-btn-secondary {
-    @apply inline-flex items-center justify-center gap-2 px-5 py-2.5
-           bg-gray-100 hover:bg-gray-200 active:bg-gray-300
-           text-gray-700 font-medium text-sm rounded-xl
-           transition-all duration-200;
+    @apply inline-flex items-center justify-center gap-2 rounded-xl bg-gray-100
+           px-5 py-2.5 text-sm
+           font-medium text-gray-700 transition-all duration-200
+           hover:bg-gray-200 active:bg-gray-300;
   }
 
   /* Badge translucent */
   .ivos-badge {
-    @apply inline-flex items-center gap-1.5 px-3 py-1 text-xs font-semibold rounded-full;
+    @apply inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold;
   }
   .ivos-badge-green {
-    @apply ivos-badge bg-emerald-50 text-emerald-700 border border-emerald-100;
+    @apply ivos-badge border border-emerald-100 bg-emerald-50 text-emerald-700;
   }
   .ivos-badge-orange {
-    @apply ivos-badge bg-amber-50 text-amber-700 border border-amber-100;
+    @apply ivos-badge border border-amber-100 bg-amber-50 text-amber-700;
   }
   .ivos-badge-red {
-    @apply ivos-badge bg-red-50 text-red-700 border border-red-100;
+    @apply ivos-badge border border-red-100 bg-red-50 text-red-700;
   }
   .ivos-badge-blue {
-    @apply ivos-badge bg-blue-50 text-blue-700 border border-blue-100;
+    @apply ivos-badge border border-blue-100 bg-blue-50 text-blue-700;
   }
 
   /* Table modern */
@@ -152,7 +160,7 @@
     @apply w-full text-sm;
   }
   .ivos-table thead th {
-    @apply bg-gray-50/80 text-gray-500 text-[11px] font-semibold uppercase tracking-wider px-5 py-3.5 text-left;
+    @apply bg-gray-50/80 px-5 py-3.5 text-left text-[11px] font-semibold uppercase tracking-wider text-gray-500;
   }
   .ivos-table tbody tr {
     @apply border-b border-gray-100/80 transition-colors duration-150;
@@ -169,15 +177,17 @@
 
   /* Section header gradient */
   .ivos-page-header {
-    @apply bg-gradient-to-br from-[#0f172a] via-[#1e293b] to-[#334155] rounded-2xl p-6 text-white;
+    @apply rounded-2xl bg-gradient-to-br from-[#0f172a] via-[#1e293b] to-[#334155] p-6 text-white;
     box-shadow: 0 8px 32px rgba(15, 23, 42, 0.25);
   }
 
   /* KPI Card — floating card with subtle depth */
   .ivos-kpi {
-    @apply bg-white rounded-2xl p-5;
+    @apply rounded-2xl bg-white p-5;
     box-shadow: var(--shadow-card);
-    transition: box-shadow 0.3s ease, transform 0.25s ease;
+    transition:
+      box-shadow 0.3s ease,
+      transform 0.25s ease;
   }
   .ivos-kpi:hover {
     box-shadow: var(--shadow-card-hover);
@@ -186,7 +196,7 @@
 
   /* Progress bar modern */
   .ivos-progress-track {
-    @apply h-2 bg-gray-100/80 rounded-full overflow-hidden;
+    @apply h-2 overflow-hidden rounded-full bg-gray-100/80;
   }
   .ivos-progress-bar {
     @apply h-full rounded-full transition-all duration-700 ease-out;
@@ -207,18 +217,34 @@
 }
 
 @keyframes fadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }
 
 @keyframes slideUp {
-  from { opacity: 0; transform: translateY(16px) scale(0.98); }
-  to { opacity: 1; transform: translateY(0) scale(1); }
+  from {
+    opacity: 0;
+    transform: translateY(16px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
 }
 
 @keyframes slideInRight {
-  from { opacity: 0; transform: translateX(100%); }
-  to { opacity: 1; transform: translateX(0); }
+  from {
+    opacity: 0;
+    transform: translateX(100%);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
 }
 
 @layer base {
@@ -227,7 +253,9 @@
   }
   body {
     @apply bg-background text-foreground;
-    font-feature-settings: "rlig" 1, "calt" 1;
+    font-feature-settings:
+      'rlig' 1,
+      'calt' 1;
   }
 }
 
@@ -246,17 +274,17 @@
 
   /* Sidebar */
   .sidebar {
-    @apply fixed inset-y-0 left-0 z-50 w-64 bg-card border-r border-border transform transition-transform duration-300 ease-in-out;
+    @apply fixed inset-y-0 left-0 z-50 w-64 transform border-r border-border bg-card transition-transform duration-300 ease-in-out;
   }
 
   /* Main content avec sidebar */
   .main-content {
-    @apply lg:pl-64 min-h-screen;
+    @apply min-h-screen lg:pl-64;
   }
 
   /* Cards avec effet hover */
   .card-hover {
-    @apply transition-all duration-200 hover:shadow-lg hover:-translate-y-0.5;
+    @apply transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg;
   }
 
   /* Badges de statut */
@@ -299,8 +327,14 @@
 }
 
 @keyframes form-field-in {
-  from { opacity: 0; transform: translateY(-8px); }
-  to   { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .animate-form-field-in {
@@ -318,11 +352,11 @@
 }
 
 .custom-scrollbar::-webkit-scrollbar-track {
-  @apply bg-muted rounded-lg;
+  @apply rounded-lg bg-muted;
 }
 
 .custom-scrollbar::-webkit-scrollbar-thumb {
-  @apply bg-muted-foreground/30 rounded-lg hover:bg-muted-foreground/50;
+  @apply rounded-lg bg-muted-foreground/30 hover:bg-muted-foreground/50;
 }
 
 /* Print styles pour les bordereaux */
@@ -387,8 +421,13 @@
 
 /* Agenda: subtle pulse for in-progress events */
 @keyframes pulse-subtle {
-  0%, 100% { box-shadow: 0 0 0 0 rgba(255,255,255,0.3); }
-  50% { box-shadow: 0 0 0 4px rgba(255,255,255,0.1); }
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.3);
+  }
+  50% {
+    box-shadow: 0 0 0 4px rgba(255, 255, 255, 0.1);
+  }
 }
 .animate-pulse-subtle {
   animation: pulse-subtle 2s ease-in-out infinite;

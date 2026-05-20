@@ -45,12 +45,16 @@ function applySyncPayload(userId: string, payload: SyncPayload) {
   }
 
   const unread = Number(payload.unreadCount || 0);
-  window.dispatchEvent(new CustomEvent(emailSyncService.getSyncEventName(), {
-    detail: { at: new Date().toISOString(), userId },
-  }));
-  window.dispatchEvent(new CustomEvent(emailSyncService.getUnreadEventName(), {
-    detail: { at: new Date().toISOString(), userId, unread },
-  }));
+  window.dispatchEvent(
+    new CustomEvent(emailSyncService.getSyncEventName(), {
+      detail: { at: new Date().toISOString(), userId },
+    })
+  );
+  window.dispatchEvent(
+    new CustomEvent(emailSyncService.getUnreadEventName(), {
+      detail: { at: new Date().toISOString(), userId, unread },
+    })
+  );
 
   if (Array.isArray(payload.newMessages) && payload.newMessages.length > 0) {
     const first = payload.newMessages[0];
@@ -77,16 +81,25 @@ export const emailRealtimeService = {
       applySyncPayload(userId, payload);
     });
 
-    socket.on('email:center:new-mail', (payload: { unreadCount: number; messages: Array<{ from: string; subject: string }> }) => {
-      window.dispatchEvent(new CustomEvent(emailSyncService.getUnreadEventName(), {
-        detail: { at: new Date().toISOString(), userId, unread: Number(payload.unreadCount || 0) },
-      }));
+    socket.on(
+      'email:center:new-mail',
+      (payload: { unreadCount: number; messages: Array<{ from: string; subject: string }> }) => {
+        window.dispatchEvent(
+          new CustomEvent(emailSyncService.getUnreadEventName(), {
+            detail: {
+              at: new Date().toISOString(),
+              userId,
+              unread: Number(payload.unreadCount || 0),
+            },
+          })
+        );
 
-      if (Array.isArray(payload.messages) && payload.messages.length > 0) {
-        const first = payload.messages[0];
-        notifyBrowser(`Nouvel email de ${first.from}`, first.subject || 'Sans objet');
+        if (Array.isArray(payload.messages) && payload.messages.length > 0) {
+          const first = payload.messages[0];
+          notifyBrowser(`Nouvel email de ${first.from}`, first.subject || 'Sans objet');
+        }
       }
-    });
+    );
   },
 
   stop() {

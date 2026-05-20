@@ -1,7 +1,7 @@
 /**
  * Exemple d'Intégration - Module Facturation avec Paiements
  * InvoicesPageIntegrated.tsx
- * 
+ *
  * Démontre :
  * - Liste des factures avec statuts
  * - Formulaire de paiement
@@ -58,7 +58,7 @@ export default function InvoicesPageIntegrated() {
   const loadInvoices = () => {
     let data = getWorkflowInvoices();
     if (filter !== 'all') {
-      data = data.filter(i => i.status === filter);
+      data = data.filter((i) => i.status === filter);
     }
     setInvoices(data);
   };
@@ -106,7 +106,7 @@ export default function InvoicesPageIntegrated() {
 
   const handleOpenPaymentForm = (invoice: WorkflowInvoice) => {
     if (invoice.status === 'a_valider') {
-      alert('La facture doit d\'abord être validée par le Super Admin.');
+      alert("La facture doit d'abord être validée par le Super Admin.");
       return;
     }
 
@@ -121,11 +121,11 @@ export default function InvoicesPageIntegrated() {
   const paymentStats = getPaymentStats();
 
   const totalInvoiced = invoices
-    .filter(i => i.status !== 'annulee')
+    .filter((i) => i.status !== 'annulee')
     .reduce((s, i) => s + i.montantHT, 0);
 
   const totalPaid = invoices
-    .filter(i => i.status === 'payee')
+    .filter((i) => i.status === 'payee')
     .reduce((s, i) => s + i.montantHT, 0);
 
   const totalPending = totalInvoiced - totalPaid;
@@ -135,43 +135,48 @@ export default function InvoicesPageIntegrated() {
   // ══════════════════════════════════════════════════════════════
 
   const getStatusBadge = (status: InvoiceStatus) => {
-    const badges: Record<InvoiceStatus, { label: string; bg: string; color: string; icon: React.ReactNode }> = {
-      a_valider: { 
-        label: 'À Valider', 
-        bg: 'bg-yellow-100', 
+    const badges: Record<
+      InvoiceStatus,
+      { label: string; bg: string; color: string; icon: React.ReactNode }
+    > = {
+      a_valider: {
+        label: 'À Valider',
+        bg: 'bg-yellow-100',
         color: 'text-yellow-800',
-        icon: <Clock className="w-3.5 h-3.5" />
+        icon: <Clock className="h-3.5 w-3.5" />,
       },
-      validee: { 
-        label: 'Validée', 
-        bg: 'bg-blue-100', 
+      validee: {
+        label: 'Validée',
+        bg: 'bg-blue-100',
         color: 'text-blue-800',
-        icon: <CheckCircle2 className="w-3.5 h-3.5" />
+        icon: <CheckCircle2 className="h-3.5 w-3.5" />,
       },
-      envoyee: { 
-        label: 'Envoyée', 
-        bg: 'bg-purple-100', 
+      envoyee: {
+        label: 'Envoyée',
+        bg: 'bg-purple-100',
         color: 'text-purple-800',
-        icon: <Send className="w-3.5 h-3.5" />
+        icon: <Send className="h-3.5 w-3.5" />,
       },
-      payee: { 
-        label: 'Payée', 
-        bg: 'bg-green-100', 
+      payee: {
+        label: 'Payée',
+        bg: 'bg-green-100',
         color: 'text-green-800',
-        icon: <DollarSign className="w-3.5 h-3.5" />
+        icon: <DollarSign className="h-3.5 w-3.5" />,
       },
-      annulee: { 
-        label: 'Annulée', 
-        bg: 'bg-red-100', 
+      annulee: {
+        label: 'Annulée',
+        bg: 'bg-red-100',
         color: 'text-red-800',
-        icon: <XCircle className="w-3.5 h-3.5" />
+        icon: <XCircle className="h-3.5 w-3.5" />,
       },
     };
 
     const badge = badges[status];
-    
+
     return (
-      <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold ${badge.bg} ${badge.color}`}>
+      <span
+        className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold ${badge.bg} ${badge.color}`}
+      >
         {badge.icon}
         {badge.label}
       </span>
@@ -185,22 +190,19 @@ export default function InvoicesPageIntegrated() {
   return (
     <>
       <div className="w-full max-w-none space-y-6">
-        
         {/* Header */}
-        <div className="bg-gradient-to-r from-blue-600 to-indigo-600 rounded-2xl shadow-xl p-6 text-white">
+        <div className="rounded-2xl bg-gradient-to-r from-blue-600 to-indigo-600 p-6 text-white shadow-xl">
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-3xl font-bold mb-2">Gestion des Factures & Paiements</h1>
-              <p className="text-blue-100">
-                Système complet de facturation et trésorerie
-              </p>
+              <h1 className="mb-2 text-3xl font-bold">Gestion des Factures & Paiements</h1>
+              <p className="text-blue-100">Système complet de facturation et trésorerie</p>
             </div>
-            <FileText className="w-16 h-16 text-white/30" />
+            <FileText className="h-16 w-16 text-white/30" />
           </div>
         </div>
 
         {/* Statistics */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-4">
           <StatCard
             label="Total Facturé"
             value={formatCurrency(totalInvoiced)}
@@ -229,7 +231,7 @@ export default function InvoicesPageIntegrated() {
         </div>
 
         {/* Filters */}
-        <div className="bg-white rounded-2xl shadow-md p-4 border border-gray-200">
+        <div className="rounded-2xl border border-gray-200 bg-white p-4 shadow-md">
           <div className="flex items-center gap-3">
             <span className="text-sm font-semibold text-gray-600">Filtrer:</span>
             {[
@@ -242,7 +244,7 @@ export default function InvoicesPageIntegrated() {
               <button
                 key={value}
                 onClick={() => setFilter(value as InvoiceStatus | 'all')}
-                className={`px-4 py-2 rounded-lg text-sm font-semibold transition ${
+                className={`rounded-lg px-4 py-2 text-sm font-semibold transition ${
                   filter === value
                     ? 'bg-blue-600 text-white'
                     : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
@@ -255,28 +257,25 @@ export default function InvoicesPageIntegrated() {
         </div>
 
         {/* Invoices List */}
-        <div className="bg-white rounded-2xl shadow-md border border-gray-200">
-          <div className="px-6 py-4 border-b bg-gray-50">
-            <h2 className="text-lg font-bold text-gray-900">
-              Factures ({invoices.length})
-            </h2>
+        <div className="rounded-2xl border border-gray-200 bg-white shadow-md">
+          <div className="border-b bg-gray-50 px-6 py-4">
+            <h2 className="text-lg font-bold text-gray-900">Factures ({invoices.length})</h2>
           </div>
 
           <div className="divide-y divide-gray-100">
             {invoices.length === 0 ? (
               <div className="px-6 py-12 text-center text-gray-500">
-                <FileText className="w-12 h-12 mx-auto mb-3 text-gray-300" />
+                <FileText className="mx-auto mb-3 h-12 w-12 text-gray-300" />
                 <p className="font-medium">Aucune facture trouvée</p>
               </div>
             ) : (
-              invoices.map(invoice => {
+              invoices.map((invoice) => {
                 const payments = getPaymentsByInvoice(invoice.id);
                 const hasPayments = payments.length > 0;
 
                 return (
-                  <div key={invoice.id} className="px-6 py-4 hover:bg-gray-50 transition">
+                  <div key={invoice.id} className="px-6 py-4 transition hover:bg-gray-50">
                     <div className="flex items-start justify-between gap-4">
-                      
                       {/* Left: Invoice Details */}
                       <div className="flex-1 space-y-3">
                         <div className="flex items-center gap-3">
@@ -285,7 +284,7 @@ export default function InvoicesPageIntegrated() {
                           </span>
                           {getStatusBadge(invoice.status)}
                           {invoice.status === 'validee' && (
-                            <span className="text-xs px-2 py-1 bg-gray-100 text-gray-600 rounded-full">
+                            <span className="rounded-full bg-gray-100 px-2 py-1 text-xs text-gray-600">
                               🔒 Read-only
                             </span>
                           )}
@@ -306,9 +305,7 @@ export default function InvoicesPageIntegrated() {
                           </div>
                           <div>
                             <span className="text-gray-500">BSD:</span>
-                            <span className="ml-2 text-gray-700">
-                              {invoice.operationNumero}
-                            </span>
+                            <span className="ml-2 text-gray-700">{invoice.operationNumero}</span>
                           </div>
                           <div>
                             <span className="text-gray-500">Date:</span>
@@ -318,15 +315,16 @@ export default function InvoicesPageIntegrated() {
                           </div>
                         </div>
 
-                        <div className="text-xs text-gray-600 bg-gray-50 px-3 py-2 rounded-lg">
+                        <div className="rounded-lg bg-gray-50 px-3 py-2 text-xs text-gray-600">
                           {invoice.prestationLabel}
                         </div>
 
                         {hasPayments && (
                           <div className="flex items-center gap-2 text-xs">
-                            <DollarSign className="w-4 h-4 text-green-600" />
+                            <DollarSign className="h-4 w-4 text-green-600" />
                             <span className="font-semibold text-green-700">
-                              {payments.length} paiement{payments.length > 1 ? 's' : ''} enregistré{payments.length > 1 ? 's' : ''}
+                              {payments.length} paiement{payments.length > 1 ? 's' : ''} enregistré
+                              {payments.length > 1 ? 's' : ''}
                             </span>
                           </div>
                         )}
@@ -334,14 +332,13 @@ export default function InvoicesPageIntegrated() {
 
                       {/* Right: Actions */}
                       <div className="flex flex-col gap-2">
-                        
                         {/* Validation (Super Admin only) */}
                         {invoice.status === 'a_valider' && isSuperAdmin && (
                           <button
                             onClick={() => handleValidate(invoice)}
-                            className="px-4 py-2 rounded-lg bg-green-600 text-white text-xs font-semibold hover:bg-green-700 transition flex items-center gap-2"
+                            className="flex items-center gap-2 rounded-lg bg-green-600 px-4 py-2 text-xs font-semibold text-white transition hover:bg-green-700"
                           >
-                            <CheckCircle2 className="w-3.5 h-3.5" />
+                            <CheckCircle2 className="h-3.5 w-3.5" />
                             Valider
                           </button>
                         )}
@@ -350,9 +347,9 @@ export default function InvoicesPageIntegrated() {
                         {invoice.status === 'validee' && (
                           <button
                             onClick={() => handleSend(invoice)}
-                            className="px-4 py-2 rounded-lg bg-purple-600 text-white text-xs font-semibold hover:bg-purple-700 transition flex items-center gap-2"
+                            className="flex items-center gap-2 rounded-lg bg-purple-600 px-4 py-2 text-xs font-semibold text-white transition hover:bg-purple-700"
                           >
-                            <Send className="w-3.5 h-3.5" />
+                            <Send className="h-3.5 w-3.5" />
                             Marquer Envoyée
                           </button>
                         )}
@@ -361,9 +358,9 @@ export default function InvoicesPageIntegrated() {
                         {(invoice.status === 'validee' || invoice.status === 'envoyee') && (
                           <button
                             onClick={() => handleOpenPaymentForm(invoice)}
-                            className="px-4 py-2 rounded-lg bg-blue-600 text-white text-xs font-semibold hover:bg-blue-700 transition flex items-center gap-2"
+                            className="flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-xs font-semibold text-white transition hover:bg-blue-700"
                           >
-                            <DollarSign className="w-3.5 h-3.5" />
+                            <DollarSign className="h-3.5 w-3.5" />
                             Enregistrer Paiement
                           </button>
                         )}
@@ -371,12 +368,11 @@ export default function InvoicesPageIntegrated() {
                         {/* View Details */}
                         <button
                           onClick={() => setSelectedInvoice(invoice)}
-                          className="px-4 py-2 rounded-lg border border-gray-300 text-gray-700 text-xs font-semibold hover:bg-gray-50 transition flex items-center gap-2"
+                          className="flex items-center gap-2 rounded-lg border border-gray-300 px-4 py-2 text-xs font-semibold text-gray-700 transition hover:bg-gray-50"
                         >
-                          <Eye className="w-3.5 h-3.5" />
+                          <Eye className="h-3.5 w-3.5" />
                           Détails
                         </button>
-
                       </div>
                     </div>
                   </div>
@@ -388,14 +384,13 @@ export default function InvoicesPageIntegrated() {
 
         {/* All Payments List */}
         <div>
-          <h2 className="text-xl font-bold text-gray-900 mb-4">Tous les Paiements</h2>
-          <PaymentList 
+          <h2 className="mb-4 text-xl font-bold text-gray-900">Tous les Paiements</h2>
+          <PaymentList
             showActions={isSuperAdmin}
             currentUserRole={user?.role}
             currentUserName={user?.fullName}
           />
         </div>
-
       </div>
 
       {/* Payment Form Modal */}
@@ -417,21 +412,21 @@ export default function InvoicesPageIntegrated() {
 
       {/* Invoice Details Modal */}
       {selectedInvoice && !showPaymentForm && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-3xl max-h-[90vh] overflow-y-auto">
-            <div className="sticky top-0 bg-gradient-to-r from-blue-600 to-indigo-600 px-6 py-4 flex items-center justify-between">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+          <div className="max-h-[90vh] w-full max-w-3xl overflow-y-auto rounded-2xl bg-white shadow-2xl">
+            <div className="sticky top-0 flex items-center justify-between bg-gradient-to-r from-blue-600 to-indigo-600 px-6 py-4">
               <h3 className="text-lg font-bold text-white">
                 Facture {selectedInvoice.numeroOfficiel}
               </h3>
               <button
                 onClick={() => setSelectedInvoice(null)}
-                className="p-2 hover:bg-white/10 rounded-lg transition"
+                className="rounded-lg p-2 transition hover:bg-white/10"
               >
-                <XCircle className="w-5 h-5 text-white" />
+                <XCircle className="h-5 w-5 text-white" />
               </button>
             </div>
 
-            <div className="p-6 space-y-6">
+            <div className="space-y-6 p-6">
               {/* Status & Amount */}
               <div className="flex items-center justify-between">
                 {getStatusBadge(selectedInvoice.status)}
@@ -445,28 +440,40 @@ export default function InvoicesPageIntegrated() {
 
               {/* Client Info */}
               <div className="border-t pt-4">
-                <h4 className="font-semibold text-gray-900 mb-3">Informations Client</h4>
+                <h4 className="mb-3 font-semibold text-gray-900">Informations Client</h4>
                 <div className="space-y-2 text-sm">
-                  <div><span className="text-gray-500">Nom:</span> {selectedInvoice.clientNom}</div>
-                  <div><span className="text-gray-500">Adresse:</span> {selectedInvoice.clientAdresse || '—'}</div>
-                  <div><span className="text-gray-500">Contact:</span> {selectedInvoice.clientContact || '—'}</div>
+                  <div>
+                    <span className="text-gray-500">Nom:</span> {selectedInvoice.clientNom}
+                  </div>
+                  <div>
+                    <span className="text-gray-500">Adresse:</span>{' '}
+                    {selectedInvoice.clientAdresse || '—'}
+                  </div>
+                  <div>
+                    <span className="text-gray-500">Contact:</span>{' '}
+                    {selectedInvoice.clientContact || '—'}
+                  </div>
                 </div>
               </div>
 
               {/* Prestation */}
               <div className="border-t pt-4">
-                <h4 className="font-semibold text-gray-900 mb-3">Prestation</h4>
-                <div className="bg-gray-50 px-4 py-3 rounded-lg text-sm">
+                <h4 className="mb-3 font-semibold text-gray-900">Prestation</h4>
+                <div className="rounded-lg bg-gray-50 px-4 py-3 text-sm">
                   {selectedInvoice.prestationLabel}
                 </div>
-                <div className="grid grid-cols-3 gap-4 mt-3 text-sm">
+                <div className="mt-3 grid grid-cols-3 gap-4 text-sm">
                   <div>
                     <span className="text-gray-500">Quantité:</span>
-                    <div className="font-semibold">{selectedInvoice.quantite} {selectedInvoice.unite}</div>
+                    <div className="font-semibold">
+                      {selectedInvoice.quantite} {selectedInvoice.unite}
+                    </div>
                   </div>
                   <div>
                     <span className="text-gray-500">Prix Unitaire:</span>
-                    <div className="font-semibold">{formatCleanAmount(selectedInvoice.prixUnitaire, 'FCFA')}</div>
+                    <div className="font-semibold">
+                      {formatCleanAmount(selectedInvoice.prixUnitaire, 'FCFA')}
+                    </div>
                   </div>
                   <div>
                     <span className="text-gray-500">Catégorie:</span>
@@ -477,15 +484,15 @@ export default function InvoicesPageIntegrated() {
 
               {/* Payments */}
               <div className="border-t pt-4">
-                <h4 className="font-semibold text-gray-900 mb-3">Paiements Associés</h4>
+                <h4 className="mb-3 font-semibold text-gray-900">Paiements Associés</h4>
                 <PaymentList invoiceId={selectedInvoice.id} />
               </div>
             </div>
 
-            <div className="px-6 py-4 border-t flex justify-end">
+            <div className="flex justify-end border-t px-6 py-4">
               <button
                 onClick={() => setSelectedInvoice(null)}
-                className="px-6 py-2 rounded-lg bg-gray-600 text-white font-semibold hover:bg-gray-700 transition"
+                className="rounded-lg bg-gray-600 px-6 py-2 font-semibold text-white transition hover:bg-gray-700"
               >
                 Fermer
               </button>
@@ -518,15 +525,13 @@ function StatCard({ label, value, icon: Icon, color, subtitle }: StatCardProps) 
   };
 
   return (
-    <div className={`bg-gradient-to-br ${colors[color]} rounded-2xl shadow-lg p-6 text-white`}>
-      <div className="flex items-center justify-between mb-3">
-        <Icon className="w-8 h-8 text-white/80" />
+    <div className={`bg-gradient-to-br ${colors[color]} rounded-2xl p-6 text-white shadow-lg`}>
+      <div className="mb-3 flex items-center justify-between">
+        <Icon className="h-8 w-8 text-white/80" />
       </div>
-      <div className="text-2xl font-bold mb-1">{value}</div>
+      <div className="mb-1 text-2xl font-bold">{value}</div>
       <div className="text-sm text-white/80">{label}</div>
-      {subtitle && (
-        <div className="text-xs text-white/60 mt-1">{subtitle}</div>
-      )}
+      {subtitle && <div className="mt-1 text-xs text-white/60">{subtitle}</div>}
     </div>
   );
 }

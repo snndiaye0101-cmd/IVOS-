@@ -3,7 +3,13 @@ import { getRooms } from '../services/roomsService';
 import { ChatRoom } from '../types/room.types';
 import AddRoomForm from './AddRoomForm';
 
-export default function RoomsSidebar({ selectedRoomId, onSelectRoom }: { selectedRoomId: string; onSelectRoom: (id: string) => void }) {
+export default function RoomsSidebar({
+  selectedRoomId,
+  onSelectRoom,
+}: {
+  selectedRoomId: string;
+  onSelectRoom: (id: string) => void;
+}) {
   const [rooms, setRooms] = useState<ChatRoom[]>([]);
 
   const refreshRooms = () => getRooms().then(setRooms);
@@ -12,14 +18,14 @@ export default function RoomsSidebar({ selectedRoomId, onSelectRoom }: { selecte
   }, []);
 
   return (
-    <aside className="w-56 border-r pr-2 mr-4 h-full">
-      <h2 className="text-lg font-semibold mb-2">Salons</h2>
+    <aside className="mr-4 h-full w-56 border-r pr-2">
+      <h2 className="mb-2 text-lg font-semibold">Salons</h2>
       <AddRoomForm onRoomAdded={refreshRooms} />
       <ul className="space-y-1">
-        {rooms.map(room => (
+        {rooms.map((room) => (
           <li key={room.id}>
             <button
-              className={`w-full text-left px-3 py-2 rounded transition font-medium ${selectedRoomId === room.id ? 'bg-blue-600 text-white' : 'hover:bg-gray-100'}`}
+              className={`w-full rounded px-3 py-2 text-left font-medium transition ${selectedRoomId === room.id ? 'bg-blue-600 text-white' : 'hover:bg-gray-100'}`}
               onClick={() => onSelectRoom(room.id)}
             >
               {room.name}

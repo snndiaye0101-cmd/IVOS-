@@ -25,20 +25,20 @@ const tabs: Tab[] = [
     id: 'dashboard',
     label: 'Tableau de Bord',
     icon: BarChart2,
-    description: 'Graphiques et statistiques de tonnage'
+    description: 'Graphiques et statistiques de tonnage',
   },
   {
     id: 'archives',
     label: 'Archives QHSE',
     icon: FolderOpen,
-    description: 'Historique des documents (BSD, certificats, rapports)'
+    description: 'Historique des documents (BSD, certificats, rapports)',
   },
   {
     id: 'certificates',
     label: 'Certificats',
     icon: FileText,
-    description: 'Certificats de Destruction officiels'
-  }
+    description: 'Certificats de Destruction officiels',
+  },
 ];
 
 export default function QHSEReportingPage() {
@@ -48,13 +48,13 @@ export default function QHSEReportingPage() {
     <>
       <div className="space-y-6">
         {/* Header avec onglets */}
-        <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
-          <div className="px-6 py-4 border-b border-gray-200 bg-gradient-to-r from-[#1a5c3a] to-[#14472e]">
-            <h1 className="text-2xl font-bold text-white flex items-center gap-3">
-              <BarChart2 className="w-7 h-7" />
+        <div className="overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm">
+          <div className="border-b border-gray-200 bg-gradient-to-r from-[#1a5c3a] to-[#14472e] px-6 py-4">
+            <h1 className="flex items-center gap-3 text-2xl font-bold text-white">
+              <BarChart2 className="h-7 w-7" />
               Reporting & Impact QHSE
             </h1>
-            <p className="text-sm text-green-100 mt-1">
+            <p className="mt-1 text-sm text-green-100">
               Analyse, archivage et certification des opérations de gestion des déchets
             </p>
           </div>
@@ -64,20 +64,21 @@ export default function QHSEReportingPage() {
             {tabs.map((tab) => {
               const Icon = tab.icon;
               const isActive = activeTab === tab.id;
-              
+
               return (
                 <button
                   key={tab.id}
                   onClick={() => setActiveTab(tab.id)}
                   className={`
-                    flex-1 px-6 py-4 flex items-center justify-center gap-3 font-semibold transition-all
-                    ${isActive 
-                      ? 'bg-white text-[#1a5c3a] border-b-2 border-[#1a5c3a]' 
-                      : 'text-gray-600 hover:bg-white hover:text-gray-900'
+                    flex flex-1 items-center justify-center gap-3 px-6 py-4 font-semibold transition-all
+                    ${
+                      isActive
+                        ? 'border-b-2 border-[#1a5c3a] bg-white text-[#1a5c3a]'
+                        : 'text-gray-600 hover:bg-white hover:text-gray-900'
                     }
                   `}
                 >
-                  <Icon className={`w-5 h-5 ${isActive ? 'text-[#1a5c3a]' : 'text-gray-400'}`} />
+                  <Icon className={`h-5 w-5 ${isActive ? 'text-[#1a5c3a]' : 'text-gray-400'}`} />
                   <span>{tab.label}</span>
                 </button>
               );
@@ -85,9 +86,9 @@ export default function QHSEReportingPage() {
           </div>
 
           {/* Description de l'onglet actif */}
-          <div className="px-6 py-3 bg-blue-50 border-b border-blue-100">
+          <div className="border-b border-blue-100 bg-blue-50 px-6 py-3">
             <p className="text-xs text-blue-700">
-              {tabs.find(t => t.id === activeTab)?.description}
+              {tabs.find((t) => t.id === activeTab)?.description}
             </p>
           </div>
         </div>
@@ -99,13 +100,13 @@ export default function QHSEReportingPage() {
               <AnalyticsDashboardPage />
             </>
           )}
-          
+
           {activeTab === 'archives' && (
             <>
               <ArchivesQHSEPage />
             </>
           )}
-          
+
           {activeTab === 'certificates' && (
             <>
               <CertificatesPage />

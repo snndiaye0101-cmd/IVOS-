@@ -2,10 +2,10 @@
  * ═══════════════════════════════════════════════════════════════════
  * 🚀 GÉNÉRATEUR DE DONNÉES FICTIVES — DÉMARRAGE RAPIDE
  * ═══════════════════════════════════════════════════════════════════
- * 
+ *
  * Ce fichier contient tout le code nécessaire pour générer des données
  * de test complètes : Opérations → Factures → Paiements
- * 
+ *
  * ═══════════════════════════════════════════════════════════════════
  */
 
@@ -20,17 +20,17 @@ function quickCreateComplete() {
   const operations = JSON.parse(localStorage.getItem('ivos_operations_v1') || '[]');
   const invoices = JSON.parse(localStorage.getItem('ivos_workflow_invoices_v1') || '[]');
   const payments = JSON.parse(localStorage.getItem('ivos_payments_v1') || '[]');
-  
+
   const counters = JSON.parse(localStorage.getItem('ivos_operations_counter_v1') || '{}');
   const year = new Date().getFullYear();
   const next = (counters[year] || 0) + 1;
   counters[year] = next;
   localStorage.setItem('ivos_operations_counter_v1', JSON.stringify(counters));
-  
+
   const numero = `BSD-${year}-${String(next).padStart(4, '0')}`;
   const now = new Date().toISOString();
   const operationId = `op-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
-  
+
   // OPÉRATION
   const operation = {
     id: operationId,
@@ -70,16 +70,16 @@ function quickCreateComplete() {
       validatedBy: 'Agent Réception',
     },
   };
-  
+
   operations.unshift(operation);
   localStorage.setItem('ivos_operations_v1', JSON.stringify(operations));
   window.dispatchEvent(new Event('ivos_operations_change'));
-  
+
   // FACTURE
   const invoiceId = `INV-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`;
   const numeroOfficiel = `FAC-${year}-${String(invoices.length + 1).padStart(4, '0')}`;
   const montantHT = 500 * 2550; // 500 FCFA/kg × 2550 kg
-  
+
   const invoice = {
     id: invoiceId,
     operationId: operationId,
@@ -103,14 +103,14 @@ function quickCreateComplete() {
     validatedAt: now,
     validatedBy: 'Samba (DG)',
   };
-  
+
   invoices.unshift(invoice);
   localStorage.setItem('ivos_workflow_invoices_v1', JSON.stringify(invoices));
   window.dispatchEvent(new Event('ivos_invoice_change'));
-  
+
   // PAIEMENT
   const paymentId = `PAY-${Date.now()}-${Math.random().toString(36).slice(2, 8).toUpperCase()}`;
-  
+
   const payment = {
     id: paymentId,
     invoiceId,
@@ -130,17 +130,17 @@ function quickCreateComplete() {
     validePar: 'Samba (DG)',
     notes: 'Paiement test - Opération fictive',
   };
-  
+
   payments.unshift(payment);
   localStorage.setItem('ivos_payments_v1', JSON.stringify(payments));
   window.dispatchEvent(new Event('ivos_payment_change'));
-  
+
   console.log('✅ OPÉRATION COMPLÈTE CRÉÉE !');
   console.log('📋 Opération:', numero);
   console.log('💰 Facture:', numeroOfficiel, `(${montantHT.toLocaleString()} FCFA)`);
   console.log('💳 Paiement:', paymentId);
   console.log('👉 Rafraîchissez la page (F5)');
-  
+
   return { operation, invoice, payment };
 }
 
@@ -149,8 +149,14 @@ function quickCreateComplete() {
  */
 function quickCreate5() {
   const clients = ['Total Sénégal', 'SAR Sénégal', 'Shell Sénégal', 'Petrosen', 'Oryx Energies'];
-  const wastes = ['Huiles usagées', 'Boues de forage', 'Déchets chimiques', 'Solvants usagés', 'Filtres usagés'];
-  
+  const wastes = [
+    'Huiles usagées',
+    'Boues de forage',
+    'Déchets chimiques',
+    'Solvants usagés',
+    'Filtres usagés',
+  ];
+
   for (let i = 0; i < 5; i++) {
     const operations = JSON.parse(localStorage.getItem('ivos_operations_v1') || '[]');
     const counters = JSON.parse(localStorage.getItem('ivos_operations_counter_v1') || '{}');
@@ -158,11 +164,11 @@ function quickCreate5() {
     const next = (counters[year] || 0) + 1;
     counters[year] = next;
     localStorage.setItem('ivos_operations_counter_v1', JSON.stringify(counters));
-    
+
     const numero = `BSD-${year}-${String(next).padStart(4, '0')}`;
     const now = new Date().toISOString();
     const quantity = 1000 + Math.floor(Math.random() * 4000);
-    
+
     operations.unshift({
       id: `op-${Date.now()}-${i}-${Math.random().toString(36).slice(2, 6)}`,
       numero,
@@ -183,16 +189,16 @@ function quickCreate5() {
       updatedAt: now,
       bsdGeneratedAt: now,
     });
-    
+
     localStorage.setItem('ivos_operations_v1', JSON.stringify(operations));
-    
+
     // Pause 10ms pour timestamps différents
     const timestamp = Date.now();
     while (Date.now() - timestamp < 10) {}
   }
-  
+
   window.dispatchEvent(new Event('ivos_operations_change'));
-  
+
   console.log('✅ 5 OPÉRATIONS CRÉÉES !');
   console.log('👉 Rafraîchissez la page (F5)');
 }
@@ -206,7 +212,7 @@ function quickDeleteAll() {
     localStorage.removeItem('ivos_operations_counter_v1');
     localStorage.removeItem('ivos_workflow_invoices_v1');
     localStorage.removeItem('ivos_payments_v1');
-    
+
     console.log('✅ TOUT SUPPRIMÉ !');
     console.log('👉 Rafraîchissez la page (F5)');
   }
@@ -219,7 +225,7 @@ function quickStats() {
   const operations = JSON.parse(localStorage.getItem('ivos_operations_v1') || '[]');
   const invoices = JSON.parse(localStorage.getItem('ivos_workflow_invoices_v1') || '[]');
   const payments = JSON.parse(localStorage.getItem('ivos_payments_v1') || '[]');
-  
+
   console.log('═══════════════════════════════════════════════════════');
   console.log('📊 STATISTIQUES');
   console.log('═══════════════════════════════════════════════════════');
@@ -227,11 +233,11 @@ function quickStats() {
   console.log(`💰 Factures : ${invoices.length}`);
   console.log(`💳 Paiements : ${payments.length}`);
   console.log('═══════════════════════════════════════════════════════');
-  
+
   if (operations.length > 0) {
     console.log('Dernière opération:', operations[0].numero);
   }
-  
+
   return { operations: operations.length, invoices: invoices.length, payments: payments.length };
 }
 

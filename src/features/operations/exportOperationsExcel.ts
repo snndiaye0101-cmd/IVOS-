@@ -6,14 +6,14 @@ export function exportOperationsToExcel(operations: Operation[]) {
   const year: null = null;
   const filtered = operations;
   const ws = XLSX.utils.json_to_sheet(
-    filtered.map(m => ({
+    filtered.map((m) => ({
       ID: m.id,
       Client: m.client,
       Type: m.type,
       Responsable: m.responsable,
       Statut: m.status,
       'Heure début': m.heureDebut || '',
-      'Heure fin': m.heureFin || ''
+      'Heure fin': m.heureFin || '',
     }))
   );
   const wb = XLSX.utils.book_new();

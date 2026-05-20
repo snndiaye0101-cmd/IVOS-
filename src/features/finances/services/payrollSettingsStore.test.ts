@@ -10,7 +10,11 @@ describe('payrollSettingsStore history and country isolation', () => {
     const before = payrollSettingsStore.load();
     const gnInitial = before.countries.GN.ipresGeneral;
 
-    payrollSettingsStore.updateCountry('SN', { ipresGeneral: 0.061 }, { effectiveDate: '2026-05-01' });
+    payrollSettingsStore.updateCountry(
+      'SN',
+      { ipresGeneral: 0.061 },
+      { effectiveDate: '2026-05-01' }
+    );
 
     const after = payrollSettingsStore.load();
     expect(after.countries.SN.ipresGeneral).toBe(0.061);

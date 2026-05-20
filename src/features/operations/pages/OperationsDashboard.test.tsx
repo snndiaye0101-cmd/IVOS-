@@ -13,15 +13,19 @@ jest.mock('framer-motion', () => {
     layout,
     transition,
     ...rest
-  }: { [key: string]: unknown }) => rest;
+  }: {
+    [key: string]: unknown;
+  }) => rest;
 
   return {
     AnimatePresence: ({ children }: { children: React.ReactNode }) => <>{children}</>,
     motion: new Proxy(
       {},
       {
-        get: () => ({ children, ...props }: { children?: React.ReactNode; [key: string]: unknown }) =>
-          React.createElement('div', stripMotionProps(props), children),
+        get:
+          () =>
+          ({ children, ...props }: { children?: React.ReactNode; [key: string]: unknown }) =>
+            React.createElement('div', stripMotionProps(props), children),
       }
     ),
   };

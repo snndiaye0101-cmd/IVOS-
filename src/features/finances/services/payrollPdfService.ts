@@ -196,7 +196,9 @@ function dateInRange(target: Date, startDate: string, endDate?: string) {
 
 function resolveRatesAtDate(rule: PayrollCountryRule, calculationDate: Date): PayrollRates {
   const resolved: PayrollRates = { ...rule.rates };
-  const timeline = [...(rule.ratesHistory || [])].sort((a, b) => a.startDate.localeCompare(b.startDate));
+  const timeline = [...(rule.ratesHistory || [])].sort((a, b) =>
+    a.startDate.localeCompare(b.startDate)
+  );
   for (const entry of timeline) {
     if (!dateInRange(calculationDate, entry.startDate, entry.endDate)) continue;
     Object.assign(resolved, entry.value);
@@ -209,13 +211,15 @@ function resolveBracketsAtDate(rule: PayrollCountryRule, calculationDate: Date):
     .filter((entry) => dateInRange(calculationDate, entry.startDate, entry.endDate))
     .sort((a, b) => b.startDate.localeCompare(a.startDate));
   if (timeline.length > 0) return timeline[0].value;
-  return rule.taxBrackets || [
-    { upTo: 630000, rate: 0 },
-    { upTo: 1500000, rate: 0.2 },
-    { upTo: 4000000, rate: 0.3 },
-    { upTo: 8000000, rate: 0.35 },
-    { upTo: Number.POSITIVE_INFINITY, rate: 0.4 },
-  ];
+  return (
+    rule.taxBrackets || [
+      { upTo: 630000, rate: 0 },
+      { upTo: 1500000, rate: 0.2 },
+      { upTo: 4000000, rate: 0.3 },
+      { upTo: 8000000, rate: 0.35 },
+      { upTo: Number.POSITIVE_INFINITY, rate: 0.4 },
+    ]
+  );
 }
 
 import { formatCleanAmount } from '@/shared/utils/formatAmount';
@@ -288,14 +292,17 @@ export function numberToFrenchWords(value: number): string {
   return parts.join(' ');
 }
 
-function computeProgressiveAnnualTaxMinor(annualTaxablePerPartMinor: bigint, brackets: PayrollBracket[]): bigint {
+function computeProgressiveAnnualTaxMinor(
+  annualTaxablePerPartMinor: bigint,
+  brackets: PayrollBracket[]
+): bigint {
   let remaining = annualTaxablePerPartMinor;
   let previous = 0n;
   let annualTax = 0n;
 
   for (const bracket of brackets) {
     if (remaining <= 0n) break;
-    const upToMinor = Number.isFinite(bracket.upTo) ? toMinor(bracket.upTo) : (2n ** 62n);
+    const upToMinor = Number.isFinite(bracket.upTo) ? toMinor(bracket.upTo) : 2n ** 62n;
     const range = upToMinor > previous ? upToMinor - previous : 0n;
     const taxableChunk = remaining < range ? remaining : range;
     annualTax += applyRateMinor(taxableChunk, bracket.rate);
@@ -317,7 +324,12 @@ export function computePayroll(input: PayrollInput, rule: PayrollCountryRule): P
   const primeAncienneteMinor = toMinor(input.primeAnciennete);
   const primeTransportMinor = toMinor(input.primeTransport);
   const primePanierMinor = toMinor(input.primePanier);
-  const brutMinor = baseSalaryMinor + surSalaryMinor + primeAncienneteMinor + primeTransportMinor + primePanierMinor;
+  const brutMinor =
+    baseSalaryMinor +
+    surSalaryMinor +
+    primeAncienneteMinor +
+    primeTransportMinor +
+    primePanierMinor;
 
   const autoFiscal = input.autoFiscal ?? true;
   const useTransportExemptCap = input.useTransportExemptCap ?? true;
@@ -330,29 +342,50 @@ export function computePayroll(input: PayrollInput, rule: PayrollCountryRule): P
   const transportCapMinor = toMinor(activeRates.transportExemptCap);
   const housingCapMinor = toMinor(activeRates.housingExemptCap || 0);
   const transportExonereMinor = useTransportExemptCap
-    ? (primeTransportMinor < transportCapMinor ? primeTransportMinor : transportCapMinor)
+    ? primeTransportMinor < transportCapMinor
+      ? primeTransportMinor
+      : transportCapMinor
     : 0n;
   const housingExonereMinor = autoFiscal
-    ? (primePanierMinor < housingCapMinor ? primePanierMinor : housingCapMinor)
+    ? primePanierMinor < housingCapMinor
+      ? primePanierMinor
+      : housingCapMinor
     : 0n;
 
   const ipresGeneralCapMinor = toMinor(activeRates.ipresGeneralCap);
   const ipresCadreCapMinor = toMinor(activeRates.ipresCadreCap);
   const ipresGeneralBaseMinor = autoFiscal
-    ? (brutMinor < ipresGeneralCapMinor ? brutMinor : ipresGeneralCapMinor)
+    ? brutMinor < ipresGeneralCapMinor
+      ? brutMinor
+      : ipresGeneralCapMinor
     : 0n;
-  const ipresCadreBaseMinor = autoFiscal && input.cadre
-    ? (brutMinor < ipresCadreCapMinor ? brutMinor : ipresCadreCapMinor)
-    : 0n;
+  const ipresCadreBaseMinor =
+    autoFiscal && input.cadre
+      ? brutMinor < ipresCadreCapMinor
+        ? brutMinor
+        : ipresCadreCapMinor
+      : 0n;
 
-  const ipresGeneralMinor = autoFiscal ? applyRateMinor(ipresGeneralBaseMinor, activeRates.ipresGeneral) : 0n;
-  const ipresCadreMinor = autoFiscal && input.cadre ? applyRateMinor(ipresCadreBaseMinor, activeRates.ipresCadre) : 0n;
-  const ipresGeneralEmployerMinor = autoFiscal ? applyRateMinor(ipresGeneralBaseMinor, activeRates.ipresGeneralEmployer) : 0n;
-  const ipresCadreEmployerMinor = autoFiscal && input.cadre ? applyRateMinor(ipresCadreBaseMinor, activeRates.ipresCadreEmployer) : 0n;
+  const ipresGeneralMinor = autoFiscal
+    ? applyRateMinor(ipresGeneralBaseMinor, activeRates.ipresGeneral)
+    : 0n;
+  const ipresCadreMinor =
+    autoFiscal && input.cadre ? applyRateMinor(ipresCadreBaseMinor, activeRates.ipresCadre) : 0n;
+  const ipresGeneralEmployerMinor = autoFiscal
+    ? applyRateMinor(ipresGeneralBaseMinor, activeRates.ipresGeneralEmployer)
+    : 0n;
+  const ipresCadreEmployerMinor =
+    autoFiscal && input.cadre
+      ? applyRateMinor(ipresCadreBaseMinor, activeRates.ipresCadreEmployer)
+      : 0n;
   const ipmMinor = autoFiscal ? applyRateMinor(brutMinor, activeRates.ipm) : 0n;
 
-  const cssPFPatronalMinor = autoFiscal ? applyRateMinor(brutMinor, activeRates.cssPrestationsFamiliales) : 0n;
-  const cssATPatronalMinor = autoFiscal ? applyRateMinor(brutMinor, activeRates.cssAccidentTravail) : 0n;
+  const cssPFPatronalMinor = autoFiscal
+    ? applyRateMinor(brutMinor, activeRates.cssPrestationsFamiliales)
+    : 0n;
+  const cssATPatronalMinor = autoFiscal
+    ? applyRateMinor(brutMinor, activeRates.cssAccidentTravail)
+    : 0n;
 
   const brutImposableMinor = brutImposableBaseMinor(
     brutMinor,
@@ -360,27 +393,43 @@ export function computePayroll(input: PayrollInput, rule: PayrollCountryRule): P
     housingExonereMinor,
     ipresGeneralMinor,
     ipresCadreMinor,
-    ipmMinor,
+    ipmMinor
   );
 
   const tfpEmployerMinor = autoFiscal ? applyRateMinor(brutImposableMinor, tfpRate) : 0n;
 
   const irParts = Math.max(1, input.irParts || 1);
   const irMinor = autoFiscal
-    ? (driver.usesProgressiveIncomeTax
+    ? driver.usesProgressiveIncomeTax
       ? (() => {
           const annualPerPartMinor = divRound(brutImposableMinor * 12n, BigInt(irParts));
-          const annualTaxPerPartMinor = computeProgressiveAnnualTaxMinor(annualPerPartMinor, activeBrackets);
+          const annualTaxPerPartMinor = computeProgressiveAnnualTaxMinor(
+            annualPerPartMinor,
+            activeBrackets
+          );
           return divRound(annualTaxPerPartMinor * BigInt(irParts), 12n);
         })()
-      : applyRateMinor(brutImposableMinor, activeRates.ir))
+      : applyRateMinor(brutImposableMinor, activeRates.ir)
     : 0n;
 
-  const cfceMinor = autoFiscal && !isGuinea ? applyRateMinor(brutImposableMinor, activeRates.cfce) : 0n;
+  const cfceMinor =
+    autoFiscal && !isGuinea ? applyRateMinor(brutImposableMinor, activeRates.cfce) : 0n;
   const manualRetenuesMinor = toMinor(input.manualRetenues);
   const loanDeductionMinor = toMinor(input.loanDeduction);
-  const totalCotisationsMinor = ipresGeneralMinor + ipresCadreMinor + ipmMinor + irMinor + cfceMinor + manualRetenuesMinor + loanDeductionMinor;
-  const totalPatronalMinor = ipresGeneralEmployerMinor + ipresCadreEmployerMinor + cssPFPatronalMinor + cssATPatronalMinor + tfpEmployerMinor;
+  const totalCotisationsMinor =
+    ipresGeneralMinor +
+    ipresCadreMinor +
+    ipmMinor +
+    irMinor +
+    cfceMinor +
+    manualRetenuesMinor +
+    loanDeductionMinor;
+  const totalPatronalMinor =
+    ipresGeneralEmployerMinor +
+    ipresCadreEmployerMinor +
+    cssPFPatronalMinor +
+    cssATPatronalMinor +
+    tfpEmployerMinor;
   const netMinor = brutMinor - totalCotisationsMinor;
 
   const brut = fromMinor(brutMinor);
@@ -403,22 +452,138 @@ export function computePayroll(input: PayrollInput, rule: PayrollCountryRule): P
   const vrs = cfce;
 
   const lines: PayrollLine[] = [
-    { rubrique: 'BRUT', base: 0, tauxSalarial: 0, montantSalarial: 0, tauxPatronal: 0, cotPatronales: 0, isSection: true },
-    { rubrique: 'Salaire de base', base: input.baseSalary, tauxSalarial: 1, montantSalarial: input.baseSalary, tauxPatronal: 0, cotPatronales: 0 },
-    { rubrique: 'Sursalaire', base: input.surSalary, tauxSalarial: 1, montantSalarial: input.surSalary, tauxPatronal: 0, cotPatronales: 0 },
-    { rubrique: 'Prime ancienneté', base: input.primeAnciennete, tauxSalarial: 1, montantSalarial: input.primeAnciennete, tauxPatronal: 0, cotPatronales: 0 },
-    { rubrique: `Indemnité transport${useTransportExemptCap ? ' (exonérée selon plafond pays)' : ''}`, base: input.primeTransport, tauxSalarial: 1, montantSalarial: input.primeTransport, tauxPatronal: 0, cotPatronales: 0 },
-    { rubrique: isGuinea ? 'Indemnité logement' : 'Prime de panier', base: input.primePanier, tauxSalarial: 1, montantSalarial: input.primePanier, tauxPatronal: 0, cotPatronales: 0 },
-    { rubrique: 'RETENUES SOCIALES', base: 0, tauxSalarial: 0, montantSalarial: 0, tauxPatronal: 0, cotPatronales: 0, isSection: true },
-    { rubrique: `${retirementLabel} - Régime Général`, base: ipresGeneralBase, tauxSalarial: autoFiscal ? activeRates.ipresGeneral : 0, montantSalarial: -ipresGeneral, tauxPatronal: autoFiscal ? activeRates.ipresGeneralEmployer : 0, cotPatronales: ipresGeneralEmployer },
-    { rubrique: `${retirementLabel} - Régime Cadre`, base: ipresCadreBase, tauxSalarial: autoFiscal && input.cadre ? activeRates.ipresCadre : 0, montantSalarial: -ipresCadre, tauxPatronal: autoFiscal && input.cadre ? activeRates.ipresCadreEmployer : 0, cotPatronales: ipresCadreEmployer },
-    { rubrique: 'IPM - Assurance Maladie', base: brut, tauxSalarial: autoFiscal ? activeRates.ipm : 0, montantSalarial: -ipm, tauxPatronal: 0, cotPatronales: 0 },
-    { rubrique: `${driver.labels.socialBenefits} - Prestations Familiales`, base: brut, tauxSalarial: 0, montantSalarial: 0, tauxPatronal: autoFiscal ? activeRates.cssPrestationsFamiliales : 0, cotPatronales: cssPFPatronal },
-    { rubrique: `${driver.labels.socialBenefits} - Accidents du Travail`, base: brut, tauxSalarial: 0, montantSalarial: 0, tauxPatronal: autoFiscal ? activeRates.cssAccidentTravail : 0, cotPatronales: cssATPatronal },
-    { rubrique: 'RETENUES FISCALES', base: 0, tauxSalarial: 0, montantSalarial: 0, tauxPatronal: 0, cotPatronales: 0, isSection: true },
-    { rubrique: incomeTaxLabel, base: brutImposable, tauxSalarial: autoFiscal && driver.usesProgressiveIncomeTax ? 0 : (autoFiscal ? activeRates.ir : 0), montantSalarial: -ir, tauxPatronal: 0, cotPatronales: 0 },
-    { rubrique: 'Retenues diverses', base: input.manualRetenues, tauxSalarial: 1, montantSalarial: -input.manualRetenues, tauxPatronal: 0, cotPatronales: 0 },
-    { rubrique: 'Retenue prêt', base: input.loanDeduction, tauxSalarial: 1, montantSalarial: -input.loanDeduction, tauxPatronal: 0, cotPatronales: 0 },
+    {
+      rubrique: 'BRUT',
+      base: 0,
+      tauxSalarial: 0,
+      montantSalarial: 0,
+      tauxPatronal: 0,
+      cotPatronales: 0,
+      isSection: true,
+    },
+    {
+      rubrique: 'Salaire de base',
+      base: input.baseSalary,
+      tauxSalarial: 1,
+      montantSalarial: input.baseSalary,
+      tauxPatronal: 0,
+      cotPatronales: 0,
+    },
+    {
+      rubrique: 'Sursalaire',
+      base: input.surSalary,
+      tauxSalarial: 1,
+      montantSalarial: input.surSalary,
+      tauxPatronal: 0,
+      cotPatronales: 0,
+    },
+    {
+      rubrique: 'Prime ancienneté',
+      base: input.primeAnciennete,
+      tauxSalarial: 1,
+      montantSalarial: input.primeAnciennete,
+      tauxPatronal: 0,
+      cotPatronales: 0,
+    },
+    {
+      rubrique: `Indemnité transport${useTransportExemptCap ? ' (exonérée selon plafond pays)' : ''}`,
+      base: input.primeTransport,
+      tauxSalarial: 1,
+      montantSalarial: input.primeTransport,
+      tauxPatronal: 0,
+      cotPatronales: 0,
+    },
+    {
+      rubrique: isGuinea ? 'Indemnité logement' : 'Prime de panier',
+      base: input.primePanier,
+      tauxSalarial: 1,
+      montantSalarial: input.primePanier,
+      tauxPatronal: 0,
+      cotPatronales: 0,
+    },
+    {
+      rubrique: 'RETENUES SOCIALES',
+      base: 0,
+      tauxSalarial: 0,
+      montantSalarial: 0,
+      tauxPatronal: 0,
+      cotPatronales: 0,
+      isSection: true,
+    },
+    {
+      rubrique: `${retirementLabel} - Régime Général`,
+      base: ipresGeneralBase,
+      tauxSalarial: autoFiscal ? activeRates.ipresGeneral : 0,
+      montantSalarial: -ipresGeneral,
+      tauxPatronal: autoFiscal ? activeRates.ipresGeneralEmployer : 0,
+      cotPatronales: ipresGeneralEmployer,
+    },
+    {
+      rubrique: `${retirementLabel} - Régime Cadre`,
+      base: ipresCadreBase,
+      tauxSalarial: autoFiscal && input.cadre ? activeRates.ipresCadre : 0,
+      montantSalarial: -ipresCadre,
+      tauxPatronal: autoFiscal && input.cadre ? activeRates.ipresCadreEmployer : 0,
+      cotPatronales: ipresCadreEmployer,
+    },
+    {
+      rubrique: 'IPM - Assurance Maladie',
+      base: brut,
+      tauxSalarial: autoFiscal ? activeRates.ipm : 0,
+      montantSalarial: -ipm,
+      tauxPatronal: 0,
+      cotPatronales: 0,
+    },
+    {
+      rubrique: `${driver.labels.socialBenefits} - Prestations Familiales`,
+      base: brut,
+      tauxSalarial: 0,
+      montantSalarial: 0,
+      tauxPatronal: autoFiscal ? activeRates.cssPrestationsFamiliales : 0,
+      cotPatronales: cssPFPatronal,
+    },
+    {
+      rubrique: `${driver.labels.socialBenefits} - Accidents du Travail`,
+      base: brut,
+      tauxSalarial: 0,
+      montantSalarial: 0,
+      tauxPatronal: autoFiscal ? activeRates.cssAccidentTravail : 0,
+      cotPatronales: cssATPatronal,
+    },
+    {
+      rubrique: 'RETENUES FISCALES',
+      base: 0,
+      tauxSalarial: 0,
+      montantSalarial: 0,
+      tauxPatronal: 0,
+      cotPatronales: 0,
+      isSection: true,
+    },
+    {
+      rubrique: incomeTaxLabel,
+      base: brutImposable,
+      tauxSalarial:
+        autoFiscal && driver.usesProgressiveIncomeTax ? 0 : autoFiscal ? activeRates.ir : 0,
+      montantSalarial: -ir,
+      tauxPatronal: 0,
+      cotPatronales: 0,
+    },
+    {
+      rubrique: 'Retenues diverses',
+      base: input.manualRetenues,
+      tauxSalarial: 1,
+      montantSalarial: -input.manualRetenues,
+      tauxPatronal: 0,
+      cotPatronales: 0,
+    },
+    {
+      rubrique: 'Retenue prêt',
+      base: input.loanDeduction,
+      tauxSalarial: 1,
+      montantSalarial: -input.loanDeduction,
+      tauxPatronal: 0,
+      cotPatronales: 0,
+    },
   ];
 
   if (driver.complementaryTaxIsEmployerCharge) {
@@ -468,7 +633,7 @@ function brutImposableBaseMinor(
   housingExonere: bigint,
   ipresGeneral: bigint,
   ipresCadre: bigint,
-  ipm: bigint,
+  ipm: bigint
 ) {
   const result = brut - transportExonere - housingExonere - ipresGeneral - ipresCadre - ipm;
   return result < 0n ? 0n : result;
@@ -492,7 +657,7 @@ async function loadLogoDataUrl(path: string): Promise<string | null> {
 
 export async function generatePayrollPdf(
   payload: PayrollPdfPayload,
-  options?: { onGenerated?: (file: PayrollPdfGeneratedFile) => void },
+  options?: { onGenerated?: (file: PayrollPdfGeneratedFile) => void }
 ): Promise<void> {
   const mmToPt = 72 / 25.4;
   const pageMargin = 14 * mmToPt; // 14mm on all sides for full-width optimization
@@ -544,7 +709,12 @@ export async function generatePayrollPdf(
   doc.setFont('helvetica', 'normal');
   doc.setFontSize(9.5);
   doc.setTextColor(80, 80, 80);
-  doc.text(`Pays: ${payload.rule.label} | Période: ${payload.period.monthLabel}`, pageWidth / 2, headerTop + 38, { align: 'center' });
+  doc.text(
+    `Pays: ${payload.rule.label} | Période: ${payload.period.monthLabel}`,
+    pageWidth / 2,
+    headerTop + 38,
+    { align: 'center' }
+  );
 
   const employerX = logoX + logoW + 14;
   const employerY = headerTop + 52;
@@ -552,7 +722,11 @@ export async function generatePayrollPdf(
   doc.setFontSize(9);
   doc.text(payload.rule.employer.companyName, employerX, employerY);
   doc.text(payload.rule.employer.address, employerX, employerY + 13);
-  doc.text(`NINEA: ${payload.rule.employer.ninea}  |  IPRES: ${payload.rule.employer.ipres}  |  CSS: ${payload.rule.employer.css}`, employerX, employerY + 26);
+  doc.text(
+    `NINEA: ${payload.rule.employer.ninea}  |  IPRES: ${payload.rule.employer.ipres}  |  CSS: ${payload.rule.employer.css}`,
+    employerX,
+    employerY + 26
+  );
 
   const employeeTop = headerTop + headerHeight + 14;
   doc.setDrawColor(225, 227, 232);
@@ -574,7 +748,11 @@ export async function generatePayrollPdf(
   doc.text(`Fonction: ${payload.employee.role}`, colLeft, employeeTop + 68);
   doc.text(`Qualification: ${payload.employee.qualification}`, colRight, employeeTop + 36);
   doc.text(`Date d'embauche: ${payload.employee.hireDate}`, colRight, employeeTop + 52);
-  doc.text(`N° Sécurité Sociale: ${payload.employee.socialSecurityNumber}  |  Parts IR: ${payload.employee.irParts.toLocaleString('fr-FR')}`, colRight, employeeTop + 68);
+  doc.text(
+    `N° Sécurité Sociale: ${payload.employee.socialSecurityNumber}  |  Parts IR: ${payload.employee.irParts.toLocaleString('fr-FR')}`,
+    colRight,
+    employeeTop + 68
+  );
 
   const periodTop = employeeTop + 100;
   doc.setDrawColor(225, 227, 232);
@@ -582,16 +760,29 @@ export async function generatePayrollPdf(
   doc.rect(marginLeft, periodTop, contentWidth, 32);
   doc.setFont('helvetica', 'normal');
   doc.setFontSize(9.5);
-  doc.text(`Temps de travail: ${numberFormatter.format(payload.period.workedUnits)} ${payload.period.workedUnitLabel.toLowerCase()}  |  Mois de paie: ${payload.period.monthLabel}`, marginLeft + 12, periodTop + 20);
+  doc.text(
+    `Temps de travail: ${numberFormatter.format(payload.period.workedUnits)} ${payload.period.workedUnitLabel.toLowerCase()}  |  Mois de paie: ${payload.period.monthLabel}`,
+    marginLeft + 12,
+    periodTop + 20
+  );
 
-  const sectionRows: Array<[string, string, string, string, string, string]> = payload.computation.lines.map(line => [
-    line.rubrique,
-    line.isSection ? '' : formatMoney(line.base, payload.rule.currency),
-    line.isSection ? '' : formatRate(line.tauxSalarial),
-    line.isSection ? '' : (line.montantSalarial !== 0 ? formatMoney(line.montantSalarial, payload.rule.currency) : ''),
-    line.isSection ? '' : formatRate(line.tauxPatronal),
-    line.isSection ? '' : (line.cotPatronales !== 0 ? formatMoney(line.cotPatronales, payload.rule.currency) : ''),
-  ]);
+  const sectionRows: Array<[string, string, string, string, string, string]> =
+    payload.computation.lines.map((line) => [
+      line.rubrique,
+      line.isSection ? '' : formatMoney(line.base, payload.rule.currency),
+      line.isSection ? '' : formatRate(line.tauxSalarial),
+      line.isSection
+        ? ''
+        : line.montantSalarial !== 0
+          ? formatMoney(line.montantSalarial, payload.rule.currency)
+          : '',
+      line.isSection ? '' : formatRate(line.tauxPatronal),
+      line.isSection
+        ? ''
+        : line.cotPatronales !== 0
+          ? formatMoney(line.cotPatronales, payload.rule.currency)
+          : '',
+    ]);
 
   autoTable(doc, {
     startY: periodTop + 44,
@@ -616,14 +807,46 @@ export async function generatePayrollPdf(
     },
     theme: 'plain',
     columnStyles: {
-      0: { halign: 'left', cellWidth: 155, font: 'helvetica', cellPadding: { left: 10, right: 6, top: 5, bottom: 5 } },
-      1: { halign: 'right', cellWidth: 75, font: 'helvetica', cellPadding: { left: 4, right: 8, top: 5, bottom: 5 } },
-      2: { halign: 'right', cellWidth: 60, font: 'helvetica', cellPadding: { left: 4, right: 8, top: 5, bottom: 5 } },
-      3: { halign: 'right', cellWidth: 82, font: 'helvetica', cellPadding: { left: 4, right: 8, top: 5, bottom: 5 }, fontStyle: 'bold' },
-      4: { halign: 'right', cellWidth: 58, font: 'helvetica', cellPadding: { left: 4, right: 8, top: 5, bottom: 5 } },
-      5: { halign: 'right', cellWidth: 82, font: 'helvetica', cellPadding: { left: 4, right: 8, top: 5, bottom: 5 }, fontStyle: 'bold' },
+      0: {
+        halign: 'left',
+        cellWidth: 155,
+        font: 'helvetica',
+        cellPadding: { left: 10, right: 6, top: 5, bottom: 5 },
+      },
+      1: {
+        halign: 'right',
+        cellWidth: 75,
+        font: 'helvetica',
+        cellPadding: { left: 4, right: 8, top: 5, bottom: 5 },
+      },
+      2: {
+        halign: 'right',
+        cellWidth: 60,
+        font: 'helvetica',
+        cellPadding: { left: 4, right: 8, top: 5, bottom: 5 },
+      },
+      3: {
+        halign: 'right',
+        cellWidth: 82,
+        font: 'helvetica',
+        cellPadding: { left: 4, right: 8, top: 5, bottom: 5 },
+        fontStyle: 'bold',
+      },
+      4: {
+        halign: 'right',
+        cellWidth: 58,
+        font: 'helvetica',
+        cellPadding: { left: 4, right: 8, top: 5, bottom: 5 },
+      },
+      5: {
+        halign: 'right',
+        cellWidth: 82,
+        font: 'helvetica',
+        cellPadding: { left: 4, right: 8, top: 5, bottom: 5 },
+        fontStyle: 'bold',
+      },
     },
-    didParseCell: hookData => {
+    didParseCell: (hookData) => {
       const rawRow = hookData.row.raw;
       const rowLabel = Array.isArray(rawRow) ? rawRow[0] : '';
       const raw = String(rowLabel || '');
@@ -639,7 +862,7 @@ export async function generatePayrollPdf(
         hookData.cell.styles.fillColor = [252, 253, 255];
       }
     },
-    didDrawCell: hookData => {
+    didDrawCell: (hookData) => {
       // Draw only thin horizontal separators for a modern airy grid.
       if (hookData.section === 'body') {
         const xStart = marginLeft;
@@ -652,7 +875,8 @@ export async function generatePayrollPdf(
     },
   });
 
-  const finalY = (doc as unknown as { lastAutoTable?: { finalY: number } }).lastAutoTable?.finalY || 440;
+  const finalY =
+    (doc as unknown as { lastAutoTable?: { finalY: number } }).lastAutoTable?.finalY || 440;
 
   let cursorY = finalY;
   if (payload.detailedAdjustments && payload.detailedAdjustments.length > 0) {
@@ -690,7 +914,7 @@ export async function generatePayrollPdf(
         1: { halign: 'left', cellWidth: 210 },
         2: { halign: 'right', cellWidth: 120 },
       },
-      didDrawCell: hookData => {
+      didDrawCell: (hookData) => {
         if (hookData.section === 'body') {
           const xStart = marginLeft;
           const xEnd = marginLeft + contentWidth;
@@ -702,7 +926,9 @@ export async function generatePayrollPdf(
       },
     });
 
-    cursorY = ((doc as unknown as { lastAutoTable?: { finalY: number } }).lastAutoTable?.finalY || finalY) + 10;
+    cursorY =
+      ((doc as unknown as { lastAutoTable?: { finalY: number } }).lastAutoTable?.finalY || finalY) +
+      10;
   }
 
   const netWords = numberToFrenchWords(payload.computation.net);
@@ -717,28 +943,48 @@ export async function generatePayrollPdf(
   doc.text(`Salaire Brut`, marginLeft, cursorY + 28);
   doc.setFont('helvetica', 'bold');
   doc.setTextColor(31, 41, 55);
-  doc.text(formatMoney(payload.computation.brut, payload.rule.currency), marginLeft + contentWidth - 8, cursorY + 28, { align: 'right' });
+  doc.text(
+    formatMoney(payload.computation.brut, payload.rule.currency),
+    marginLeft + contentWidth - 8,
+    cursorY + 28,
+    { align: 'right' }
+  );
 
   doc.setFont('helvetica', 'normal');
   doc.setTextColor(22, 22, 22);
   doc.text(`Brut imposable`, marginLeft, cursorY + 44);
   doc.setFont('helvetica', 'bold');
   doc.setTextColor(59, 69, 84);
-  doc.text(formatMoney(payload.computation.brutImposable, payload.rule.currency), marginLeft + contentWidth - 8, cursorY + 44, { align: 'right' });
+  doc.text(
+    formatMoney(payload.computation.brutImposable, payload.rule.currency),
+    marginLeft + contentWidth - 8,
+    cursorY + 44,
+    { align: 'right' }
+  );
 
   doc.setFont('helvetica', 'normal');
   doc.setTextColor(22, 22, 22);
   doc.text(`Total retenues salariales`, marginLeft, cursorY + 60);
   doc.setFont('helvetica', 'bold');
   doc.setTextColor(200, 50, 50);
-  doc.text(formatMoney(payload.computation.totalCotisations, payload.rule.currency), marginLeft + contentWidth - 8, cursorY + 60, { align: 'right' });
+  doc.text(
+    formatMoney(payload.computation.totalCotisations, payload.rule.currency),
+    marginLeft + contentWidth - 8,
+    cursorY + 60,
+    { align: 'right' }
+  );
 
   doc.setFont('helvetica', 'normal');
   doc.setTextColor(22, 22, 22);
   doc.text(`Total cotisations patronales`, marginLeft, cursorY + 76);
   doc.setFont('helvetica', 'bold');
   doc.setTextColor(80, 100, 130);
-  doc.text(formatMoney(payload.computation.totalPatronal, payload.rule.currency), marginLeft + contentWidth - 8, cursorY + 76, { align: 'right' });
+  doc.text(
+    formatMoney(payload.computation.totalPatronal, payload.rule.currency),
+    marginLeft + contentWidth - 8,
+    cursorY + 76,
+    { align: 'right' }
+  );
 
   const netBoxTop = cursorY + 94;
   doc.setDrawColor(31, 41, 55);
@@ -755,7 +1001,7 @@ export async function generatePayrollPdf(
   doc.setTextColor(31, 41, 55);
   doc.setFont('helvetica', 'bold');
   doc.text('NET À PAYER', marginLeft + 12, netBoxTop + 28);
-  
+
   doc.setFontSize(14);
   doc.setTextColor(26, 82, 182);
   const netAmount = formatMoney(payload.computation.net, payload.rule.currency);
@@ -764,7 +1010,11 @@ export async function generatePayrollPdf(
   doc.setFont('helvetica', 'normal');
   doc.setFontSize(9);
   doc.setTextColor(100, 110, 130);
-  doc.text(`En lettres: ${netWords} ${payload.rule.currency.toLowerCase()}`, marginLeft + 12, netBoxTop + 52);
+  doc.text(
+    `En lettres: ${netWords} ${payload.rule.currency.toLowerCase()}`,
+    marginLeft + 12,
+    netBoxTop + 52
+  );
 
   // Cumulative section below NET box
   const cumBoxTop = netBoxTop + 90;
@@ -772,13 +1022,25 @@ export async function generatePayrollPdf(
   doc.setTextColor(59, 69, 84);
   doc.setFont('helvetica', 'bold');
   doc.text('CUMULS ANNUELS', marginLeft, cumBoxTop);
-  
+
   doc.setFont('helvetica', 'normal');
   doc.setFontSize(9);
   doc.setTextColor(70, 80, 90);
-  doc.text(`Brut imposable: ${formatMoney(payload.annualCumulative.brutImposable, payload.rule.currency)}`, marginLeft, cumBoxTop + 16);
-  doc.text(`IR versé: ${formatMoney(payload.annualCumulative.irVerse, payload.rule.currency)}`, marginLeft, cumBoxTop + 32);
-  doc.text(`Net payé: ${formatMoney(payload.annualCumulative.netPaye, payload.rule.currency)}`, marginLeft, cumBoxTop + 48);
+  doc.text(
+    `Brut imposable: ${formatMoney(payload.annualCumulative.brutImposable, payload.rule.currency)}`,
+    marginLeft,
+    cumBoxTop + 16
+  );
+  doc.text(
+    `IR versé: ${formatMoney(payload.annualCumulative.irVerse, payload.rule.currency)}`,
+    marginLeft,
+    cumBoxTop + 32
+  );
+  doc.text(
+    `Net payé: ${formatMoney(payload.annualCumulative.netPaye, payload.rule.currency)}`,
+    marginLeft,
+    cumBoxTop + 48
+  );
 
   // Leave balance
   doc.setFontSize(8.5);
@@ -791,7 +1053,12 @@ export async function generatePayrollPdf(
   doc.setLineWidth(0.5);
   doc.rect(marginLeft, footerTop, contentWidth, 88);
   doc.line(marginLeft + contentWidth / 3, footerTop, marginLeft + contentWidth / 3, footerTop + 88);
-  doc.line(marginLeft + (contentWidth / 3) * 2, footerTop, marginLeft + (contentWidth / 3) * 2, footerTop + 88);
+  doc.line(
+    marginLeft + (contentWidth / 3) * 2,
+    footerTop,
+    marginLeft + (contentWidth / 3) * 2,
+    footerTop + 88
+  );
 
   doc.setFont('helvetica', 'bold');
   doc.setFontSize(9);
@@ -802,13 +1069,27 @@ export async function generatePayrollPdf(
 
   doc.setDrawColor(205, 210, 218);
   doc.line(marginLeft + 12, footerTop + 66, marginLeft + contentWidth / 3 - 12, footerTop + 66);
-  doc.line(marginLeft + contentWidth / 3 + 12, footerTop + 66, marginLeft + (contentWidth / 3) * 2 - 12, footerTop + 66);
-  doc.line(marginLeft + (contentWidth / 3) * 2 + 12, footerTop + 66, marginLeft + contentWidth - 12, footerTop + 66);
+  doc.line(
+    marginLeft + contentWidth / 3 + 12,
+    footerTop + 66,
+    marginLeft + (contentWidth / 3) * 2 - 12,
+    footerTop + 66
+  );
+  doc.line(
+    marginLeft + (contentWidth / 3) * 2 + 12,
+    footerTop + 66,
+    marginLeft + contentWidth - 12,
+    footerTop + 66
+  );
 
   doc.setTextColor(100, 100, 100);
   doc.setFontSize(8);
   doc.setFont('helvetica', 'normal');
-  doc.text(`Document généré par ${payload.generatedBy} le ${new Date().toLocaleString('fr-FR')}`, marginLeft, pageHeight - marginBottom + 2);
+  doc.text(
+    `Document généré par ${payload.generatedBy} le ${new Date().toLocaleString('fr-FR')}`,
+    marginLeft,
+    pageHeight - marginBottom + 2
+  );
 
   const fileName = `bulletin-paie-${payload.employee.matricule || 'employe'}-${payload.period.monthLabel.replace(/\s+/g, '-')}.pdf`;
   if (options?.onGenerated) {

@@ -201,7 +201,7 @@ function dayBefore(date: string) {
 
 function appendTimelineEntry<T>(
   current: PayrollDatedValue<T>[],
-  entry: PayrollDatedValue<T>,
+  entry: PayrollDatedValue<T>
 ): PayrollDatedValue<T>[] {
   const next = current
     .map((item) => ({ ...item }))
@@ -227,7 +227,7 @@ function appendTimelineEntry<T>(
 }
 
 function normalizeRateTimeline(
-  timeline: PayrollDatedValue<Partial<PayrollCountryRatePatch>>[] | undefined,
+  timeline: PayrollDatedValue<Partial<PayrollCountryRatePatch>>[] | undefined
 ): PayrollDatedValue<Partial<PayrollCountryRatePatch>>[] {
   if (!Array.isArray(timeline)) return [];
   return timeline
@@ -241,7 +241,7 @@ function normalizeRateTimeline(
 }
 
 function normalizeBracketTimeline(
-  timeline: PayrollDatedValue<PayrollBracket[]>[] | undefined,
+  timeline: PayrollDatedValue<PayrollBracket[]>[] | undefined
 ): PayrollDatedValue<PayrollBracket[]>[] {
   if (!Array.isArray(timeline)) return [];
   return timeline
@@ -256,7 +256,7 @@ function normalizeBracketTimeline(
 
 function normalizeFiscalHistory(
   history: PayrollCountryFiscalHistory | undefined,
-  fallback: PayrollCountryFiscalHistory,
+  fallback: PayrollCountryFiscalHistory
 ): PayrollCountryFiscalHistory {
   return {
     rateTimeline: normalizeRateTimeline(history?.rateTimeline || fallback.rateTimeline),
@@ -268,7 +268,10 @@ function emit() {
   window.dispatchEvent(new Event(EVENT_NAME));
 }
 
-function normalizeBrackets(brackets: PayrollBracket[] | undefined, fallback: PayrollBracket[]): PayrollBracket[] {
+function normalizeBrackets(
+  brackets: PayrollBracket[] | undefined,
+  fallback: PayrollBracket[]
+): PayrollBracket[] {
   if (!Array.isArray(brackets) || brackets.length === 0) return fallback;
   return brackets
     .map((bracket) => ({
@@ -278,18 +281,36 @@ function normalizeBrackets(brackets: PayrollBracket[] | undefined, fallback: Pay
     .sort((a, b) => a.upTo - b.upTo);
 }
 
-function normalizeCountrySettings(country: Partial<PayrollCountrySettings> | undefined, fallback: PayrollCountrySettings): PayrollCountrySettings {
+function normalizeCountrySettings(
+  country: Partial<PayrollCountrySettings> | undefined,
+  fallback: PayrollCountrySettings
+): PayrollCountrySettings {
   return {
     ipresGeneral: Math.max(0, Number(country?.ipresGeneral ?? fallback.ipresGeneral)),
-    ipresGeneralEmployer: Math.max(0, Number(country?.ipresGeneralEmployer ?? fallback.ipresGeneralEmployer)),
+    ipresGeneralEmployer: Math.max(
+      0,
+      Number(country?.ipresGeneralEmployer ?? fallback.ipresGeneralEmployer)
+    ),
     ipresCadre: Math.max(0, Number(country?.ipresCadre ?? fallback.ipresCadre)),
-    ipresCadreEmployer: Math.max(0, Number(country?.ipresCadreEmployer ?? fallback.ipresCadreEmployer)),
-    cssAccidentTravail: Math.max(0, Number(country?.cssAccidentTravail ?? fallback.cssAccidentTravail)),
-    cssPrestationsFamiliales: Math.max(0, Number(country?.cssPrestationsFamiliales ?? fallback.cssPrestationsFamiliales)),
+    ipresCadreEmployer: Math.max(
+      0,
+      Number(country?.ipresCadreEmployer ?? fallback.ipresCadreEmployer)
+    ),
+    cssAccidentTravail: Math.max(
+      0,
+      Number(country?.cssAccidentTravail ?? fallback.cssAccidentTravail)
+    ),
+    cssPrestationsFamiliales: Math.max(
+      0,
+      Number(country?.cssPrestationsFamiliales ?? fallback.cssPrestationsFamiliales)
+    ),
     ipm: Math.max(0, Number(country?.ipm ?? fallback.ipm)),
     ipresGeneralCap: Math.max(0, Number(country?.ipresGeneralCap ?? fallback.ipresGeneralCap)),
     ipresCadreCap: Math.max(0, Number(country?.ipresCadreCap ?? fallback.ipresCadreCap)),
-    transportExemptCap: Math.max(0, Number(country?.transportExemptCap ?? fallback.transportExemptCap)),
+    transportExemptCap: Math.max(
+      0,
+      Number(country?.transportExemptCap ?? fallback.transportExemptCap)
+    ),
     housingExemptCap: Math.max(0, Number(country?.housingExemptCap ?? fallback.housingExemptCap)),
     irBrackets: normalizeBrackets(country?.irBrackets, fallback.irBrackets),
     cfce: Math.max(0, Number(country?.cfce ?? fallback.cfce)),
@@ -306,9 +327,13 @@ function normalizeSettings(value: Partial<PayrollSettings> | undefined): Payroll
   const countries = value?.countries || {};
   return {
     automation: {
-      globalAutoFiscal: value?.automation?.globalAutoFiscal ?? defaultSettings.automation.globalAutoFiscal,
-      useTransportExemptCap: value?.automation?.useTransportExemptCap ?? defaultSettings.automation.useTransportExemptCap,
-      useFiscalParts: value?.automation?.useFiscalParts ?? defaultSettings.automation.useFiscalParts,
+      globalAutoFiscal:
+        value?.automation?.globalAutoFiscal ?? defaultSettings.automation.globalAutoFiscal,
+      useTransportExemptCap:
+        value?.automation?.useTransportExemptCap ??
+        defaultSettings.automation.useTransportExemptCap,
+      useFiscalParts:
+        value?.automation?.useFiscalParts ?? defaultSettings.automation.useFiscalParts,
     },
     countries: {
       SN: normalizeCountrySettings(countries.SN, defaultSettings.countries.SN),
@@ -354,7 +379,7 @@ export const payrollSettingsStore = {
   updateCountry(
     code: string,
     patch: Partial<PayrollCountrySettings>,
-    options?: { effectiveDate?: string; persistHistory?: boolean },
+    options?: { effectiveDate?: string; persistHistory?: boolean }
   ) {
     const current = load();
     const fallback = current.countries[code] || defaultSettings.countries.SN;
@@ -373,17 +398,23 @@ export const payrollSettingsStore = {
       }, {} as Partial<PayrollCountryRatePatch>);
 
       if (Object.keys(ratePatch).length > 0) {
-        nextCountry.fiscalHistory.rateTimeline = appendTimelineEntry(nextCountry.fiscalHistory.rateTimeline, {
-          startDate: effectiveDate,
-          value: ratePatch,
-        });
+        nextCountry.fiscalHistory.rateTimeline = appendTimelineEntry(
+          nextCountry.fiscalHistory.rateTimeline,
+          {
+            startDate: effectiveDate,
+            value: ratePatch,
+          }
+        );
       }
 
       if (Array.isArray(patch.irBrackets) && patch.irBrackets.length > 0) {
-        nextCountry.fiscalHistory.bracketTimeline = appendTimelineEntry(nextCountry.fiscalHistory.bracketTimeline, {
-          startDate: effectiveDate,
-          value: normalizeBrackets(patch.irBrackets, fallback.irBrackets),
-        });
+        nextCountry.fiscalHistory.bracketTimeline = appendTimelineEntry(
+          nextCountry.fiscalHistory.bracketTimeline,
+          {
+            startDate: effectiveDate,
+            value: normalizeBrackets(patch.irBrackets, fallback.irBrackets),
+          }
+        );
       }
     }
 
@@ -395,7 +426,11 @@ export const payrollSettingsStore = {
       },
     });
   },
-  updateCountryWithEffectiveDate(code: string, patch: Partial<PayrollCountrySettings>, effectiveDate: string) {
+  updateCountryWithEffectiveDate(
+    code: string,
+    patch: Partial<PayrollCountrySettings>,
+    effectiveDate: string
+  ) {
     this.updateCountry(code, patch, { effectiveDate, persistHistory: true });
   },
 };

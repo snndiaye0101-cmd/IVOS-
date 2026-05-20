@@ -1,9 +1,9 @@
 // ============= MESSAGE BUBBLE COMPONENT =============
 // Affiche les messages de chat individuels avec édition/suppression
 
-import React, { useState } from "react";
-import { Trash2, Edit2, Smile } from "lucide-react";
-import { motion } from "framer-motion";
+import React, { useState } from 'react';
+import { Trash2, Edit2, Smile } from 'lucide-react';
+import { motion } from 'framer-motion';
 
 interface MessageBubbleProps {
   id: string;
@@ -11,7 +11,7 @@ interface MessageBubbleProps {
   userName: string;
   userAvatar?: string;
   timestamp: string;
-  type?: "text" | "image" | "file" | "location";
+  type?: 'text' | 'image' | 'file' | 'location';
   fileUrl?: string;
   fileName?: string;
   isOwn: boolean;
@@ -26,7 +26,7 @@ export default function MessageBubble({
   userName,
   userAvatar,
   timestamp,
-  type = "text",
+  type = 'text',
   fileUrl,
   fileName,
   isOwn,
@@ -47,7 +47,7 @@ export default function MessageBubble({
 
   return (
     <motion.div
-      className={`flex gap-3 mb-4 group ${isOwn ? "flex-row-reverse" : ""}`}
+      className={`group mb-4 flex gap-3 ${isOwn ? 'flex-row-reverse' : ''}`}
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.2 }}
@@ -59,15 +59,15 @@ export default function MessageBubble({
         <img
           src={userAvatar}
           alt={userName}
-          className="w-9 h-9 rounded-full flex-shrink-0 shadow-lg object-cover"
+          className="h-9 w-9 flex-shrink-0 rounded-full object-cover shadow-lg"
         />
       )}
       {!userAvatar && (
         <div
-          className={`w-9 h-9 rounded-full flex-shrink-0 flex items-center justify-center font-bold text-sm shadow-lg ${
+          className={`flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full text-sm font-bold shadow-lg ${
             isOwn
-              ? "bg-gradient-to-br from-indigo-500 to-blue-600 text-white"
-              : "bg-slate-700 text-slate-200"
+              ? 'bg-gradient-to-br from-indigo-500 to-blue-600 text-white'
+              : 'bg-slate-700 text-slate-200'
           }`}
           title={userName}
         >
@@ -76,58 +76,50 @@ export default function MessageBubble({
       )}
 
       {/* Message Content */}
-      <div
-        className={`flex flex-col justify-center ${isOwn ? "items-end" : "items-start"}`}
-      >
+      <div className={`flex flex-col justify-center ${isOwn ? 'items-end' : 'items-start'}`}>
         {/* Header */}
-        <div className="flex items-center gap-2 mb-1">
-          <span className="font-semibold text-white text-sm">{userName}</span>
+        <div className="mb-1 flex items-center gap-2">
+          <span className="text-sm font-semibold text-white">{userName}</span>
           <span className="text-xs text-slate-400">{timestamp}</span>
         </div>
 
         {/* Bubble */}
         <div
-          className={`rounded-2xl max-w-md px-4 py-2 ${
+          className={`max-w-md rounded-2xl px-4 py-2 ${
             isOwn
-              ? "bg-indigo-600 text-white rounded-br-none"
-              : "bg-slate-700 text-slate-100 rounded-bl-none"
-          } ${isDeleted ? "italic opacity-50" : ""}`}
+              ? 'rounded-br-none bg-indigo-600 text-white'
+              : 'rounded-bl-none bg-slate-700 text-slate-100'
+          } ${isDeleted ? 'italic opacity-50' : ''}`}
         >
           {isEditing ? (
             <textarea
               value={editedContent}
               onChange={(e) => setEditedContent(e.target.value)}
-              className="bg-slate-800 text-white rounded px-2 py-1 w-full text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              className="w-full rounded bg-slate-800 px-2 py-1 text-sm text-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
               rows={3}
               autoFocus
             />
           ) : (
             <>
-              {type === "text" && (
-                <p className="break-words whitespace-pre-wrap text-sm">
-                  {isDeleted ? "Message supprimé" : content}
+              {type === 'text' && (
+                <p className="whitespace-pre-wrap break-words text-sm">
+                  {isDeleted ? 'Message supprimé' : content}
                 </p>
               )}
-              {type === "image" && fileUrl && (
-                <img
-                  src={fileUrl}
-                  alt="image"
-                  className="max-w-xs rounded-lg mt-2 shadow-lg"
-                />
+              {type === 'image' && fileUrl && (
+                <img src={fileUrl} alt="image" className="mt-2 max-w-xs rounded-lg shadow-lg" />
               )}
-              {type === "file" && fileName && (
+              {type === 'file' && fileName && (
                 <a
                   href={fileUrl}
                   download
-                  className="flex items-center gap-2 text-indigo-300 hover:underline text-sm"
+                  className="flex items-center gap-2 text-sm text-indigo-300 hover:underline"
                 >
                   📎 {fileName}
                 </a>
               )}
-              {type === "location" && (
-                <div className="flex items-center gap-2 text-sm">
-                  📍 {content}
-                </div>
+              {type === 'location' && (
+                <div className="flex items-center gap-2 text-sm">📍 {content}</div>
               )}
             </>
           )}
@@ -135,10 +127,10 @@ export default function MessageBubble({
 
         {/* Edit Controls */}
         {isEditing && (
-          <div className="flex gap-2 mt-2">
+          <div className="mt-2 flex gap-2">
             <button
               onClick={handleEditSave}
-              className="px-3 py-1 bg-green-600 hover:bg-green-700 text-white text-xs rounded transition-all"
+              className="rounded bg-green-600 px-3 py-1 text-xs text-white transition-all hover:bg-green-700"
             >
               Enregistrer
             </button>
@@ -147,7 +139,7 @@ export default function MessageBubble({
                 setIsEditing(false);
                 setEditedContent(content);
               }}
-              className="px-3 py-1 bg-slate-600 hover:bg-slate-700 text-white text-xs rounded transition-all"
+              className="rounded bg-slate-600 px-3 py-1 text-xs text-white transition-all hover:bg-slate-700"
             >
               Annuler
             </button>
@@ -157,11 +149,11 @@ export default function MessageBubble({
 
       {/* Action Buttons */}
       {showActions && !isDeleted && (
-        <div className={`flex gap-1 ${isOwn ? "flex-row-reverse" : ""}`}>
+        <div className={`flex gap-1 ${isOwn ? 'flex-row-reverse' : ''}`}>
           {isOwn && onEdit && (
             <button
               onClick={() => setIsEditing(true)}
-              className="p-1.5 rounded-lg hover:bg-slate-700 text-slate-400 hover:text-blue-400 transition-all"
+              className="rounded-lg p-1.5 text-slate-400 transition-all hover:bg-slate-700 hover:text-blue-400"
               title="Éditer"
             >
               <Edit2 size={16} />
@@ -171,7 +163,7 @@ export default function MessageBubble({
           {isOwn && onDelete && (
             <button
               onClick={() => onDelete(id)}
-              className="p-1.5 rounded-lg hover:bg-slate-700 text-slate-400 hover:text-red-400 transition-all"
+              className="rounded-lg p-1.5 text-slate-400 transition-all hover:bg-slate-700 hover:text-red-400"
               title="Supprimer"
             >
               <Trash2 size={16} />

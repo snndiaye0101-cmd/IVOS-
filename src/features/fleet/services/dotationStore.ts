@@ -31,11 +31,11 @@ export interface CarteArchiveMensuelle {
   mois: string; // "2026-04"
   vehicleRegistration: string;
   numeroCarte: string;
-  dotationMois: number;    // Montant rechargé au 1er du mois
+  dotationMois: number; // Montant rechargé au 1er du mois
   rechargesExceptionnelles: number; // Total recharges exceptionnelles du mois
   depensesTotales: number; // Total dépensé via carte
-  soldeRestant: number;    // dotationMois + recharges - depenses
-  archivedAt: string;      // ISO timestamp
+  soldeRestant: number; // dotationMois + recharges - depenses
+  archivedAt: string; // ISO timestamp
 }
 
 /** Dotation par défaut pour un véhicule (= recharge automatique mensuelle) */
@@ -74,47 +74,63 @@ function genId(): string {
 export const dotationStore = {
   // ─ Cartes Carburant ─────────────────────────────────────────
   loadCartes(): CarteCarburant[] {
-    try { return JSON.parse(localStorage.getItem(CARTES_KEY) || '[]'); } catch { return []; }
+    try {
+      return JSON.parse(localStorage.getItem(CARTES_KEY) || '[]');
+    } catch {
+      return [];
+    }
   },
 
   saveCartes(cartes: CarteCarburant[]) {
     localStorage.setItem(CARTES_KEY, JSON.stringify(cartes));
-    try { window.dispatchEvent(new Event('dotation:updated')); } catch {}
+    try {
+      window.dispatchEvent(new Event('dotation:updated'));
+    } catch {}
   },
 
   getCarte(registration: string): CarteCarburant | null {
-    return this.loadCartes().find(c => c.vehicleRegistration === registration) || null;
+    return this.loadCartes().find((c) => c.vehicleRegistration === registration) || null;
   },
 
   setCarte(registration: string, numeroCarte: string) {
     const cartes = this.loadCartes();
-    const idx = cartes.findIndex(c => c.vehicleRegistration === registration);
+    const idx = cartes.findIndex((c) => c.vehicleRegistration === registration);
     if (idx >= 0) {
       cartes[idx].numeroCarte = numeroCarte;
     } else {
-      cartes.push({ vehicleRegistration: registration, numeroCarte, dateAttribution: new Date().toISOString().slice(0, 10) });
+      cartes.push({
+        vehicleRegistration: registration,
+        numeroCarte,
+        dateAttribution: new Date().toISOString().slice(0, 10),
+      });
     }
     this.saveCartes(cartes);
   },
 
   // ─ Defaults (= forfait mensuel de recharge auto) ───────────
   loadDefaults(): DotationDefault[] {
-    try { return JSON.parse(localStorage.getItem(DEFAULTS_KEY) || '[]'); } catch { return []; }
+    try {
+      return JSON.parse(localStorage.getItem(DEFAULTS_KEY) || '[]');
+    } catch {
+      return [];
+    }
   },
 
   saveDefaults(defaults: DotationDefault[]) {
     localStorage.setItem(DEFAULTS_KEY, JSON.stringify(defaults));
-    try { window.dispatchEvent(new Event('dotation:updated')); } catch {}
+    try {
+      window.dispatchEvent(new Event('dotation:updated'));
+    } catch {}
   },
 
   getDefault(registration: string): number {
-    const d = this.loadDefaults().find(d => d.vehicleRegistration === registration);
+    const d = this.loadDefaults().find((d) => d.vehicleRegistration === registration);
     return d ? d.montant : 0;
   },
 
   setDefault(registration: string, montant: number) {
     const defaults = this.loadDefaults();
-    const idx = defaults.findIndex(d => d.vehicleRegistration === registration);
+    const idx = defaults.findIndex((d) => d.vehicleRegistration === registration);
     if (idx >= 0) {
       defaults[idx].montant = montant;
     } else {
@@ -125,17 +141,23 @@ export const dotationStore = {
 
   // ─ Overrides ────────────────────────────────────────────────
   loadOverrides(): DotationOverride[] {
-    try { return JSON.parse(localStorage.getItem(OVERRIDES_KEY) || '[]'); } catch { return []; }
+    try {
+      return JSON.parse(localStorage.getItem(OVERRIDES_KEY) || '[]');
+    } catch {
+      return [];
+    }
   },
 
   saveOverrides(overrides: DotationOverride[]) {
     localStorage.setItem(OVERRIDES_KEY, JSON.stringify(overrides));
-    try { window.dispatchEvent(new Event('dotation:updated')); } catch {}
+    try {
+      window.dispatchEvent(new Event('dotation:updated'));
+    } catch {}
   },
 
   getOverride(registration: string, mois: string): number | null {
     const o = this.loadOverrides().find(
-      o => o.vehicleRegistration === registration && o.mois === mois
+      (o) => o.vehicleRegistration === registration && o.mois === mois
     );
     return o ? o.montant : null;
   },
@@ -143,7 +165,7 @@ export const dotationStore = {
   setOverride(registration: string, mois: string, montant: number) {
     const overrides = this.loadOverrides();
     const idx = overrides.findIndex(
-      o => o.vehicleRegistration === registration && o.mois === mois
+      (o) => o.vehicleRegistration === registration && o.mois === mois
     );
     if (idx >= 0) {
       overrides[idx].montant = montant;
@@ -176,7 +198,11 @@ export const dotationStore = {
 
   // ─ Log d'audit ──────────────────────────────────────────────
   loadLog(): DotationLogEntry[] {
-    try { return JSON.parse(localStorage.getItem(LOG_KEY) || '[]'); } catch { return []; }
+    try {
+      return JSON.parse(localStorage.getItem(LOG_KEY) || '[]');
+    } catch {
+      return [];
+    }
   },
 
   saveLog(log: DotationLogEntry[]) {
@@ -194,12 +220,16 @@ export const dotationStore = {
   },
 
   getLogForVehicle(registration: string): DotationLogEntry[] {
-    return this.loadLog().filter(e => e.vehicleRegistration === registration);
+    return this.loadLog().filter((e) => e.vehicleRegistration === registration);
   },
 
   // ─ Archives mensuelles par carte ────────────────────────────
   loadCarteArchives(): CarteArchiveMensuelle[] {
-    try { return JSON.parse(localStorage.getItem(CARTE_ARCHIVES_KEY) || '[]'); } catch { return []; }
+    try {
+      return JSON.parse(localStorage.getItem(CARTE_ARCHIVES_KEY) || '[]');
+    } catch {
+      return [];
+    }
   },
 
   saveCarteArchives(archives: CarteArchiveMensuelle[]) {
@@ -207,26 +237,24 @@ export const dotationStore = {
   },
 
   getCarteArchive(registration: string, mois: string): CarteArchiveMensuelle | null {
-    return this.loadCarteArchives().find(
-      a => a.vehicleRegistration === registration && a.mois === mois
-    ) || null;
+    return (
+      this.loadCarteArchives().find(
+        (a) => a.vehicleRegistration === registration && a.mois === mois
+      ) || null
+    );
   },
 
   getCarteArchivesForVehicle(registration: string): CarteArchiveMensuelle[] {
     return this.loadCarteArchives()
-      .filter(a => a.vehicleRegistration === registration)
+      .filter((a) => a.vehicleRegistration === registration)
       .sort((a, b) => b.mois.localeCompare(a.mois));
   },
 
   /** Archive le relevé mensuel d'une carte. Appelé au 1er du mois pour le mois précédent. */
-  archiveCarteMois(
-    registration: string,
-    mois: string,
-    depensesTotales: number,
-  ) {
+  archiveCarteMois(registration: string, mois: string, depensesTotales: number) {
     const archives = this.loadCarteArchives();
     // Ne pas archiver en double
-    if (archives.find(a => a.vehicleRegistration === registration && a.mois === mois)) return;
+    if (archives.find((a) => a.vehicleRegistration === registration && a.mois === mois)) return;
 
     const carte = this.getCarte(registration);
     const forfait = this.getForfaitMensuel(registration);

@@ -39,13 +39,13 @@ export default function PaymentList({
   const loadData = () => {
     let data = loadPayments();
     if (invoiceId) {
-      data = data.filter(p => p.invoiceId === invoiceId);
+      data = data.filter((p) => p.invoiceId === invoiceId);
     }
     if (filterStatus !== 'all') {
-      data = data.filter(p => p.status === filterStatus);
+      data = data.filter((p) => p.status === filterStatus);
     }
     if (filterMethod !== 'all') {
-      data = data.filter(p => p.method === filterMethod);
+      data = data.filter((p) => p.method === filterMethod);
     }
     setPayments(data);
   };
@@ -84,7 +84,7 @@ export default function PaymentList({
     };
     const badge = badges[status];
     return (
-      <span className={`px-3 py-1 rounded-full text-xs font-semibold ${badge.bg} ${badge.color}`}>
+      <span className={`rounded-full px-3 py-1 text-xs font-semibold ${badge.bg} ${badge.color}`}>
         {badge.label}
       </span>
     );
@@ -94,12 +94,12 @@ export default function PaymentList({
 
   return (
     <>
-      <div className="bg-white rounded-2xl border border-gray-200 shadow-md">
+      <div className="rounded-2xl border border-gray-200 bg-white shadow-md">
         {/* Header */}
-        <div className="px-6 py-4 border-b border-gray-200 bg-gradient-to-r from-green-50 to-emerald-50">
+        <div className="border-b border-gray-200 bg-gradient-to-r from-green-50 to-emerald-50 px-6 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <DollarSign className="w-5 h-5 text-green-600" />
+              <DollarSign className="h-5 w-5 text-green-600" />
               <h3 className="text-lg font-bold text-gray-900">
                 {invoiceId ? 'Paiements de cette Facture' : 'Liste des Paiements'}
               </h3>
@@ -111,11 +111,11 @@ export default function PaymentList({
 
           {/* Filters */}
           {!invoiceId && (
-            <div className="flex gap-3 mt-4">
+            <div className="mt-4 flex gap-3">
               <select
                 value={filterStatus}
-                onChange={e => setFilterStatus(e.target.value as PaymentStatus | 'all')}
-                className="px-3 py-2 rounded-lg border border-gray-300 text-sm focus:ring-2 focus:ring-green-400 outline-none"
+                onChange={(e) => setFilterStatus(e.target.value as PaymentStatus | 'all')}
+                className="rounded-lg border border-gray-300 px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-green-400"
               >
                 <option value="all">Tous les statuts</option>
                 <option value="en_attente">En Attente</option>
@@ -126,8 +126,8 @@ export default function PaymentList({
 
               <select
                 value={filterMethod}
-                onChange={e => setFilterMethod(e.target.value as PaymentMethod | 'all')}
-                className="px-3 py-2 rounded-lg border border-gray-300 text-sm focus:ring-2 focus:ring-green-400 outline-none"
+                onChange={(e) => setFilterMethod(e.target.value as PaymentMethod | 'all')}
+                className="rounded-lg border border-gray-300 px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-green-400"
               >
                 <option value="all">Tous les modes</option>
                 <option value="virement">Virement</option>
@@ -143,16 +143,16 @@ export default function PaymentList({
         <div className="divide-y divide-gray-100">
           {payments.length === 0 ? (
             <div className="px-6 py-12 text-center text-gray-500">
-              <DollarSign className="w-12 h-12 mx-auto mb-3 text-gray-300" />
+              <DollarSign className="mx-auto mb-3 h-12 w-12 text-gray-300" />
               <p className="font-medium">Aucun paiement enregistré</p>
             </div>
           ) : (
-            payments.map(payment => (
-              <div key={payment.id} className="px-6 py-4 hover:bg-gray-50 transition">
+            payments.map((payment) => (
+              <div key={payment.id} className="px-6 py-4 transition hover:bg-gray-50">
                 <div className="flex items-start justify-between gap-4">
                   {/* Left: Details */}
                   <div className="flex-1">
-                    <div className="flex items-center gap-3 mb-2">
+                    <div className="mb-2 flex items-center gap-3">
                       <span className="font-mono text-xs font-bold text-gray-500">
                         {payment.id}
                       </span>
@@ -186,7 +186,7 @@ export default function PaymentList({
                       </div>
                       <div className="col-span-2">
                         <span className="text-gray-500">Détails:</span>
-                        <span className="ml-2 text-gray-700 text-xs">
+                        <span className="ml-2 text-xs text-gray-700">
                           {formatPaymentDetails(payment)}
                         </span>
                       </div>
@@ -203,7 +203,7 @@ export default function PaymentList({
                     </div>
 
                     {payment.notes && (
-                      <div className="mt-2 text-xs text-gray-600 italic bg-gray-50 px-3 py-2 rounded-lg">
+                      <div className="mt-2 rounded-lg bg-gray-50 px-3 py-2 text-xs italic text-gray-600">
                         Note: {payment.notes}
                       </div>
                     )}
@@ -216,16 +216,16 @@ export default function PaymentList({
                         <>
                           <button
                             onClick={() => handleValidate(payment.id)}
-                            className="px-4 py-2 rounded-lg bg-blue-600 text-white text-xs font-semibold hover:bg-blue-700 transition flex items-center gap-2"
+                            className="flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-xs font-semibold text-white transition hover:bg-blue-700"
                           >
-                            <CheckCircle2 className="w-3.5 h-3.5" />
+                            <CheckCircle2 className="h-3.5 w-3.5" />
                             Valider
                           </button>
                           <button
                             onClick={() => handleReject(payment.id)}
-                            className="px-4 py-2 rounded-lg bg-red-600 text-white text-xs font-semibold hover:bg-red-700 transition flex items-center gap-2"
+                            className="flex items-center gap-2 rounded-lg bg-red-600 px-4 py-2 text-xs font-semibold text-white transition hover:bg-red-700"
                           >
-                            <XCircle className="w-3.5 h-3.5" />
+                            <XCircle className="h-3.5 w-3.5" />
                             Rejeter
                           </button>
                         </>
@@ -234,18 +234,18 @@ export default function PaymentList({
                       {payment.status === 'valide' && isSuperAdmin && (
                         <button
                           onClick={() => handleEncaisse(payment.id)}
-                          className="px-4 py-2 rounded-lg bg-green-600 text-white text-xs font-semibold hover:bg-green-700 transition flex items-center gap-2"
+                          className="flex items-center gap-2 rounded-lg bg-green-600 px-4 py-2 text-xs font-semibold text-white transition hover:bg-green-700"
                         >
-                          <DollarSign className="w-3.5 h-3.5" />
+                          <DollarSign className="h-3.5 w-3.5" />
                           Marquer Encaissé
                         </button>
                       )}
 
                       <button
                         onClick={() => setSelectedPayment(payment)}
-                        className="px-4 py-2 rounded-lg border border-gray-300 text-gray-700 text-xs font-semibold hover:bg-gray-50 transition flex items-center gap-2"
+                        className="flex items-center gap-2 rounded-lg border border-gray-300 px-4 py-2 text-xs font-semibold text-gray-700 transition hover:bg-gray-50"
                       >
-                        <Eye className="w-3.5 h-3.5" />
+                        <Eye className="h-3.5 w-3.5" />
                         Détails
                       </button>
                     </div>
@@ -259,12 +259,12 @@ export default function PaymentList({
 
       {/* Modal Détails */}
       {selectedPayment && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-lg">
-            <div className="px-6 py-4 border-b bg-gradient-to-r from-green-600 to-emerald-600">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+          <div className="w-full max-w-lg rounded-2xl bg-white shadow-2xl">
+            <div className="border-b bg-gradient-to-r from-green-600 to-emerald-600 px-6 py-4">
               <h3 className="text-lg font-bold text-white">Détails du Paiement</h3>
             </div>
-            <div className="p-6 space-y-4">
+            <div className="space-y-4 p-6">
               <div className="grid grid-cols-2 gap-4 text-sm">
                 <div>
                   <span className="font-semibold text-gray-600">ID:</span>
@@ -294,24 +294,24 @@ export default function PaymentList({
                 </div>
                 <div className="col-span-2">
                   <span className="font-semibold text-gray-600">Détails:</span>
-                  <p className="text-xs bg-gray-50 px-3 py-2 rounded-lg mt-1">
+                  <p className="mt-1 rounded-lg bg-gray-50 px-3 py-2 text-xs">
                     {formatPaymentDetails(selectedPayment)}
                   </p>
                 </div>
                 {selectedPayment.notes && (
                   <div className="col-span-2">
                     <span className="font-semibold text-gray-600">Notes:</span>
-                    <p className="text-xs bg-gray-50 px-3 py-2 rounded-lg mt-1 italic">
+                    <p className="mt-1 rounded-lg bg-gray-50 px-3 py-2 text-xs italic">
                       {selectedPayment.notes}
                     </p>
                   </div>
                 )}
               </div>
             </div>
-            <div className="px-6 py-4 border-t flex justify-end">
+            <div className="flex justify-end border-t px-6 py-4">
               <button
                 onClick={() => setSelectedPayment(null)}
-                className="px-6 py-2 rounded-lg bg-gray-600 text-white font-semibold hover:bg-gray-700 transition"
+                className="rounded-lg bg-gray-600 px-6 py-2 font-semibold text-white transition hover:bg-gray-700"
               >
                 Fermer
               </button>

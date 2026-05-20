@@ -1,10 +1,30 @@
 import React, { useState, useMemo, useEffect, useRef, useCallback } from 'react';
 import {
-  Plus, Edit3, Trash2, Search, Check, X, Receipt,
-  ChevronDown, Users, Truck, DollarSign, TrendingDown,
-  CalendarDays, Upload, Tag, FileText, AlertCircle,
-  Fuel, Wrench, HardHat, Package, Building2, MoreHorizontal,
-  RefreshCw, Lock,
+  Plus,
+  Edit3,
+  Trash2,
+  Search,
+  Check,
+  X,
+  Receipt,
+  ChevronDown,
+  Users,
+  Truck,
+  DollarSign,
+  TrendingDown,
+  CalendarDays,
+  Upload,
+  Tag,
+  FileText,
+  AlertCircle,
+  Fuel,
+  Wrench,
+  HardHat,
+  Package,
+  Building2,
+  MoreHorizontal,
+  RefreshCw,
+  Lock,
 } from 'lucide-react';
 import { formatCleanAmount } from '@/shared/utils/formatAmount';
 import { personnelStore, type PersonnelAgent } from '../../fleet/services/personnelStore';
@@ -20,30 +40,158 @@ import {
   saveExpenses,
 } from '../services/globalExpensesService';
 
-const CATEGORIES: { value: ExpenseCategory; label: string; icon: typeof Fuel; color: string; bg: string }[] = [
-  { value: 'Carburant', label: 'Carburant', icon: Fuel, color: 'text-orange-700', bg: 'bg-orange-50' },
-  { value: 'Carburant / Logistique', label: 'Carburant / Logistique', icon: Fuel, color: 'text-orange-800', bg: 'bg-orange-100' },
-  { value: 'Assurance', label: 'Assurance', icon: Building2, color: 'text-indigo-700', bg: 'bg-indigo-50' },
-  { value: 'Entretien Véhicule', label: 'Entretien Véhicule', icon: Wrench, color: 'text-blue-700', bg: 'bg-blue-50' },
+const CATEGORIES: {
+  value: ExpenseCategory;
+  label: string;
+  icon: typeof Fuel;
+  color: string;
+  bg: string;
+}[] = [
+  {
+    value: 'Carburant',
+    label: 'Carburant',
+    icon: Fuel,
+    color: 'text-orange-700',
+    bg: 'bg-orange-50',
+  },
+  {
+    value: 'Carburant / Logistique',
+    label: 'Carburant / Logistique',
+    icon: Fuel,
+    color: 'text-orange-800',
+    bg: 'bg-orange-100',
+  },
+  {
+    value: 'Assurance',
+    label: 'Assurance',
+    icon: Building2,
+    color: 'text-indigo-700',
+    bg: 'bg-indigo-50',
+  },
+  {
+    value: 'Entretien Véhicule',
+    label: 'Entretien Véhicule',
+    icon: Wrench,
+    color: 'text-blue-700',
+    bg: 'bg-blue-50',
+  },
   { value: 'EPI', label: 'EPI', icon: HardHat, color: 'text-amber-700', bg: 'bg-amber-50' },
-  { value: 'Logistique', label: 'Logistique', icon: Package, color: 'text-purple-700', bg: 'bg-purple-50' },
-  { value: 'Administratif', label: 'Administratif', icon: Building2, color: 'text-indigo-700', bg: 'bg-indigo-50' },
-  { value: 'Autre', label: 'Autre', icon: MoreHorizontal, color: 'text-gray-700', bg: 'bg-gray-100' },
+  {
+    value: 'Logistique',
+    label: 'Logistique',
+    icon: Package,
+    color: 'text-purple-700',
+    bg: 'bg-purple-50',
+  },
+  {
+    value: 'Administratif',
+    label: 'Administratif',
+    icon: Building2,
+    color: 'text-indigo-700',
+    bg: 'bg-indigo-50',
+  },
+  {
+    value: 'Autre',
+    label: 'Autre',
+    icon: MoreHorizontal,
+    color: 'text-gray-700',
+    bg: 'bg-gray-100',
+  },
 ];
 
 function catMeta(cat: ExpenseCategory) {
-  return CATEGORIES.find(c => c.value === cat) || CATEGORIES[CATEGORIES.length - 1];
+  return CATEGORIES.find((c) => c.value === cat) || CATEGORIES[CATEGORIES.length - 1];
 }
 
 const SEED_EXPENSES: Expense[] = [
-  { id: 1, label: 'Gasoil Camion Benne 01', category: 'Carburant', amount: 185000, date: '2026-04-10', affectationType: 'vehicle', affectationId: 'v1', affectationName: 'DK-1234-AB', createdAt: '2026-04-10T08:30:00' },
-  { id: 2, label: 'Vidange complète', category: 'Entretien Véhicule', amount: 275000, date: '2026-04-08', affectationType: 'vehicle', affectationId: 'v2', affectationName: 'DK-5678-CD', createdAt: '2026-04-08T14:00:00' },
-  { id: 3, label: 'Gants et casques chantier', category: 'EPI', amount: 120000, date: '2026-04-05', affectationType: 'employee', affectationId: 'ag3', affectationName: 'Ousmane Ndiaye', createdAt: '2026-04-05T10:00:00' },
-  { id: 4, label: 'Transport matériel Touba', category: 'Logistique', amount: 350000, date: '2026-04-04', affectationType: 'none', affectationId: '', affectationName: '', createdAt: '2026-04-04T11:00:00' },
-  { id: 5, label: 'Ramettes papier A4', category: 'Administratif', amount: 45000, date: '2026-04-02', affectationType: 'none', affectationId: '', affectationName: '', createdAt: '2026-04-02T09:00:00' },
-  { id: 6, label: 'Gasoil Camion Citerne', category: 'Carburant', amount: 210000, date: '2026-03-28', affectationType: 'vehicle', affectationId: 'v3', affectationName: 'DK-9012-EF', createdAt: '2026-03-28T07:00:00' },
-  { id: 7, label: 'Pneus avant remplacement', category: 'Entretien Véhicule', amount: 480000, date: '2026-03-20', affectationType: 'vehicle', affectationId: 'v1', affectationName: 'DK-1234-AB', createdAt: '2026-03-20T15:30:00' },
-  { id: 8, label: 'Prime terrain équipe Nord', category: 'Autre', amount: 150000, date: '2026-03-15', affectationType: 'employee', affectationId: 'ag1', affectationName: 'Mamadou Diallo', createdAt: '2026-03-15T12:00:00' },
+  {
+    id: 1,
+    label: 'Gasoil Camion Benne 01',
+    category: 'Carburant',
+    amount: 185000,
+    date: '2026-04-10',
+    affectationType: 'vehicle',
+    affectationId: 'v1',
+    affectationName: 'DK-1234-AB',
+    createdAt: '2026-04-10T08:30:00',
+  },
+  {
+    id: 2,
+    label: 'Vidange complète',
+    category: 'Entretien Véhicule',
+    amount: 275000,
+    date: '2026-04-08',
+    affectationType: 'vehicle',
+    affectationId: 'v2',
+    affectationName: 'DK-5678-CD',
+    createdAt: '2026-04-08T14:00:00',
+  },
+  {
+    id: 3,
+    label: 'Gants et casques chantier',
+    category: 'EPI',
+    amount: 120000,
+    date: '2026-04-05',
+    affectationType: 'employee',
+    affectationId: 'ag3',
+    affectationName: 'Ousmane Ndiaye',
+    createdAt: '2026-04-05T10:00:00',
+  },
+  {
+    id: 4,
+    label: 'Transport matériel Touba',
+    category: 'Logistique',
+    amount: 350000,
+    date: '2026-04-04',
+    affectationType: 'none',
+    affectationId: '',
+    affectationName: '',
+    createdAt: '2026-04-04T11:00:00',
+  },
+  {
+    id: 5,
+    label: 'Ramettes papier A4',
+    category: 'Administratif',
+    amount: 45000,
+    date: '2026-04-02',
+    affectationType: 'none',
+    affectationId: '',
+    affectationName: '',
+    createdAt: '2026-04-02T09:00:00',
+  },
+  {
+    id: 6,
+    label: 'Gasoil Camion Citerne',
+    category: 'Carburant',
+    amount: 210000,
+    date: '2026-03-28',
+    affectationType: 'vehicle',
+    affectationId: 'v3',
+    affectationName: 'DK-9012-EF',
+    createdAt: '2026-03-28T07:00:00',
+  },
+  {
+    id: 7,
+    label: 'Pneus avant remplacement',
+    category: 'Entretien Véhicule',
+    amount: 480000,
+    date: '2026-03-20',
+    affectationType: 'vehicle',
+    affectationId: 'v1',
+    affectationName: 'DK-1234-AB',
+    createdAt: '2026-03-20T15:30:00',
+  },
+  {
+    id: 8,
+    label: 'Prime terrain équipe Nord',
+    category: 'Autre',
+    amount: 150000,
+    date: '2026-03-15',
+    affectationType: 'employee',
+    affectationId: 'ag1',
+    affectationName: 'Mamadou Diallo',
+    createdAt: '2026-03-15T12:00:00',
+  },
 ];
 
 function _loadExpensesWithSeed(): Expense[] {
@@ -54,8 +202,16 @@ function _loadExpensesWithSeed(): Expense[] {
 }
 
 // ─── Helpers ────────────────────────────────────────────────────────
-function fmtPrice(n: number) { return formatCleanAmount(n, 'FCFA'); }
-function fmtDate(d: string) { return new Date(d).toLocaleDateString('fr-FR', { day: '2-digit', month: 'short', year: 'numeric' }); }
+function fmtPrice(n: number) {
+  return formatCleanAmount(n, 'FCFA');
+}
+function fmtDate(d: string) {
+  return new Date(d).toLocaleDateString('fr-FR', {
+    day: '2-digit',
+    month: 'short',
+    year: 'numeric',
+  });
+}
 function formatInputPrice(value: string): string {
   const num = value.replace(/\D/g, '');
   if (!num) return '';
@@ -66,12 +222,28 @@ function parseInputPrice(value: string): number {
 }
 
 function getMonthOptions(expenses: Expense[]): { value: string; label: string }[] {
-  const months = ['Janvier','Février','Mars','Avril','Mai','Juin','Juillet','Août','Septembre','Octobre','Novembre','Décembre'];
-  const set = new Set(expenses.map(e => e.date.slice(0, 7)));
-  return Array.from(set).sort().reverse().map(m => {
-    const [y, mo] = m.split('-');
-    return { value: m, label: `${months[Number(mo) - 1]} ${y}` };
-  });
+  const months = [
+    'Janvier',
+    'Février',
+    'Mars',
+    'Avril',
+    'Mai',
+    'Juin',
+    'Juillet',
+    'Août',
+    'Septembre',
+    'Octobre',
+    'Novembre',
+    'Décembre',
+  ];
+  const set = new Set(expenses.map((e) => e.date.slice(0, 7)));
+  return Array.from(set)
+    .sort()
+    .reverse()
+    .map((m) => {
+      const [y, mo] = m.split('-');
+      return { value: m, label: `${months[Number(mo) - 1]} ${y}` };
+    });
 }
 
 // ─── Component ──────────────────────────────────────────────────────
@@ -111,13 +283,27 @@ export default function GlobalExpensesPage() {
   useEffect(() => {
     try {
       const v = vehiclesStore.load();
-      setVehicles(v.map((veh: Record<string, unknown>) => ({ id: (veh.id || veh.registration) as string, registration: ((veh.registration || veh.immatriculation) as string) || 'N/A' })));
-    } catch { /* no vehicles */ }
+      setVehicles(
+        v.map((veh) => ({
+          id: veh.id || veh.registration,
+          registration: veh.registration || 'N/A',
+        }))
+      );
+    } catch {
+      /* no vehicles */
+    }
     const h = () => {
       try {
         const v = vehiclesStore.load();
-        setVehicles(v.map((veh: Record<string, unknown>) => ({ id: (veh.id || veh.registration) as string, registration: ((veh.registration || veh.immatriculation) as string) || 'N/A' })));
-      } catch { /* ignore */ }
+        setVehicles(
+          v.map((veh) => ({
+            id: veh.id || veh.registration,
+            registration: veh.registration || 'N/A',
+          }))
+        );
+      } catch {
+        /* ignore */
+      }
     };
     window.addEventListener('fleetVehicles:updated', h);
     return () => window.removeEventListener('fleetVehicles:updated', h);
@@ -136,57 +322,76 @@ export default function GlobalExpensesPage() {
     let list = expenses;
     if (search.trim()) {
       const q = search.toLowerCase();
-      list = list.filter(e => e.label.toLowerCase().includes(q) || e.affectationName.toLowerCase().includes(q) || e.category.toLowerCase().includes(q));
+      list = list.filter(
+        (e) =>
+          e.label.toLowerCase().includes(q) ||
+          e.affectationName.toLowerCase().includes(q) ||
+          e.category.toLowerCase().includes(q)
+      );
     }
-    if (catFilter) list = list.filter(e => e.category === catFilter);
-    if (monthFilter) list = list.filter(e => e.date.startsWith(monthFilter));
+    if (catFilter) list = list.filter((e) => e.category === catFilter);
+    if (monthFilter) list = list.filter((e) => e.date.startsWith(monthFilter));
     return list.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
   }, [expenses, search, catFilter, monthFilter]);
 
   const stats = useMemo(() => {
     const now = new Date().toISOString().slice(0, 7);
-    const thisMonth = expenses.filter(e => e.date.startsWith(now));
+    const thisMonth = expenses.filter((e) => e.date.startsWith(now));
     const totalMonth = thisMonth.reduce((s, e) => s + e.amount, 0);
     const totalFiltered = filtered.reduce((s, e) => s + e.amount, 0);
     const totalAll = expenses.reduce((s, e) => s + e.amount, 0);
     // category breakdown for current month
     const byCat: Record<string, number> = {};
-    thisMonth.forEach(e => { byCat[e.category] = (byCat[e.category] || 0) + e.amount; });
+    thisMonth.forEach((e) => {
+      byCat[e.category] = (byCat[e.category] || 0) + e.amount;
+    });
     const topCategory = Object.entries(byCat).sort((a, b) => b[1] - a[1])[0];
     return { count: filtered.length, totalMonth, totalFiltered, totalAll, topCategory };
   }, [expenses, filtered]);
 
   // ─── Affectation name resolver ─────────────────────────────────
-  const getAffName = useCallback((type: AffectationType, id: string): string => {
-    if (type === 'employee') {
-      const a = agents.find(a => a.id === id);
-      return a ? `${a.firstName} ${a.lastName}` : id;
-    }
-    if (type === 'vehicle') {
-      const v = vehicles.find(v => v.id === id);
-      return v ? v.registration : id;
-    }
-    return '';
-  }, [agents, vehicles]);
+  const getAffName = useCallback(
+    (type: AffectationType, id: string): string => {
+      if (type === 'employee') {
+        const a = agents.find((a) => a.id === id);
+        return a ? `${a.firstName} ${a.lastName}` : id;
+      }
+      if (type === 'vehicle') {
+        const v = vehicles.find((v) => v.id === id);
+        return v ? v.registration : id;
+      }
+      return '';
+    },
+    [agents, vehicles]
+  );
 
   // ─── Modal handlers ────────────────────────────────────────────
   const openCreate = () => {
     setEditExp(null);
-    setFLabel(''); setFCategory('Carburant'); setFAmount('');
+    setFLabel('');
+    setFCategory('Carburant');
+    setFAmount('');
     setFDate(new Date().toISOString().slice(0, 10));
-    setFAffType('none'); setFAffId(''); setFAttachment('');
+    setFAffType('none');
+    setFAffId('');
+    setFAttachment('');
     setShowModal(true);
   };
   const openEdit = (exp: Expense) => {
     setEditExp(exp);
-    setFLabel(exp.label); setFCategory(exp.category);
+    setFLabel(exp.label);
+    setFCategory(exp.category);
     setFAmount(exp.amount.toLocaleString('fr-FR'));
     setFDate(exp.date);
-    setFAffType(exp.affectationType); setFAffId(exp.affectationId);
+    setFAffType(exp.affectationType);
+    setFAffId(exp.affectationId);
     setFAttachment(exp.attachment || '');
     setShowModal(true);
   };
-  const closeModal = () => { setShowModal(false); setEditExp(null); };
+  const closeModal = () => {
+    setShowModal(false);
+    setEditExp(null);
+  };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -195,12 +400,20 @@ export default function GlobalExpensesPage() {
     const affName = getAffName(fAffType, fAffId);
 
     if (editExp) {
-      const updated = expenses.map(ex =>
-        ex.id === editExp.id ? {
-          ...ex, label: fLabel, category: fCategory, amount, date: fDate,
-          affectationType: fAffType, affectationId: fAffId, affectationName: affName,
-          attachment: fAttachment || undefined,
-        } : ex
+      const updated = expenses.map((ex) =>
+        ex.id === editExp.id
+          ? {
+              ...ex,
+              label: fLabel,
+              category: fCategory,
+              amount,
+              date: fDate,
+              affectationType: fAffType,
+              affectationId: fAffId,
+              affectationName: affName,
+              attachment: fAttachment || undefined,
+            }
+          : ex
       );
       setExpenses(updated);
       saveExpenses(updated);
@@ -211,12 +424,20 @@ export default function GlobalExpensesPage() {
             montant: amount,
             date: fDate,
           });
-        } catch { /* ne pas bloquer */ }
+        } catch {
+          /* ne pas bloquer */
+        }
       }
     } else {
       const newExp: Expense = {
-        id: Date.now(), label: fLabel, category: fCategory, amount, date: fDate,
-        affectationType: fAffType, affectationId: fAffId, affectationName: affName,
+        id: Date.now(),
+        label: fLabel,
+        category: fCategory,
+        amount,
+        date: fDate,
+        affectationType: fAffType,
+        affectationId: fAffId,
+        affectationName: affName,
         attachment: fAttachment || undefined,
         createdAt: new Date().toISOString(),
       };
@@ -228,20 +449,25 @@ export default function GlobalExpensesPage() {
   };
 
   const handleDelete = (id: number) => {
-    const exp = expenses.find(e => e.id === id);
-    const updated = expenses.filter(e => e.id !== id);
+    const exp = expenses.find((e) => e.id === id);
+    const updated = expenses.filter((e) => e.id !== id);
     setExpenses(updated);
     saveExpenses(updated);
     setPendingDeleteId(null);
     // Si la dépense est liée à un plein carburant, supprimer aussi le plein source
     if (exp?.fuelPleinId !== undefined) {
-      try { carburantStore.remove(exp.fuelPleinId); } catch { /* ne pas bloquer */ }
+      try {
+        carburantStore.remove(exp.fuelPleinId);
+      } catch {
+        /* ne pas bloquer */
+      }
     }
   };
 
   // File drop handler (stores filename only for demo)
   const handleFileDrop = (e: React.DragEvent) => {
-    e.preventDefault(); setDragOver(false);
+    e.preventDefault();
+    setDragOver(false);
     const file = e.dataTransfer.files?.[0];
     if (file) setFAttachment(file.name);
   };
@@ -254,20 +480,22 @@ export default function GlobalExpensesPage() {
   return (
     <div className="w-full space-y-6">
       {/* Header */}
-      <div className="bg-gradient-to-r from-[#1a1a2e] via-red-900 to-red-800 rounded-2xl p-6 text-white shadow-lg">
-        <div className="flex items-center justify-between flex-wrap gap-4">
+      <div className="rounded-2xl bg-gradient-to-r from-[#1a1a2e] via-red-900 to-red-800 p-6 text-white shadow-lg">
+        <div className="flex flex-wrap items-center justify-between gap-4">
           <div className="flex items-center gap-3">
-            <div className="p-2.5 bg-white/15 rounded-xl backdrop-blur-sm">
+            <div className="rounded-xl bg-white/15 p-2.5 backdrop-blur-sm">
               <Receipt className="h-6 w-6" />
             </div>
             <div>
               <h1 className="text-2xl font-bold tracking-tight">Suivi des Dépenses</h1>
-              <p className="text-red-200 text-sm mt-0.5">Dépenses Globales — Catégorisées & Affectées</p>
+              <p className="mt-0.5 text-sm text-red-200">
+                Dépenses Globales — Catégorisées & Affectées
+              </p>
             </div>
           </div>
           <button
             onClick={openCreate}
-            className="flex items-center gap-2 px-5 py-2.5 bg-emerald-500 text-white hover:bg-emerald-400 rounded-xl text-sm font-bold transition-all shadow-md hover:shadow-lg active:scale-[0.97]"
+            className="flex items-center gap-2 rounded-xl bg-emerald-500 px-5 py-2.5 text-sm font-bold text-white shadow-md transition-all hover:bg-emerald-400 hover:shadow-lg active:scale-[0.97]"
           >
             <Plus className="h-4 w-4" /> Nouvelle Dépense
           </button>
@@ -275,20 +503,55 @@ export default function GlobalExpensesPage() {
       </div>
 
       {/* KPI Cards */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+      <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
         {[
-          { label: 'Cumul du Mois', value: fmtPrice(stats.totalMonth), icon: CalendarDays, tc: 'text-red-600', bg: 'bg-red-50', color: 'from-red-400 to-red-500' },
-          { label: 'Nb Dépenses Affichées', value: String(stats.count), icon: FileText, tc: 'text-blue-700', bg: 'bg-blue-50', color: 'from-blue-500 to-blue-600' },
-          { label: 'Total Affiché', value: fmtPrice(stats.totalFiltered), icon: DollarSign, tc: 'text-indigo-700', bg: 'bg-indigo-50', color: 'from-indigo-500 to-indigo-600' },
-          { label: stats.topCategory ? `Top: ${stats.topCategory[0]}` : 'Top Catégorie', value: stats.topCategory ? fmtPrice(stats.topCategory[1]) : '—', icon: TrendingDown, tc: 'text-amber-700', bg: 'bg-amber-50', color: 'from-amber-400 to-amber-500' },
-        ].map(k => (
-          <div key={k.label} className="bg-white rounded-2xl p-5 shadow-sm hover:shadow-md transition-shadow relative overflow-hidden">
-            <div className={`absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b ${k.color} rounded-l-2xl`} />
+          {
+            label: 'Cumul du Mois',
+            value: fmtPrice(stats.totalMonth),
+            icon: CalendarDays,
+            tc: 'text-red-600',
+            bg: 'bg-red-50',
+            color: 'from-red-400 to-red-500',
+          },
+          {
+            label: 'Nb Dépenses Affichées',
+            value: String(stats.count),
+            icon: FileText,
+            tc: 'text-blue-700',
+            bg: 'bg-blue-50',
+            color: 'from-blue-500 to-blue-600',
+          },
+          {
+            label: 'Total Affiché',
+            value: fmtPrice(stats.totalFiltered),
+            icon: DollarSign,
+            tc: 'text-indigo-700',
+            bg: 'bg-indigo-50',
+            color: 'from-indigo-500 to-indigo-600',
+          },
+          {
+            label: stats.topCategory ? `Top: ${stats.topCategory[0]}` : 'Top Catégorie',
+            value: stats.topCategory ? fmtPrice(stats.topCategory[1]) : '—',
+            icon: TrendingDown,
+            tc: 'text-amber-700',
+            bg: 'bg-amber-50',
+            color: 'from-amber-400 to-amber-500',
+          },
+        ].map((k) => (
+          <div
+            key={k.label}
+            className="relative overflow-hidden rounded-2xl bg-white p-5 shadow-sm transition-shadow hover:shadow-md"
+          >
+            <div
+              className={`absolute bottom-0 left-0 top-0 w-1 bg-gradient-to-b ${k.color} rounded-l-2xl`}
+            />
             <div className="pl-3">
-              <div className={`p-2 ${k.bg} rounded-lg w-fit mb-2`}>
+              <div className={`p-2 ${k.bg} mb-2 w-fit rounded-lg`}>
                 <k.icon className={`h-4 w-4 ${k.tc}`} />
               </div>
-              <p className="text-[10px] uppercase tracking-wider text-gray-400 font-semibold">{k.label}</p>
+              <p className="text-[10px] font-semibold uppercase tracking-wider text-gray-400">
+                {k.label}
+              </p>
               <p className={`text-lg font-bold ${k.tc} mt-0.5 truncate`}>{k.value}</p>
             </div>
           </div>
@@ -296,127 +559,201 @@ export default function GlobalExpensesPage() {
       </div>
 
       {/* Search & Filters */}
-      <div className="bg-white rounded-2xl p-4 shadow-sm flex flex-col md:flex-row items-center gap-3">
-        <div className="relative flex-1 w-full">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-300" />
+      <div className="flex flex-col items-center gap-3 rounded-2xl bg-white p-4 shadow-sm md:flex-row">
+        <div className="relative w-full flex-1">
+          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-300" />
           <input
-            type="text" value={search} onChange={e => setSearch(e.target.value)}
+            type="text"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
             placeholder="Rechercher par libellé, bénéficiaire, catégorie..."
-            className="w-full pl-10 pr-4 py-2.5 bg-gray-50 rounded-xl text-sm text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-red-500/20 focus:bg-white transition-all"
+            className="w-full rounded-xl bg-gray-50 py-2.5 pl-10 pr-4 text-sm text-gray-800 placeholder-gray-400 transition-all focus:bg-white focus:outline-none focus:ring-2 focus:ring-red-500/20"
           />
         </div>
-        <div className="flex items-center gap-2 flex-wrap">
-          <button onClick={() => setCatFilter('')}
-            className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all whitespace-nowrap ${!catFilter ? 'bg-[#1a1a2e] text-white shadow-sm' : 'bg-gray-100 text-gray-500 hover:bg-gray-200'}`}
-          >Tous</button>
-          {CATEGORIES.map(c => (
-            <button key={c.value} onClick={() => setCatFilter(c.value)}
-              className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all whitespace-nowrap ${catFilter === c.value ? 'bg-[#1a1a2e] text-white shadow-sm' : 'bg-gray-100 text-gray-500 hover:bg-gray-200'}`}
-            >{c.label}</button>
+        <div className="flex flex-wrap items-center gap-2">
+          <button
+            onClick={() => setCatFilter('')}
+            className={`whitespace-nowrap rounded-lg px-3 py-1.5 text-xs font-semibold transition-all ${!catFilter ? 'bg-[#1a1a2e] text-white shadow-sm' : 'bg-gray-100 text-gray-500 hover:bg-gray-200'}`}
+          >
+            Tous
+          </button>
+          {CATEGORIES.map((c) => (
+            <button
+              key={c.value}
+              onClick={() => setCatFilter(c.value)}
+              className={`whitespace-nowrap rounded-lg px-3 py-1.5 text-xs font-semibold transition-all ${catFilter === c.value ? 'bg-[#1a1a2e] text-white shadow-sm' : 'bg-gray-100 text-gray-500 hover:bg-gray-200'}`}
+            >
+              {c.label}
+            </button>
           ))}
         </div>
         {monthOptions.length > 0 && (
           <div className="relative">
             <select
               value={monthFilter}
-              onChange={e => setMonthFilter(e.target.value)}
-              className="appearance-none pl-3 pr-8 py-1.5 rounded-lg text-xs font-semibold bg-gray-100 text-gray-600 focus:outline-none focus:ring-2 focus:ring-red-400/20 cursor-pointer"
+              onChange={(e) => setMonthFilter(e.target.value)}
+              className="cursor-pointer appearance-none rounded-lg bg-gray-100 py-1.5 pl-3 pr-8 text-xs font-semibold text-gray-600 focus:outline-none focus:ring-2 focus:ring-red-400/20"
             >
               <option value="">Tous les mois</option>
-              {monthOptions.map(m => <option key={m.value} value={m.value}>{m.label}</option>)}
+              {monthOptions.map((m) => (
+                <option key={m.value} value={m.value}>
+                  {m.label}
+                </option>
+              ))}
             </select>
-            <ChevronDown className="absolute right-2 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-gray-400 pointer-events-none" />
+            <ChevronDown className="pointer-events-none absolute right-2 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-gray-400" />
           </div>
         )}
-        <span className="text-xs text-gray-400 font-medium whitespace-nowrap">{filtered.length} dépense{filtered.length !== 1 ? 's' : ''}</span>
+        <span className="whitespace-nowrap text-xs font-medium text-gray-400">
+          {filtered.length} dépense{filtered.length !== 1 ? 's' : ''}
+        </span>
       </div>
 
       {/* Total Banner */}
       {filtered.length > 0 && (
-        <div className="bg-gradient-to-r from-red-50 to-orange-50 rounded-2xl px-6 py-3 flex items-center justify-between shadow-sm">
-          <span className="text-sm text-gray-500 font-medium">Total de la sélection</span>
+        <div className="flex items-center justify-between rounded-2xl bg-gradient-to-r from-red-50 to-orange-50 px-6 py-3 shadow-sm">
+          <span className="text-sm font-medium text-gray-500">Total de la sélection</span>
           <span className="text-lg font-bold text-red-700">{fmtPrice(stats.totalFiltered)}</span>
         </div>
       )}
 
       {/* Table */}
-      <div className="bg-white rounded-2xl shadow-sm overflow-hidden">
+      <div className="overflow-hidden rounded-2xl bg-white shadow-sm">
         <div className="overflow-x-auto">
           <table className="w-full">
             <thead>
               <tr className="bg-gray-50/80">
-                <th className="text-left px-6 py-3.5 text-[10px] uppercase tracking-wider text-gray-400 font-semibold">Date</th>
-                <th className="text-left px-6 py-3.5 text-[10px] uppercase tracking-wider text-gray-400 font-semibold">Catégorie</th>
-                <th className="text-left px-6 py-3.5 text-[10px] uppercase tracking-wider text-gray-400 font-semibold">Libellé</th>
-                <th className="text-left px-6 py-3.5 text-[10px] uppercase tracking-wider text-gray-400 font-semibold">Bénéficiaire / Véhicule</th>
-                <th className="text-right px-6 py-3.5 text-[10px] uppercase tracking-wider text-gray-400 font-semibold">Montant</th>
-                <th className="text-right px-6 py-3.5 text-[10px] uppercase tracking-wider text-gray-400 font-semibold">Actions</th>
+                <th className="px-6 py-3.5 text-left text-[10px] font-semibold uppercase tracking-wider text-gray-400">
+                  Date
+                </th>
+                <th className="px-6 py-3.5 text-left text-[10px] font-semibold uppercase tracking-wider text-gray-400">
+                  Catégorie
+                </th>
+                <th className="px-6 py-3.5 text-left text-[10px] font-semibold uppercase tracking-wider text-gray-400">
+                  Libellé
+                </th>
+                <th className="px-6 py-3.5 text-left text-[10px] font-semibold uppercase tracking-wider text-gray-400">
+                  Bénéficiaire / Véhicule
+                </th>
+                <th className="px-6 py-3.5 text-right text-[10px] font-semibold uppercase tracking-wider text-gray-400">
+                  Montant
+                </th>
+                <th className="px-6 py-3.5 text-right text-[10px] font-semibold uppercase tracking-wider text-gray-400">
+                  Actions
+                </th>
               </tr>
             </thead>
             <tbody>
               {filtered.length === 0 ? (
-                <tr><td colSpan={6} className="text-center py-12 text-sm text-gray-400">Aucune dépense trouvée</td></tr>
-              ) : filtered.map(exp => {
-                const meta = catMeta(exp.category);
-                const CatIcon = meta.icon;
-                const isDeleting = pendingDeleteId === exp.id;
+                <tr>
+                  <td colSpan={6} className="py-12 text-center text-sm text-gray-400">
+                    Aucune dépense trouvée
+                  </td>
+                </tr>
+              ) : (
+                filtered.map((exp) => {
+                  const meta = catMeta(exp.category);
+                  const CatIcon = meta.icon;
+                  const isDeleting = pendingDeleteId === exp.id;
 
-                return (
-                  <tr key={exp.id} className="group hover:bg-gray-50/70 transition-colors">
-                    <td className="px-6 py-4">
-                      <div className="flex items-center gap-1.5 text-xs text-gray-500">
-                        <CalendarDays className="h-3 w-3 text-gray-300" />
-                        {fmtDate(exp.date)}
-                      </div>
-                    </td>
-                    <td className="px-6 py-4">
-                      <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[10px] font-bold ${meta.bg} ${meta.color}`}>
-                        <CatIcon className="h-3 w-3" /> {exp.category}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4">
-                      <p className="text-sm font-medium text-gray-800">{exp.label}</p>
-                      {exp.isAutoSync && (
-                        <span className="inline-flex items-center gap-1 mt-1 px-1.5 py-0.5 rounded text-[9px] font-bold bg-orange-50 text-orange-600 border border-orange-100">
-                          <RefreshCw className="h-2.5 w-2.5" /> Auto-sync Hub Carburant
+                  return (
+                    <tr key={exp.id} className="group transition-colors hover:bg-gray-50/70">
+                      <td className="px-6 py-4">
+                        <div className="flex items-center gap-1.5 text-xs text-gray-500">
+                          <CalendarDays className="h-3 w-3 text-gray-300" />
+                          {fmtDate(exp.date)}
+                        </div>
+                      </td>
+                      <td className="px-6 py-4">
+                        <span
+                          className={`inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1 text-[10px] font-bold ${meta.bg} ${meta.color}`}
+                        >
+                          <CatIcon className="h-3 w-3" /> {exp.category}
                         </span>
-                      )}
-                      {exp.attachment && (
-                        <p className="text-[9px] text-gray-400 flex items-center gap-1 mt-0.5"><Upload className="h-2.5 w-2.5" />{exp.attachment}</p>
-                      )}
-                    </td>
-                    <td className="px-6 py-4">
-                      {exp.affectationType !== 'none' ? (
-                        <div className="flex items-center gap-1.5">
-                          {exp.affectationType === 'employee' ? <Users className="h-3 w-3 text-indigo-400" /> : <Truck className="h-3 w-3 text-emerald-400" />}
-                          <span className="text-xs text-gray-600">{exp.affectationName}</span>
-                        </div>
-                      ) : (
-                        <span className="text-xs text-gray-300">—</span>
-                      )}
-                    </td>
-                    <td className="px-6 py-4 text-right">
-                      <span className="text-sm font-bold text-gray-900">{fmtPrice(exp.amount)}</span>
-                    </td>
-                    <td className="px-6 py-4">
-                      {isDeleting ? (
-                        <div className="flex items-center justify-end gap-1.5">
-                          <span className="text-[10px] text-red-500 font-semibold mr-1">Supprimer ?</span>
-                          <button onClick={() => handleDelete(exp.id)} className="p-1.5 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors"><Check className="h-3.5 w-3.5" /></button>
-                          <button onClick={() => setPendingDeleteId(null)} className="p-1.5 bg-gray-200 text-gray-500 rounded-lg hover:bg-gray-300 transition-colors"><X className="h-3.5 w-3.5" /></button>
-                        </div>
-                      ) : (
-                        <div className="flex items-center justify-end gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity">
-                          <button onClick={() => openEdit(exp)} className="p-1.5 bg-gray-100 text-gray-500 rounded-lg hover:bg-indigo-100 hover:text-indigo-600 transition-colors" title={exp.isAutoSync ? 'Modifier (sync bidirectionnelle active)' : 'Modifier'}>
-                            {exp.isAutoSync ? <Lock className="h-3.5 w-3.5 text-orange-400" /> : <Edit3 className="h-3.5 w-3.5" />}
-                          </button>
-                          <button onClick={() => setPendingDeleteId(exp.id)} className="p-1.5 bg-gray-100 text-gray-500 rounded-lg hover:bg-red-100 hover:text-red-600 transition-colors" title="Supprimer"><Trash2 className="h-3.5 w-3.5" /></button>
-                        </div>
-                      )}
-                    </td>
-                  </tr>
-                );
-              })}
+                      </td>
+                      <td className="px-6 py-4">
+                        <p className="text-sm font-medium text-gray-800">{exp.label}</p>
+                        {exp.isAutoSync && (
+                          <span className="mt-1 inline-flex items-center gap-1 rounded border border-orange-100 bg-orange-50 px-1.5 py-0.5 text-[9px] font-bold text-orange-600">
+                            <RefreshCw className="h-2.5 w-2.5" /> Auto-sync Hub Carburant
+                          </span>
+                        )}
+                        {exp.attachment && (
+                          <p className="mt-0.5 flex items-center gap-1 text-[9px] text-gray-400">
+                            <Upload className="h-2.5 w-2.5" />
+                            {exp.attachment}
+                          </p>
+                        )}
+                      </td>
+                      <td className="px-6 py-4">
+                        {exp.affectationType !== 'none' ? (
+                          <div className="flex items-center gap-1.5">
+                            {exp.affectationType === 'employee' ? (
+                              <Users className="h-3 w-3 text-indigo-400" />
+                            ) : (
+                              <Truck className="h-3 w-3 text-emerald-400" />
+                            )}
+                            <span className="text-xs text-gray-600">{exp.affectationName}</span>
+                          </div>
+                        ) : (
+                          <span className="text-xs text-gray-300">—</span>
+                        )}
+                      </td>
+                      <td className="px-6 py-4 text-right">
+                        <span className="text-sm font-bold text-gray-900">
+                          {fmtPrice(exp.amount)}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4">
+                        {isDeleting ? (
+                          <div className="flex items-center justify-end gap-1.5">
+                            <span className="mr-1 text-[10px] font-semibold text-red-500">
+                              Supprimer ?
+                            </span>
+                            <button
+                              onClick={() => handleDelete(exp.id)}
+                              className="rounded-lg bg-red-500 p-1.5 text-white transition-colors hover:bg-red-600"
+                            >
+                              <Check className="h-3.5 w-3.5" />
+                            </button>
+                            <button
+                              onClick={() => setPendingDeleteId(null)}
+                              className="rounded-lg bg-gray-200 p-1.5 text-gray-500 transition-colors hover:bg-gray-300"
+                            >
+                              <X className="h-3.5 w-3.5" />
+                            </button>
+                          </div>
+                        ) : (
+                          <div className="flex items-center justify-end gap-1.5 opacity-0 transition-opacity group-hover:opacity-100">
+                            <button
+                              onClick={() => openEdit(exp)}
+                              className="rounded-lg bg-gray-100 p-1.5 text-gray-500 transition-colors hover:bg-indigo-100 hover:text-indigo-600"
+                              title={
+                                exp.isAutoSync
+                                  ? 'Modifier (sync bidirectionnelle active)'
+                                  : 'Modifier'
+                              }
+                            >
+                              {exp.isAutoSync ? (
+                                <Lock className="h-3.5 w-3.5 text-orange-400" />
+                              ) : (
+                                <Edit3 className="h-3.5 w-3.5" />
+                              )}
+                            </button>
+                            <button
+                              onClick={() => setPendingDeleteId(exp.id)}
+                              className="rounded-lg bg-gray-100 p-1.5 text-gray-500 transition-colors hover:bg-red-100 hover:text-red-600"
+                              title="Supprimer"
+                            >
+                              <Trash2 className="h-3.5 w-3.5" />
+                            </button>
+                          </div>
+                        )}
+                      </td>
+                    </tr>
+                  );
+                })
+              )}
             </tbody>
           </table>
         </div>
@@ -424,32 +761,44 @@ export default function GlobalExpensesPage() {
 
       {/* ─── Modal ────────────────────────────────────────────────── */}
       {showModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm" onClick={closeModal}>
-          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-xl mx-4 overflow-hidden max-h-[90vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm"
+          onClick={closeModal}
+        >
+          <div
+            className="mx-4 max-h-[90vh] w-full max-w-xl overflow-hidden overflow-y-auto rounded-2xl bg-white shadow-2xl"
+            onClick={(e) => e.stopPropagation()}
+          >
             {/* Header */}
-            <div className="bg-gradient-to-r from-[#1a1a2e] to-red-900 px-6 py-4 text-white sticky top-0 z-10">
+            <div className="sticky top-0 z-10 bg-gradient-to-r from-[#1a1a2e] to-red-900 px-6 py-4 text-white">
               <div className="flex items-center gap-3">
-                <div className="p-2 bg-white/15 rounded-lg"><Receipt className="h-5 w-5" /></div>
+                <div className="rounded-lg bg-white/15 p-2">
+                  <Receipt className="h-5 w-5" />
+                </div>
                 <div>
-                  <h2 className="text-lg font-bold">{editExp ? 'Modifier la Dépense' : 'Nouvelle Dépense'}</h2>
-                  <p className="text-red-200 text-xs">Formulaire détaillé avec affectation</p>
+                  <h2 className="text-lg font-bold">
+                    {editExp ? 'Modifier la Dépense' : 'Nouvelle Dépense'}
+                  </h2>
+                  <p className="text-xs text-red-200">Formulaire détaillé avec affectation</p>
                 </div>
               </div>
             </div>
 
-            <form onSubmit={handleSubmit} className="p-6 space-y-4">
+            <form onSubmit={handleSubmit} className="space-y-4 p-6">
               {/* Libellé */}
               <div>
-                <label className="text-[10px] uppercase tracking-wider text-gray-400 font-semibold mb-1.5 block">
+                <label className="mb-1.5 block text-[10px] font-semibold uppercase tracking-wider text-gray-400">
                   Libellé <span className="text-red-400">*</span>
                 </label>
                 <div className="relative">
-                  <Tag className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-300" />
+                  <Tag className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-300" />
                   <input
-                    type="text" value={fLabel} onChange={e => setFLabel(e.target.value)}
+                    type="text"
+                    value={fLabel}
+                    onChange={(e) => setFLabel(e.target.value)}
                     placeholder="Ex: Gasoil Camion Benne, Vidange..."
                     required
-                    className="w-full pl-10 pr-4 py-2.5 bg-gray-50 rounded-xl text-sm text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-red-500/20 focus:bg-white transition-all"
+                    className="w-full rounded-xl bg-gray-50 py-2.5 pl-10 pr-4 text-sm text-gray-800 placeholder-gray-400 transition-all focus:bg-white focus:outline-none focus:ring-2 focus:ring-red-500/20"
                   />
                 </div>
               </div>
@@ -457,34 +806,41 @@ export default function GlobalExpensesPage() {
               <div className="grid grid-cols-2 gap-4">
                 {/* Catégorie */}
                 <div>
-                  <label className="text-[10px] uppercase tracking-wider text-gray-400 font-semibold mb-1.5 block">
+                  <label className="mb-1.5 block text-[10px] font-semibold uppercase tracking-wider text-gray-400">
                     Catégorie <span className="text-red-400">*</span>
                   </label>
                   <div className="relative">
                     <select
-                      value={fCategory} onChange={e => setFCategory(e.target.value as ExpenseCategory)}
+                      value={fCategory}
+                      onChange={(e) => setFCategory(e.target.value as ExpenseCategory)}
                       required
-                      className="w-full pl-4 pr-8 py-2.5 bg-gray-50 rounded-xl text-sm text-gray-800 appearance-none focus:outline-none focus:ring-2 focus:ring-red-500/20 focus:bg-white transition-all cursor-pointer"
+                      className="w-full cursor-pointer appearance-none rounded-xl bg-gray-50 py-2.5 pl-4 pr-8 text-sm text-gray-800 transition-all focus:bg-white focus:outline-none focus:ring-2 focus:ring-red-500/20"
                     >
-                      {CATEGORIES.map(c => <option key={c.value} value={c.value}>{c.label}</option>)}
+                      {CATEGORIES.map((c) => (
+                        <option key={c.value} value={c.value}>
+                          {c.label}
+                        </option>
+                      ))}
                     </select>
-                    <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-300 pointer-events-none" />
+                    <ChevronDown className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-300" />
                   </div>
                 </div>
 
                 {/* Montant */}
                 <div>
-                  <label className="text-[10px] uppercase tracking-wider text-gray-400 font-semibold mb-1.5 block">
+                  <label className="mb-1.5 block text-[10px] font-semibold uppercase tracking-wider text-gray-400">
                     Montant (FCFA) <span className="text-red-400">*</span>
                   </label>
                   <div className="relative">
-                    <DollarSign className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-300" />
+                    <DollarSign className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-300" />
                     <input
-                      type="text" inputMode="numeric"
-                      value={fAmount} onChange={e => setFAmount(formatInputPrice(e.target.value))}
+                      type="text"
+                      inputMode="numeric"
+                      value={fAmount}
+                      onChange={(e) => setFAmount(formatInputPrice(e.target.value))}
                       placeholder="0"
                       required
-                      className="w-full pl-10 pr-4 py-2.5 bg-gray-50 rounded-xl text-sm text-gray-800 placeholder-gray-300 focus:outline-none focus:ring-2 focus:ring-red-500/20 focus:bg-white transition-all"
+                      className="w-full rounded-xl bg-gray-50 py-2.5 pl-10 pr-4 text-sm text-gray-800 placeholder-gray-300 transition-all focus:bg-white focus:outline-none focus:ring-2 focus:ring-red-500/20"
                     />
                   </div>
                 </div>
@@ -492,90 +848,133 @@ export default function GlobalExpensesPage() {
 
               {/* Date */}
               <div>
-                <label className="text-[10px] uppercase tracking-wider text-gray-400 font-semibold mb-1.5 block">
+                <label className="mb-1.5 block text-[10px] font-semibold uppercase tracking-wider text-gray-400">
                   Date <span className="text-red-400">*</span>
                 </label>
                 <div className="relative">
-                  <CalendarDays className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-300" />
+                  <CalendarDays className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-300" />
                   <input
-                    type="date" value={fDate} onChange={e => setFDate(e.target.value)}
+                    type="date"
+                    value={fDate}
+                    onChange={(e) => setFDate(e.target.value)}
                     required
-                    className="w-full pl-10 pr-4 py-2.5 bg-gray-50 rounded-xl text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-red-500/20 focus:bg-white transition-all"
+                    className="w-full rounded-xl bg-gray-50 py-2.5 pl-10 pr-4 text-sm text-gray-800 transition-all focus:bg-white focus:outline-none focus:ring-2 focus:ring-red-500/20"
                   />
                 </div>
               </div>
 
               {/* Affectation */}
               <div>
-                <label className="text-[10px] uppercase tracking-wider text-gray-400 font-semibold mb-1.5 block">
+                <label className="mb-1.5 block text-[10px] font-semibold uppercase tracking-wider text-gray-400">
                   Affectation (optionnel)
                 </label>
-                <div className="flex gap-2 mb-2">
-                  {([['none', 'Aucune'], ['employee', 'Employé'], ['vehicle', 'Véhicule']] as const).map(([val, label]) => (
+                <div className="mb-2 flex gap-2">
+                  {(
+                    [
+                      ['none', 'Aucune'],
+                      ['employee', 'Employé'],
+                      ['vehicle', 'Véhicule'],
+                    ] as const
+                  ).map(([val, label]) => (
                     <button
-                      key={val} type="button"
-                      onClick={() => { setFAffType(val); setFAffId(''); }}
-                      className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${fAffType === val ? 'bg-[#1a1a2e] text-white shadow-sm' : 'bg-gray-100 text-gray-500 hover:bg-gray-200'}`}
-                    >{label}</button>
+                      key={val}
+                      type="button"
+                      onClick={() => {
+                        setFAffType(val);
+                        setFAffId('');
+                      }}
+                      className={`rounded-lg px-3 py-1.5 text-xs font-semibold transition-all ${fAffType === val ? 'bg-[#1a1a2e] text-white shadow-sm' : 'bg-gray-100 text-gray-500 hover:bg-gray-200'}`}
+                    >
+                      {label}
+                    </button>
                   ))}
                 </div>
                 {fAffType === 'employee' && (
                   <div className="relative">
-                    <Users className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-300" />
+                    <Users className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-300" />
                     <select
-                      value={fAffId} onChange={e => setFAffId(e.target.value)}
-                      className="w-full pl-10 pr-8 py-2.5 bg-gray-50 rounded-xl text-sm text-gray-800 appearance-none focus:outline-none focus:ring-2 focus:ring-red-500/20 focus:bg-white transition-all cursor-pointer"
+                      value={fAffId}
+                      onChange={(e) => setFAffId(e.target.value)}
+                      className="w-full cursor-pointer appearance-none rounded-xl bg-gray-50 py-2.5 pl-10 pr-8 text-sm text-gray-800 transition-all focus:bg-white focus:outline-none focus:ring-2 focus:ring-red-500/20"
                     >
                       <option value="">Sélectionner un employé...</option>
-                      {agents.map(a => <option key={a.id} value={a.id}>{a.firstName} {a.lastName} — {a.matricule}</option>)}
+                      {agents.map((a) => (
+                        <option key={a.id} value={a.id}>
+                          {a.firstName} {a.lastName} — {a.matricule}
+                        </option>
+                      ))}
                     </select>
-                    <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-300 pointer-events-none" />
+                    <ChevronDown className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-300" />
                   </div>
                 )}
                 {fAffType === 'vehicle' && (
                   <div className="relative">
-                    <Truck className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-300" />
+                    <Truck className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-300" />
                     <select
-                      value={fAffId} onChange={e => setFAffId(e.target.value)}
-                      className="w-full pl-10 pr-8 py-2.5 bg-gray-50 rounded-xl text-sm text-gray-800 appearance-none focus:outline-none focus:ring-2 focus:ring-red-500/20 focus:bg-white transition-all cursor-pointer"
+                      value={fAffId}
+                      onChange={(e) => setFAffId(e.target.value)}
+                      className="w-full cursor-pointer appearance-none rounded-xl bg-gray-50 py-2.5 pl-10 pr-8 text-sm text-gray-800 transition-all focus:bg-white focus:outline-none focus:ring-2 focus:ring-red-500/20"
                     >
                       <option value="">Sélectionner un véhicule...</option>
-                      {vehicles.map(v => <option key={v.id} value={v.id}>{v.registration}</option>)}
+                      {vehicles.map((v) => (
+                        <option key={v.id} value={v.id}>
+                          {v.registration}
+                        </option>
+                      ))}
                     </select>
-                    <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-300 pointer-events-none" />
+                    <ChevronDown className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-300" />
                   </div>
                 )}
               </div>
 
               {/* Pièce jointe — Drag & Drop */}
               <div>
-                <label className="text-[10px] uppercase tracking-wider text-gray-400 font-semibold mb-1.5 block">
+                <label className="mb-1.5 block text-[10px] font-semibold uppercase tracking-wider text-gray-400">
                   Pièce Jointe (optionnel)
                 </label>
                 <div
                   ref={dropRef}
-                  onDragOver={e => { e.preventDefault(); setDragOver(true); }}
+                  onDragOver={(e) => {
+                    e.preventDefault();
+                    setDragOver(true);
+                  }}
                   onDragLeave={() => setDragOver(false)}
                   onDrop={handleFileDrop}
-                  className={`relative rounded-xl border-2 border-dashed p-4 text-center transition-all cursor-pointer ${
-                    dragOver ? 'border-red-400 bg-red-50' : fAttachment ? 'border-emerald-300 bg-emerald-50' : 'border-gray-200 bg-gray-50 hover:border-gray-300'
+                  className={`relative cursor-pointer rounded-xl border-2 border-dashed p-4 text-center transition-all ${
+                    dragOver
+                      ? 'border-red-400 bg-red-50'
+                      : fAttachment
+                        ? 'border-emerald-300 bg-emerald-50'
+                        : 'border-gray-200 bg-gray-50 hover:border-gray-300'
                   }`}
                 >
                   <input
-                    type="file" onChange={handleFileSelect}
-                    className="absolute inset-0 opacity-0 cursor-pointer"
+                    type="file"
+                    onChange={handleFileSelect}
+                    className="absolute inset-0 cursor-pointer opacity-0"
                     accept=".pdf,.jpg,.jpeg,.png,.webp"
                   />
                   {fAttachment ? (
                     <div className="flex items-center justify-center gap-2">
                       <FileText className="h-4 w-4 text-emerald-600" />
                       <span className="text-sm font-medium text-emerald-700">{fAttachment}</span>
-                      <button type="button" onClick={e => { e.stopPropagation(); setFAttachment(''); }} className="p-0.5 rounded bg-red-100 text-red-500 hover:bg-red-200 ml-2"><X className="h-3 w-3" /></button>
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setFAttachment('');
+                        }}
+                        className="ml-2 rounded bg-red-100 p-0.5 text-red-500 hover:bg-red-200"
+                      >
+                        <X className="h-3 w-3" />
+                      </button>
                     </div>
                   ) : (
                     <div className="flex flex-col items-center gap-1">
                       <Upload className="h-5 w-5 text-gray-300" />
-                      <p className="text-xs text-gray-400">Glisser-déposer ou cliquer • PDF, JPG, PNG</p>
+                      <p className="text-xs text-gray-400">
+                        Glisser-déposer ou cliquer • PDF, JPG, PNG
+                      </p>
                     </div>
                   )}
                 </div>
@@ -583,12 +982,16 @@ export default function GlobalExpensesPage() {
 
               {/* Amount preview */}
               {parseInputPrice(fAmount) > 0 && (
-                <div className="bg-red-50 rounded-xl p-3 flex items-center justify-between">
+                <div className="flex items-center justify-between rounded-xl bg-red-50 p-3">
                   <div className="flex items-center gap-2">
                     <AlertCircle className="h-4 w-4 text-red-400" />
-                    <span className="text-[10px] uppercase tracking-wider font-semibold text-gray-400">Montant enregistré</span>
+                    <span className="text-[10px] font-semibold uppercase tracking-wider text-gray-400">
+                      Montant enregistré
+                    </span>
                   </div>
-                  <span className="text-lg font-bold text-red-700">{fmtPrice(parseInputPrice(fAmount))}</span>
+                  <span className="text-lg font-bold text-red-700">
+                    {fmtPrice(parseInputPrice(fAmount))}
+                  </span>
                 </div>
               )}
 
@@ -596,13 +999,14 @@ export default function GlobalExpensesPage() {
               <div className="flex gap-3 pt-2">
                 <button
                   type="submit"
-                  className="flex-1 flex items-center justify-center gap-2 bg-emerald-600 text-white px-5 py-2.5 rounded-xl font-bold text-sm hover:bg-emerald-500 transition-all shadow-sm hover:shadow-md active:scale-[0.97]"
+                  className="flex flex-1 items-center justify-center gap-2 rounded-xl bg-emerald-600 px-5 py-2.5 text-sm font-bold text-white shadow-sm transition-all hover:bg-emerald-500 hover:shadow-md active:scale-[0.97]"
                 >
                   <Check className="h-4 w-4" /> {editExp ? 'Enregistrer' : 'Ajouter la Dépense'}
                 </button>
                 <button
-                  type="button" onClick={closeModal}
-                  className="flex-1 bg-gray-100 text-gray-600 px-5 py-2.5 rounded-xl font-semibold text-sm hover:bg-gray-200 transition-all active:scale-[0.97]"
+                  type="button"
+                  onClick={closeModal}
+                  className="flex-1 rounded-xl bg-gray-100 px-5 py-2.5 text-sm font-semibold text-gray-600 transition-all hover:bg-gray-200 active:scale-[0.97]"
                 >
                   Annuler
                 </button>

@@ -4,18 +4,18 @@
 // src/shared/services/mobileApiService.ts
 export function syncMobileData(data: unknown) {
   // TODO: Envoyer les données collectées depuis l’app mobile
-  console.log('[Mobile API] Sync', data)
+  console.log('[Mobile API] Sync', data);
 }
 
 export function fetchMobileUpdates(userId: string) {
   // TODO: Récupérer les mises à jour pour l’utilisateur mobile
-  console.log('[Mobile API] Fetch updates', userId)
+  console.log('[Mobile API] Fetch updates', userId);
 }
 
 // IoT
 export function sendVehicleTelemetry(vehicleId: string, telemetry: Record<string, unknown>) {
   // TODO: Envoyer les données télématiques (OBD-II, capteurs)
-  console.log('[IoT] Télémétrie véhicule', vehicleId, telemetry)
+  console.log('[IoT] Télémétrie véhicule', vehicleId, telemetry);
 }
 
 // Mobile/offline : Vérifier la compatibilité PWA, la gestion du mode offline, la synchronisation différée et la robustesse IoT.

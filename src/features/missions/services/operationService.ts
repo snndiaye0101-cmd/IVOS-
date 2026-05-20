@@ -21,7 +21,7 @@ export class OperationService {
   }
 
   getOperation(id: string): Operation | null {
-    return operations.find(m => m.id === id) || null;
+    return operations.find((m) => m.id === id) || null;
   }
 
   getOperations(): Operation[] {
@@ -29,14 +29,14 @@ export class OperationService {
   }
 
   updateOperation(id: string, operation: Partial<Operation>): Operation | null {
-    const idx = operations.findIndex(m => m.id === id);
+    const idx = operations.findIndex((m) => m.id === id);
     if (idx === -1) return null;
     operations[idx] = { ...operations[idx], ...operation };
     return operations[idx];
   }
 
   deleteOperation(id: string): void {
-    const idx = operations.findIndex(m => m.id === id);
+    const idx = operations.findIndex((m) => m.id === id);
     if (idx !== -1) operations.splice(idx, 1);
   }
 }

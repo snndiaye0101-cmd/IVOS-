@@ -9,13 +9,22 @@ const SECRET = 'IVOS-SN-2026-KIGNABOUR-SECURE';
 async function hmacSign(payload: string): Promise<string> {
   const enc = new TextEncoder();
   const key = await crypto.subtle.importKey(
-    'raw', enc.encode(SECRET), { name: 'HMAC', hash: 'SHA-256' }, false, ['sign']
+    'raw',
+    enc.encode(SECRET),
+    { name: 'HMAC', hash: 'SHA-256' },
+    false,
+    ['sign']
   );
   const sig = await crypto.subtle.sign('HMAC', key, enc.encode(payload));
-  return Array.from(new Uint8Array(sig)).map(b => b.toString(16).padStart(2, '0')).join('').slice(0, 16);
+  return Array.from(new Uint8Array(sig))
+    .map((b) => b.toString(16).padStart(2, '0'))
+    .join('')
+    .slice(0, 16);
 }
 
-export async function verifyQRPayload(raw: string): Promise<{ valid: boolean; employeId: string; matricule: string }> {
+export async function verifyQRPayload(
+  raw: string
+): Promise<{ valid: boolean; employeId: string; matricule: string }> {
   try {
     const parsed = JSON.parse(raw);
     const { id, matricule, sig } = parsed;
@@ -45,7 +54,10 @@ export async function generateQRDataUrl(agent: PersonnelAgent): Promise<string> 
 }
 
 /* ═══════ BADGE DOWNLOAD (PNG) ═══════ */
-export async function downloadBadgePNG(agent: PersonnelAgent, badgeElement: HTMLElement): Promise<void> {
+export async function downloadBadgePNG(
+  agent: PersonnelAgent,
+  badgeElement: HTMLElement
+): Promise<void> {
   const canvas = await html2canvas(badgeElement, {
     scale: 3,
     backgroundColor: '#ffffff',

@@ -1,7 +1,7 @@
-import { renderHook, act, waitFor } from '@testing-library/react'
-import { useClaims } from './useClaims'
-import { claimsStore } from '../services/claimsStore'
-import { personalVehiclesStore } from '../services/personalVehiclesStore'
+import { renderHook, act, waitFor } from '@testing-library/react';
+import { useClaims } from './useClaims';
+import { claimsStore } from '../services/claimsStore';
+import { personalVehiclesStore } from '../services/personalVehiclesStore';
 
 jest.mock('sonner', () => ({
   toast: {
@@ -9,13 +9,13 @@ jest.mock('sonner', () => ({
     error: jest.fn(),
     info: jest.fn(),
   },
-}))
+}));
 
 describe('useClaims', () => {
   beforeEach(() => {
-    claimsStore.clear()
-    personalVehiclesStore.clear()
-  })
+    claimsStore.clear();
+    personalVehiclesStore.clear();
+  });
 
   it('merges parc and personnel claims', async () => {
     claimsStore.save([
@@ -29,7 +29,7 @@ describe('useClaims', () => {
         severity: 'Mineur',
         status: 'Ouvert',
       },
-    ])
+    ]);
 
     personalVehiclesStore.save([
       {
@@ -49,19 +49,19 @@ describe('useClaims', () => {
           },
         ],
       },
-    ])
+    ]);
 
-    const { result } = renderHook(() => useClaims())
+    const { result } = renderHook(() => useClaims());
 
     await waitFor(() => {
-      expect(result.current.parcClaims).toHaveLength(1)
-      expect(result.current.personnelClaims).toHaveLength(1)
-      expect(result.current.allClaims).toHaveLength(2)
-    })
-  })
+      expect(result.current.parcClaims).toHaveLength(1);
+      expect(result.current.personnelClaims).toHaveLength(1);
+      expect(result.current.allClaims).toHaveLength(2);
+    });
+  });
 
   it('creates, updates and deletes parc claims', () => {
-    const { result } = renderHook(() => useClaims())
+    const { result } = renderHook(() => useClaims());
 
     act(() => {
       result.current.createClaim({
@@ -73,32 +73,32 @@ describe('useClaims', () => {
         severity: 'Mineur',
         status: 'Ouvert',
         source: 'parc',
-      })
-    })
+      });
+    });
 
-    expect(result.current.parcClaims).toHaveLength(1)
-    const created = result.current.parcClaims[0]
+    expect(result.current.parcClaims).toHaveLength(1);
+    const created = result.current.parcClaims[0];
 
     act(() => {
       result.current.updateClaim(created.id, {
         ...created,
         status: 'En cours',
-      })
-    })
+      });
+    });
 
-    expect(result.current.parcClaims[0].status).toBe('En cours')
+    expect(result.current.parcClaims[0].status).toBe('En cours');
 
     act(() => {
-      result.current.deleteClaim(created.id)
-    })
+      result.current.deleteClaim(created.id);
+    });
 
-    expect(result.current.parcClaims).toHaveLength(0)
-  })
+    expect(result.current.parcClaims).toHaveLength(0);
+  });
 
   it('generates a report number with current year and padded index', () => {
-    const { result } = renderHook(() => useClaims())
-    const year = new Date().getFullYear()
+    const { result } = renderHook(() => useClaims());
+    const year = new Date().getFullYear();
 
-    expect(result.current.generateReportNumber()).toBe(`SIN-${year}-0001`)
-  })
-})
+    expect(result.current.generateReportNumber()).toBe(`SIN-${year}-0001`);
+  });
+});

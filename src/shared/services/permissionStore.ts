@@ -19,7 +19,7 @@ export const APP_MODULES = [
   'hub_carburant',
 ] as const;
 
-export type AppModule = typeof APP_MODULES[number];
+export type AppModule = (typeof APP_MODULES)[number];
 
 export const MODULE_LABELS: Record<AppModule, string> = {
   dashboard: 'Pilotage Opérationnel',
@@ -36,12 +36,12 @@ export const MODULE_LABELS: Record<AppModule, string> = {
 /** Maps sidebar section names → AppModule */
 export const SECTION_TO_MODULE: Record<string, AppModule> = {
   'PILOTAGE OPÉRATIONNEL': 'dashboard',
-  'Flotte': 'fleet',
-  'Exploitation': 'exploitation',
-  'Finances': 'finances',
-  'Technique': 'technique',
+  Flotte: 'fleet',
+  Exploitation: 'exploitation',
+  Finances: 'finances',
+  Technique: 'technique',
   'Ressources Humaines': 'rh',
-  'Paramètres': 'parametres',
+  Paramètres: 'parametres',
 };
 
 /** Maps route prefixes → AppModule */
@@ -106,15 +106,17 @@ export const SIDEBAR_PERMISSION_TREE: PermissionCategory[] = [
     section: 'Exploitation',
     items: [
       { path: '/exploitation', label: 'Opérations', module: 'exploitation' },
-      { path: '/exploitation/special-operations', label: 'Opérations Spéciales', module: 'exploitation' },
+      {
+        path: '/exploitation/special-operations',
+        label: 'Opérations Spéciales',
+        module: 'exploitation',
+      },
       { path: '/exploitation/bsd-en-cours', label: 'BSD', module: 'exploitation' },
     ],
   },
   {
     section: 'REPORTING & IMPACT',
-    items: [
-      { path: '/qhse/reporting', label: 'Reporting QHSE', module: 'finances' },
-    ],
+    items: [{ path: '/qhse/reporting', label: 'Reporting QHSE', module: 'finances' }],
   },
   {
     section: 'Flotte',
@@ -127,7 +129,11 @@ export const SIDEBAR_PERMISSION_TREE: PermissionCategory[] = [
       { path: '/maintenance', label: 'Maintenance / Pannes', module: 'technique' },
       { path: '/sinistres', label: 'Assurances & Sinistres', module: 'technique' },
       { path: '/pneumatique', label: 'Pneumatique', module: 'technique' },
-      { path: '/inventaire-maintenance-materiels', label: 'Inventaire & Maintenance Matériels', module: 'technique' },
+      {
+        path: '/inventaire-maintenance-materiels',
+        label: 'Inventaire & Maintenance Matériels',
+        module: 'technique',
+      },
     ],
   },
   {
@@ -146,7 +152,11 @@ export const SIDEBAR_PERMISSION_TREE: PermissionCategory[] = [
   {
     section: 'Immobilisations & Infrastructures',
     items: [
-      { path: '/investissements', label: 'Gestion des Immobilisations & Infrastructures', module: 'finances' },
+      {
+        path: '/investissements',
+        label: 'Gestion des Immobilisations & Infrastructures',
+        module: 'finances',
+      },
     ],
   },
   {
@@ -163,13 +173,21 @@ export const SIDEBAR_PERMISSION_TREE: PermissionCategory[] = [
   {
     section: 'Paramètres',
     items: [
-      { path: '/settings/administration-systeme', label: 'Administration Système', module: 'parametres' },
+      {
+        path: '/settings/administration-systeme',
+        label: 'Administration Système',
+        module: 'parametres',
+      },
       { path: '/settings/clients', label: 'Référentiels Clients', module: 'parametres' },
-      { path: '/settings/alerts', label: 'Seuils d\'Alertes', module: 'parametres' },
+      { path: '/settings/alerts', label: "Seuils d'Alertes", module: 'parametres' },
       { path: '/settings/backups', label: 'Sauvegardes', module: 'parametres' },
       { path: '/settings/security', label: 'Sécurité & Accès', module: 'parametres' },
       { path: '/settings/system-config', label: 'Gestion des Sites', module: 'parametres' },
-      { path: '/settings/payroll-fiscal-config', label: 'Configuration Paie & Fiscalité', module: 'parametres' },
+      {
+        path: '/settings/payroll-fiscal-config',
+        label: 'Configuration Paie & Fiscalité',
+        module: 'parametres',
+      },
     ],
   },
 ];
@@ -182,7 +200,11 @@ interface RoutePermissions {
 }
 
 function loadAllRoutePermissions(): RoutePermissions[] {
-  try { return JSON.parse(localStorage.getItem(ROUTE_PERMISSIONS_KEY) || '[]'); } catch { return []; }
+  try {
+    return JSON.parse(localStorage.getItem(ROUTE_PERMISSIONS_KEY) || '[]');
+  } catch {
+    return [];
+  }
 }
 
 function saveAllRoutePermissions(perms: RoutePermissions[]) {
@@ -191,13 +213,18 @@ function saveAllRoutePermissions(perms: RoutePermissions[]) {
 
 function defaultRoutePermissionsForRole(role: UserRole): Record<string, PermissionLevel> {
   const defaults = defaultPermissionsForRole(role);
-  return SIDEBAR_PERMISSION_TREE.flatMap(category => category.items).reduce((acc, item) => {
-    acc[item.path] = defaults[item.module];
-    return acc;
-  }, {} as Record<string, PermissionLevel>);
+  return SIDEBAR_PERMISSION_TREE.flatMap((category) => category.items).reduce(
+    (acc, item) => {
+      acc[item.path] = defaults[item.module];
+      return acc;
+    },
+    {} as Record<string, PermissionLevel>
+  );
 }
 
-function aggregateRoutePermissionsByModule(routes: Record<string, PermissionLevel>): Record<AppModule, PermissionLevel> {
+function aggregateRoutePermissionsByModule(
+  routes: Record<string, PermissionLevel>
+): Record<AppModule, PermissionLevel> {
   const modulePerms: Record<AppModule, PermissionLevel> = {} as Record<AppModule, PermissionLevel>;
 
   for (const module of APP_MODULES) {
@@ -219,7 +246,10 @@ function aggregateRoutePermissionsByModule(routes: Record<string, PermissionLeve
   return modulePerms;
 }
 
-function findRoutePermission(routes: Record<string, PermissionLevel>, path: string): PermissionLevel | null {
+function findRoutePermission(
+  routes: Record<string, PermissionLevel>,
+  path: string
+): PermissionLevel | null {
   if (routes[path]) return routes[path];
   const sorted = Object.keys(routes).sort((a, b) => b.length - a.length);
   for (const prefix of sorted) {
@@ -260,7 +290,11 @@ function defaultPermissionsForRole(role: UserRole): Record<AppModule, Permission
 // ─── Store ────────────────────────────────────────────────────
 
 function loadAllPermissions(): UserPermissions[] {
-  try { return JSON.parse(localStorage.getItem(PERMISSIONS_KEY) || '[]'); } catch { return []; }
+  try {
+    return JSON.parse(localStorage.getItem(PERMISSIONS_KEY) || '[]');
+  } catch {
+    return [];
+  }
 }
 
 function saveAllPermissions(perms: UserPermissions[]) {
@@ -268,7 +302,11 @@ function saveAllPermissions(perms: UserPermissions[]) {
 }
 
 function loadRoles(): Record<string, UserRole> {
-  try { return JSON.parse(localStorage.getItem(ROLE_KEY) || '{}'); } catch { return {}; }
+  try {
+    return JSON.parse(localStorage.getItem(ROLE_KEY) || '{}');
+  } catch {
+    return {};
+  }
 }
 
 function saveRoles(roles: Record<string, UserRole>) {
@@ -277,7 +315,7 @@ function saveRoles(roles: Record<string, UserRole>) {
 
 function loadRoutePermissionsForUser(userId: string): RoutePermissions | undefined {
   const all = loadAllRoutePermissions();
-  return all.find(p => p.userId === userId);
+  return all.find((p) => p.userId === userId);
 }
 
 function getDefaultRoutePermissions(userId: string): Record<string, PermissionLevel> {
@@ -291,7 +329,7 @@ function getRoutePermissionsForUser(userId: string): Record<string, PermissionLe
 
 function saveRoutePermissionsForUser(userId: string, routes: Record<string, PermissionLevel>) {
   const all = loadAllRoutePermissions();
-  const idx = all.findIndex(p => p.userId === userId);
+  const idx = all.findIndex((p) => p.userId === userId);
   if (idx >= 0) {
     all[idx].routes = routes;
   } else {
@@ -302,7 +340,7 @@ function saveRoutePermissionsForUser(userId: string, routes: Record<string, Perm
 }
 
 function resetRoutePermissionsForUser(userId: string) {
-  const all = loadAllRoutePermissions().filter(p => p.userId !== userId);
+  const all = loadAllRoutePermissions().filter((p) => p.userId !== userId);
   saveAllRoutePermissions(all);
   window.dispatchEvent(new Event('permissions:updated'));
 }
@@ -327,7 +365,7 @@ export const permissionStore = {
   /** Get effective permissions for a user (custom or role-based defaults) */
   getPermissions(userId: string): Record<AppModule, PermissionLevel> {
     const all = loadAllPermissions();
-    const custom = all.find(p => p.userId === userId);
+    const custom = all.find((p) => p.userId === userId);
     if (custom) return custom.modules;
     return defaultPermissionsForRole(this.getRole(userId));
   },
@@ -335,7 +373,7 @@ export const permissionStore = {
   /** Set custom permissions for a user (only SuperAdmin should call this) */
   setPermissions(userId: string, modules: Record<AppModule, PermissionLevel>) {
     const all = loadAllPermissions();
-    const idx = all.findIndex(p => p.userId === userId);
+    const idx = all.findIndex((p) => p.userId === userId);
     if (idx >= 0) {
       all[idx].modules = modules;
     } else {
@@ -347,7 +385,7 @@ export const permissionStore = {
 
   /** Reset user to role-based defaults */
   resetToDefaults(userId: string) {
-    const all = loadAllPermissions().filter(p => p.userId !== userId);
+    const all = loadAllPermissions().filter((p) => p.userId !== userId);
     saveAllPermissions(all);
     resetRoutePermissionsForUser(userId);
     window.dispatchEvent(new Event('permissions:updated'));
@@ -356,10 +394,13 @@ export const permissionStore = {
   getRoutePermissions(userId: string): Record<string, PermissionLevel> {
     if (this.isSuperAdmin(userId)) {
       const defaults = defaultPermissionsForRole('SuperAdmin');
-      return SIDEBAR_PERMISSION_TREE.flatMap(category => category.items).reduce((acc, item) => {
-        acc[item.path] = defaults[item.module];
-        return acc;
-      }, {} as Record<string, PermissionLevel>);
+      return SIDEBAR_PERMISSION_TREE.flatMap((category) => category.items).reduce(
+        (acc, item) => {
+          acc[item.path] = defaults[item.module];
+          return acc;
+        },
+        {} as Record<string, PermissionLevel>
+      );
     }
     return getRoutePermissionsForUser(userId);
   },
@@ -373,7 +414,11 @@ export const permissionStore = {
   },
 
   /** Check if user can access a module at a given level */
-  canAccess(userId: string, module: AppModule, requiredLevel: 'view' | 'edit' | 'all' = 'view'): boolean {
+  canAccess(
+    userId: string,
+    module: AppModule,
+    requiredLevel: 'view' | 'edit' | 'all' = 'view'
+  ): boolean {
     if (this.isSuperAdmin(userId)) return true;
     const perms = this.getPermissions(userId);
     const level = perms[module];
@@ -410,10 +455,10 @@ export const permissionStore = {
   /** Get modules visible in sidebar for a section */
   canAccessSection(userId: string, sectionName: string): boolean {
     if (this.isSuperAdmin(userId)) return true;
-    const category = SIDEBAR_PERMISSION_TREE.find(c => c.section === sectionName);
+    const category = SIDEBAR_PERMISSION_TREE.find((c) => c.section === sectionName);
     if (!category) return true;
     const routePerms = this.getRoutePermissions(userId);
-    return category.items.some(item => {
+    return category.items.some((item) => {
       const routePermission = findRoutePermission(routePerms, item.path);
       if (routePermission) return routePermission !== 'none';
       return this.canAccess(userId, item.module, 'view');
@@ -433,6 +478,8 @@ export const permissionStore = {
         roles[admin.id] = 'SuperAdmin';
         saveRoles(roles);
       }
-    } catch { /* ignore */ }
+    } catch {
+      /* ignore */
+    }
   },
 };

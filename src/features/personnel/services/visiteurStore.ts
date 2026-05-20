@@ -20,7 +20,9 @@ export interface Visiteur {
   surSite: boolean;
 }
 
-function emit() { window.dispatchEvent(new Event(EVT)); }
+function emit() {
+  window.dispatchEvent(new Event(EVT));
+}
 
 function load(): Visiteur[] {
   try {
@@ -41,7 +43,9 @@ function load(): Visiteur[] {
       surSite: false,
       ...entry,
     }));
-  } catch { return []; }
+  } catch {
+    return [];
+  }
 }
 
 function save(data: Visiteur[]) {
@@ -51,7 +55,7 @@ function save(data: Visiteur[]) {
 
 function add(v: Omit<Visiteur, 'id'>): Visiteur {
   const all = load();
-  const id = all.length ? Math.max(...all.map(x => x.id)) + 1 : 1;
+  const id = all.length ? Math.max(...all.map((x) => x.id)) + 1 : 1;
   const entry = { ...v, id };
   all.push(entry);
   save(all);
@@ -60,7 +64,7 @@ function add(v: Omit<Visiteur, 'id'>): Visiteur {
 
 function sortieVisiteur(id: number): void {
   const all = load();
-  const i = all.findIndex(v => v.id === id);
+  const i = all.findIndex((v) => v.id === id);
   if (i >= 0) {
     all[i].heureSortie = new Date().toTimeString().slice(0, 5);
     all[i].surSite = false;
@@ -70,12 +74,12 @@ function sortieVisiteur(id: number): void {
 
 function getVisiteursSurSite(): Visiteur[] {
   const today = new Date().toISOString().slice(0, 10);
-  return load().filter(v => v.date === today && v.surSite);
+  return load().filter((v) => v.date === today && v.surSite);
 }
 
 function getTodayVisiteurs(): Visiteur[] {
   const today = new Date().toISOString().slice(0, 10);
-  return load().filter(v => v.date === today);
+  return load().filter((v) => v.date === today);
 }
 
 export const visiteurStore = {

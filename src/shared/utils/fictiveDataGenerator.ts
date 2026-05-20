@@ -1,12 +1,12 @@
 /**
  * Script de Génération de Données Fictives Complètes
  * Créer une opération BSD jusqu'à la facturation et le paiement
- * 
+ *
  * Utilisation :
  * 1. Ouvrir la console du navigateur (F12)
  * 2. Copier-coller ce script
  * 3. Exécuter : createFictiveOperationComplete()
- * 
+ *
  * Ou créer un bouton dans l'UI pour tester facilement
  */
 
@@ -15,8 +15,8 @@ interface FictiveOperationOptions {
   wasteType?: string;
   quantity?: number;
   completeWorkflow?: boolean; // Si true, remplit toutes les 9 étapes
-  generateInvoice?: boolean;   // Si true, crée la facture
-  generatePayment?: boolean;   // Si true, crée un paiement
+  generateInvoice?: boolean; // Si true, crée la facture
+  generatePayment?: boolean; // Si true, crée un paiement
 }
 
 /**
@@ -41,7 +41,7 @@ export function createFictiveOperationComplete(options: FictiveOperationOptions 
   // ══════════════════════════════════════════════════════════════
 
   const operations = JSON.parse(localStorage.getItem('ivos_operations_v1') || '[]');
-  
+
   // Générer numéro
   const counters = JSON.parse(localStorage.getItem('ivos_operations_counter_v1') || '{}');
   const year = new Date().getFullYear();
@@ -56,33 +56,33 @@ export function createFictiveOperationComplete(options: FictiveOperationOptions 
   const operation = {
     id: operationId,
     numero,
-    
+
     // Client
     client: clientName,
     clientNom: 'Amadou Diallo',
     clientTelephone: '+221 77 123 45 67',
     clientAdresse: 'Zone Industrielle, Dakar, Sénégal',
     clientEmail: 'amadou.diallo@totalsenegal.com',
-    
+
     // Déchet
     typeDechet: wasteType,
     etatDechet: 'liquide',
-    
+
     // Conditionnement
     typeConditionnement: 'citerne',
     nombreColis: '1',
-    
+
     // Quantité
     quantiteKg: String(quantity),
     uniteComplementaire: `${(quantity / 1000).toFixed(2)} tonnes`,
-    
+
     // Transport
     vehicule: 'Camion Citerne 20m³',
     immatriculation: 'DK-1234-AB',
     chauffeur: 'Mamadou Ndiaye',
     dateDepart: now,
     observations: 'Collecte mensuelle programmée - Client prioritaire',
-    
+
     // Métadonnées
     status: completeWorkflow ? 'cloturee' : 'en_cours',
     createdBy: 'sample_10', // Admin user
@@ -104,46 +104,46 @@ export function createFictiveOperationComplete(options: FictiveOperationOptions 
       producteurContact: '+221 77 123 45 67',
       producteurEmail: 'amadou.diallo@totalsenegal.com',
       referenceInterne: `REF-${Date.now()}`,
-      
+
       // Étape 2 - Collecteur (AUTO)
       collecteurNom: 'IVOS — Sénégal Oilfield Services',
       collecteurAdresse: 'Dakar, Sénégal',
       collecteurContact: 'Agent Exploitation',
-      
+
       // Étape 3 - Dénomination
       categorieDechet: 'Déchets Dangereux',
       codeDechet: '13-02-05',
       descriptionDechet: wasteType,
       origineDechet: 'Activités industrielles pétrolières',
       etatDechet: 'Liquide',
-      
+
       // Étape 4 - Conditionnement
       nombreColis: '1',
       typeConditionnement: 'Citerne 20m³',
       volumeEstime: '18500',
       quantiteEstimee: String(quantity),
-      
+
       // Étape 5 - Signature Producteur (AUTO)
       signatureProducteur: `Amadou Diallo (${new Date().toLocaleString('fr-FR')})`,
       dateSignatureProducteur: now,
-      
+
       // Étape 6 - Pesée
       poidsReel: String(quantity + 50), // Légère différence avec estimation
-      
+
       // Étape 7 - Signature Chauffeur (AUTO)
       signatureChauffeur: `Mamadou Ndiaye (${new Date().toLocaleString('fr-FR')})`,
       dateSignatureChauffeur: now,
-      
+
       // Étape 8 - Réception
       dateReception: now,
       destinataireNom: 'IVOS Centre de Traitement',
       destinataireAdresse: 'Route de Rufisque, Dakar',
       destinationSite: 'Site IVOS Rufisque',
-      
+
       // Étape 9 - Traitement
       modeTraitement: 'Valorisation énergétique',
       certification: 'Certificat de destruction N°CER-2026-' + String(next).padStart(4, '0'),
-      
+
       // Validation finale
       validatedAt: now,
       validatedBy: 'Agent Réception',
@@ -170,10 +170,10 @@ export function createFictiveOperationComplete(options: FictiveOperationOptions 
 
   if (generateInvoice && completeWorkflow) {
     const invoices = JSON.parse(localStorage.getItem('ivos_workflow_invoices_v1') || '[]');
-    
+
     const invoiceId = `INV-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`;
     const numeroOfficiel = `FAC-${year}-${String(invoices.length + 1).padStart(4, '0')}`;
-    
+
     // Calcul prix (exemple : 500 FCFA/kg pour huiles usagées)
     const prixUnitaire = 500;
     const quantite = quantity + 50; // Poids réel
@@ -185,12 +185,12 @@ export function createFictiveOperationComplete(options: FictiveOperationOptions 
       operationNumero: numero,
       numeroOfficiel,
       documentType: 'BSD',
-      
+
       // Client
       clientNom: clientName,
       clientAdresse: 'Zone Industrielle, Dakar, Sénégal',
       clientContact: '+221 77 123 45 67',
-      
+
       // Prestation
       prestationLabel: `Collecte et traitement ${wasteType} selon BSD N°${numero}`,
       categorieDechet: 'Déchets Dangereux',
@@ -198,7 +198,7 @@ export function createFictiveOperationComplete(options: FictiveOperationOptions 
       unite: 'kg',
       prixUnitaire,
       montantHT,
-      
+
       // Méta
       status: 'validee', // Validée par Super Admin
       siteCode: 'DKR',
@@ -222,30 +222,30 @@ export function createFictiveOperationComplete(options: FictiveOperationOptions 
 
     if (generatePayment) {
       const payments = JSON.parse(localStorage.getItem('ivos_payments_v1') || '[]');
-      
+
       const paymentId = `PAY-${Date.now()}-${Math.random().toString(36).slice(2, 8).toUpperCase()}`;
-      
+
       const payment = {
         id: paymentId,
         invoiceId,
         invoiceNumero: numeroOfficiel,
         clientNom: clientName,
-        
+
         montant: montantHT,
         method: 'virement',
         details: {
           referenceBancaire: `VIR-${year}-${String(Math.floor(Math.random() * 99999)).padStart(5, '0')}`,
           banqueEmettrice: 'CBAO Sénégal',
         },
-        
+
         status: 'encaisse', // Déjà encaissé pour test complet
         dateCreation: now,
         dateValidation: now,
         dateEncaissement: now,
-        
+
         saisiePar: 'Agent Finance',
         validePar: 'Samba (DG)',
-        
+
         notes: 'Paiement test - Opération fictive complète',
       };
 
@@ -281,13 +281,7 @@ export function createFictiveOperationComplete(options: FictiveOperationOptions 
  * Créer plusieurs opérations fictives d'un coup
  */
 export function createMultipleFictiveOperations(count: number = 5): void {
-  const clients = [
-    'Total Sénégal',
-    'SAR Sénégal',
-    'Shell Sénégal',
-    'Petrosen',
-    'Oryx Energies',
-  ];
+  const clients = ['Total Sénégal', 'SAR Sénégal', 'Shell Sénégal', 'Petrosen', 'Oryx Energies'];
 
   const wasteTypes = [
     'Huiles usagées hydrocarbures',
@@ -305,8 +299,8 @@ export function createMultipleFictiveOperations(count: number = 5): void {
       wasteType: wasteTypes[i % wasteTypes.length],
       quantity: 1000 + Math.floor(Math.random() * 5000),
       completeWorkflow: Math.random() > 0.3, // 70% complètes
-      generateInvoice: Math.random() > 0.2,  // 80% avec facture
-      generatePayment: Math.random() > 0.4,  // 60% avec paiement
+      generateInvoice: Math.random() > 0.2, // 80% avec facture
+      generatePayment: Math.random() > 0.4, // 60% avec paiement
     });
 
     results.push(result);
@@ -324,12 +318,16 @@ export function createMultipleFictiveOperations(count: number = 5): void {
  * Nettoyer toutes les données de test
  */
 export function clearAllFictiveData(): void {
-  if (window.confirm('⚠️ Supprimer toutes les opérations, factures et paiements ? Cette action est irréversible.')) {
+  if (
+    window.confirm(
+      '⚠️ Supprimer toutes les opérations, factures et paiements ? Cette action est irréversible.'
+    )
+  ) {
     localStorage.removeItem('ivos_operations_v1');
     localStorage.removeItem('ivos_operations_counter_v1');
     localStorage.removeItem('ivos_workflow_invoices_v1');
     localStorage.removeItem('ivos_payments_v1');
-    
+
     console.log('✅ Toutes les données ont été supprimées');
     console.log('👉 Rafraîchissez la page');
   }
@@ -343,7 +341,7 @@ if (typeof window !== 'undefined') {
   (window as any).createFictiveOperation = createFictiveOperationComplete;
   (window as any).createMultipleFictiveOperations = createMultipleFictiveOperations;
   (window as any).clearAllFictiveData = clearAllFictiveData;
-  
+
   console.log('');
   console.log('🚀 Script de génération de données fictives chargé !');
   console.log('');

@@ -1,4 +1,4 @@
-import React, { useState, ReactNode, Children, cloneElement, isValidElement } from "react";
+import React, { useState, ReactNode, Children, cloneElement, isValidElement } from 'react';
 
 interface TabsProps {
   children: ReactNode;
@@ -11,20 +11,22 @@ interface TabProps {
   children: ReactNode;
 }
 
-export function Tabs({ children, defaultIndex = 0, className = "" }: TabsProps) {
+export function Tabs({ children, defaultIndex = 0, className = '' }: TabsProps) {
   const [activeIndex, setActiveIndex] = useState(defaultIndex);
-  const tabs = Children.toArray(children).filter(child => isValidElement(child) && child.type === Tab);
+  const tabs = Children.toArray(children).filter(
+    (child) => isValidElement(child) && child.type === Tab
+  );
 
   return (
     <div className={className}>
-      <div className="flex border-b border-gray-200 mb-4">
+      <div className="mb-4 flex border-b border-gray-200">
         {tabs.map((tab: any, idx) => (
           <button
             key={tab.props.label}
-            className={`px-4 py-2 -mb-px font-medium border-b-2 transition-colors focus:outline-none ${
+            className={`-mb-px border-b-2 px-4 py-2 font-medium transition-colors focus:outline-none ${
               idx === activeIndex
-                ? "border-blue-600 text-blue-700 bg-white"
-                : "border-transparent text-gray-500 hover:text-blue-600 hover:border-blue-300 bg-gray-50"
+                ? 'border-blue-600 bg-white text-blue-700'
+                : 'border-transparent bg-gray-50 text-gray-500 hover:border-blue-300 hover:text-blue-600'
             }`}
             onClick={() => setActiveIndex(idx)}
             type="button"
@@ -37,7 +39,11 @@ export function Tabs({ children, defaultIndex = 0, className = "" }: TabsProps) 
           </button>
         ))}
       </div>
-      <div className="bg-white rounded shadow-sm p-4" role="tabpanel" id={`tabpanel-${activeIndex}`}>
+      <div
+        className="rounded bg-white p-4 shadow-sm"
+        role="tabpanel"
+        id={`tabpanel-${activeIndex}`}
+      >
         {isValidElement(tabs[activeIndex]) && tabs[activeIndex].props.children}
       </div>
     </div>

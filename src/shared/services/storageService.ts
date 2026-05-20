@@ -13,7 +13,9 @@ export class StorageService {
   async getMetadata(url: string): Promise<Record<string, unknown>> {
     const res = await fetch(url, { method: 'HEAD' });
     const meta: Record<string, unknown> = {};
-    res.headers.forEach((value, key) => { meta[key] = value; });
+    res.headers.forEach((value, key) => {
+      meta[key] = value;
+    });
     return meta;
   }
 }

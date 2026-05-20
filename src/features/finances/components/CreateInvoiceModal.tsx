@@ -22,14 +22,19 @@ interface CreateInvoiceModalProps {
   clients: Client[];
 }
 
-export default function CreateInvoiceModal({ isOpen, onClose, onSubmit, clients }: CreateInvoiceModalProps) {
+export default function CreateInvoiceModal({
+  isOpen,
+  onClose,
+  onSubmit,
+  clients,
+}: CreateInvoiceModalProps) {
   // États du formulaire
   const [selectedClientId, setSelectedClientId] = useState('');
   const [dateEcheance, setDateEcheance] = useState('');
   const [tauxTVA, setTauxTVA] = useState(18);
   const [modeReglement, setModeReglement] = useState<PaymentMethod>('Virement');
   const [notes, setNotes] = useState('');
-  
+
   // Lignes de facturation
   const [lignes, setLignes] = useState<Omit<InvoiceLine, 'id'>[]>([
     {
@@ -38,7 +43,7 @@ export default function CreateInvoiceModal({ isOpen, onClose, onSubmit, clients 
       unite: 'forfait',
       prixUnitaireHT: 0,
       totalHT: 0,
-    }
+    },
   ]);
 
   if (!isOpen) return null;
@@ -62,7 +67,7 @@ export default function CreateInvoiceModal({ isOpen, onClose, onSubmit, clients 
         unite: 'forfait',
         prixUnitaireHT: 0,
         totalHT: 0,
-      }
+      },
     ]);
   };
 
@@ -79,7 +84,7 @@ export default function CreateInvoiceModal({ isOpen, onClose, onSubmit, clients 
   const totalTTC = totalHT + totalTVA;
 
   // Client sélectionné
-  const selectedClient = clients.find(c => c.id === selectedClientId);
+  const selectedClient = clients.find((c) => c.id === selectedClientId);
 
   // Soumission du formulaire
   const handleSubmit = (e: React.FormEvent) => {
@@ -90,13 +95,13 @@ export default function CreateInvoiceModal({ isOpen, onClose, onSubmit, clients 
       return;
     }
 
-    if (lignes.some(l => !l.description.trim())) {
+    if (lignes.some((l) => !l.description.trim())) {
       alert('Veuillez renseigner toutes les descriptions');
       return;
     }
 
     if (!dateEcheance) {
-      alert('Veuillez définir une date d\'échéance');
+      alert("Veuillez définir une date d'échéance");
       return;
     }
 
@@ -108,7 +113,7 @@ export default function CreateInvoiceModal({ isOpen, onClose, onSubmit, clients 
       typeFacture: 'Facture libre',
       dateEcheance,
       tauxTVA,
-      lignes: lignes.map(l => ({ ...l })),
+      lignes: lignes.map((l) => ({ ...l })),
       notes: notes.trim() || undefined,
       modeReglement,
     };
@@ -124,68 +129,69 @@ export default function CreateInvoiceModal({ isOpen, onClose, onSubmit, clients 
     setTauxTVA(18);
     setModeReglement('Virement');
     setNotes('');
-    setLignes([{
-      description: '',
-      quantite: 1,
-      unite: 'forfait',
-      prixUnitaireHT: 0,
-      totalHT: 0,
-    }]);
+    setLignes([
+      {
+        description: '',
+        quantite: 1,
+        unite: 'forfait',
+        prixUnitaireHT: 0,
+        totalHT: 0,
+      },
+    ]);
   };
 
   return (
     <>
       {/* Overlay */}
-      <div 
-        className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50"
-        onClick={onClose}
-      />
-      
+      <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm" onClick={onClose} />
+
       {/* Modal */}
-      <div className="fixed inset-0 z-50 flex items-center justify-center p-4 pointer-events-none">
-        <div 
-          className="bg-white rounded-2xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto pointer-events-auto"
+      <div className="pointer-events-none fixed inset-0 z-50 flex items-center justify-center p-4">
+        <div
+          className="pointer-events-auto max-h-[90vh] w-full max-w-4xl overflow-y-auto rounded-2xl bg-white shadow-2xl"
           onClick={(e) => e.stopPropagation()}
         >
           {/* En-tête */}
-          <div className="sticky top-0 bg-gradient-to-r from-indigo-600 to-blue-600 text-white px-6 py-4 flex items-center justify-between border-b border-indigo-700">
+          <div className="sticky top-0 flex items-center justify-between border-b border-indigo-700 bg-gradient-to-r from-indigo-600 to-blue-600 px-6 py-4 text-white">
             <div className="flex items-center gap-3">
-              <FileText className="w-6 h-6" />
+              <FileText className="h-6 w-6" />
               <div>
                 <h2 className="text-xl font-bold">Créer une Facture Libre</h2>
-                <p className="text-xs text-indigo-100 mt-0.5">Facture sans lien BSD</p>
+                <p className="mt-0.5 text-xs text-indigo-100">Facture sans lien BSD</p>
               </div>
             </div>
             <button
               onClick={onClose}
-              className="p-2 hover:bg-white/20 rounded-lg transition-colors"
+              className="rounded-lg p-2 transition-colors hover:bg-white/20"
             >
-              <X className="w-5 h-5" />
+              <X className="h-5 w-5" />
             </button>
           </div>
 
           {/* Formulaire */}
-          <form onSubmit={handleSubmit} className="p-6 space-y-6">
+          <form onSubmit={handleSubmit} className="space-y-6 p-6">
             {/* Section Client */}
-            <div className="bg-gray-50 rounded-xl p-4 border border-gray-200">
-              <h3 className="text-sm font-bold text-gray-700 mb-3 flex items-center gap-2">
-                <span className="w-6 h-6 bg-indigo-100 text-indigo-600 rounded-full flex items-center justify-center text-xs font-bold">1</span>
+            <div className="rounded-xl border border-gray-200 bg-gray-50 p-4">
+              <h3 className="mb-3 flex items-center gap-2 text-sm font-bold text-gray-700">
+                <span className="flex h-6 w-6 items-center justify-center rounded-full bg-indigo-100 text-xs font-bold text-indigo-600">
+                  1
+                </span>
                 Informations Client
               </h3>
-              
+
               <div className="space-y-3">
                 <div>
-                  <label className="block text-xs font-semibold text-gray-700 mb-1.5">
+                  <label className="mb-1.5 block text-xs font-semibold text-gray-700">
                     Client *
                   </label>
                   <select
                     value={selectedClientId}
                     onChange={(e) => setSelectedClientId(e.target.value)}
                     required
-                    className="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                    className="w-full rounded-lg border border-gray-300 px-3 py-2.5 focus:border-transparent focus:ring-2 focus:ring-indigo-500"
                   >
                     <option value="">-- Sélectionner un client --</option>
-                    {clients.map(client => (
+                    {clients.map((client) => (
                       <option key={client.id} value={client.id}>
                         {client.name} {client.siret ? `(${client.siret})` : ''}
                       </option>
@@ -194,13 +200,15 @@ export default function CreateInvoiceModal({ isOpen, onClose, onSubmit, clients 
                 </div>
 
                 {selectedClient && (
-                  <div className="bg-indigo-50 border border-indigo-200 rounded-lg p-3 text-sm">
+                  <div className="rounded-lg border border-indigo-200 bg-indigo-50 p-3 text-sm">
                     <div className="font-semibold text-indigo-900">{selectedClient.name}</div>
                     {selectedClient.siret && (
-                      <div className="text-indigo-700 text-xs mt-1">SIRET: {selectedClient.siret}</div>
+                      <div className="mt-1 text-xs text-indigo-700">
+                        SIRET: {selectedClient.siret}
+                      </div>
                     )}
                     {selectedClient.address && (
-                      <div className="text-indigo-600 text-xs mt-1">{selectedClient.address}</div>
+                      <div className="mt-1 text-xs text-indigo-600">{selectedClient.address}</div>
                     )}
                   </div>
                 )}
@@ -208,28 +216,33 @@ export default function CreateInvoiceModal({ isOpen, onClose, onSubmit, clients 
             </div>
 
             {/* Section Prestations */}
-            <div className="bg-gray-50 rounded-xl p-4 border border-gray-200">
-              <div className="flex items-center justify-between mb-3">
-                <h3 className="text-sm font-bold text-gray-700 flex items-center gap-2">
-                  <span className="w-6 h-6 bg-indigo-100 text-indigo-600 rounded-full flex items-center justify-center text-xs font-bold">2</span>
+            <div className="rounded-xl border border-gray-200 bg-gray-50 p-4">
+              <div className="mb-3 flex items-center justify-between">
+                <h3 className="flex items-center gap-2 text-sm font-bold text-gray-700">
+                  <span className="flex h-6 w-6 items-center justify-center rounded-full bg-indigo-100 text-xs font-bold text-indigo-600">
+                    2
+                  </span>
                   Prestations
                 </h3>
                 <button
                   type="button"
                   onClick={addLigne}
-                  className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors"
+                  className="flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-semibold text-indigo-600 transition-colors hover:bg-indigo-50"
                 >
-                  <Plus className="w-4 h-4" />
+                  <Plus className="h-4 w-4" />
                   Ajouter une ligne
                 </button>
               </div>
 
               <div className="space-y-3">
                 {lignes.map((ligne, index) => (
-                  <div key={index} className="bg-white rounded-lg p-3 border border-gray-200 space-y-2">
+                  <div
+                    key={index}
+                    className="space-y-2 rounded-lg border border-gray-200 bg-white p-3"
+                  >
                     <div className="flex items-start justify-between gap-2">
                       <div className="flex-1">
-                        <label className="block text-xs font-semibold text-gray-600 mb-1">
+                        <label className="mb-1 block text-xs font-semibold text-gray-600">
                           Description de la prestation *
                         </label>
                         <input
@@ -242,40 +255,46 @@ export default function CreateInvoiceModal({ isOpen, onClose, onSubmit, clients 
                           }}
                           placeholder="Ex: Conseil stratégique, Audit QHSE, Vente d'EPI..."
                           required
-                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 text-sm"
+                          className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500"
                         />
                       </div>
-                      
+
                       {lignes.length > 1 && (
                         <button
                           type="button"
                           onClick={() => removeLigne(index)}
-                          className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors mt-6"
+                          className="mt-6 rounded-lg p-2 text-red-600 transition-colors hover:bg-red-50"
                           title="Supprimer cette ligne"
                         >
-                          <Trash2 className="w-4 h-4" />
+                          <Trash2 className="h-4 w-4" />
                         </button>
                       )}
                     </div>
 
                     <div className="grid grid-cols-4 gap-2">
                       <div>
-                        <label className="block text-xs font-semibold text-gray-600 mb-1">
+                        <label className="mb-1 block text-xs font-semibold text-gray-600">
                           Quantité *
                         </label>
                         <input
                           type="number"
                           value={ligne.quantite}
-                          onChange={(e) => updateLigneTotal(index, parseFloat(e.target.value) || 0, ligne.prixUnitaireHT)}
+                          onChange={(e) =>
+                            updateLigneTotal(
+                              index,
+                              parseFloat(e.target.value) || 0,
+                              ligne.prixUnitaireHT
+                            )
+                          }
                           min="0"
                           step="0.01"
                           required
-                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 text-sm"
+                          className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500"
                         />
                       </div>
 
                       <div>
-                        <label className="block text-xs font-semibold text-gray-600 mb-1">
+                        <label className="mb-1 block text-xs font-semibold text-gray-600">
                           Unité
                         </label>
                         <select
@@ -285,7 +304,7 @@ export default function CreateInvoiceModal({ isOpen, onClose, onSubmit, clients 
                             newLignes[index].unite = e.target.value;
                             setLignes(newLignes);
                           }}
-                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 text-sm"
+                          className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500"
                         >
                           <option value="forfait">forfait</option>
                           <option value="heure">heure</option>
@@ -297,26 +316,28 @@ export default function CreateInvoiceModal({ isOpen, onClose, onSubmit, clients 
                       </div>
 
                       <div>
-                        <label className="block text-xs font-semibold text-gray-600 mb-1">
+                        <label className="mb-1 block text-xs font-semibold text-gray-600">
                           Prix Unit. HT *
                         </label>
                         <input
                           type="number"
                           value={ligne.prixUnitaireHT}
-                          onChange={(e) => updateLigneTotal(index, ligne.quantite, parseFloat(e.target.value) || 0)}
+                          onChange={(e) =>
+                            updateLigneTotal(index, ligne.quantite, parseFloat(e.target.value) || 0)
+                          }
                           min="0"
                           step="1"
                           required
                           placeholder="FCFA"
-                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 text-sm"
+                          className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500"
                         />
                       </div>
 
                       <div>
-                        <label className="block text-xs font-semibold text-gray-600 mb-1">
+                        <label className="mb-1 block text-xs font-semibold text-gray-600">
                           Total HT
                         </label>
-                        <div className="px-3 py-2 bg-gray-100 border border-gray-300 rounded-lg text-sm font-bold text-gray-800">
+                        <div className="rounded-lg border border-gray-300 bg-gray-100 px-3 py-2 text-sm font-bold text-gray-800">
                           {formatCleanAmount(ligne.totalHT, 'FCFA')}
                         </div>
                       </div>
@@ -327,15 +348,17 @@ export default function CreateInvoiceModal({ isOpen, onClose, onSubmit, clients 
             </div>
 
             {/* Section Paramètres */}
-            <div className="bg-gray-50 rounded-xl p-4 border border-gray-200">
-              <h3 className="text-sm font-bold text-gray-700 mb-3 flex items-center gap-2">
-                <span className="w-6 h-6 bg-indigo-100 text-indigo-600 rounded-full flex items-center justify-center text-xs font-bold">3</span>
+            <div className="rounded-xl border border-gray-200 bg-gray-50 p-4">
+              <h3 className="mb-3 flex items-center gap-2 text-sm font-bold text-gray-700">
+                <span className="flex h-6 w-6 items-center justify-center rounded-full bg-indigo-100 text-xs font-bold text-indigo-600">
+                  3
+                </span>
                 Paramètres de Facturation
               </h3>
 
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
                 <div>
-                  <label className="block text-xs font-semibold text-gray-700 mb-1.5">
+                  <label className="mb-1.5 block text-xs font-semibold text-gray-700">
                     Date d'échéance *
                   </label>
                   <input
@@ -343,12 +366,12 @@ export default function CreateInvoiceModal({ isOpen, onClose, onSubmit, clients 
                     value={dateEcheance}
                     onChange={(e) => setDateEcheance(e.target.value)}
                     required
-                    className="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500"
+                    className="w-full rounded-lg border border-gray-300 px-3 py-2.5 focus:ring-2 focus:ring-indigo-500"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-xs font-semibold text-gray-700 mb-1.5">
+                  <label className="mb-1.5 block text-xs font-semibold text-gray-700">
                     Taux TVA (%)
                   </label>
                   <input
@@ -358,18 +381,18 @@ export default function CreateInvoiceModal({ isOpen, onClose, onSubmit, clients 
                     min="0"
                     max="100"
                     step="0.01"
-                    className="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500"
+                    className="w-full rounded-lg border border-gray-300 px-3 py-2.5 focus:ring-2 focus:ring-indigo-500"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-xs font-semibold text-gray-700 mb-1.5">
+                  <label className="mb-1.5 block text-xs font-semibold text-gray-700">
                     Mode de règlement
                   </label>
                   <select
                     value={modeReglement}
                     onChange={(e) => setModeReglement(e.target.value as PaymentMethod)}
-                    className="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500"
+                    className="w-full rounded-lg border border-gray-300 px-3 py-2.5 focus:ring-2 focus:ring-indigo-500"
                   >
                     <option value="Virement">Virement</option>
                     <option value="Chèque">Chèque</option>
@@ -382,7 +405,7 @@ export default function CreateInvoiceModal({ isOpen, onClose, onSubmit, clients 
               </div>
 
               <div className="mt-4">
-                <label className="block text-xs font-semibold text-gray-700 mb-1.5">
+                <label className="mb-1.5 block text-xs font-semibold text-gray-700">
                   Notes (optionnel)
                 </label>
                 <textarea
@@ -390,50 +413,56 @@ export default function CreateInvoiceModal({ isOpen, onClose, onSubmit, clients 
                   onChange={(e) => setNotes(e.target.value)}
                   rows={3}
                   placeholder="Notes ou commentaires sur cette facture..."
-                  className="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 resize-none"
+                  className="w-full resize-none rounded-lg border border-gray-300 px-3 py-2.5 focus:ring-2 focus:ring-indigo-500"
                 />
               </div>
             </div>
 
             {/* Récapitulatif Totaux */}
-            <div className="bg-gradient-to-br from-indigo-50 to-blue-50 rounded-xl p-4 border-2 border-indigo-200">
-              <div className="flex items-center gap-2 mb-3">
-                <DollarSign className="w-5 h-5 text-indigo-600" />
+            <div className="rounded-xl border-2 border-indigo-200 bg-gradient-to-br from-indigo-50 to-blue-50 p-4">
+              <div className="mb-3 flex items-center gap-2">
+                <DollarSign className="h-5 w-5 text-indigo-600" />
                 <h3 className="text-sm font-bold text-indigo-900">Récapitulatif</h3>
               </div>
 
               <div className="space-y-2">
-                <div className="flex justify-between items-center text-sm">
+                <div className="flex items-center justify-between text-sm">
                   <span className="text-gray-700">Total HT</span>
-                  <span className="font-semibold text-gray-900">{formatCleanAmount(totalHT, 'FCFA')}</span>
+                  <span className="font-semibold text-gray-900">
+                    {formatCleanAmount(totalHT, 'FCFA')}
+                  </span>
                 </div>
-                <div className="flex justify-between items-center text-sm">
+                <div className="flex items-center justify-between text-sm">
                   <span className="text-gray-700">TVA ({tauxTVA}%)</span>
-                  <span className="font-semibold text-gray-900">{formatCleanAmount(totalTVA, 'FCFA')}</span>
+                  <span className="font-semibold text-gray-900">
+                    {formatCleanAmount(totalTVA, 'FCFA')}
+                  </span>
                 </div>
-                <div className="h-px bg-indigo-300 my-2" />
-                <div className="flex justify-between items-center">
+                <div className="my-2 h-px bg-indigo-300" />
+                <div className="flex items-center justify-between">
                   <span className="text-base font-bold text-indigo-900">Total TTC</span>
-                  <span className="text-xl font-bold text-indigo-600">{formatCleanAmount(totalTTC, 'FCFA')}</span>
+                  <span className="text-xl font-bold text-indigo-600">
+                    {formatCleanAmount(totalTTC, 'FCFA')}
+                  </span>
                 </div>
               </div>
             </div>
 
             {/* Actions */}
-            <div className="flex items-center justify-end gap-3 pt-4 border-t border-gray-200">
+            <div className="flex items-center justify-end gap-3 border-t border-gray-200 pt-4">
               <button
                 type="button"
                 onClick={() => {
                   handleReset();
                   onClose();
                 }}
-                className="px-5 py-2.5 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors font-medium"
+                className="rounded-lg border border-gray-300 px-5 py-2.5 font-medium text-gray-700 transition-colors hover:bg-gray-50"
               >
                 Annuler
               </button>
               <button
                 type="submit"
-                className="px-5 py-2.5 bg-gradient-to-r from-indigo-600 to-blue-600 text-white rounded-lg hover:from-indigo-700 hover:to-blue-700 transition-colors font-semibold shadow-md"
+                className="rounded-lg bg-gradient-to-r from-indigo-600 to-blue-600 px-5 py-2.5 font-semibold text-white shadow-md transition-colors hover:from-indigo-700 hover:to-blue-700"
               >
                 Créer la Facture
               </button>

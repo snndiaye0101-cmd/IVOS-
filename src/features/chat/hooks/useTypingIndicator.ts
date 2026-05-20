@@ -1,8 +1,8 @@
 // ============= TYPING INDICATOR HOOK =============
 // Gère les indicateurs de saisie en temps réel
 
-import { useState, useEffect, useCallback, useRef } from "react";
-import { supabase } from "@/shared/services/supabaseClient";
+import { useState, useEffect, useCallback, useRef } from 'react';
+import { supabase } from '@/shared/services/supabaseClient';
 
 interface TypingUser {
   userId: string;
@@ -10,11 +10,7 @@ interface TypingUser {
   timestamp: number;
 }
 
-export function useTypingIndicator(
-  channelId: string,
-  userId: string,
-  userName: string
-) {
+export function useTypingIndicator(channelId: string, userId: string, userName: string) {
   const [typingUsers, setTypingUsers] = useState<TypingUser[]>([]);
   const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const isTypingRef = useRef(false);
@@ -22,14 +18,14 @@ export function useTypingIndicator(
   // Send typing indicator
   const sendTypingIndicator = useCallback(async () => {
     try {
-      const { error } = await supabase.from("typing_indicators").upsert(
+      const { error } = await supabase.from('typing_indicators').upsert(
         {
           channel_id: channelId,
           user_id: userId,
           user_name: userName,
           timestamp: Date.now(),
         },
-        { onConflict: "channel_id,user_id" }
+        { onConflict: 'channel_id,user_id' }
       );
 
       if (error) throw error;
@@ -44,17 +40,17 @@ export function useTypingIndicator(
         // Remove typing indicator after 3 seconds
         try {
           await supabase
-            .from("typing_indicators")
+            .from('typing_indicators')
             .delete()
-            .eq("channel_id", channelId)
-            .eq("user_id", userId);
+            .eq('channel_id', channelId)
+            .eq('user_id', userId);
           isTypingRef.current = false;
         } catch (err) {
-          console.error("Error clearing typing indicator:", err);
+          console.error('Error clearing typing indicator:', err);
         }
       }, 3000);
     } catch (error) {
-      console.error("Error sending typing indicator:", error);
+      console.error('Error sending typing indicator:', error);
     }
   }, [channelId, userId, userName]);
 
@@ -63,15 +59,15 @@ export function useTypingIndicator(
     const subscription = supabase
       .channel(`typing-${channelId}`)
       .on(
-        "postgres_changes",
+        'postgres_changes',
         {
-          event: "*",
-          schema: "public",
-          table: "typing_indicators",
+          event: '*',
+          schema: 'public',
+          table: 'typing_indicators',
           filter: `channel_id=eq.${channelId}`,
         },
         (payload) => {
-          if (payload.eventType === "INSERT" || payload.eventType === "UPDATE") {
+          if (payload.eventType === 'INSERT' || payload.eventType === 'UPDATE') {
             const newUser = payload.new as TypingUser;
             setTypingUsers((prev) => {
               const filtered = prev.filter((u) => u.userId !== newUser.userId);
@@ -80,15 +76,11 @@ export function useTypingIndicator(
 
             // Auto-remove after 5 seconds if not updated
             setTimeout(() => {
-              setTypingUsers((prev) =>
-                prev.filter((u) => u.userId !== newUser.userId)
-              );
+              setTypingUsers((prev) => prev.filter((u) => u.userId !== newUser.userId));
             }, 5000);
-          } else if (payload.eventType === "DELETE") {
+          } else if (payload.eventType === 'DELETE') {
             const deletedUser = payload.old as TypingUser;
-            setTypingUsers((prev) =>
-              prev.filter((u) => u.userId !== deletedUser.userId)
-            );
+            setTypingUsers((prev) => prev.filter((u) => u.userId !== deletedUser.userId));
           }
         }
       )

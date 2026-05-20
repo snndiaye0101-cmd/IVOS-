@@ -3,7 +3,7 @@ export interface Channel {
   id: string;
   name: string;
   description?: string;
-  type: "public" | "private" | "direct";
+  type: 'public' | 'private' | 'direct';
   members: string[]; // Array of user IDs
   participants?: string[]; // For DMs
   created_by: string;
@@ -19,7 +19,7 @@ export interface ChatMessage {
   user_id: string;
   user_name: string;
   content: string;
-  type: "text" | "image" | "file" | "location";
+  type: 'text' | 'image' | 'file' | 'location';
   file_url?: string;
   file_name?: string;
   created_at: string;
@@ -36,9 +36,9 @@ export interface ChatUser {
   email: string;
   avatar_url?: string;
   online: boolean;
-  status: "online" | "away" | "offline" | "do_not_disturb";
+  status: 'online' | 'away' | 'offline' | 'do_not_disturb';
   last_seen_at?: string;
-  role: "admin" | "chauffeur" | "member";
+  role: 'admin' | 'chauffeur' | 'member';
 }
 
 // ============= MEMBER TYPES =============
@@ -55,7 +55,7 @@ export interface ChannelMember {
 // ============= PRESENCE TYPES =============
 export interface UserPresence {
   user_id: string;
-  status: "online" | "away" | "offline" | "do_not_disturb";
+  status: 'online' | 'away' | 'offline' | 'do_not_disturb';
   last_seen_at: string;
 }
 
@@ -63,7 +63,7 @@ export interface UserPresence {
 export interface CreateChannelInput {
   name: string;
   description?: string;
-  type: "public" | "private" | "direct";
+  type: 'public' | 'private' | 'direct';
   members?: string[];
 }
 
@@ -76,7 +76,7 @@ export interface UpdateChannelInput {
 export interface SendMessageInput {
   channel_id: string;
   content: string;
-  type?: "text" | "image" | "file" | "location";
+  type?: 'text' | 'image' | 'file' | 'location';
   file_url?: string;
   file_name?: string;
 }

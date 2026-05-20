@@ -21,7 +21,7 @@ if (typeof window !== 'undefined') {
       ...existingEnv,
       ...((import.meta as ImportMetaWithEnv).env ?? {}),
     },
-  }
+  };
 }
 
 ReactDOM.createRoot(document.getElementById('root')!).render(

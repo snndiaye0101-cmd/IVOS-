@@ -14,19 +14,15 @@ const AllTheProviders = ({ children }: { children: ReactNode }) => {
   return (
     <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
       <AuthProvider>
-        <ContextProvider>
-          {children}
-        </ContextProvider>
+        <ContextProvider>{children}</ContextProvider>
       </AuthProvider>
     </BrowserRouter>
   );
 };
 
 // Custom render avec providers
-const customRender = (
-  ui: ReactElement,
-  options?: Omit<RenderOptions, 'wrapper'>
-) => render(ui, { wrapper: AllTheProviders, ...options });
+const customRender = (ui: ReactElement, options?: Omit<RenderOptions, 'wrapper'>) =>
+  render(ui, { wrapper: AllTheProviders, ...options });
 
 // Re-export tout de @testing-library/react
 export * from '@testing-library/react';

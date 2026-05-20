@@ -1,10 +1,10 @@
 /**
  * Bouton Flottant — Création Rapide de Données de Test
  * À ajouter dans n'importe quelle page pour tester rapidement
- * 
+ *
  * Usage :
  * import QuickTestButton from '@/shared/components/QuickTestButton';
- * 
+ *
  * <QuickTestButton />
  */
 
@@ -29,12 +29,11 @@ export default function QuickTestButton() {
       });
 
       setMessage(`✅ ${result.operation.numero} créé !`);
-      
+
       // Refresh page après 1.5s
       setTimeout(() => {
         window.location.reload();
       }, 1500);
-      
     } catch (error) {
       console.error('Erreur création:', error);
       setMessage('❌ Erreur lors de la création');
@@ -46,47 +45,47 @@ export default function QuickTestButton() {
     <>
       {/* Menu déroulant */}
       {showMenu && (
-        <div className="fixed bottom-20 right-6 bg-white rounded-2xl shadow-2xl border border-gray-200 p-4 w-80 z-50 animate-in slide-in-from-bottom-4">
-          
+        <div className="animate-in slide-in-from-bottom-4 fixed bottom-20 right-6 z-50 w-80 rounded-2xl border border-gray-200 bg-white p-4 shadow-2xl">
           {/* Header */}
-          <div className="flex items-center justify-between mb-4">
+          <div className="mb-4 flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center">
-                <Database className="w-4 h-4 text-white" />
+              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-purple-500 to-pink-500">
+                <Database className="h-4 w-4 text-white" />
               </div>
               <h3 className="font-bold text-gray-900">Test Rapide</h3>
             </div>
             <button
               onClick={() => setShowMenu(false)}
-              className="w-7 h-7 rounded-lg hover:bg-gray-100 flex items-center justify-center"
+              className="flex h-7 w-7 items-center justify-center rounded-lg hover:bg-gray-100"
             >
-              <X className="w-4 h-4 text-gray-500" />
+              <X className="h-4 w-4 text-gray-500" />
             </button>
           </div>
 
           {/* Message */}
           {message && (
-            <div className={`mb-4 p-3 rounded-lg text-sm font-medium ${
-              message.includes('✅') 
-                ? 'bg-green-50 text-green-700 border border-green-200'
-                : 'bg-red-50 text-red-700 border border-red-200'
-            }`}>
+            <div
+              className={`mb-4 rounded-lg p-3 text-sm font-medium ${
+                message.includes('✅')
+                  ? 'border border-green-200 bg-green-50 text-green-700'
+                  : 'border border-red-200 bg-red-50 text-red-700'
+              }`}
+            >
               {message}
             </div>
           )}
 
           {/* Options */}
           <div className="space-y-2">
-            
             <button
               onClick={() => handleCreate('complete')}
               disabled={creating}
-              className="w-full p-3 rounded-lg bg-green-50 border border-green-200 hover:bg-green-100 text-left transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+              className="w-full rounded-lg border border-green-200 bg-green-50 p-3 text-left transition-all hover:bg-green-100 disabled:cursor-not-allowed disabled:opacity-50"
             >
               <div className="flex items-center gap-3">
-                <CheckCircle className="w-5 h-5 text-green-600 flex-shrink-0" />
+                <CheckCircle className="h-5 w-5 flex-shrink-0 text-green-600" />
                 <div>
-                  <p className="font-medium text-gray-900 text-sm">Opération Complète</p>
+                  <p className="text-sm font-medium text-gray-900">Opération Complète</p>
                   <p className="text-xs text-gray-600">Workflow + Facture + Paiement</p>
                 </div>
               </div>
@@ -95,12 +94,12 @@ export default function QuickTestButton() {
             <button
               onClick={() => handleCreate('invoice-only')}
               disabled={creating}
-              className="w-full p-3 rounded-lg bg-blue-50 border border-blue-200 hover:bg-blue-100 text-left transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+              className="w-full rounded-lg border border-blue-200 bg-blue-50 p-3 text-left transition-all hover:bg-blue-100 disabled:cursor-not-allowed disabled:opacity-50"
             >
               <div className="flex items-center gap-3">
-                <FileText className="w-5 h-5 text-blue-600 flex-shrink-0" />
+                <FileText className="h-5 w-5 flex-shrink-0 text-blue-600" />
                 <div>
-                  <p className="font-medium text-gray-900 text-sm">Avec Facture Non Payée</p>
+                  <p className="text-sm font-medium text-gray-900">Avec Facture Non Payée</p>
                   <p className="text-xs text-gray-600">Workflow + Facture (sans paiement)</p>
                 </div>
               </div>
@@ -109,21 +108,20 @@ export default function QuickTestButton() {
             <button
               onClick={() => handleCreate('incomplete')}
               disabled={creating}
-              className="w-full p-3 rounded-lg bg-yellow-50 border border-yellow-200 hover:bg-yellow-100 text-left transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+              className="w-full rounded-lg border border-yellow-200 bg-yellow-50 p-3 text-left transition-all hover:bg-yellow-100 disabled:cursor-not-allowed disabled:opacity-50"
             >
               <div className="flex items-center gap-3">
-                <Database className="w-5 h-5 text-yellow-600 flex-shrink-0" />
+                <Database className="h-5 w-5 flex-shrink-0 text-yellow-600" />
                 <div>
-                  <p className="font-medium text-gray-900 text-sm">Opération En Cours</p>
+                  <p className="text-sm font-medium text-gray-900">Opération En Cours</p>
                   <p className="text-xs text-gray-600">Workflow incomplet (67%)</p>
                 </div>
               </div>
             </button>
-
           </div>
 
           {/* Info */}
-          <p className="text-xs text-gray-500 mt-4 text-center">
+          <p className="mt-4 text-center text-xs text-gray-500">
             La page se rafraîchira automatiquement
           </p>
         </div>
@@ -133,27 +131,24 @@ export default function QuickTestButton() {
       <button
         onClick={() => setShowMenu(!showMenu)}
         disabled={creating}
-        className={`fixed bottom-6 right-6 w-14 h-14 rounded-full shadow-2xl flex items-center justify-center z-50 transition-all ${
-          showMenu 
-            ? 'bg-gray-600 hover:bg-gray-700' 
+        className={`fixed bottom-6 right-6 z-50 flex h-14 w-14 items-center justify-center rounded-full shadow-2xl transition-all ${
+          showMenu
+            ? 'bg-gray-600 hover:bg-gray-700'
             : 'bg-gradient-to-br from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700'
-        } disabled:opacity-50 disabled:cursor-not-allowed`}
+        } disabled:cursor-not-allowed disabled:opacity-50`}
       >
         {creating ? (
-          <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+          <div className="h-5 w-5 animate-spin rounded-full border-2 border-white border-t-transparent" />
         ) : showMenu ? (
-          <X className="w-6 h-6 text-white" />
+          <X className="h-6 w-6 text-white" />
         ) : (
-          <Zap className="w-6 h-6 text-white" />
+          <Zap className="h-6 w-6 text-white" />
         )}
       </button>
 
       {/* Overlay */}
       {showMenu && (
-        <div 
-          className="fixed inset-0 bg-black/20 z-40"
-          onClick={() => setShowMenu(false)}
-        />
+        <div className="fixed inset-0 z-40 bg-black/20" onClick={() => setShowMenu(false)} />
       )}
     </>
   );

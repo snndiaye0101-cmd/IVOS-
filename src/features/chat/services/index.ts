@@ -2,7 +2,7 @@
 // Centralize all chat-related exports for easy importing
 
 // Types
-export * from "../types/chat.types";
+export * from '../types/chat.types';
 
 // Services
 export {
@@ -12,7 +12,7 @@ export {
   realtimeSubscriptions,
   directMessagesService,
   notificationsService,
-} from "./chatSupabaseService";
+} from './chatSupabaseService';
 
 // Hooks
-export { useChat } from "../hooks/useChat";
+export { useChat } from '../hooks/useChat';

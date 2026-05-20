@@ -41,25 +41,25 @@ export interface Invoice {
   date: string; // ISO date
   dateEcheance: string; // Date d'échéance
   typeFacture: InvoiceType; // Type de facture
-  
+
   // Client
   clientId: string;
   clientNom: string;
   clientAdresse?: string;
   clientSiret?: string;
-  
+
   // Référence opération (BSD OU Projet)
   operationId?: string;
   bsdReference?: string; // Numéro du BSD lié (BSD-YYYYMM-XXXX)
   specialOperationId?: string; // Référence opération spéciale
   sourceModule?: InvoiceSource; // Origine de la facture
-  
+
   // Montants
   montantHT: number; // Montant Hors Taxe
   tauxTVA: number; // Taux de TVA en % (ex: 18)
   montantTVA: number; // Montant TVA calculé
   montantTTC: number; // Montant Toutes Taxes Comprises
-  
+
   // Paiement
   statutPaiement: PaymentStatus;
   modeReglement?: PaymentMethod;
@@ -72,7 +72,7 @@ export interface Invoice {
 
   // Lignes de facturation
   lignes: InvoiceLine[];
-  
+
   // Métadonnées
   notes?: string;
   createdAt: string;
@@ -102,7 +102,7 @@ export interface NewInvoiceData {
   clientAdresse?: string;
   clientSiret?: string;
   typeFacture?: InvoiceType;
-  
+
   // Pour factures BSD
   operationId?: string;
   bsdReference?: string;
@@ -110,7 +110,7 @@ export interface NewInvoiceData {
   // Pour opérations spéciales
   specialOperationId?: string;
   sourceModule?: InvoiceSource;
-  
+
   dateEcheance: string;
   tauxTVA: number;
   lignes: Omit<InvoiceLine, 'id'>[];

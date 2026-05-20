@@ -7,7 +7,6 @@ const rooms: ChatRoom[] = [
   { id: 'random', name: 'Café', description: 'Discussions informelles.' },
 ];
 
-
 export function getRooms(): Promise<ChatRoom[]> {
   return Promise.resolve(rooms);
 }

@@ -7,9 +7,11 @@ Ce dossier regroupe les modules, services, composants et utilitaires partagés e
 - **styles/** : Styles globaux et partagés (voir README dédié).
 
 ## Conventions
+
 - Factoriser au maximum les éléments réutilisables.
 - Documenter chaque module (README, JSDoc, commentaires).
 - Respecter les conventions du projet (voir `/docs/CONVENTIONS_CODE.md`).
 
 ## Contact
+
 Pour toute question ou amélioration, contacter l’équipe technique IVOS.

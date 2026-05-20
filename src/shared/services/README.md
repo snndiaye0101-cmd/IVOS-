@@ -13,9 +13,11 @@ Ce dossier regroupe les services transverses utilisés dans l’ensemble du syst
 - **webExportService.ts** : Export de données, anonymisation, conformité RGPD.
 
 ## Conventions
+
 - Chaque service est factorisé, documenté (JSDoc/commentaire en tête).
 - Les tests unitaires sont à placer dans `__tests__` ou à côté du service.
 - Respecter les conventions du projet (voir `/docs/CONVENTIONS_CODE.md`).
 
 ## Contact
+
 Pour toute question ou amélioration, contacter l’équipe technique IVOS.

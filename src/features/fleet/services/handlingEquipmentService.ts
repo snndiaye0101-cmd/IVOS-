@@ -60,7 +60,7 @@ export function getAllEquipment(): HandlingEquipment[] {
     if (!data) return [];
     const equipment: HandlingEquipment[] = JSON.parse(data);
     // Recalculer les statuts à chaque chargement
-    return equipment.map(eq => {
+    return equipment.map((eq) => {
       const vgpData = calculateVGPStatus(eq.lastVGPDate);
       return { ...eq, ...vgpData };
     });
@@ -80,10 +80,7 @@ function saveEquipment(equipment: HandlingEquipment[]): void {
 /**
  * Crée un nouvel engin
  */
-export function createEquipment(
-  data: NewHandlingEquipmentData,
-  userId: string
-): HandlingEquipment {
+export function createEquipment(data: NewHandlingEquipmentData, userId: string): HandlingEquipment {
   const now = new Date().toISOString();
   const vgpData = calculateVGPStatus(data.lastVGPDate);
 
@@ -123,11 +120,11 @@ export function updateEquipment(
   userId: string
 ): HandlingEquipment | null {
   const all = getAllEquipment();
-  const index = all.findIndex(eq => eq.id === id);
+  const index = all.findIndex((eq) => eq.id === id);
   if (index === -1) return null;
 
   const updated = { ...all[index], ...updates };
-  
+
   // Recalculer VGP si lastVGPDate a changé
   if (updates.lastVGPDate) {
     const vgpData = calculateVGPStatus(updates.lastVGPDate);
@@ -150,7 +147,7 @@ export function updateEquipment(
  */
 export function deleteEquipment(id: string): boolean {
   const all = getAllEquipment();
-  const filtered = all.filter(eq => eq.id !== id);
+  const filtered = all.filter((eq) => eq.id !== id);
   if (filtered.length === all.length) return false;
   saveEquipment(filtered);
   return true;
@@ -164,9 +161,9 @@ export function generateVGPReport(): VGPReport {
   const now = new Date();
   const reportMonth = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
 
-  const conforme = equipment.filter(eq => eq.vgpStatus === 'conforme');
-  const aRenouveler = equipment.filter(eq => eq.vgpStatus === 'à_renouveler');
-  const expire = equipment.filter(eq => eq.vgpStatus === 'expiré');
+  const conforme = equipment.filter((eq) => eq.vgpStatus === 'conforme');
+  const aRenouveler = equipment.filter((eq) => eq.vgpStatus === 'à_renouveler');
+  const expire = equipment.filter((eq) => eq.vgpStatus === 'expiré');
 
   const report: VGPReport = {
     reportDate: now.toISOString(),
@@ -190,7 +187,7 @@ export function generateVGPReport(): VGPReport {
  */
 export function generateVGPReportPDF(report: VGPReport): jsPDF {
   const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
-  
+
   const pageWidth = doc.internal.pageSize.getWidth();
   let y = 20;
 
@@ -213,7 +210,11 @@ export function generateVGPReportPDF(report: VGPReport): jsPDF {
   doc.setFont('helvetica', 'normal');
   doc.text(`Mois : ${report.reportMonth}`, 15, y);
   y += 6;
-  doc.text(`Date de génération : ${new Date(report.reportDate).toLocaleDateString('fr-FR')}`, 15, y);
+  doc.text(
+    `Date de génération : ${new Date(report.reportDate).toLocaleDateString('fr-FR')}`,
+    15,
+    y
+  );
   y += 10;
 
   // Statistiques
@@ -250,22 +251,32 @@ export function generateVGPReportPDF(report: VGPReport): jsPDF {
     doc.text('Aucun engin conforme.', 20, y);
     y += 8;
   } else {
-    report.conformeEquipment.forEach(eq => {
+    report.conformeEquipment.forEach((eq) => {
       doc.text(`• ${eq.serialNumber} — ${eq.brand} ${eq.model} (${eq.type})`, 20, y);
       y += 4;
       doc.setFontSize(8);
       doc.setTextColor(100, 100, 100);
-      doc.text(`  Énergie : ${eq.energyType} | Capacité : ${eq.liftingCapacity}T | Prochaine VGP : ${new Date(eq.nextVGPDate).toLocaleDateString('fr-FR')}`, 20, y);
+      doc.text(
+        `  Énergie : ${eq.energyType} | Capacité : ${eq.liftingCapacity}T | Prochaine VGP : ${new Date(eq.nextVGPDate).toLocaleDateString('fr-FR')}`,
+        20,
+        y
+      );
       doc.setFontSize(9);
       doc.setTextColor(0, 0, 0);
       y += 5;
-      if (y > 270) { doc.addPage(); y = 20; }
+      if (y > 270) {
+        doc.addPage();
+        y = 20;
+      }
     });
   }
   y += 5;
 
   // Section À Renouveler
-  if (y > 250) { doc.addPage(); y = 20; }
+  if (y > 250) {
+    doc.addPage();
+    y = 20;
+  }
   doc.setFontSize(12);
   doc.setFont('helvetica', 'bold');
   doc.setTextColor(255, 140, 0);
@@ -279,22 +290,32 @@ export function generateVGPReportPDF(report: VGPReport): jsPDF {
     doc.text('Aucun engin à renouveler.', 20, y);
     y += 8;
   } else {
-    report.toRenewEquipment.forEach(eq => {
+    report.toRenewEquipment.forEach((eq) => {
       doc.text(`• ${eq.serialNumber} — ${eq.brand} ${eq.model} (${eq.type})`, 20, y);
       y += 4;
       doc.setFontSize(8);
       doc.setTextColor(100, 100, 100);
-      doc.text(`  Énergie : ${eq.energyType} | Capacité : ${eq.liftingCapacity}T | Prochaine VGP : ${new Date(eq.nextVGPDate).toLocaleDateString('fr-FR')}`, 20, y);
+      doc.text(
+        `  Énergie : ${eq.energyType} | Capacité : ${eq.liftingCapacity}T | Prochaine VGP : ${new Date(eq.nextVGPDate).toLocaleDateString('fr-FR')}`,
+        20,
+        y
+      );
       doc.setFontSize(9);
       doc.setTextColor(0, 0, 0);
       y += 5;
-      if (y > 270) { doc.addPage(); y = 20; }
+      if (y > 270) {
+        doc.addPage();
+        y = 20;
+      }
     });
   }
   y += 5;
 
   // Section Expirés
-  if (y > 250) { doc.addPage(); y = 20; }
+  if (y > 250) {
+    doc.addPage();
+    y = 20;
+  }
   doc.setFontSize(12);
   doc.setFont('helvetica', 'bold');
   doc.setTextColor(220, 20, 60);
@@ -308,23 +329,32 @@ export function generateVGPReportPDF(report: VGPReport): jsPDF {
     doc.text('Aucun engin expiré.', 20, y);
     y += 8;
   } else {
-    report.expiredEquipment.forEach(eq => {
+    report.expiredEquipment.forEach((eq) => {
       doc.text(`• ${eq.serialNumber} — ${eq.brand} ${eq.model} (${eq.type})`, 20, y);
       y += 4;
       doc.setFontSize(8);
       doc.setTextColor(100, 100, 100);
-      doc.text(`  Énergie : ${eq.energyType} | Capacité : ${eq.liftingCapacity}T | VGP expirée le : ${new Date(eq.nextVGPDate).toLocaleDateString('fr-FR')}`, 20, y);
+      doc.text(
+        `  Énergie : ${eq.energyType} | Capacité : ${eq.liftingCapacity}T | VGP expirée le : ${new Date(eq.nextVGPDate).toLocaleDateString('fr-FR')}`,
+        20,
+        y
+      );
       doc.setFontSize(9);
       doc.setTextColor(0, 0, 0);
       y += 5;
-      if (y > 270) { doc.addPage(); y = 20; }
+      if (y > 270) {
+        doc.addPage();
+        y = 20;
+      }
     });
   }
 
   // Pied de page
   doc.setFontSize(8);
   doc.setTextColor(150, 150, 150);
-  doc.text('Généré automatiquement par IVOS — Système de Gestion Intégré', pageWidth / 2, 285, { align: 'center' });
+  doc.text('Généré automatiquement par IVOS — Système de Gestion Intégré', pageWidth / 2, 285, {
+    align: 'center',
+  });
 
   return doc;
 }
@@ -366,9 +396,9 @@ export function generateMonthlyReportAuto(): void {
   const report = generateVGPReport();
   const pdf = generateVGPReportPDF(report);
   const pdfBlob = pdf.output('blob');
-  
+
   saveReportToArchives(report, pdfBlob);
-  
+
   // Dans un vrai système, envoyer email à l'admin (Samba)
   console.log('📧 Rapport VGP généré et archivé — Email envoyé à Samba');
 }

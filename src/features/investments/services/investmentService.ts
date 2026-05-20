@@ -13,11 +13,13 @@ const EXPENSES_KEY = 'ivos_investment_expenses_v1';
 const DOCS_KEY = 'ivos_investment_documents_v1';
 
 function slugify(value: string): string {
-  return value
-    .normalize('NFD')
-    .replace(/[\u0300-\u036f]/g, '')
-    .replace(/[^a-zA-Z0-9]+/g, '_')
-    .replace(/^_+|_+$/g, '') || 'Projet';
+  return (
+    value
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .replace(/[^a-zA-Z0-9]+/g, '_')
+      .replace(/^_+|_+$/g, '') || 'Projet'
+  );
 }
 
 function notifyAll() {
@@ -49,7 +51,7 @@ export function fileToDataUrl(file: File): Promise<string> {
 
 function nextProjectCode(existing: InvestmentProject[]): string {
   const year = new Date().getFullYear();
-  const count = existing.filter(p => p.codeProjet.startsWith(`INV-${year}-`)).length + 1;
+  const count = existing.filter((p) => p.codeProjet.startsWith(`INV-${year}-`)).length + 1;
   return `INV-${year}-${String(count).padStart(4, '0')}`;
 }
 
@@ -58,27 +60,33 @@ export function getInvestmentArchivePath(projectName: string): string {
 }
 
 export function getInvestmentProjects(options?: { archived?: boolean }): InvestmentProject[] {
-  const all = load<InvestmentProject>(PROJECTS_KEY).map(project => ({
+  const all = load<InvestmentProject>(PROJECTS_KEY).map((project) => ({
     ...project,
     dateDebut: project.dateDebut || project.createdAt.slice(0, 10),
-        acomptesPrevus: Array.isArray(project.acomptesPrevus)
-        ? project.acomptesPrevus.map((line: Partial<InvestmentInstallment>) => {
-            const montantPrevuVal = (line as unknown as Record<string, unknown>)['montantPrevu'];
-            return {
-              id: line.id ?? '',
-              libelle: line.libelle || '',
-              montant: typeof line.montant === 'number' ? line.montant : (typeof montantPrevuVal === 'number' ? montantPrevuVal : 0),
-              datePrevisionnelle: line.datePrevisionnelle || project.dateLivraison || project.dateDebut || '',
-              decaisse: Boolean(line.decaisse),
-            };
-          })
+    acomptesPrevus: Array.isArray(project.acomptesPrevus)
+      ? project.acomptesPrevus.map((line: Partial<InvestmentInstallment>) => {
+          const montantPrevuVal = (line as unknown as Record<string, unknown>)['montantPrevu'];
+          return {
+            id: line.id ?? '',
+            libelle: line.libelle || '',
+            montant:
+              typeof line.montant === 'number'
+                ? line.montant
+                : typeof montantPrevuVal === 'number'
+                  ? montantPrevuVal
+                  : 0,
+            datePrevisionnelle:
+              line.datePrevisionnelle || project.dateLivraison || project.dateDebut || '',
+            decaisse: Boolean(line.decaisse),
+          };
+        })
       : [],
   }));
   if (options?.archived === undefined) {
     return all.sort((a, b) => b.createdAt.localeCompare(a.createdAt));
   }
   return all
-    .filter(project => project.archived === options.archived)
+    .filter((project) => project.archived === options.archived)
     .sort((a, b) => b.createdAt.localeCompare(a.createdAt));
 }
 
@@ -91,9 +99,9 @@ function syncDecaisseToExpenses(project: InvestmentProject, userId: string) {
   const now = new Date().toISOString();
   let changed = false;
 
-  project.acomptesPrevus.forEach(installment => {
+  project.acomptesPrevus.forEach((installment) => {
     if (!installment.decaisse) return;
-    const alreadyExists = expenses.some(e => e.acompteId === installment.id);
+    const alreadyExists = expenses.some((e) => e.acompteId === installment.id);
     if (alreadyExists) return;
 
     expenses.push({
@@ -123,10 +131,13 @@ function syncDecaisseToExpenses(project: InvestmentProject, userId: string) {
   }
 }
 
-export function createInvestmentProject(data: NewInvestmentProjectData, userId: string): InvestmentProject {
+export function createInvestmentProject(
+  data: NewInvestmentProjectData,
+  userId: string
+): InvestmentProject {
   const projects = load<InvestmentProject>(PROJECTS_KEY);
   const now = new Date().toISOString();
-  const acomptesPrevus: InvestmentInstallment[] = data.acomptesPrevus.map(line => ({
+  const acomptesPrevus: InvestmentInstallment[] = data.acomptesPrevus.map((line) => ({
     id: `inv-acompte-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
     libelle: line.libelle,
     montant: line.montant,
@@ -154,13 +165,19 @@ export function createInvestmentProject(data: NewInvestmentProjectData, userId: 
   return project;
 }
 
-export function updateInvestmentProject(projectId: string, data: NewInvestmentProjectData, userId: string): InvestmentProject | null {
+export function updateInvestmentProject(
+  projectId: string,
+  data: NewInvestmentProjectData,
+  userId: string
+): InvestmentProject | null {
   const projects = load<InvestmentProject>(PROJECTS_KEY);
-  const index = projects.findIndex(project => project.id === projectId);
+  const index = projects.findIndex((project) => project.id === projectId);
   if (index < 0) return null;
 
   const acomptesPrevus: InvestmentInstallment[] = data.acomptesPrevus.map((line, lineIndex) => ({
-    id: projects[index].acomptesPrevus?.[lineIndex]?.id || `inv-acompte-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
+    id:
+      projects[index].acomptesPrevus?.[lineIndex]?.id ||
+      `inv-acompte-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
     libelle: line.libelle,
     montant: line.montant,
     datePrevisionnelle: line.datePrevisionnelle,
@@ -187,11 +204,13 @@ export function updateInvestmentProject(projectId: string, data: NewInvestmentPr
 
 export function deleteInvestmentProject(projectId: string): boolean {
   const projects = load<InvestmentProject>(PROJECTS_KEY);
-  const nextProjects = projects.filter(project => project.id !== projectId);
+  const nextProjects = projects.filter((project) => project.id !== projectId);
   if (nextProjects.length === projects.length) return false;
 
-  const nextExpenses = load<InvestmentExpense>(EXPENSES_KEY).filter(expense => expense.projectId !== projectId);
-  const nextDocs = load<InvestmentDocument>(DOCS_KEY).filter(doc => doc.projectId !== projectId);
+  const nextExpenses = load<InvestmentExpense>(EXPENSES_KEY).filter(
+    (expense) => expense.projectId !== projectId
+  );
+  const nextDocs = load<InvestmentDocument>(DOCS_KEY).filter((doc) => doc.projectId !== projectId);
 
   localStorage.setItem(PROJECTS_KEY, JSON.stringify(nextProjects));
   localStorage.setItem(EXPENSES_KEY, JSON.stringify(nextExpenses));
@@ -201,12 +220,12 @@ export function deleteInvestmentProject(projectId: string): boolean {
 }
 
 export function getInvestmentProjectById(projectId: string): InvestmentProject | null {
-  return getInvestmentProjects().find(project => project.id === projectId) || null;
+  return getInvestmentProjects().find((project) => project.id === projectId) || null;
 }
 
 export function archiveInvestmentProject(projectId: string, userId: string): boolean {
   const projects = load<InvestmentProject>(PROJECTS_KEY);
-  const index = projects.findIndex(project => project.id === projectId);
+  const index = projects.findIndex((project) => project.id === projectId);
   if (index < 0) return false;
   projects[index] = {
     ...projects[index],
@@ -220,11 +239,16 @@ export function archiveInvestmentProject(projectId: string, userId: string): boo
 
 export function getInvestmentExpenses(projectId?: string): InvestmentExpense[] {
   const expenses = load<InvestmentExpense>(EXPENSES_KEY);
-  const filtered = projectId ? expenses.filter(expense => expense.projectId === projectId) : expenses;
+  const filtered = projectId
+    ? expenses.filter((expense) => expense.projectId === projectId)
+    : expenses;
   return filtered.sort((a, b) => b.dateFacture.localeCompare(a.dateFacture));
 }
 
-export function createInvestmentExpense(data: NewInvestmentExpenseData, userId: string): InvestmentExpense {
+export function createInvestmentExpense(
+  data: NewInvestmentExpenseData,
+  userId: string
+): InvestmentExpense {
   const expenses = load<InvestmentExpense>(EXPENSES_KEY);
   const now = new Date().toISOString();
   const expense: InvestmentExpense = {
@@ -318,8 +342,10 @@ export function getInvestmentDocuments(projectId?: string): InvestmentDocument[]
 
     if (legacyType === 'Photo avancement') normalizedType = 'Photo site';
     else if (legacyType === 'Photo site') normalizedType = 'Photo site';
-      else if (legacyType === 'Contrat sign' || legacyType === 'Contrat') normalizedType = 'Contrat signé';
-    else if (legacyType === 'Plan technique' || legacyType === 'Plan') normalizedType = 'Plan technique';
+    else if (legacyType === 'Contrat sign' || legacyType === 'Contrat')
+      normalizedType = 'Contrat signé';
+    else if (legacyType === 'Plan technique' || legacyType === 'Plan')
+      normalizedType = 'Plan technique';
     else if (legacyType === 'Facture') normalizedType = 'Facture';
     else normalizedType = 'Autre';
 
@@ -336,13 +362,13 @@ export function getInvestmentDocuments(projectId?: string): InvestmentDocument[]
       previewDataUrl: typeof doc?.previewDataUrl === 'string' ? doc.previewDataUrl : undefined,
     };
   });
-  const filtered = projectId ? docs.filter(doc => doc.projectId === projectId) : docs;
+  const filtered = projectId ? docs.filter((doc) => doc.projectId === projectId) : docs;
   return filtered.sort((a, b) => b.uploadedAt.localeCompare(a.uploadedAt));
 }
 
 export function deleteInvestmentDocument(documentId: string): boolean {
   const docs = load<InvestmentDocument>(DOCS_KEY);
-  const nextDocs = docs.filter(doc => doc.id !== documentId);
+  const nextDocs = docs.filter((doc) => doc.id !== documentId);
   if (nextDocs.length === docs.length) return false;
 
   // The archive folder is virtualized via archivePath metadata in docs.
@@ -352,9 +378,12 @@ export function deleteInvestmentDocument(documentId: string): boolean {
   return true;
 }
 
-export function setExpenseQHSEConform(expenseId: string, qhseConforme: boolean): InvestmentExpense | null {
+export function setExpenseQHSEConform(
+  expenseId: string,
+  qhseConforme: boolean
+): InvestmentExpense | null {
   const expenses = load<InvestmentExpense>(EXPENSES_KEY);
-  const index = expenses.findIndex(expense => expense.id === expenseId);
+  const index = expenses.findIndex((expense) => expense.id === expenseId);
   if (index < 0) return null;
   expenses[index] = {
     ...expenses[index],
@@ -365,9 +394,13 @@ export function setExpenseQHSEConform(expenseId: string, qhseConforme: boolean):
   return expenses[index];
 }
 
-export async function attachVisualProof(expenseId: string, file: File, userId: string): Promise<InvestmentExpense | null> {
+export async function attachVisualProof(
+  expenseId: string,
+  file: File,
+  userId: string
+): Promise<InvestmentExpense | null> {
   const expenses = load<InvestmentExpense>(EXPENSES_KEY);
-  const index = expenses.findIndex(expense => expense.id === expenseId);
+  const index = expenses.findIndex((expense) => expense.id === expenseId);
   if (index < 0) return null;
 
   const previewDataUrl = await fileToDataUrl(file);
@@ -391,11 +424,15 @@ export async function attachVisualProof(expenseId: string, file: File, userId: s
   return expenses[index];
 }
 
-export function signExpenseAsSuperAdmin(expenseId: string, userId: string, isSuperAdmin: boolean): InvestmentExpense | null {
+export function signExpenseAsSuperAdmin(
+  expenseId: string,
+  userId: string,
+  isSuperAdmin: boolean
+): InvestmentExpense | null {
   if (!isSuperAdmin) return null;
 
   const expenses = load<InvestmentExpense>(EXPENSES_KEY);
-  const index = expenses.findIndex(expense => expense.id === expenseId);
+  const index = expenses.findIndex((expense) => expense.id === expenseId);
   if (index < 0) return null;
 
   const current = expenses[index];
@@ -418,7 +455,7 @@ export function signExpenseAsSuperAdmin(expenseId: string, userId: string, isSup
 
 export function markInvestmentExpensePaid(expenseId: string): InvestmentExpense | null {
   const expenses = load<InvestmentExpense>(EXPENSES_KEY);
-  const index = expenses.findIndex(expense => expense.id === expenseId);
+  const index = expenses.findIndex((expense) => expense.id === expenseId);
   if (index < 0) return null;
 
   if (!expenses[index].superAdminValide) {

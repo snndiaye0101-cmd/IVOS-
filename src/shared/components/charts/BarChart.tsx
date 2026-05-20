@@ -19,12 +19,12 @@ interface BarChartProps {
   unit?: string;
 }
 
-export default function BarChart({ 
-  data, 
-  title, 
-  width = 800, 
+export default function BarChart({
+  data,
+  title,
+  width = 800,
   height = 400,
-  unit = 't'
+  unit = 't',
 }: BarChartProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
@@ -47,7 +47,7 @@ export default function BarChart({
     ctx.clearRect(0, 0, width, height);
 
     // Find max value
-    const maxValue = Math.max(...data.map(d => d.value));
+    const maxValue = Math.max(...data.map((d) => d.value));
     const roundedMax = Math.ceil(maxValue / 1000) * 1000; // Round to nearest 1000
 
     // Draw Y-axis grid lines
@@ -109,12 +109,16 @@ export default function BarChart({
       ctx.font = '12px system-ui, sans-serif';
       ctx.textAlign = 'center';
       ctx.textBaseline = 'top';
-      
+
       // Multi-line label if too long
       const words = item.label.split(' ');
       if (words.length > 1) {
         ctx.fillText(words[0], x + actualBarWidth / 2, paddingTop + chartHeight + 10);
-        ctx.fillText(words.slice(1).join(' '), x + actualBarWidth / 2, paddingTop + chartHeight + 25);
+        ctx.fillText(
+          words.slice(1).join(' '),
+          x + actualBarWidth / 2,
+          paddingTop + chartHeight + 25
+        );
       } else {
         ctx.fillText(item.label, x + actualBarWidth / 2, paddingTop + chartHeight + 10);
       }
@@ -135,7 +139,6 @@ export default function BarChart({
     ctx.moveTo(paddingLeft, paddingTop + chartHeight);
     ctx.lineTo(paddingLeft + chartWidth, paddingTop + chartHeight);
     ctx.stroke();
-
   }, [data, width, height]);
 
   const formatValue = (value: number) => {
@@ -158,15 +161,13 @@ export default function BarChart({
   return (
     <>
       <div className="flex flex-col items-center">
-        {title && (
-          <h3 className="text-lg font-bold text-gray-900 mb-4">{title}</h3>
-        )}
+        {title && <h3 className="mb-4 text-lg font-bold text-gray-900">{title}</h3>}
 
         <canvas
           ref={canvasRef}
           width={width}
           height={height}
-          className="border border-gray-200 rounded-lg"
+          className="rounded-lg border border-gray-200"
         />
       </div>
     </>

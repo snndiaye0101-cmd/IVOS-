@@ -11,7 +11,12 @@ interface AnnualClosurePanelProps {
   onReset: (year: number, siteCode: string) => Promise<void>;
 }
 
-export default function AnnualClosurePanel({ isOpen, onClose, onArchive, onReset }: AnnualClosurePanelProps) {
+export default function AnnualClosurePanel({
+  isOpen,
+  onClose,
+  onArchive,
+  onReset,
+}: AnnualClosurePanelProps) {
   const { site, year } = useContextSelector();
   const [loading, setLoading] = useState<'archive' | 'reset' | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
@@ -44,20 +49,41 @@ export default function AnnualClosurePanel({ isOpen, onClose, onArchive, onReset
   };
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} title={`Clôture annuelle – ${site.name} (${year})`} size="md">
+    <Modal
+      isOpen={isOpen}
+      onClose={onClose}
+      title={`Clôture annuelle – ${site.name} (${year})`}
+      size="md"
+    >
       <div className="space-y-6">
-        <div className="flex items-center gap-3 p-4 bg-blue-50 rounded-lg">
+        <div className="flex items-center gap-3 rounded-lg bg-blue-50 p-4">
           <Archive className="text-blue-700" />
-          <span className="text-blue-900 font-semibold">Vous pouvez archiver toutes les données de l’année sélectionnée pour ce site. Cette opération est irréversible.</span>
+          <span className="font-semibold text-blue-900">
+            Vous pouvez archiver toutes les données de l’année sélectionnée pour ce site. Cette
+            opération est irréversible.
+          </span>
         </div>
-        <div className="flex items-center gap-3 p-4 bg-yellow-50 rounded-lg">
+        <div className="flex items-center gap-3 rounded-lg bg-yellow-50 p-4">
           <RefreshCcw className="text-yellow-700" />
-          <span className="text-yellow-900 font-semibold">Vous pouvez réinitialiser les compteurs et états pour la nouvelle année. Les archives ne seront pas supprimées.</span>
+          <span className="font-semibold text-yellow-900">
+            Vous pouvez réinitialiser les compteurs et états pour la nouvelle année. Les archives ne
+            seront pas supprimées.
+          </span>
         </div>
-        {success && <div className="flex items-center gap-2 text-green-700 font-bold"><CheckCircle2 /> {success}</div>}
-        {error && <div className="flex items-center gap-2 text-red-700 font-bold"><AlertTriangle /> {error}</div>}
-        <div className="flex gap-4 justify-end mt-6">
-          <Button variant="secondary" onClick={onClose}>Fermer</Button>
+        {success && (
+          <div className="flex items-center gap-2 font-bold text-green-700">
+            <CheckCircle2 /> {success}
+          </div>
+        )}
+        {error && (
+          <div className="flex items-center gap-2 font-bold text-red-700">
+            <AlertTriangle /> {error}
+          </div>
+        )}
+        <div className="mt-6 flex justify-end gap-4">
+          <Button variant="secondary" onClick={onClose}>
+            Fermer
+          </Button>
           <Button variant="danger" onClick={handleArchive} disabled={loading === 'archive'}>
             {loading === 'archive' ? 'Archivage...' : 'Archiver l’année'}
           </Button>

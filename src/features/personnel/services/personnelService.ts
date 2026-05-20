@@ -15,6 +15,6 @@ export async function addPersonnel(data: Record<string, unknown>) {
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(data),
   });
-  if (!res.ok) throw new Error('Erreur lors de l\'ajout');
+  if (!res.ok) throw new Error("Erreur lors de l'ajout");
   return res.json();
 }

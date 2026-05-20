@@ -1,12 +1,36 @@
 import React, { useState, useMemo, useEffect, useCallback } from 'react';
 import {
-  BarChart3, TrendingUp, DollarSign, Fuel, ShieldAlert, ClipboardList,
-  Download, Calendar, AlertTriangle, Truck, Users, Banknote, Receipt,
-  Wallet, ArrowUpRight, ArrowDownRight, Activity, ChevronDown
+  BarChart3,
+  TrendingUp,
+  DollarSign,
+  Fuel,
+  ShieldAlert,
+  ClipboardList,
+  Download,
+  Calendar,
+  AlertTriangle,
+  Truck,
+  Users,
+  Banknote,
+  Receipt,
+  Wallet,
+  ArrowUpRight,
+  ArrowDownRight,
+  Activity,
+  ChevronDown,
 } from 'lucide-react';
 import {
-  BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend,
-  ResponsiveContainer, PieChart, Pie, Cell
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  Legend,
+  ResponsiveContainer,
+  PieChart,
+  Pie,
+  Cell,
 } from 'recharts';
 import { jsPDF } from 'jspdf';
 import autoTable from 'jspdf-autotable';
@@ -15,7 +39,10 @@ import { vehiclesStore } from '../../fleet/services/vehiclesStore';
 import type { Vehicle } from '../../fleet/services/vehiclesStore';
 import { carburantStore, type Plein } from '../../fleet/services/carburantStore';
 import { personnelStore } from '../../fleet/services/personnelStore';
-import { getWorkflowInvoices, type WorkflowInvoice } from '../../finances/services/workflowInvoiceService';
+import {
+  getWorkflowInvoices,
+  type WorkflowInvoice,
+} from '../../finances/services/workflowInvoiceService';
 import { getAllOperations } from '../../exploitation/services/operationService';
 
 // ── Types ──────────────────────────────────────────────────────────────────────
@@ -91,7 +118,7 @@ function loadOperations(): ExploitationOperation[] {
     if (parsed.length > 0) return parsed;
 
     // Fallback to canonical exploitation operations service for continuity.
-    return getAllOperations().map(op => ({
+    return getAllOperations().map((op) => ({
       numero: op.numero,
       status: op.status === 'cloturee' ? 'completed' : 'in_progress',
       currentStep: op.status === 'cloturee' ? 5 : 3,
@@ -100,7 +127,7 @@ function loadOperations(): ExploitationOperation[] {
     }));
   } catch {
     try {
-      return getAllOperations().map(op => ({
+      return getAllOperations().map((op) => ({
         numero: op.numero,
         status: op.status === 'cloturee' ? 'completed' : 'in_progress',
         currentStep: op.status === 'cloturee' ? 5 : 3,
@@ -121,7 +148,7 @@ const PIE_COLORS = ['#3b82f6', '#f59e0b', '#10b981', '#ef4444', '#8b5cf6', '#06b
 
 export default function DirectionDashboard() {
   const [, setTick] = useState(0);
-  const reload = useCallback(() => setTick(t => t + 1), []);
+  const reload = useCallback(() => setTick((t) => t + 1), []);
 
   // ── Filtre temporel ──────────────────────────────────────────────────────────
   const now = new Date();
@@ -136,12 +163,17 @@ export default function DirectionDashboard() {
   // ── Live reload ──────────────────────────────────────────────────────────────
   useEffect(() => {
     const events = [
-      'fleetVehicles:updated', 'carburant:updated', 'personnel:updated',
-      'ivos_payslips_change', 'ivos_expenses_change', 'ivos_invoice_change',
-      'ivos_exploitation_change', 'ivos_operations_change',
+      'fleetVehicles:updated',
+      'carburant:updated',
+      'personnel:updated',
+      'ivos_payslips_change',
+      'ivos_expenses_change',
+      'ivos_invoice_change',
+      'ivos_exploitation_change',
+      'ivos_operations_change',
     ];
-    events.forEach(e => window.addEventListener(e, reload));
-    return () => events.forEach(e => window.removeEventListener(e, reload));
+    events.forEach((e) => window.addEventListener(e, reload));
+    return () => events.forEach((e) => window.removeEventListener(e, reload));
   }, [reload]);
 
   // ── Data aggregation ─────────────────────────────────────────────────────────
@@ -155,46 +187,46 @@ export default function DirectionDashboard() {
     const operations = loadOperations();
 
     // ── 1. Masse Salariale (mois sélectionné) ─────────────────────────────────
-    const monthPayslips = payslips.filter(p => p.month === currentKey);
+    const monthPayslips = payslips.filter((p) => p.month === currentKey);
     const totalBaseSalary = monthPayslips.reduce((s, p) => s + (p.baseSalary || 0), 0);
     const totalBonus = monthPayslips.reduce((s, p) => s + (p.bonus || 0), 0);
     const totalRetenues = monthPayslips.reduce((s, p) => s + (p.retenues || 0), 0);
     const masseSalariale = totalBaseSalary + totalBonus + totalRetenues;
 
     // ── 2. Facturation ─────────────────────────────────────────────────────────
-    const monthInvoices = invoices.filter(inv => {
+    const monthInvoices = invoices.filter((inv) => {
       const d = inv.createdAt?.slice(0, 7);
       return d === currentKey;
     });
     const totalFacture = monthInvoices.reduce((s, inv) => s + (inv.montantHT || 0), 0);
     const recouvrementEnCours = monthInvoices
-      .filter(inv => inv.status !== 'payee' && inv.status !== 'annulee')
+      .filter((inv) => inv.status !== 'payee' && inv.status !== 'annulee')
       .reduce((s, inv) => s + (inv.montantHT || 0), 0);
 
     // ── 3. Dépenses Globales ───────────────────────────────────────────────────
-    const monthExpenses = expenses.filter(e => e.date?.slice(0, 7) === currentKey);
+    const monthExpenses = expenses.filter((e) => e.date?.slice(0, 7) === currentKey);
     const totalExpenses = monthExpenses.reduce((s, e) => s + (e.amount || 0), 0);
     const depenseCarburantExpenses = monthExpenses
-      .filter(e => e.category === 'Carburant')
+      .filter((e) => e.category === 'Carburant')
       .reduce((s, e) => s + (e.amount || 0), 0);
 
     // Carburant from fuel store (montant)
-    const monthCarburant = carburant.filter(p => p.date?.slice(0, 7) === currentKey);
+    const monthCarburant = carburant.filter((p) => p.date?.slice(0, 7) === currentKey);
     const carburantTotal = monthCarburant.reduce((s, p) => s + (p.montant || 0), 0);
-    const prevMonthCarburant = carburant.filter(p => p.date?.slice(0, 7) === prevKey);
+    const prevMonthCarburant = carburant.filter((p) => p.date?.slice(0, 7) === prevKey);
     const carburantTotalPrev = prevMonthCarburant.reduce((s, p) => s + (p.montant || 0), 0);
 
     const depensesGlobales = totalExpenses + carburantTotal + masseSalariale;
 
     // ── 4. Ventilation Carburant : Fonction vs Parc ────────────────────────────
     const vehicleTypeMap: Record<string, string> = {};
-    vehicles.forEach(v => {
+    vehicles.forEach((v) => {
       vehicleTypeMap[v.registration] = v.type;
     });
 
     let carburantFonction = 0;
     let carburantParc = 0;
-    monthCarburant.forEach(p => {
+    monthCarburant.forEach((p) => {
       const vType = vehicleTypeMap[p.vehicule] || '';
       if (vType.toLowerCase().includes('fonction')) {
         carburantFonction += p.montant || 0;
@@ -209,7 +241,7 @@ export default function DirectionDashboard() {
 
     // ── 6. Top 3 Véhicules Énergivores ─────────────────────────────────────────
     const fuelByVehicle: Record<string, number> = {};
-    monthCarburant.forEach(p => {
+    monthCarburant.forEach((p) => {
       fuelByVehicle[p.vehicule] = (fuelByVehicle[p.vehicule] || 0) + (p.montant || 0);
     });
     const topFuelVehicles = Object.entries(fuelByVehicle)
@@ -218,12 +250,12 @@ export default function DirectionDashboard() {
       .map(([vehicule, montant]) => ({ vehicule, montant }));
 
     // ── 7. Operations réalisées ──────────────────────────────────────────────────
-    const monthOperations = operations.filter(m => {
+    const monthOperations = operations.filter((m) => {
       const d = m.createdAt?.slice(0, 7);
       return d === currentKey;
     });
     const operationsRealisees = monthOperations.filter(
-      m => m.currentStep >= 5 || m.status === 'completed'
+      (m) => m.currentStep >= 5 || m.status === 'completed'
     ).length;
     const operationsTotal = monthOperations.length;
 
@@ -232,24 +264,26 @@ export default function DirectionDashboard() {
     const in15Days = new Date();
     in15Days.setDate(today.getDate() + 15);
 
-    const vehiculesEnAlerte = vehicles.filter(v => {
-      const vtDate = v.technicalControlExpiry ? new Date(v.technicalControlExpiry) : null;
-      const assDate = v.insuranceExpiry ? new Date(v.insuranceExpiry) : null;
-      return (vtDate && vtDate <= in15Days) || (assDate && assDate <= in15Days);
-    }).map(v => {
-      const alerts: string[] = [];
-      const vtDate = v.technicalControlExpiry ? new Date(v.technicalControlExpiry) : null;
-      const assDate = v.insuranceExpiry ? new Date(v.insuranceExpiry) : null;
-      if (vtDate && vtDate <= in15Days) {
-        const j = Math.ceil((vtDate.getTime() - today.getTime()) / 86400000);
-        alerts.push(j <= 0 ? 'VT Expirée' : `VT dans ${j}j`);
-      }
-      if (assDate && assDate <= in15Days) {
-        const j = Math.ceil((assDate.getTime() - today.getTime()) / 86400000);
-        alerts.push(j <= 0 ? 'Assurance Expirée' : `Assurance dans ${j}j`);
-      }
-      return { registration: v.registration, brand: v.brand, model: v.model, alerts };
-    });
+    const vehiculesEnAlerte = vehicles
+      .filter((v) => {
+        const vtDate = v.technicalControlExpiry ? new Date(v.technicalControlExpiry) : null;
+        const assDate = v.insuranceExpiry ? new Date(v.insuranceExpiry) : null;
+        return (vtDate && vtDate <= in15Days) || (assDate && assDate <= in15Days);
+      })
+      .map((v) => {
+        const alerts: string[] = [];
+        const vtDate = v.technicalControlExpiry ? new Date(v.technicalControlExpiry) : null;
+        const assDate = v.insuranceExpiry ? new Date(v.insuranceExpiry) : null;
+        if (vtDate && vtDate <= in15Days) {
+          const j = Math.ceil((vtDate.getTime() - today.getTime()) / 86400000);
+          alerts.push(j <= 0 ? 'VT Expirée' : `VT dans ${j}j`);
+        }
+        if (assDate && assDate <= in15Days) {
+          const j = Math.ceil((assDate.getTime() - today.getTime()) / 86400000);
+          alerts.push(j <= 0 ? 'Assurance Expirée' : `Assurance dans ${j}j`);
+        }
+        return { registration: v.registration, brand: v.brand, model: v.model, alerts };
+      });
 
     // ── 9. Marge Opérationnelle ────────────────────────────────────────────────
     const chiffreAffaires = totalFacture;
@@ -259,12 +293,12 @@ export default function DirectionDashboard() {
     const barData = [
       {
         name: monthLabel(prevKey),
-        'Litres': Math.round(carburantLitresPrev),
+        Litres: Math.round(carburantLitresPrev),
         'Coût (FCFA)': carburantTotalPrev,
       },
       {
         name: monthLabel(currentKey),
-        'Litres': Math.round(carburantLitresCurrent),
+        Litres: Math.round(carburantLitresCurrent),
         'Coût (FCFA)': carburantTotal,
       },
     ];
@@ -273,7 +307,7 @@ export default function DirectionDashboard() {
     const pieData = [
       { name: 'Véhicules de Fonction', value: carburantFonction },
       { name: 'Véhicules de Parc', value: carburantParc },
-    ].filter(d => d.value > 0);
+    ].filter((d) => d.value > 0);
 
     if (pieData.length === 0) {
       pieData.push({ name: 'Véhicules de Parc', value: carburantTotal || 1 });
@@ -281,30 +315,45 @@ export default function DirectionDashboard() {
 
     // ── Expenses breakdown by category ─────────────────────────────────────────
     const expenseByCategory: Record<string, number> = {};
-    monthExpenses.forEach(e => {
+    monthExpenses.forEach((e) => {
       expenseByCategory[e.category] = (expenseByCategory[e.category] || 0) + (e.amount || 0);
     });
 
     return {
-      masseSalariale, totalBaseSalary, totalBonus, totalRetenues,
-      totalFacture, recouvrementEnCours,
-      depensesGlobales, carburantTotal, carburantTotalPrev,
-      carburantFonction, carburantParc,
-      carburantLitresCurrent, carburantLitresPrev,
+      masseSalariale,
+      totalBaseSalary,
+      totalBonus,
+      totalRetenues,
+      totalFacture,
+      recouvrementEnCours,
+      depensesGlobales,
+      carburantTotal,
+      carburantTotalPrev,
+      carburantFonction,
+      carburantParc,
+      carburantLitresCurrent,
+      carburantLitresPrev,
       topFuelVehicles,
-      operationsRealisees, operationsTotal,
+      operationsRealisees,
+      operationsTotal,
       vehiculesEnAlerte,
-      margeOperationnelle, chiffreAffaires,
-      barData, pieData, expenseByCategory,
+      margeOperationnelle,
+      chiffreAffaires,
+      barData,
+      pieData,
+      expenseByCategory,
       personnelCount: personnel.length,
       vehiclesCount: vehicles.length,
     };
   }, [currentKey, prevKey]);
 
   // ── Variation helpers ────────────────────────────────────────────────────────
-  const fuelVariation = data.carburantTotalPrev > 0
-    ? ((data.carburantTotal - data.carburantTotalPrev) / data.carburantTotalPrev * 100).toFixed(1)
-    : null;
+  const fuelVariation =
+    data.carburantTotalPrev > 0
+      ? (((data.carburantTotal - data.carburantTotalPrev) / data.carburantTotalPrev) * 100).toFixed(
+          1
+        )
+      : null;
 
   // ── PDF Export ───────────────────────────────────────────────────────────────
   const exportPDF = () => {
@@ -343,8 +392,16 @@ export default function DirectionDashboard() {
       startY: y,
       head: [['Carburant', 'Litres', 'Coût (FCFA)']],
       body: [
-        ['Mois en cours', data.carburantLitresCurrent.toLocaleString('fr-FR'), FCFA(data.carburantTotal)],
-        ['Mois précédent', data.carburantLitresPrev.toLocaleString('fr-FR'), FCFA(data.carburantTotalPrev)],
+        [
+          'Mois en cours',
+          data.carburantLitresCurrent.toLocaleString('fr-FR'),
+          FCFA(data.carburantTotal),
+        ],
+        [
+          'Mois précédent',
+          data.carburantLitresPrev.toLocaleString('fr-FR'),
+          FCFA(data.carburantTotalPrev),
+        ],
         ['Véhicules de Fonction', '—', FCFA(data.carburantFonction)],
         ['Véhicules de Parc', '—', FCFA(data.carburantParc)],
       ],
@@ -359,9 +416,7 @@ export default function DirectionDashboard() {
       autoTable(doc, {
         startY: y,
         head: [['Rang', 'Véhicule', 'Coût Carburant (FCFA)']],
-        body: data.topFuelVehicles.map((v, i) => [
-          `#${i + 1}`, v.vehicule, FCFA(v.montant),
-        ]),
+        body: data.topFuelVehicles.map((v, i) => [`#${i + 1}`, v.vehicule, FCFA(v.montant)]),
         theme: 'grid',
         headStyles: { fillColor: [26, 26, 46] },
       });
@@ -377,8 +432,10 @@ export default function DirectionDashboard() {
       autoTable(doc, {
         startY: y,
         head: [['Véhicule', 'Marque / Modèle', 'Alertes']],
-        body: data.vehiculesEnAlerte.map(v => [
-          v.registration, `${v.brand} ${v.model}`, v.alerts.join(', '),
+        body: data.vehiculesEnAlerte.map((v) => [
+          v.registration,
+          `${v.brand} ${v.model}`,
+          v.alerts.join(', '),
         ]),
         theme: 'grid',
         headStyles: { fillColor: [220, 38, 38] },
@@ -391,59 +448,68 @@ export default function DirectionDashboard() {
   // ── Month selector options ───────────────────────────────────────────────────
   const years = [2024, 2025, 2026, 2027];
   const months = [
-    { v: 1, l: 'Janvier' }, { v: 2, l: 'Février' }, { v: 3, l: 'Mars' },
-    { v: 4, l: 'Avril' }, { v: 5, l: 'Mai' }, { v: 6, l: 'Juin' },
-    { v: 7, l: 'Juillet' }, { v: 8, l: 'Août' }, { v: 9, l: 'Septembre' },
-    { v: 10, l: 'Octobre' }, { v: 11, l: 'Novembre' }, { v: 12, l: 'Décembre' },
+    { v: 1, l: 'Janvier' },
+    { v: 2, l: 'Février' },
+    { v: 3, l: 'Mars' },
+    { v: 4, l: 'Avril' },
+    { v: 5, l: 'Mai' },
+    { v: 6, l: 'Juin' },
+    { v: 7, l: 'Juillet' },
+    { v: 8, l: 'Août' },
+    { v: 9, l: 'Septembre' },
+    { v: 10, l: 'Octobre' },
+    { v: 11, l: 'Novembre' },
+    { v: 12, l: 'Décembre' },
   ];
 
   // ── Render ───────────────────────────────────────────────────────────────────
   return (
-    <div className="w-full min-h-screen pb-10">
-
+    <div className="min-h-screen w-full pb-10">
       {/* ═══ HEADER ═══ */}
-      <div className="bg-gradient-to-r from-[#1a1a2e] via-[#16213e] to-[#0f3460] rounded-2xl p-6 mb-6 text-white">
-        <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4">
+      <div className="mb-6 rounded-2xl bg-gradient-to-r from-[#1a1a2e] via-[#16213e] to-[#0f3460] p-6 text-white">
+        <div className="flex flex-col items-start justify-between gap-4 lg:flex-row lg:items-center">
           <div className="flex items-center gap-4">
-            <div className="w-14 h-14 bg-white/10 rounded-xl flex items-center justify-center">
-              <BarChart3 className="w-8 h-8" />
+            <div className="flex h-14 w-14 items-center justify-center rounded-xl bg-white/10">
+              <BarChart3 className="h-8 w-8" />
             </div>
             <div>
               <h1 className="text-2xl font-bold tracking-tight">Dashboard de Direction</h1>
-              <p className="text-sm text-gray-300">
-                Vue consolidée — {monthLabel(currentKey)}
-              </p>
+              <p className="text-sm text-gray-300">Vue consolidée — {monthLabel(currentKey)}</p>
             </div>
           </div>
 
           {/* Filtre temporel + Export */}
           <div className="flex flex-wrap items-center gap-3">
-            <div className="flex items-center gap-2 bg-white/10 rounded-xl px-3 py-2">
-              <Calendar className="w-4 h-4 text-gray-300" />
+            <div className="flex items-center gap-2 rounded-xl bg-white/10 px-3 py-2">
+              <Calendar className="h-4 w-4 text-gray-300" />
               <select
                 value={selectedMonth}
-                onChange={e => setSelectedMonth(Number(e.target.value))}
-                className="bg-transparent text-white text-sm border-none outline-none cursor-pointer"
+                onChange={(e) => setSelectedMonth(Number(e.target.value))}
+                className="cursor-pointer border-none bg-transparent text-sm text-white outline-none"
               >
-                {months.map(m => (
-                  <option key={m.v} value={m.v} className="text-gray-900">{m.l}</option>
+                {months.map((m) => (
+                  <option key={m.v} value={m.v} className="text-gray-900">
+                    {m.l}
+                  </option>
                 ))}
               </select>
               <select
                 value={selectedYear}
-                onChange={e => setSelectedYear(Number(e.target.value))}
-                className="bg-transparent text-white text-sm border-none outline-none cursor-pointer"
+                onChange={(e) => setSelectedYear(Number(e.target.value))}
+                className="cursor-pointer border-none bg-transparent text-sm text-white outline-none"
               >
-                {years.map(y => (
-                  <option key={y} value={y} className="text-gray-900">{y}</option>
+                {years.map((y) => (
+                  <option key={y} value={y} className="text-gray-900">
+                    {y}
+                  </option>
                 ))}
               </select>
             </div>
             <button
               onClick={exportPDF}
-              className="flex items-center gap-2 bg-white/10 hover:bg-white/20 text-white text-sm font-medium px-4 py-2.5 rounded-xl transition-colors"
+              className="flex items-center gap-2 rounded-xl bg-white/10 px-4 py-2.5 text-sm font-medium text-white transition-colors hover:bg-white/20"
             >
-              <Download className="w-4 h-4" />
+              <Download className="h-4 w-4" />
               📥 Télécharger Rapport PDF
             </button>
           </div>
@@ -451,12 +517,15 @@ export default function DirectionDashboard() {
       </div>
 
       {/* ═══ SECTION 1 — WIDGETS FINANCIERS ═══ */}
-      <SectionTitle icon={<DollarSign className="w-5 h-5" />} title="Indicateurs Financiers — Mois en Cours" />
+      <SectionTitle
+        icon={<DollarSign className="h-5 w-5" />}
+        title="Indicateurs Financiers — Mois en Cours"
+      />
 
-      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4 mb-8">
+      <div className="mb-8 grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
         {/* Masse Salariale */}
         <WidgetCard
-          icon={<Users className="w-6 h-6" />}
+          icon={<Users className="h-6 w-6" />}
           gradient="from-indigo-500 to-indigo-700"
           label="Masse Salariale"
           value={FCFA(data.masseSalariale)}
@@ -465,7 +534,7 @@ export default function DirectionDashboard() {
 
         {/* Total Facturé */}
         <WidgetCard
-          icon={<Receipt className="w-6 h-6" />}
+          icon={<Receipt className="h-6 w-6" />}
           gradient="from-green-500 to-green-700"
           label="Total Facturé"
           value={FCFA(data.totalFacture)}
@@ -474,7 +543,7 @@ export default function DirectionDashboard() {
 
         {/* Recouvrement en Cours */}
         <WidgetCard
-          icon={<Banknote className="w-6 h-6" />}
+          icon={<Banknote className="h-6 w-6" />}
           gradient="from-amber-500 to-amber-700"
           label="Recouvrement en Cours"
           value={FCFA(data.recouvrementEnCours)}
@@ -484,7 +553,7 @@ export default function DirectionDashboard() {
 
         {/* Dépenses Globales */}
         <WidgetCard
-          icon={<Wallet className="w-6 h-6" />}
+          icon={<Wallet className="h-6 w-6" />}
           gradient="from-red-500 to-red-700"
           label="Dépenses Globales"
           value={FCFA(data.depensesGlobales)}
@@ -493,13 +562,12 @@ export default function DirectionDashboard() {
       </div>
 
       {/* ═══ SECTION 2 — CARBURANT & GRAPHIQUES ═══ */}
-      <SectionTitle icon={<Fuel className="w-5 h-5" />} title="Analyse du Carburant" />
+      <SectionTitle icon={<Fuel className="h-5 w-5" />} title="Analyse du Carburant" />
 
-      <div className="grid grid-cols-1 xl:grid-cols-3 gap-6 mb-8">
-
+      <div className="mb-8 grid grid-cols-1 gap-6 xl:grid-cols-3">
         {/* Ventilation Pie Chart */}
-        <div className="bg-white rounded-2xl shadow-md p-5">
-          <h3 className="text-sm font-bold text-[#1a1a2e] uppercase tracking-wide mb-4">
+        <div className="rounded-2xl bg-white p-5 shadow-md">
+          <h3 className="mb-4 text-sm font-bold uppercase tracking-wide text-[#1a1a2e]">
             Ventilation Coût Carburant
           </h3>
           <div className="h-52">
@@ -523,19 +591,21 @@ export default function DirectionDashboard() {
               </PieChart>
             </ResponsiveContainer>
           </div>
-          <div className="flex justify-center gap-6 mt-2 text-xs text-gray-600">
+          <div className="mt-2 flex justify-center gap-6 text-xs text-gray-600">
             <span className="flex items-center gap-1.5">
-              <span className="w-3 h-3 rounded-full bg-blue-500 inline-block" /> Fonction : {FCFA(data.carburantFonction)}
+              <span className="inline-block h-3 w-3 rounded-full bg-blue-500" /> Fonction :{' '}
+              {FCFA(data.carburantFonction)}
             </span>
             <span className="flex items-center gap-1.5">
-              <span className="w-3 h-3 rounded-full bg-amber-500 inline-block" /> Parc : {FCFA(data.carburantParc)}
+              <span className="inline-block h-3 w-3 rounded-full bg-amber-500" /> Parc :{' '}
+              {FCFA(data.carburantParc)}
             </span>
           </div>
         </div>
 
         {/* Comparatif Mensuel Bar Chart */}
-        <div className="bg-white rounded-2xl shadow-md p-5">
-          <h3 className="text-sm font-bold text-[#1a1a2e] uppercase tracking-wide mb-4">
+        <div className="rounded-2xl bg-white p-5 shadow-md">
+          <h3 className="mb-4 text-sm font-bold uppercase tracking-wide text-[#1a1a2e]">
             Comparatif Mensuel — Consommation
           </h3>
           <div className="h-52">
@@ -544,9 +614,11 @@ export default function DirectionDashboard() {
                 <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
                 <XAxis dataKey="name" tick={{ fontSize: 11 }} />
                 <YAxis tick={{ fontSize: 11 }} />
-                <Tooltip formatter={(v: number, name: string) =>
-                  name.includes('FCFA') ? FCFA(v) : `${v.toLocaleString('fr-FR')} L`
-                } />
+                <Tooltip
+                  formatter={(v: number, name: string) =>
+                    name.includes('FCFA') ? FCFA(v) : `${v.toLocaleString('fr-FR')} L`
+                  }
+                />
                 <Legend wrapperStyle={{ fontSize: 11 }} />
                 <Bar dataKey="Litres" fill="#3b82f6" radius={[4, 4, 0, 0]} />
                 <Bar dataKey="Coût (FCFA)" fill="#f59e0b" radius={[4, 4, 0, 0]} />
@@ -554,25 +626,30 @@ export default function DirectionDashboard() {
             </ResponsiveContainer>
           </div>
           {fuelVariation && (
-            <div className={`flex items-center justify-center gap-1 mt-3 text-sm font-semibold ${
-              Number(fuelVariation) <= 0 ? 'text-green-600' : 'text-red-600'
-            }`}>
-              {Number(fuelVariation) <= 0
-                ? <ArrowDownRight className="w-4 h-4" />
-                : <ArrowUpRight className="w-4 h-4" />
-              }
+            <div
+              className={`mt-3 flex items-center justify-center gap-1 text-sm font-semibold ${
+                Number(fuelVariation) <= 0 ? 'text-green-600' : 'text-red-600'
+              }`}
+            >
+              {Number(fuelVariation) <= 0 ? (
+                <ArrowDownRight className="h-4 w-4" />
+              ) : (
+                <ArrowUpRight className="h-4 w-4" />
+              )}
               {fuelVariation}% vs mois précédent
             </div>
           )}
         </div>
 
         {/* Top 3 Véhicules les plus énergivores */}
-        <div className="bg-white rounded-2xl shadow-md p-5">
-          <h3 className="text-sm font-bold text-[#1a1a2e] uppercase tracking-wide mb-4">
+        <div className="rounded-2xl bg-white p-5 shadow-md">
+          <h3 className="mb-4 text-sm font-bold uppercase tracking-wide text-[#1a1a2e]">
             🔥 Top 3 Véhicules Énergivores
           </h3>
           {data.topFuelVehicles.length === 0 ? (
-            <p className="text-sm text-gray-400 mt-8 text-center">Aucune donnée carburant ce mois</p>
+            <p className="mt-8 text-center text-sm text-gray-400">
+              Aucune donnée carburant ce mois
+            </p>
           ) : (
             <div className="space-y-3">
               {data.topFuelVehicles.map((v, i) => {
@@ -583,14 +660,16 @@ export default function DirectionDashboard() {
                   <div key={v.vehicule} className="space-y-1">
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-2">
-                        <span className={`w-7 h-7 rounded-full ${colors[i]} text-white text-xs font-bold flex items-center justify-center`}>
+                        <span
+                          className={`h-7 w-7 rounded-full ${colors[i]} flex items-center justify-center text-xs font-bold text-white`}
+                        >
                           #{i + 1}
                         </span>
                         <span className="text-sm font-semibold text-gray-800">{v.vehicule}</span>
                       </div>
                       <span className="text-sm font-bold text-gray-900">{FCFA(v.montant)}</span>
                     </div>
-                    <div className="w-full bg-gray-100 rounded-full h-2.5">
+                    <div className="h-2.5 w-full rounded-full bg-gray-100">
                       <div
                         className={`h-2.5 rounded-full ${colors[i]}`}
                         style={{ width: `${pct}%` }}
@@ -605,25 +684,27 @@ export default function DirectionDashboard() {
       </div>
 
       {/* ═══ SECTION 3 — OPÉRATIONS & CONFORMITÉ ═══ */}
-      <SectionTitle icon={<ClipboardList className="w-5 h-5" />} title="Suivi des Opérations & Conformité" />
+      <SectionTitle
+        icon={<ClipboardList className="h-5 w-5" />}
+        title="Suivi des Opérations & Conformité"
+      />
 
-      <div className="grid grid-cols-1 xl:grid-cols-2 gap-6 mb-8">
-
+      <div className="mb-8 grid grid-cols-1 gap-6 xl:grid-cols-2">
         {/* Operations réalisées */}
-        <div className="bg-white rounded-2xl shadow-md p-5">
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="text-sm font-bold text-[#1a1a2e] uppercase tracking-wide">
+        <div className="rounded-2xl bg-white p-5 shadow-md">
+          <div className="mb-4 flex items-center justify-between">
+            <h3 className="text-sm font-bold uppercase tracking-wide text-[#1a1a2e]">
               Activité — Opérations
             </h3>
             <div className="flex items-center gap-2">
-              <Activity className="w-4 h-4 text-green-500" />
+              <Activity className="h-4 w-4 text-green-500" />
               <span className="text-xs text-gray-500">Mois en cours</span>
             </div>
           </div>
           <div className="flex items-end gap-6">
             <div>
               <p className="text-4xl font-extrabold text-[#1a1a2e]">{data.operationsRealisees}</p>
-              <p className="text-sm text-gray-500 mt-1">opérations réalisées</p>
+              <p className="mt-1 text-sm text-gray-500">opérations réalisées</p>
             </div>
             <div className="pb-1">
               <p className="text-lg font-bold text-gray-400">/ {data.operationsTotal}</p>
@@ -632,57 +713,66 @@ export default function DirectionDashboard() {
           </div>
           {data.operationsTotal > 0 && (
             <div className="mt-4">
-              <div className="w-full bg-gray-100 rounded-full h-3">
+              <div className="h-3 w-full rounded-full bg-gray-100">
                 <div
                   className="h-3 rounded-full bg-gradient-to-r from-green-400 to-green-600 transition-all"
-                  style={{ width: `${Math.min(100, (data.operationsRealisees / data.operationsTotal) * 100)}%` }}
+                  style={{
+                    width: `${Math.min(100, (data.operationsRealisees / data.operationsTotal) * 100)}%`,
+                  }}
                 />
               </div>
-              <p className="text-xs text-gray-500 mt-1 text-right">
-                {Math.round((data.operationsRealisees / data.operationsTotal) * 100)}% de réalisation
+              <p className="mt-1 text-right text-xs text-gray-500">
+                {Math.round((data.operationsRealisees / data.operationsTotal) * 100)}% de
+                réalisation
               </p>
             </div>
           )}
         </div>
 
         {/* Véhicules en alerte conformité */}
-        <div className="bg-white rounded-2xl shadow-md p-5">
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="text-sm font-bold text-[#1a1a2e] uppercase tracking-wide">
+        <div className="rounded-2xl bg-white p-5 shadow-md">
+          <div className="mb-4 flex items-center justify-between">
+            <h3 className="text-sm font-bold uppercase tracking-wide text-[#1a1a2e]">
               ⚠️ Sécurité — Conformité Véhicules
             </h3>
             {data.vehiculesEnAlerte.length > 0 && (
-              <span className="bg-red-100 text-red-700 text-xs font-bold px-2.5 py-1 rounded-full animate-pulse">
+              <span className="animate-pulse rounded-full bg-red-100 px-2.5 py-1 text-xs font-bold text-red-700">
                 {data.vehiculesEnAlerte.length} alerte{data.vehiculesEnAlerte.length > 1 ? 's' : ''}
               </span>
             )}
           </div>
           {data.vehiculesEnAlerte.length === 0 ? (
-            <div className="text-center py-8">
-              <ShieldAlert className="w-10 h-10 text-green-400 mx-auto mb-2" />
-              <p className="text-sm text-green-600 font-medium">Tous les véhicules sont conformes</p>
+            <div className="py-8 text-center">
+              <ShieldAlert className="mx-auto mb-2 h-10 w-10 text-green-400" />
+              <p className="text-sm font-medium text-green-600">
+                Tous les véhicules sont conformes
+              </p>
             </div>
           ) : (
             <div className="overflow-x-auto">
               <table className="min-w-full">
                 <thead>
-                  <tr className="bg-[#1a1a2e] text-white text-xs uppercase">
-                    <th className="px-4 py-2.5 text-left rounded-tl-lg">Immatriculation</th>
+                  <tr className="bg-[#1a1a2e] text-xs uppercase text-white">
+                    <th className="rounded-tl-lg px-4 py-2.5 text-left">Immatriculation</th>
                     <th className="px-4 py-2.5 text-left">Véhicule</th>
-                    <th className="px-4 py-2.5 text-left rounded-tr-lg">Alertes</th>
+                    <th className="rounded-tr-lg px-4 py-2.5 text-left">Alertes</th>
                   </tr>
                 </thead>
                 <tbody>
                   {data.vehiculesEnAlerte.map((v, idx) => (
                     <tr key={v.registration} className={idx % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
-                      <td className="px-4 py-2 text-sm font-semibold text-gray-900">{v.registration}</td>
-                      <td className="px-4 py-2 text-sm text-gray-600">{v.brand} {v.model}</td>
+                      <td className="px-4 py-2 text-sm font-semibold text-gray-900">
+                        {v.registration}
+                      </td>
+                      <td className="px-4 py-2 text-sm text-gray-600">
+                        {v.brand} {v.model}
+                      </td>
                       <td className="px-4 py-2">
                         <div className="flex flex-wrap gap-1">
-                          {v.alerts.map(a => (
+                          {v.alerts.map((a) => (
                             <span
                               key={a}
-                              className={`text-xs font-semibold px-2 py-0.5 rounded-full ${
+                              className={`rounded-full px-2 py-0.5 text-xs font-semibold ${
                                 a.includes('Expirée')
                                   ? 'bg-red-100 text-red-700'
                                   : 'bg-amber-100 text-amber-700'
@@ -703,50 +793,72 @@ export default function DirectionDashboard() {
       </div>
 
       {/* ═══ SECTION 4 — MARGE OPÉRATIONNELLE ═══ */}
-      <SectionTitle icon={<TrendingUp className="w-5 h-5" />} title="Indicateur de Rentabilité" />
+      <SectionTitle icon={<TrendingUp className="h-5 w-5" />} title="Indicateur de Rentabilité" />
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+      <div className="mb-6 grid grid-cols-1 gap-4 md:grid-cols-3">
         <MargeCard
           label="Chiffre d'Affaires"
           value={data.chiffreAffaires}
-          icon={<Receipt className="w-5 h-5" />}
+          icon={<Receipt className="h-5 w-5" />}
           color="text-green-700 bg-green-50"
         />
         <MargeCard
           label="Coûts (Carburant + Salaires)"
           value={data.carburantTotal + data.masseSalariale}
-          icon={<Wallet className="w-5 h-5" />}
+          icon={<Wallet className="h-5 w-5" />}
           color="text-red-700 bg-red-50"
         />
-        <div className={`rounded-2xl shadow-md p-5 ${
-          data.margeOperationnelle >= 0 ? 'bg-gradient-to-br from-green-500 to-green-700' : 'bg-gradient-to-br from-red-500 to-red-700'
-        } text-white`}>
-          <div className="flex items-center gap-2 mb-2">
-            <TrendingUp className="w-5 h-5" />
-            <span className="text-xs font-semibold uppercase tracking-wider opacity-90">Marge Opérationnelle</span>
+        <div
+          className={`rounded-2xl p-5 shadow-md ${
+            data.margeOperationnelle >= 0
+              ? 'bg-gradient-to-br from-green-500 to-green-700'
+              : 'bg-gradient-to-br from-red-500 to-red-700'
+          } text-white`}
+        >
+          <div className="mb-2 flex items-center gap-2">
+            <TrendingUp className="h-5 w-5" />
+            <span className="text-xs font-semibold uppercase tracking-wider opacity-90">
+              Marge Opérationnelle
+            </span>
           </div>
           <p className="text-3xl font-extrabold">{FCFA(data.margeOperationnelle)}</p>
-          <p className="text-xs mt-1 opacity-80">CA - (Carburant + Masse Salariale)</p>
+          <p className="mt-1 text-xs opacity-80">CA - (Carburant + Masse Salariale)</p>
         </div>
       </div>
 
       {/* ═══ SECTION 5 — DÉPENSES PAR CATÉGORIE ═══ */}
       {Object.keys(data.expenseByCategory).length > 0 && (
         <>
-          <SectionTitle icon={<DollarSign className="w-5 h-5" />} title="Répartition des Dépenses par Catégorie" />
-          <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-3 mb-8">
-            {Object.entries(data.expenseByCategory).sort((a, b) => b[1] - a[1]).map(([cat, amount], i) => (
-              <div key={cat} className="bg-white rounded-xl shadow p-4 text-center hover:shadow-md transition-shadow">
-                <div className={`w-10 h-10 rounded-full mx-auto mb-2 flex items-center justify-center text-white bg-gradient-to-br ${
-                  ['from-blue-500 to-blue-700', 'from-amber-500 to-amber-600', 'from-emerald-500 to-emerald-600',
-                   'from-purple-500 to-purple-600', 'from-cyan-500 to-cyan-600', 'from-rose-500 to-rose-600'][i % 6]
-                }`}>
-                  <DollarSign className="w-5 h-5" />
+          <SectionTitle
+            icon={<DollarSign className="h-5 w-5" />}
+            title="Répartition des Dépenses par Catégorie"
+          />
+          <div className="mb-8 grid grid-cols-2 gap-3 md:grid-cols-3 xl:grid-cols-6">
+            {Object.entries(data.expenseByCategory)
+              .sort((a, b) => b[1] - a[1])
+              .map(([cat, amount], i) => (
+                <div
+                  key={cat}
+                  className="rounded-xl bg-white p-4 text-center shadow transition-shadow hover:shadow-md"
+                >
+                  <div
+                    className={`mx-auto mb-2 flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br text-white ${
+                      [
+                        'from-blue-500 to-blue-700',
+                        'from-amber-500 to-amber-600',
+                        'from-emerald-500 to-emerald-600',
+                        'from-purple-500 to-purple-600',
+                        'from-cyan-500 to-cyan-600',
+                        'from-rose-500 to-rose-600',
+                      ][i % 6]
+                    }`}
+                  >
+                    <DollarSign className="h-5 w-5" />
+                  </div>
+                  <p className="truncate text-xs font-medium text-gray-500">{cat}</p>
+                  <p className="mt-0.5 text-sm font-bold text-gray-900">{FCFA(amount)}</p>
                 </div>
-                <p className="text-xs font-medium text-gray-500 truncate">{cat}</p>
-                <p className="text-sm font-bold text-gray-900 mt-0.5">{FCFA(amount)}</p>
-              </div>
-            ))}
+              ))}
           </div>
         </>
       )}
@@ -758,15 +870,22 @@ export default function DirectionDashboard() {
 
 function SectionTitle({ icon, title }: { icon: React.ReactNode; title: string }) {
   return (
-    <div className="flex items-center gap-2 mb-4 mt-2">
-      <div className="w-8 h-8 rounded-lg bg-[#1a1a2e] text-white flex items-center justify-center">{icon}</div>
-      <h2 className="text-base font-bold text-[#1a1a2e] uppercase tracking-wide">{title}</h2>
+    <div className="mb-4 mt-2 flex items-center gap-2">
+      <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-[#1a1a2e] text-white">
+        {icon}
+      </div>
+      <h2 className="text-base font-bold uppercase tracking-wide text-[#1a1a2e]">{title}</h2>
     </div>
   );
 }
 
 function WidgetCard({
-  icon, gradient, label, value, sub, danger,
+  icon,
+  gradient,
+  label,
+  value,
+  sub,
+  danger,
 }: {
   icon: React.ReactNode;
   gradient: string;
@@ -776,23 +895,30 @@ function WidgetCard({
   danger?: boolean;
 }) {
   return (
-    <div className={`bg-white rounded-2xl shadow-md overflow-hidden hover:shadow-lg transition-shadow ${danger ? 'ring-2 ring-amber-400' : ''}`}>
+    <div
+      className={`overflow-hidden rounded-2xl bg-white shadow-md transition-shadow hover:shadow-lg ${danger ? 'ring-2 ring-amber-400' : ''}`}
+    >
       <div className="p-5">
-        <div className="flex items-start justify-between mb-3">
-          <div className={`w-11 h-11 rounded-xl bg-gradient-to-br ${gradient} flex items-center justify-center text-white`}>
+        <div className="mb-3 flex items-start justify-between">
+          <div
+            className={`h-11 w-11 rounded-xl bg-gradient-to-br ${gradient} flex items-center justify-center text-white`}
+          >
             {icon}
           </div>
         </div>
-        <p className="text-lg font-extrabold text-gray-900 leading-tight">{value}</p>
-        <p className="text-xs font-semibold text-[#1a1a2e] mt-1">{label}</p>
-        <p className="text-[11px] text-gray-400 mt-0.5 leading-snug">{sub}</p>
+        <p className="text-lg font-extrabold leading-tight text-gray-900">{value}</p>
+        <p className="mt-1 text-xs font-semibold text-[#1a1a2e]">{label}</p>
+        <p className="mt-0.5 text-[11px] leading-snug text-gray-400">{sub}</p>
       </div>
     </div>
   );
 }
 
 function MargeCard({
-  label, value, icon, color,
+  label,
+  value,
+  icon,
+  color,
 }: {
   label: string;
   value: number;
@@ -800,8 +926,8 @@ function MargeCard({
   color: string;
 }) {
   return (
-    <div className={`rounded-2xl shadow-md p-5 ${color}`}>
-      <div className="flex items-center gap-2 mb-2">
+    <div className={`rounded-2xl p-5 shadow-md ${color}`}>
+      <div className="mb-2 flex items-center gap-2">
         {icon}
         <span className="text-xs font-semibold uppercase tracking-wider">{label}</span>
       </div>

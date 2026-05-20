@@ -12,7 +12,16 @@ export interface AuditEntry {
   userId: string;
   userName: string;
   userRole: string;
-  action: 'create' | 'update' | 'view' | 'delete' | 'permission_change' | 'role_change' | 'approval' | 'rejection' | 'critical_action';
+  action:
+    | 'create'
+    | 'update'
+    | 'view'
+    | 'delete'
+    | 'permission_change'
+    | 'role_change'
+    | 'approval'
+    | 'rejection'
+    | 'critical_action';
   module: string;
   entity: string;
   entityId: string;
@@ -27,7 +36,11 @@ const AUDIT_KEY = 'ivos_audit_log_v1';
 const MAX_ENTRIES = 5000;
 
 function loadAudit(): AuditEntry[] {
-  try { return JSON.parse(localStorage.getItem(AUDIT_KEY) || '[]'); } catch { return []; }
+  try {
+    return JSON.parse(localStorage.getItem(AUDIT_KEY) || '[]');
+  } catch {
+    return [];
+  }
 }
 
 function saveAudit(entries: AuditEntry[]) {
@@ -55,7 +68,15 @@ export const auditService = {
   },
 
   /** Shorthand: log a data modification */
-  logUpdate(user: { id: string; name: string; role: string }, module: string, entity: string, entityId: string, oldValue: Record<string, unknown>, newValue: Record<string, unknown>, description?: string) {
+  logUpdate(
+    user: { id: string; name: string; role: string },
+    module: string,
+    entity: string,
+    entityId: string,
+    oldValue: Record<string, unknown>,
+    newValue: Record<string, unknown>,
+    description?: string
+  ) {
     return this.log({
       userId: user.id,
       userName: user.name,
@@ -72,7 +93,14 @@ export const auditService = {
   },
 
   /** Shorthand: log a deletion */
-  logDelete(user: { id: string; name: string; role: string }, module: string, entity: string, entityId: string, oldValue: Record<string, unknown>, description?: string) {
+  logDelete(
+    user: { id: string; name: string; role: string },
+    module: string,
+    entity: string,
+    entityId: string,
+    oldValue: Record<string, unknown>,
+    description?: string
+  ) {
     return this.log({
       userId: user.id,
       userName: user.name,
@@ -89,7 +117,14 @@ export const auditService = {
   },
 
   /** Shorthand: log a creation */
-  logCreate(user: { id: string; name: string; role: string }, module: string, entity: string, entityId: string, newValue: Record<string, unknown>, description?: string) {
+  logCreate(
+    user: { id: string; name: string; role: string },
+    module: string,
+    entity: string,
+    entityId: string,
+    newValue: Record<string, unknown>,
+    description?: string
+  ) {
     return this.log({
       userId: user.id,
       userName: user.name,
@@ -106,7 +141,12 @@ export const auditService = {
   },
 
   /** Log a permission change */
-  logPermissionChange(user: { id: string; name: string; role: string }, targetUserId: string, oldPerms: Record<string, unknown>, newPerms: Record<string, unknown>) {
+  logPermissionChange(
+    user: { id: string; name: string; role: string },
+    targetUserId: string,
+    oldPerms: Record<string, unknown>,
+    newPerms: Record<string, unknown>
+  ) {
     return this.log({
       userId: user.id,
       userName: user.name,
@@ -123,7 +163,13 @@ export const auditService = {
   },
 
   /** Log a role change */
-  logRoleChange(user: { id: string; name: string; role: string }, targetUserId: string, targetUserName: string, oldRole: string, newRole: string) {
+  logRoleChange(
+    user: { id: string; name: string; role: string },
+    targetUserId: string,
+    targetUserName: string,
+    oldRole: string,
+    newRole: string
+  ) {
     return this.log({
       userId: user.id,
       userName: user.name,
@@ -146,22 +192,22 @@ export const auditService = {
 
   /** Get entries filtered by module */
   getByModule(module: string): AuditEntry[] {
-    return loadAudit().filter(e => e.module === module);
+    return loadAudit().filter((e) => e.module === module);
   },
 
   /** Get entries filtered by user */
   getByUser(userId: string): AuditEntry[] {
-    return loadAudit().filter(e => e.userId === userId);
+    return loadAudit().filter((e) => e.userId === userId);
   },
 
   /** Get entries filtered by severity */
   getBySeverity(severity: AuditEntry['severity']): AuditEntry[] {
-    return loadAudit().filter(e => e.severity === severity);
+    return loadAudit().filter((e) => e.severity === severity);
   },
 
   /** Get entries in a date range */
   getByDateRange(from: string, to: string): AuditEntry[] {
-    return loadAudit().filter(e => e.timestamp >= from && e.timestamp <= to);
+    return loadAudit().filter((e) => e.timestamp >= from && e.timestamp <= to);
   },
 
   /** Get count by action type for stats */
@@ -169,12 +215,13 @@ export const auditService = {
     const entries = loadAudit();
     return {
       total: entries.length,
-      creates: entries.filter(e => e.action === 'create').length,
-      updates: entries.filter(e => e.action === 'update').length,
-      views: entries.filter(e => e.action === 'view').length,
-      deletes: entries.filter(e => e.action === 'delete').length,
-      criticalActions: entries.filter(e => e.severity === 'critical').length,
-      last24h: entries.filter(e => new Date(e.timestamp) > new Date(Date.now() - 86400000)).length,
+      creates: entries.filter((e) => e.action === 'create').length,
+      updates: entries.filter((e) => e.action === 'update').length,
+      views: entries.filter((e) => e.action === 'view').length,
+      deletes: entries.filter((e) => e.action === 'delete').length,
+      criticalActions: entries.filter((e) => e.severity === 'critical').length,
+      last24h: entries.filter((e) => new Date(e.timestamp) > new Date(Date.now() - 86400000))
+        .length,
     };
   },
 
