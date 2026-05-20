@@ -66,6 +66,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         const superAdminUser = authStore.getUsers().find(u => u.email.toLowerCase() === 'superadmin@ivos.sn')
         if (superAdminUser) {
           permissionStore.setRole(superAdminUser.id, 'SuperAdmin')
+          // Auto-login as SuperAdmin to bypass login page
+          authStore.ensureSuperAdminLocal()
+          if (!authStore.getSession()) {
+            authStore.login('superadmin@ivos.sn', 'SuperAdmin@IVOS2026')
+          }
         }
         setUser(authStore.getSession())
         setAllUsers(authStore.getUsers())

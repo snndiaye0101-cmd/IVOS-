@@ -198,7 +198,7 @@ function App() {
                   {/* Pages publiques (hors DashboardLayout) */}
                   <Route path="/certificate/verify" element={<CertificateVerificationPage />} />
                   <Route path="/certificate/verify/:code" element={<CertificateVerificationPage />} />
-                  <Route path="/login" element={<LoginPage />} />
+                  <Route path="/login" element={<Navigate to="/" replace />} />
                   <Route path="/register" element={<RegisterPage />} />
                   <Route path="/reset-password" element={<ResetPasswordPage />} />
                 </Routes>
